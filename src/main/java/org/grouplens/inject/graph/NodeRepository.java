@@ -20,6 +20,8 @@ public interface NodeRepository {
     
     /**
      * Get a bind rule which uses the repository's defaults to resolve desires.
+     * For any desire, this bind rule will compare less than all other bind
+     * rules applicable to that desire.
      * 
      * @return A bind rule that uses defaults and annotations to resolve
      *         desires.
