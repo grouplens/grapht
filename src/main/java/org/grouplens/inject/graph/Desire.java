@@ -83,7 +83,7 @@ public interface Desire {
     Class<? extends Annotation> getParameterAnnotation();
 
     /**
-     * Query whether this desire is instantiable — that is, resovled to a
+     * Query whether this desire is instantiable — that is, resolved to a
      * concrete type. If it is instantiable, then it can be converted to a node
      * with {@link #getNode()}.
      * 
