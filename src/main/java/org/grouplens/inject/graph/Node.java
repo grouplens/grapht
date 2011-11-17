@@ -2,9 +2,10 @@ package org.grouplens.inject.graph;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Provider;
+
+import com.google.common.base.Function;
 
 /**
  * A concrete type. It has a set of dependencies which must be satisfied in
@@ -29,12 +30,20 @@ public interface Node {
     List<Desire> getDependencies();
     
     /**
+     * Get the type of this node.
+     * 
+     * @return The type of objects to be instantiated by this node.
+     */
+    Type getType();
+    
+    /**
      * Create an instance of the type satisfied by this node.
      * 
-     * @param dependencies A map of desires to providers of those desires, used
-     *        to instantiate the object.
+     * @param dependencies A function mapping desires to providers of their
+     *        instances.
      * @return A new instance of the type represented by this node, with the
      *         specified dependencies injected.
+     * @review Consider supporting making Node create {@link Provider}s.
      */
-    Object createInstance(Map<Desire, Provider<? extends Object>> dependencies);
+    Object createInstance(Function<Desire, Provider<? extends Object>> dependencies);
 }

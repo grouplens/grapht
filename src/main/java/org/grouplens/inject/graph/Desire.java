@@ -46,7 +46,16 @@ public interface Desire {
      * desire's parameter annotation.
      * 
      * <p>
-     * For component desires.
+     * For component desires, this checks whether the other desire is compatible
+     * with this desire. Compatibility is defined by the following:
+     * <ul>
+     * <li>Anything satisfying the other desire is type-compatible with (can be
+     * assigned to) this desire.
+     * <li>Some as-yet-undefined type conversion rules.
+     * </ul>
+     * 
+     * @review Do we actually need this method? I (MDE) am inclined to delete
+     *         it. {@link BindRule#matches(Desire)} may be all we need.
      * 
      * @param desire The desire to check.
      * @return <tt>true</tt> if any node satisfying <var>desire</var> will
