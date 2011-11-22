@@ -30,6 +30,8 @@ import java.lang.annotation.Target;
  *
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
+ * @review Do we want to keep types?
+ *
  */
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)
