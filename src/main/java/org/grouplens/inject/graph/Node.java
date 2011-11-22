@@ -45,5 +45,5 @@ public interface Node {
      *         specified dependencies injected.
      * @review Consider supporting making Node create {@link Provider}s.
      */
-    Object createInstance(Function<Desire, Provider<? extends Object>> dependencies);
+    Object createInstance(Function<Desire, Provider<?>> dependencies);
 }
