@@ -35,6 +35,12 @@ public interface Node {
      * @return The type of objects to be instantiated by this node.
      */
     Type getType();
+
+    /**
+     * Get the type-erased class of this node's type.
+     * @return The class object for this node's type.
+     */
+    Class<?> getErasedType();
     
     /**
      * Create an instance of the type satisfied by this node.
