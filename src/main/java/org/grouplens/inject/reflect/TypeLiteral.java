@@ -7,6 +7,13 @@ import java.lang.reflect.Type;
  * Class for expressing type literals. Create a concrete class extending
  * this class, instantiating <var>E</var> with a particular type, to express
  * that type statically.  This is pretty much like Guice's type literals.
+ * <p/>
+ * Example:
+ * <pre>
+ * {@code
+ * TypeLiteral<List<String>> typ = new TypeLiteral<List<String>>() { }
+ * }
+ * </pre>
  * 
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
