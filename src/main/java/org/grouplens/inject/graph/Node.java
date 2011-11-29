@@ -48,7 +48,6 @@ public interface Node {
      *                     instances.
      * @return A provider of new instances of the type specified by this node,
      *         instantiated using the specified dependency mapping.
-     * @review Consider supporting making Node create {@link Provider}s.
      */
     Provider<?> makeProvider(Function<Desire, Provider<?>> dependencies);
 }
