@@ -76,7 +76,7 @@ public class MockNode implements Node {
     }
 
     @Override
-    public Provider<?> makeProvider(Function<Desire, Provider<?>> dependencies) {
+    public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
         return provider;
     }
 
