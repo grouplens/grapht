@@ -37,5 +37,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Parameter {
+    /**
+     * The type of this parameter. Use the Java class type (e.g. {@link Integer}.class). Both
+     * primitive and object parameters can be annotated with the parameter interface.
+     * @return The type of acceptable values of this parameter.
+     */
     Class<?> value();
 }

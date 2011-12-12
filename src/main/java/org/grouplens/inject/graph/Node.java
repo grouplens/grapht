@@ -67,5 +67,5 @@ public interface Node {
      * @return A provider of new instances of the type specified by this node,
      *         instantiated using the specified dependency mapping.
      */
-    Provider<?> makeProvider(Function<Desire, Provider<?>> dependencies);
+    Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies);
 }

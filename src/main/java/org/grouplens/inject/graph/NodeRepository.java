@@ -28,7 +28,8 @@ package org.grouplens.inject.graph;
 public interface NodeRepository {
     /**
      * Look up the node for a desire, using whatever default lookup rules are
-     * specified.
+     * specified. The equivalent of applying the {@linkplain #defaultBindRule() default bind rule}
+     * recursively is done.
      * 
      * @param desire The desire to resolve.
      * @return The node resolved by this desire, or <tt>null</tt> if the desire
