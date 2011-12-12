@@ -16,10 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-<<<<<<< local
-=======
 
->>>>>>> other
 /**
  * Interface to the type graph API used by the configuration injector. This API
  * provides means to compare and resolve types, get their dependencies, and
