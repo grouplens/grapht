@@ -20,12 +20,15 @@ package org.grouplens.lenskit.inject.graph;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Provider;
 
 import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Node;
+import org.grouplens.inject.graph.Role;
+import org.grouplens.inject.resolver.ContextMatcher;
 
 import com.google.common.base.Function;
 
@@ -34,7 +37,7 @@ import com.google.common.base.Function;
  * It can be full configured by its constructors, although
  * {@link #makeProvider(Function)} always returns the same provider.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockNode implements Node {
     private final Provider<?> provider;
@@ -78,6 +81,16 @@ public class MockNode implements Node {
     @Override
     public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
         return provider;
+    }
+    
+    @Override
+    public Comparator<ContextMatcher> contextComparator(Role role) {
+        return new Comparator<ContextMatcher>() {
+            @Override
+            public int compare(ContextMatcher arg0, ContextMatcher arg1) {
+                return 0;
+            }
+        };
     }
 
     @SuppressWarnings("rawtypes")

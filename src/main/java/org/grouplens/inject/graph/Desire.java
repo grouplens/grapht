@@ -42,6 +42,9 @@ public interface Desire {
      * with this desire. This is equivalent to
      * {@link Class#isAssignableFrom(Class)}.
      *
+     * @review Do we actually need this method? I (ML) am inclined to delete
+     *         it, since we'll likely be deleting isSatisfiedBy(Desire).
+     *
      * @param node The node in question.
      * @return <tt>true</tt> if the node is compatible with the desire (can
      *         satisfy it); <tt>false</tt> otherwise.

@@ -36,7 +36,7 @@ package org.grouplens.inject.resolver;
  * The ContextChain can then be used to determine if the list of ContextMatchers
  * applies to any given dependency context.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface ContextMatcher {
     /**

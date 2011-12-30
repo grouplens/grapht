@@ -32,7 +32,7 @@ import org.grouplens.inject.graph.Role;
  * 
  * @see ContextMatcher
  * @see ContextChain
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class NodeAndRole {
     private final Node node;

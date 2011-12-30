@@ -22,7 +22,7 @@ package org.grouplens.inject.resolver;
  * ResolverExceptions are thrown when a Resolver is unable to resolve a
  * dependency graph completely.
  * 
- * @author Michael Ludiwg
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ResolverException extends RuntimeException {
     private static final long serialVersionUID = 1L;

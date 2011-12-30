@@ -33,7 +33,7 @@ import org.grouplens.inject.graph.Graph;
  * dependency hierarchy that led to the desire being actively resolved.
  *
  * @see DefaultResolver
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface Resolver {
     /**

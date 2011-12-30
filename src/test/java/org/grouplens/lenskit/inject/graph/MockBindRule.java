@@ -16,29 +16,39 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.reflect;
+package org.grouplens.lenskit.inject.graph;
 
-import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.grouplens.inject.resolver.ContextMatcher;
-import org.grouplens.inject.resolver.NodeAndRole;
+import org.grouplens.inject.graph.BindRule;
+import org.grouplens.inject.graph.Desire;
 
-public class ReflectionContextMatcher implements ContextMatcher {
-    private final Class<?> type;
-    private final Class<? extends Annotation> roleAnnotation;
+/**
+ * MockBindRule is a simple implementation of BindRule where the matching
+ * bindings are represented as a map from input Desires to output Desires, via
+ * {@link #addMapping(Desire, Desire)}.
+ * 
+ * @author Michael Ludwig
+ */
+public class MockBindRule implements BindRule {
+    private final Map<Desire, Desire> bindings;
     
-    public ReflectionContextMatcher(Class<?> type) {
-        this(type, null);
+    public MockBindRule() {
+        bindings = new HashMap<Desire, Desire>();
     }
     
-    public ReflectionContextMatcher(Class<?> type, Class<? extends Annotation> role) {
-        this.type = type;
-        roleAnnotation = role;
+    public void addMapping(Desire in, Desire out) {
+        bindings.put(in, out);
     }
     
     @Override
-    public boolean matches(NodeAndRole n) {
-        // FIXME: handle role inheritence, and generics correctly
-        return type.isAssignableFrom(n.getNode().getErasedType()) && roleAnnotation.equals(null);
+    public boolean matches(Desire desire) {
+        return bindings.containsKey(desire);
+    }
+
+    @Override
+    public Desire apply(Desire desire) {
+        return bindings.get(desire);
     }
 }

@@ -71,7 +71,7 @@ import com.google.common.collect.Ordering;
  * the type of the BindRule.
  * </p>
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class DefaultResolver implements Resolver {
     private final NodeRepository repository;

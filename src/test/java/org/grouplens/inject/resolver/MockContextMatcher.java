@@ -16,29 +16,20 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.reflect;
-
-import java.lang.annotation.Annotation;
+package org.grouplens.inject.resolver;
 
 import org.grouplens.inject.resolver.ContextMatcher;
 import org.grouplens.inject.resolver.NodeAndRole;
 
-public class ReflectionContextMatcher implements ContextMatcher {
+public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
-    private final Class<? extends Annotation> roleAnnotation;
     
-    public ReflectionContextMatcher(Class<?> type) {
-        this(type, null);
-    }
-    
-    public ReflectionContextMatcher(Class<?> type, Class<? extends Annotation> role) {
+    public MockContextMatcher(Class<?> type) {
         this.type = type;
-        roleAnnotation = role;
     }
     
     @Override
     public boolean matches(NodeAndRole n) {
-        // FIXME: handle role inheritence, and generics correctly
-        return type.isAssignableFrom(n.getNode().getErasedType()) && roleAnnotation.equals(null);
+        return type.isAssignableFrom(n.getNode().getErasedType());
     }
 }

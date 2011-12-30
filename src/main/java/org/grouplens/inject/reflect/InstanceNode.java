@@ -21,10 +21,13 @@ package org.grouplens.inject.reflect;
 import com.google.common.base.Function;
 import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Node;
+import org.grouplens.inject.graph.Role;
+import org.grouplens.inject.resolver.ContextMatcher;
 
 import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -68,5 +71,10 @@ class InstanceNode implements Node {
                 return instance;
             }
         };
+    }
+
+    @Override
+    public Comparator<ContextMatcher> contextComparator(Role role) {
+        throw new UnsupportedOperationException();
     }
 }

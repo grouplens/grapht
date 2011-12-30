@@ -18,7 +18,6 @@
  */
 package org.grouplens.lenskit.inject.graph;
 
-import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +25,7 @@ import java.util.Set;
 import org.grouplens.inject.graph.BindRule;
 import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Node;
+import org.grouplens.inject.graph.Role;
 
 /**
  * MockDesire is a simple Desire implementation for use within certain types of
@@ -33,12 +33,11 @@ import org.grouplens.inject.graph.Node;
  * sets returned by {@link #getSatisfiableDesires()} and
  * {@link #getSatisfiableNodes()}.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockDesire implements Desire {
-    private final Class<? extends Annotation> parameterOrRole;
+    private final Role role;
     
-    private final boolean isParameter;
     private final Node node;
     
     private final Set<Node> satisfiableNodes;
@@ -52,14 +51,9 @@ public class MockDesire implements Desire {
         this(node, null);
     }
     
-    public MockDesire(Node node, Class<? extends Annotation> role) {
-        this(node, role, false);
-    }
-    
-    public MockDesire(Node node, Class<? extends Annotation> parameterOrRole,  boolean isParameter) {
+    public MockDesire(Node node, Role role) {
         this.node = node;
-        this.isParameter = isParameter;
-        this.parameterOrRole = parameterOrRole;
+        this.role = role;
         
         this.satisfiableDesires = new HashSet<Desire>();
         this.satisfiableNodes = new HashSet<Node>();
@@ -84,21 +78,6 @@ public class MockDesire implements Desire {
     }
 
     @Override
-    public boolean isParameter() {
-        return isParameter;
-    }
-
-    @Override
-    public Class<? extends Annotation> getRoleAnnotation() {
-        return (isParameter ? parameterOrRole : null);
-    }
-
-    @Override
-    public Class<? extends Annotation> getParameterAnnotation() {
-        return (isParameter ? null : parameterOrRole);
-    }
-
-    @Override
     public boolean isInstantiable() {
         return node != null;
     }
@@ -116,5 +95,15 @@ public class MockDesire implements Desire {
                 return 0;
             }
         };
+    }
+
+    @Override
+    public Role getRole() {
+        return role;
+    }
+
+    @Override
+    public boolean isParameter() {
+        return false;
     }
 }
