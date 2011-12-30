@@ -18,7 +18,6 @@
  */
 package org.grouplens.inject.graph;
 
-import java.lang.annotation.Annotation;
 import java.util.Comparator;
 
 /**
@@ -91,26 +90,19 @@ public interface Desire {
      * Query whether this desire is for a parameter (primitive or string with a
      * parameter annotation).
      *
+     * @deprecated Can this be removed and subsumed by the Role interface?
      * @return <tt>true</tt> if this desire is for a parameter, <tt>false</tt>
      *         if it is for a component.
      */
     boolean isParameter();
 
     /**
-     * Get the role annotation applied to this desire.
-     *
-     * @return The role annotation applied to this desire, if it is for a
-     *         component (if it is for a parameter, <tt>null</tt> is returned).
+     * Return the role that was declared with this desire. A desire without a
+     * role should return null. No role can also be considered the default role.
+     * 
+     * @return The role applied to this desire
      */
-    Class<? extends Annotation> getRoleAnnotation();
-
-    /**
-     * Get the parameter annotation applied to this desire.
-     *
-     * @return The parameter annotation applied to this desire, if it is a
-     *         parameter.
-     */
-    Class<? extends Annotation> getParameterAnnotation();
+    Role getRole();
 
     /**
      * Query whether this desire is instantiable — that is, resolved to a

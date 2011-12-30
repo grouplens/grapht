@@ -19,9 +19,13 @@
 package org.grouplens.inject.graph;
 
 import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
+
+import org.grouplens.inject.resolver.ContextMatcher;
 
 import com.google.common.base.Function;
 
@@ -68,4 +72,14 @@ public interface Node {
      *         instantiated using the specified dependency mapping.
      */
     Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies);
+
+    /**
+     * Create a Comparator that can be used ContextMatchers that apply to this
+     * Node. The specified Role is the role of the desire that this node is
+     * meant to satisfy. The Role can be null to represent the default role.
+     * 
+     * @param role The role of the desire that this node satisfies
+     * @return A comparator for context matchers for this node and role
+     */
+    Comparator<ContextMatcher> contextComparator(@Nullable Role role);
 }
