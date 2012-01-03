@@ -24,7 +24,7 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.grouplens.inject.graph.Desire;
-import org.grouplens.lenskit.inject.graph.MockNode;
+import org.grouplens.inject.graph.MockNode;
 import org.junit.Test;
 
 public class ContextChainTest {

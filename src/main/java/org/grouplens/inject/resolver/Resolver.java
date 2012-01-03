@@ -62,5 +62,5 @@ public interface Resolver {
     // identifying the set of root nodes that the root desires mapped to.  We
     // need to return a Map<Desire, Node> as well as the graph to provide entry
     // points into the dependency graph
-    Graph resolve(Collection<Desire> rootDesires, Map<ContextChain, Collection<BindRule>> bindRules);
+    Graph resolve(Collection<? extends Desire> rootDesires, Map<ContextChain, Collection<? extends BindRule>> bindRules);
 }

@@ -122,8 +122,8 @@ public class DefaultResolver implements Resolver {
     }
 
     @Override
-    public Graph resolve(Collection<Desire> rootDesires,
-                         Map<ContextChain, Collection<BindRule>> bindRules) {
+    public Graph resolve(Collection<? extends Desire> rootDesires,
+                         Map<ContextChain, Collection<? extends BindRule>> bindRules) {
         Graph graph = new Graph();
         for (Desire desire: rootDesires) {
             // resolve all root desires, each starting at the empty context
@@ -132,7 +132,7 @@ public class DefaultResolver implements Resolver {
         return graph;
     }
     
-    private Node resolveFully(Desire desire, Graph graph, Map<ContextChain, Collection<BindRule>> bindRules, List<NodeAndRole> context) {
+    private Node resolveFully(Desire desire, Graph graph, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<NodeAndRole> context) {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
@@ -155,12 +155,16 @@ public class DefaultResolver implements Resolver {
         return resolved;
     }
     
-    private Node resolve(Desire desire, Map<ContextChain, Collection<BindRule>> bindRules, List<NodeAndRole> context) {
+    private Node resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<NodeAndRole> context) {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
         
         Desire currentDesire = desire;
+        // FIXME: REVIEW Is this correct behavior? To stop at the first instantiable
+        // desire? Or should we continue until we can't apply bind rules and then
+        // proceed only if it's instantiable?
+        // No it is not
         while(!currentDesire.isInstantiable()) {
             // collect all bind rules that apply to this desire
             List<ContextAndBindRule> validRules = new ArrayList<ContextAndBindRule>();

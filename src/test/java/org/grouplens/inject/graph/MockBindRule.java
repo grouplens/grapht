@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.lenskit.inject.graph;
+package org.grouplens.inject.graph;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +36,11 @@ public class MockBindRule implements BindRule {
     
     public MockBindRule() {
         bindings = new HashMap<Desire, Desire>();
+    }
+    
+    public MockBindRule(Desire in, Desire out) {
+        this();
+        addMapping(in, out);
     }
     
     public void addMapping(Desire in, Desire out) {
