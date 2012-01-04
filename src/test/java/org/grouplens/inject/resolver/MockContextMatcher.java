@@ -19,7 +19,7 @@
 package org.grouplens.inject.resolver;
 
 import org.grouplens.inject.resolver.ContextMatcher;
-import org.grouplens.inject.resolver.NodeAndRole;
+import org.grouplens.inject.resolver.SatisfactionAndRole;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
@@ -29,7 +29,7 @@ public class MockContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(NodeAndRole n) {
+    public boolean matches(SatisfactionAndRole n) {
         return type.isAssignableFrom(n.getNode().getErasedType());
     }
 }

@@ -36,16 +36,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestInstanceNode {
-    ClasspathNodeRepository repo;
+    ClasspathSatisfactionRepository repo;
 
     @Before
     public void initRepository() {
-        repo = new ClasspathNodeRepository();
+        repo = new ClasspathSatisfactionRepository();
     }
     
     @Test
     public void testSimpleClass() {
-        Node nd = new InstanceNode("foobie bletch", String.class);
+        Node nd = new InstanceSatisfaction("foobie bletch", String.class);
         assertThat(nd.getType(), equalTo((Type) String.class));
         assertThat(nd.getErasedType(), equalTo((Class) String.class));
         assertThat(nd.getDependencies(), Matchers.<Desire>empty());
@@ -54,7 +54,7 @@ public class TestInstanceNode {
     @Test
     public void testProvider() {
         StringBuffer buf = new StringBuffer();
-        Node nd = new InstanceNode(buf, StringBuffer.class);
+        Node nd = new InstanceSatisfaction(buf, StringBuffer.class);
         Provider<?> provider = nd.makeProvider(Functions.constant((Provider<?>) null));
         assertThat(provider, notNullValue());
         assertThat(provider.get(), sameInstance((Object) buf));

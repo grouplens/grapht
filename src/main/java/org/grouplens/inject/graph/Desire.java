@@ -24,7 +24,7 @@ import java.util.Comparator;
  * A possibly-not-concrete type. This represents the type of a dependency; it
  * may or may not be concrete. It can effectively be any type. Desires are
  * iteratively resolved and narrowed until they finally correspond to
- * {@link Node}s.
+ * {@link Satisfaction}s.
  *
  * <p>
  * There are two types of desires: parameter desires and component desires. They
@@ -37,22 +37,22 @@ import java.util.Comparator;
  */
 public interface Desire {
     /**
-     * Query whether a particular node will satisfy this desire. If true, then
-     * an instance of the type represented by <var>node</var> is type-compatible
+     * Query whether a particular satisfaction will satisfy this desire. If true, then
+     * an instance of the type represented by <var>satisfaction</var> is type-compatible
      * with this desire. This is equivalent to
      * {@link Class#isAssignableFrom(Class)}.
      *
      * @review Do we actually need this method? I (ML) am inclined to delete
      *         it, since we'll likely be deleting isSatisfiedBy(Desire).
      *
-     * @param node The node in question.
-     * @return <tt>true</tt> if the node is compatible with the desire (can
+     * @param satisfaction The satisfaction in question.
+     * @return <tt>true</tt> if the satisfaction is compatible with the desire (can
      *         satisfy it); <tt>false</tt> otherwise.
-     * @throws IllegalArgumentException if <var>node</var> is not from the same
+     * @throws IllegalArgumentException if <var>satisfaction</var> is not from the same
      *         graph implementation as this desire.
      * @see Class#isAssignableFrom(Class)
      */
-    boolean isSatisfiedBy(Node node);
+    boolean isSatisfiedBy(Satisfaction satisfaction);
 
     /**
      * Query whether a particular desire is a subset of this desire. If true,
@@ -93,7 +93,7 @@ public interface Desire {
      * Query whether this desire is for a parameter (primitive or string with a
      * parameter annotation).
      *
-     * @deprecated Can this be removed and subsumed by the Role interface?
+     * @deprecated Can this be removed and consumed by the Role interface?
      * @return <tt>true</tt> if this desire is for a parameter, <tt>false</tt>
      *         if it is for a component.
      */
@@ -108,23 +108,23 @@ public interface Desire {
     Role getRole();
 
     /**
-     * Query whether this desire is instantiable — that is, resolved to a
-     * concrete type. If it is instantiable, then it can be converted to a node
-     * with {@link #getNode()}.
+     * Query whether this desire is instantiable, that is, resolved to a
+     * concrete type. If it is instantiable, then it can be converted to a Satisfaction
+     * with {@link #getSatisfaction()}.
      *
      * @return <tt>true</tt> if the desire is for a concrete class. The only
-     *         further desires or nodes that can satisfy it are for subclasses
+     *         further desires or satisfactions that can satisfy it are for subclasses
      *         of the desire type.
      */
     boolean isInstantiable();
 
     /**
-     * Get the node (concrete type) if this desire is fully resolved.
+     * Get the satisfaction (concrete type) if this desire is fully resolved.
      *
-     * @return The node for this desire, or <tt>null</tt> if the desire is not a
+     * @return The satisfaction for this desire, or <tt>null</tt> if the desire is not a
      *         concrete type.
      */
-    Node getNode();
+    Satisfaction getSatisfaction();
 
     /**
      * Get a comparator for ordering bind rules.  The resulting comparator will

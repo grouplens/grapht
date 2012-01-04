@@ -46,5 +46,5 @@ public interface ContextMatcher {
      * @param n The node and role in the current dependency context
      * @return True if this matcher matches the node and role, false otherwise
      */
-    boolean matches(NodeAndRole n);
+    boolean matches(SatisfactionAndRole n);
 }

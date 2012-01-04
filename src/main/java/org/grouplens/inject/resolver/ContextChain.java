@@ -33,7 +33,7 @@ public class ContextChain {
         return Collections.unmodifiableList(matchers);
     }
     
-    public boolean matches(List<NodeAndRole> nodes) {
+    public boolean matches(List<SatisfactionAndRole> nodes) {
         int i = 0;
         for (ContextMatcher cm: matchers) {
             boolean found = false;

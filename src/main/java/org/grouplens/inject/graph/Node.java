@@ -18,68 +18,43 @@
  */
 package org.grouplens.inject.graph;
 
-import java.lang.reflect.Type;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-
-import org.grouplens.inject.resolver.ContextMatcher;
-
-import com.google.common.base.Function;
-
 /**
- * A concrete type. It has a set of dependencies which must be satisfied in
- * order to instantiate it. It can also be viewed as an instantiable extension
- * of {@link Type}.
  * <p>
- * Nodes are expected to provide a reasonable implementation of
- * {@link #equals(Object)} and {@link #hashCode()} so that they can be
- * de-duplicated, etc.
- *
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
+ * A Node represents a conceptual node within a graph. Nodes within the same
+ * graph can contain payload instances that represent domain-specific data for
+ * the graph.
+ * <p>
+ * Nodes use instance equality, regardless of how their payloads might implement
+ * equality or how they compare. Thus, if two Node instances in a graph have the
+ * same payload, they are still considered separate nodes from the graph's
+ * perspective.
+ * 
+ * @see Edge
+ * @see Graph
+ * @author Michael Ludwig <mludwig@cs.umn.edu
  */
-public interface Node {
-    /**
-     * Get this node's dependencies.
-     *
-     * @return A list of dependencies which must be satisfied in order to
-     *         instantiate this node.
-     */
-    List<Desire> getDependencies();
+public class Node<T> {
+    private final T payload;
 
     /**
-     * Get the type of this node.
-     *
-     * @return The type of objects to be instantiated by this node.
-     */
-    Type getType();
-
-    /**
-     * Get the type-erased class of this node's type.
-     *
-     * @return The class object for this node's type.
-     */
-    Class<?> getErasedType();
-
-    /**
-     * Create a provider from this node.
-     *
-     * @param dependencies A function mapping desires to providers of their
-     *                     instances.
-     * @return A provider of new instances of the type specified by this node,
-     *         instantiated using the specified dependency mapping.
-     */
-    Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies);
-
-    /**
-     * Create a Comparator that can be used ContextMatchers that apply to this
-     * Node. The specified Role is the role of the desire that this node is
-     * meant to satisfy. The Role can be null to represent the default role.
+     * Create a new Node that uses the specified payload instance.
      * 
-     * @param role The role of the desire that this node satisfies
-     * @return A comparator for context matchers for this node and role
+     * @param payload The payload instance to store with this node
+     * @throws NullPointerException if payload is null
      */
-    Comparator<ContextMatcher> contextComparator(@Nullable Role role);
+    public Node(T payload) {
+        if (payload == null)
+            throw new NullPointerException("Payload cannot be null");
+        this.payload = payload;
+    }
+    
+    /**
+     * @return The current payload instance of the Node
+     */
+    public T getPayload() {
+        return payload;
+    }
+    
+    // do not override equals() and hashCode(), we want nodes to 
+    // use instance equality
 }

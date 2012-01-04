@@ -29,6 +29,9 @@ import org.grouplens.inject.graph.Node;
 import org.junit.Test;
 
 public class GraphTest {
+    // FIXME: add testGetEdges() and testRemoveEdges() to test the operations
+    //  that take a head and tail node, I do not think they have been tested
+    
     @Test
     public void testAddNode() {
         Graph graph = new Graph();

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.grouplens.inject.graph.BindRule;
 import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Graph;
+import org.grouplens.inject.graph.Satisfaction;
 
 /**
  * Resolvers are algorithms that resolve the dependencies of a set of
@@ -62,5 +63,5 @@ public interface Resolver {
     // identifying the set of root nodes that the root desires mapped to.  We
     // need to return a Map<Desire, Node> as well as the graph to provide entry
     // points into the dependency graph
-    Graph resolve(Collection<? extends Desire> rootDesires, Map<ContextChain, Collection<? extends BindRule>> bindRules);
+    Graph<Satisfaction, Desire> resolve(Collection<? extends Desire> rootDesires, Map<ContextChain, Collection<? extends BindRule>> bindRules);
 }

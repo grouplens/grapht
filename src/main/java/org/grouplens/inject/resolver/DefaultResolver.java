@@ -127,12 +127,12 @@ public class DefaultResolver implements Resolver {
         Graph graph = new Graph();
         for (Desire desire: rootDesires) {
             // resolve all root desires, each starting at the empty context
-            resolveFully(desire, graph, bindRules, new ArrayList<NodeAndRole>());
+            resolveFully(desire, graph, bindRules, new ArrayList<SatisfactionAndRole>());
         }
         return graph;
     }
     
-    private Node resolveFully(Desire desire, Graph graph, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<NodeAndRole> context) {
+    private Node resolveFully(Desire desire, Graph graph, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
@@ -142,8 +142,8 @@ public class DefaultResolver implements Resolver {
         graph.addNode(resolved);
         
         // update the context
-        List<NodeAndRole> newContext = new ArrayList<NodeAndRole>(context);
-        newContext.add(new NodeAndRole(resolved, desire.getRole()));
+        List<SatisfactionAndRole> newContext = new ArrayList<SatisfactionAndRole>(context);
+        newContext.add(new SatisfactionAndRole(resolved, desire.getRole()));
         
         List<Desire> dependencies = resolved.getDependencies();
         for (Desire d: dependencies) {
@@ -155,7 +155,7 @@ public class DefaultResolver implements Resolver {
         return resolved;
     }
     
-    private Node resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<NodeAndRole> context) {
+    private Node resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
@@ -241,9 +241,9 @@ public class DefaultResolver implements Resolver {
      * and that they match the exact same nodes in the context.
      */
     private static class TypeDeltaComparator implements Comparator<ContextAndBindRule> {
-        private final List<NodeAndRole> context;
+        private final List<SatisfactionAndRole> context;
         
-        public TypeDeltaComparator(List<NodeAndRole> context) {
+        public TypeDeltaComparator(List<SatisfactionAndRole> context) {
             this.context = context;
         }
         
@@ -266,7 +266,7 @@ public class DefaultResolver implements Resolver {
                     break;
                 }
                 
-                NodeAndRole currentNode = context.get(i);
+                SatisfactionAndRole currentNode = context.get(i);
                 ContextMatcher m1 = o1.context.getContexts().get(lastIndex1 - matcher);
                 ContextMatcher m2 = o2.context.getContexts().get(lastIndex2 - matcher);
                 
@@ -322,9 +322,9 @@ public class DefaultResolver implements Resolver {
      * end of the current context.
      */
     private static class ContextClosenessComparator implements Comparator<ContextAndBindRule> {
-        private final List<NodeAndRole> context;
+        private final List<SatisfactionAndRole> context;
         
-        public ContextClosenessComparator(List<NodeAndRole> context) {
+        public ContextClosenessComparator(List<SatisfactionAndRole> context) {
             this.context = context;
         }
         

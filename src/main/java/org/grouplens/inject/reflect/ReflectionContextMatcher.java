@@ -21,7 +21,7 @@ package org.grouplens.inject.reflect;
 import java.lang.annotation.Annotation;
 
 import org.grouplens.inject.resolver.ContextMatcher;
-import org.grouplens.inject.resolver.NodeAndRole;
+import org.grouplens.inject.resolver.SatisfactionAndRole;
 
 public class ReflectionContextMatcher implements ContextMatcher {
     private final Class<?> type;
@@ -37,8 +37,8 @@ public class ReflectionContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(NodeAndRole n) {
+    public boolean matches(SatisfactionAndRole n) {
         // FIXME: handle role inheritence, and generics correctly
-        return type.isAssignableFrom(n.getNode().getErasedType()) && roleAnnotation.equals(null);
+        return type.isAssignableFrom(n.getSatisfaction().getErasedType()) && roleAnnotation.equals(null);
     }
 }

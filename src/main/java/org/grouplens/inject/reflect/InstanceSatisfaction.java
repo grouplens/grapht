@@ -18,23 +18,25 @@
  */
 package org.grouplens.inject.reflect;
 
-import com.google.common.base.Function;
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Node;
-import org.grouplens.inject.graph.Role;
-import org.grouplens.inject.resolver.ContextMatcher;
-
-import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Provider;
+
+import org.grouplens.inject.graph.Desire;
+import org.grouplens.inject.graph.Role;
+import org.grouplens.inject.graph.Satisfaction;
+import org.grouplens.inject.resolver.ContextMatcher;
+
+import com.google.common.base.Function;
+
 /**
  * Node implementation wrapping an instance. It has no dependencies, and
  * the resulting providers just return the instance.
  */
-class InstanceNode implements Node {
+class InstanceSatisfaction implements Satisfaction {
     Object instance;
     Type type;
 
@@ -43,7 +45,7 @@ class InstanceNode implements Node {
      * @param obj The object to return.
      * @param type The type of the object.
      */
-    InstanceNode(Object obj, Type type) {
+    InstanceSatisfaction(Object obj, Type type) {
         instance = obj;
         this.type = type;
     }

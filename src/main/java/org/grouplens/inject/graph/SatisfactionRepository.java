@@ -19,29 +19,34 @@
 package org.grouplens.inject.graph;
 
 /**
- * A repository for obtaining type nodes and resolving desires.  The reflection
+ * A repository for obtaining type satisfactions and resolving desires.  The reflection
  * implementation uses annotations and subclassing relationships to attempt to
  * resolve desires from the classpath.
  * 
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  */
-public interface NodeRepository {
+public interface SatisfactionRepository {
     /**
-     * Look up the node for a desire, using whatever default lookup rules are
-     * specified. The equivalent of applying the {@linkplain #defaultBindRule() default bind rule}
-     * recursively is done.
+     * Look up the satisfaction for a desire, using whatever default lookup
+     * rules are specified. The equivalent of applying the
+     * {@linkplain #defaultBindRule() default bind rule} recursively is done.
      * 
      * @param desire The desire to resolve.
      * @return The node resolved by this desire, or <tt>null</tt> if the desire
      *         is not instantiable and cannot be resolved.
+     * @deprecated I think this is likely unnecessary as the resolver handles
+     *             most of this already
      */
-    Node resolve(Desire desire);
-    
+    Satisfaction resolve(Desire desire);
+
     /**
      * Get a bind rule which uses the repository's defaults to resolve desires.
      * For any desire, this bind rule will compare less than all other bind
      * rules applicable to that desire.
      * 
+     * @review [ML] We could move this into Desire and remove this type if we're
+     *         also willing to get rid of resolve(). That way Desires are
+     *         responsible for identifying their defaults
      * @return A bind rule that uses defaults and annotations to resolve
      *         desires.
      */

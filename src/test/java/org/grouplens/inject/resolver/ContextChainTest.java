@@ -122,9 +122,9 @@ public class ContextChainTest {
         }
         ContextChain chain = new ContextChain(matchers);
         
-        List<NodeAndRole> context = new ArrayList<NodeAndRole>();
+        List<SatisfactionAndRole> context = new ArrayList<SatisfactionAndRole>();
         for (Class<?> type: contextTypes) {
-            context.add(new NodeAndRole(new MockNode(type, new ArrayList<Desire>()), null));
+            context.add(new SatisfactionAndRole(new MockNode(type, new ArrayList<Desire>()), null));
         }
         
         Assert.assertEquals(expectedMatch, chain.matches(context));

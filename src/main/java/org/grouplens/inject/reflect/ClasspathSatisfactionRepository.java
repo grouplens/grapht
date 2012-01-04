@@ -18,17 +18,18 @@
  */
 package org.grouplens.inject.reflect;
 
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Node;
-import org.grouplens.inject.graph.NodeRepository;
-
 import java.lang.reflect.Type;
 
-public class ClasspathNodeRepository implements NodeRepository {
+import org.grouplens.inject.graph.BindRule;
+import org.grouplens.inject.graph.Desire;
+import org.grouplens.inject.graph.Satisfaction;
+import org.grouplens.inject.graph.SatisfactionRepository;
+
+// FIXME: repair documentation to refer to satisfactions instead of nodes
+public class ClasspathSatisfactionRepository implements SatisfactionRepository {
 
     @Override
-    public Node resolve(Desire desire) {
+    public Satisfaction resolve(Desire desire) {
         // TODO Support resolving desires
         throw new UnsupportedOperationException();
     }
@@ -47,7 +48,7 @@ public class ClasspathNodeRepository implements NodeRepository {
      * @throws IllegalArgumentException if <var>obj</var> is an instance of a
      * parameterized type.
      */
-    public Node newInstanceNode(Object obj) {
+    public Satisfaction newInstanceNode(Object obj) {
         Class<?> type = obj.getClass();
         if (type.getTypeParameters().length > 0) {
             throw new IllegalArgumentException("object is of parameterized type");
@@ -64,8 +65,8 @@ public class ClasspathNodeRepository implements NodeRepository {
      * code can tell, of type <var>type</var>. Due to type reification, not all
      * such errors can be caught.
      */
-    public Node newInstanceNode(Object obj, Type type) {
-        return new InstanceNode(obj, type);
+    public Satisfaction newInstanceNode(Object obj, Type type) {
+        return new InstanceSatisfaction(obj, type);
     }
 
     /**
@@ -76,7 +77,7 @@ public class ClasspathNodeRepository implements NodeRepository {
      * @return A node wrapping the object.
      * @see #newInstanceNode(Object, java.lang.reflect.Type) 
      */
-    public <T> Node newInstanceNode(T obj, TypeLiteral<T> type) {
+    public <T> Satisfaction newInstanceNode(T obj, TypeLiteral<T> type) {
         return newInstanceNode(obj, type.getType());
     }
 }
