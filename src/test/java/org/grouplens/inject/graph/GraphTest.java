@@ -38,6 +38,16 @@ public class GraphTest {
         Set<Node> nodes = graph.getNodes();
         Assert.assertEquals(1, nodes.size());
         Assert.assertTrue(nodes.contains(node));
+        Assert.assertTrue(graph.getOutgoingEdges(node).isEmpty());
+    }
+    
+    @Test
+    public void testUnknownNode() {
+        Graph graph = new Graph();
+        Node node = new MockNode();
+        
+        Assert.assertFalse(graph.getNodes().contains(node));
+        Assert.assertNull(graph.getOutgoingEdges(node));
     }
     
     @Test

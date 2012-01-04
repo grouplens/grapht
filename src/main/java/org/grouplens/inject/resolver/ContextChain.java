@@ -25,7 +25,7 @@ import java.util.List;
 public class ContextChain {
     private final List<ContextMatcher> matchers;
     
-    public ContextChain(List<ContextMatcher> matchers) {
+    public ContextChain(List<? extends ContextMatcher> matchers) {
         this.matchers = new ArrayList<ContextMatcher>(matchers);
     }
     

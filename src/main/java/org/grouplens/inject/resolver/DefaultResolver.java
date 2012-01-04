@@ -161,11 +161,7 @@ public class DefaultResolver implements Resolver {
         Set<BindRule> appliedRules = new HashSet<BindRule>();
         
         Desire currentDesire = desire;
-        // FIXME: REVIEW Is this correct behavior? To stop at the first instantiable
-        // desire? Or should we continue until we can't apply bind rules and then
-        // proceed only if it's instantiable?
-        // No it is not
-        while(!currentDesire.isInstantiable()) {
+        while(true) {
             // collect all bind rules that apply to this desire
             List<ContextAndBindRule> validRules = new ArrayList<ContextAndBindRule>();
             for (ContextChain chain: bindRules.keySet()) {
@@ -181,6 +177,8 @@ public class DefaultResolver implements Resolver {
             }
             
             // also add the default bind rule if it can apply to the desire
+            // - here we assume that the default bind rule will not match an
+            //   instantiable desire that has no declared default
             BindRule defaultRule = repository.defaultBindRule();
             if (defaultRule.matches(currentDesire)) {
                 // we use the null context to distinguish this rule from the empty context
@@ -188,8 +186,13 @@ public class DefaultResolver implements Resolver {
             }
             
             if (validRules.isEmpty()) {
-                // no more bind rules to apply
-                throw new ResolverException("Unable to satisfy desire: " + currentDesire + ", root desire: " + desire);
+                if (currentDesire.isInstantiable()) {
+                    // the desire can be converted to a node, so we're done
+                    return currentDesire.getNode();
+                } else {
+                    // no more rules and we can't make a node
+                    throw new ResolverException("Unable to satisfy desire: " + currentDesire + ", root desire: " + desire);
+                }
             }
             
             Comparator<ContextAndBindRule> ordering = Ordering.from(new ContextClosenessComparator(context))
@@ -210,10 +213,6 @@ public class DefaultResolver implements Resolver {
             appliedRules.add(selectedRule);
             currentDesire = selectedRule.apply(currentDesire);
         }
-        
-        // at this point we have followed bind rules until we've reached
-        // an instantiable desire
-        return currentDesire.getNode();
     }
 
     /*
