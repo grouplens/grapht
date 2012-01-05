@@ -30,6 +30,6 @@ public class NodeTest {
         
         Assert.assertTrue(set.contains(n1));
         Assert.assertFalse(set.contains(n2));
-        Assert.assertEquals(n1.hashCode(), n2.hashCode());
+        Assert.assertFalse(n1.hashCode() == n2.hashCode());
     }
 }

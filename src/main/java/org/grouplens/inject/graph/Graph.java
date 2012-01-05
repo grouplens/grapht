@@ -328,8 +328,9 @@ public class Graph<N, E> {
         Set<Edge<N, E>> outgoingEdges = outgoing.get(head);
         if (outgoingEdges != null) {
             Set<Edge<N, E>> removed = new HashSet<Edge<N, E>>();
-            
-            // FIXME: not iteration safe
+
+            // clone set so we can call removeEdge() without ConcurrentModificationExceptions
+            outgoingEdges = new HashSet<Edge<N, E>>(outgoingEdges);
             for (Edge<N, E> o: outgoingEdges) {
                 if (o.getTail().equals(tail)) {
                     // found the edge so remove it
