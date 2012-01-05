@@ -16,16 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.graph;
+package org.grouplens.inject.spi;
 
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Node;
-import org.grouplens.inject.graph.Role;
 
 /**
  * MockDesire is a simple Desire implementation for use within certain types of
@@ -37,54 +32,60 @@ import org.grouplens.inject.graph.Role;
  */
 public class MockDesire implements Desire {
     private final Role role;
+    private final Satisfaction satisfaction;
     
-    private final Node node;
+    private final Desire defaultDesire;
     
-    private final Set<Node> satisfiableNodes;
+    private final Set<Satisfaction> satisfiableSatisfactions;
     private final Set<Desire> satisfiableDesires;
     
     public MockDesire() {
         this(null);
     }
     
-    public MockDesire(Node node) {
-        this(node, null);
+    public MockDesire(Satisfaction satisfaction) {
+        this(satisfaction, null);
     }
     
-    public MockDesire(Node node, Role role) {
-        this.node = node;
+    public MockDesire(Satisfaction satisfaction, Role role) {
+        this(satisfaction, role, null);
+    }
+    
+    public MockDesire(Satisfaction satisfaction, Role role, Desire dflt) {
+        this.satisfaction = satisfaction;
         this.role = role;
+        this.defaultDesire = dflt;
         
         this.satisfiableDesires = new HashSet<Desire>();
-        this.satisfiableNodes = new HashSet<Node>();
+        this.satisfiableSatisfactions = new HashSet<Satisfaction>();
     }
     
-    public Set<Node> getSatisfiableNodes() {
-        return satisfiableNodes;
+    public Set<Satisfaction> getSatisfyingSatisfaction() {
+        return satisfiableSatisfactions;
     }
     
-    public Set<Desire> getSatisfiableDesires() {
+    public Set<Desire> getSatisfyingDesires() {
         return satisfiableDesires;
     }
     
     @Override
-    public boolean isSatisfiedBy(Node node) {
-        return satisfiableNodes.contains(node);
+    public boolean isSatisfiedBy(Satisfaction satisfaction) {
+        return this.satisfaction.equals(satisfaction) || satisfiableSatisfactions.contains(satisfaction);
     }
 
     @Override
     public boolean isSatisfiedBy(Desire desire) {
-        return satisfiableDesires.contains(desire);
+        return defaultDesire.equals(desire) || satisfiableDesires.contains(desire);
     }
 
     @Override
     public boolean isInstantiable() {
-        return node != null;
+        return satisfaction != null;
     }
 
     @Override
-    public Node getNode() {
-        return node;
+    public Satisfaction getSatisfaction() {
+        return satisfaction;
     }
 
     @Override
@@ -105,5 +106,10 @@ public class MockDesire implements Desire {
     @Override
     public boolean isParameter() {
         return false;
+    }
+
+    @Override
+    public Desire getDefaultDesire() {
+        return defaultDesire;
     }
 }

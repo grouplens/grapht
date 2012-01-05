@@ -20,25 +20,10 @@ package org.grouplens.inject.reflect;
 
 import java.lang.reflect.Type;
 
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Satisfaction;
-import org.grouplens.inject.graph.SatisfactionRepository;
+import org.grouplens.inject.spi.Satisfaction;
 
 // FIXME: repair documentation to refer to satisfactions instead of nodes
-public class ClasspathSatisfactionRepository implements SatisfactionRepository {
-
-    @Override
-    public Satisfaction resolve(Desire desire) {
-        // TODO Support resolving desires
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public BindRule defaultBindRule() {
-        // TODO Implement default bind rule
-        throw new UnsupportedOperationException();
-    }
+public class ClasspathSatisfactionRepository {
 
     /**
      * Create a new node wrapping an instance. The object must be of a

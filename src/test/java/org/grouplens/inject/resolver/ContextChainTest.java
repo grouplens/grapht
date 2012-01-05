@@ -23,8 +23,9 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.MockNode;
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.MockSatisfaction;
+import org.grouplens.inject.spi.SatisfactionAndRole;
 import org.junit.Test;
 
 public class ContextChainTest {
@@ -124,7 +125,7 @@ public class ContextChainTest {
         
         List<SatisfactionAndRole> context = new ArrayList<SatisfactionAndRole>();
         for (Class<?> type: contextTypes) {
-            context.add(new SatisfactionAndRole(new MockNode(type, new ArrayList<Desire>()), null));
+            context.add(new SatisfactionAndRole(new MockSatisfaction(type, new ArrayList<Desire>()), null));
         }
         
         Assert.assertEquals(expectedMatch, chain.matches(context));

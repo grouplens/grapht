@@ -25,10 +25,10 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Role;
-import org.grouplens.inject.graph.Satisfaction;
 import org.grouplens.inject.resolver.ContextMatcher;
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Satisfaction;
 
 import com.google.common.base.Function;
 

@@ -18,6 +18,8 @@
  */
 package org.grouplens.inject.resolver;
 
+import org.grouplens.inject.spi.SatisfactionAndRole;
+
 /**
  * <p>
  * ContextMatcher represents a "pattern" that can match an element within the

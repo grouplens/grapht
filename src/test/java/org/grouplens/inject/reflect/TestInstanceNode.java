@@ -18,22 +18,24 @@
  */
 package org.grouplens.inject.reflect;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.*;
 
-import com.google.common.base.Functions;
-import com.sun.org.apache.xpath.internal.functions.Function;
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Node;
+import java.io.File;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+import javax.inject.Provider;
+
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Satisfaction;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.inject.Provider;
-import java.io.File;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Functions;
 
 public class TestInstanceNode {
     ClasspathSatisfactionRepository repo;
@@ -44,8 +46,9 @@ public class TestInstanceNode {
     }
     
     @Test
+    @SuppressWarnings("rawtypes")
     public void testSimpleClass() {
-        Node nd = new InstanceSatisfaction("foobie bletch", String.class);
+        Satisfaction nd = new InstanceSatisfaction("foobie bletch", String.class);
         assertThat(nd.getType(), equalTo((Type) String.class));
         assertThat(nd.getErasedType(), equalTo((Class) String.class));
         assertThat(nd.getDependencies(), Matchers.<Desire>empty());
@@ -54,7 +57,7 @@ public class TestInstanceNode {
     @Test
     public void testProvider() {
         StringBuffer buf = new StringBuffer();
-        Node nd = new InstanceSatisfaction(buf, StringBuffer.class);
+        Satisfaction nd = new InstanceSatisfaction(buf, StringBuffer.class);
         Provider<?> provider = nd.makeProvider(Functions.constant((Provider<?>) null));
         assertThat(provider, notNullValue());
         assertThat(provider.get(), sameInstance((Object) buf));
@@ -63,7 +66,7 @@ public class TestInstanceNode {
     @Test
     public void testCreate() {
         File f = new File("foobie.bletch");
-        Node nd = repo.newInstanceNode(f);
+        Satisfaction nd = repo.newInstanceNode(f);
         assertThat(nd, notNullValue());
         assertThat(nd.makeProvider(Functions.constant((Provider<?>) null)).get(),
                 sameInstance((Object) f));

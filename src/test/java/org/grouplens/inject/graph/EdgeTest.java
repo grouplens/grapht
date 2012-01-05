@@ -23,53 +23,56 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Edge;
-import org.grouplens.inject.graph.Node;
 import org.junit.Test;
 
 public class EdgeTest {
     @Test
     public void testGetters() {
-        Node head = new MockNode();
-        Node tail = new MockNode();
-        Desire desire = new MockDesire();
+        Node<Object> head = new Node<Object>(new Object());
+        Node<Object> tail = new Node<Object>(new Object());
+        Object ep = new Object();
         
-        Edge edge = new Edge(head, tail, desire);
+        Edge<Object, Object> edge = new Edge<Object, Object>(head, tail, ep);
         
         Assert.assertEquals(head, edge.getHead());
         Assert.assertEquals(tail, edge.getTail());
-        Assert.assertEquals(desire, edge.getDesire());
+        Assert.assertEquals(ep, edge.getPayload());
     }
     
     @Test
     public void testEquals() {
-        Node head = new MockNode();
-        Node tail = new MockNode();
-        Desire desire = new MockDesire();
-        Desire desire2 = new MockDesire();
+        Node<Object> head = new Node<Object>(new Object());
+        Node<Object> tail = new Node<Object>(new Object());
+        Object ep1 = new Object();
+        Object ep2 = new Object();
         
-        Edge edge1 = new Edge(head, tail, desire);
-        Edge edge2 = new Edge(head, tail, desire);
-        Edge reversedEdge = new Edge(tail, head, desire);
-        Edge diffDesire = new Edge(head, tail, desire2);
+        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, tail, ep1);
+        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, ep1);
+        Edge<Object, Object> reversedEdge = new Edge<Object, Object>(tail, head, ep1);
+        Edge<Object, Object> diffPayload = new Edge<Object, Object>(head, tail, ep2);
         
-        Assert.assertEquals(edge1, edge2);
+        Assert.assertEquals(edge1, edge1);
+        // Edges use instance equality
+        Assert.assertFalse(edge1.equals(edge2));
         Assert.assertFalse(edge1.equals(reversedEdge));
-        Assert.assertFalse(edge1.equals(diffDesire));
+        Assert.assertFalse(edge1.equals(diffPayload));
     }
     
     @Test
     public void testHashcode() {
-        Node head = new MockNode();
-        Node tail = new MockNode();
-        Desire desire = new MockDesire();
+        Node<Object> head = new Node<Object>(new Object());
+        Node<Object> tail = new Node<Object>(new Object());
+        Object ep = new Object();
         
-        Edge edge1 = new Edge(head, tail, desire);
-        Edge edge2 = new Edge(head, tail, desire);
+        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, tail, ep);
+        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, ep);
         
-        Set<Edge> edges = new HashSet<Edge>();
+        Set<Edge<Object, Object>> edges = new HashSet<Edge<Object, Object>>();
         edges.add(edge1);
-        Assert.assertTrue(edges.contains(edge2));
+        
+        // Edges use instance equality and hashing, so make sure that edge2
+        // doesn't appear in the set
+        Assert.assertTrue(edges.contains(edge1));
+        Assert.assertFalse(edges.contains(edge2));
     }
 }

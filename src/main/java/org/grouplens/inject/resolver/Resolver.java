@@ -21,10 +21,9 @@ package org.grouplens.inject.resolver;
 import java.util.Collection;
 import java.util.Map;
 
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Graph;
-import org.grouplens.inject.graph.Satisfaction;
+import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Satisfaction;
 
 /**
  * Resolvers are algorithms that resolve the dependencies of a set of
@@ -39,29 +38,22 @@ import org.grouplens.inject.graph.Satisfaction;
 public interface Resolver {
     /**
      * <p>
-     * Resolve all Desires within <tt>rootDesires</tt> given the set of
+     * Resolve all dependencies of <tt>rootSatisfaction</tt> given the set of
      * BindRules to apply. The BindRules are stored in a Map where the
      * ContextChain keys represent the context rules that activate that
      * collection of BindRules. The BindRules within a given collection for a
      * ContextChain need not apply to the same Desires or types, they are merely
      * activated at the same time.
      * <p>
-     * This will return a graph containing the resolved Nodes for the root
-     * desires, and all necessary edges and nodes to satisfy the root Nodes'
-     * dependencies. If the desires or dependencies could not be satisfied,
-     * either because there was not sufficient binding information or if there
-     * were too many choices, then an exception is thrown.
+     * This will return a ResolverResult containing a fully resolved dependency
+     * graph for the root satisfaction.
      * 
-     * @param rootDesires The root desires that must be resolved
+     * @param rootSatisfaction The root object to be resolved
      * @param bindRules The bind rule configuration that specifies how to
      *            resolve desires into nodes
-     * @return A completed dependency graph for the given desires and rules
-     * @throws ResolverException if the desires could not be fully resolved
-     * @throws NullPointerException if rootDesires or bindRules are null
+     * @return A completed dependency graph for the given root and rules
+     * @throws ResolverException if the satisfaction could not be fully resolved
+     * @throws NullPointerException if rootSatisfaction or bindRules are null
      */
-    // FIXME: this can't just return a Graph because we have no easy way of
-    // identifying the set of root nodes that the root desires mapped to.  We
-    // need to return a Map<Desire, Node> as well as the graph to provide entry
-    // points into the dependency graph
-    Graph<Satisfaction, Desire> resolve(Collection<? extends Desire> rootDesires, Map<ContextChain, Collection<? extends BindRule>> bindRules);
+    ResolverResult resolve(Satisfaction rootSatisfaction, Map<ContextChain, Collection<? extends BindRule>> bindRules);
 }

@@ -16,13 +16,12 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.resolver;
+package org.grouplens.inject.spi;
 
 import javax.annotation.Nullable;
 
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Role;
-import org.grouplens.inject.graph.Satisfaction;
+import org.grouplens.inject.resolver.ContextChain;
+import org.grouplens.inject.resolver.ContextMatcher;
 
 /**
  * SatisfactionAndRole is a simple pairing between a Satisfaction and a Role. Roles are defined
@@ -62,7 +61,7 @@ public class SatisfactionAndRole {
     }
     
     /**
-     * @return The role on the desire that the Node satisfies, may be null
+     * @return The role on the desire that the Satisfaction satisfies, may be null
      */
     public Role getRole() {
         return role;

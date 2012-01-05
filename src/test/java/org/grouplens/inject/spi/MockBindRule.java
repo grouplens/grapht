@@ -16,13 +16,13 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.graph;
+package org.grouplens.inject.spi;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
+import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.Desire;
 
 /**
  * MockBindRule is a simple implementation of BindRule where the matching

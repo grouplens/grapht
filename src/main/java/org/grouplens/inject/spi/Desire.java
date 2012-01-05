@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.graph;
+package org.grouplens.inject.spi;
 
 import java.util.Comparator;
 
@@ -125,6 +125,20 @@ public interface Desire {
      *         concrete type.
      */
     Satisfaction getSatisfaction();
+
+    /**
+     * <p>
+     * Get the default desire for this desire. If a desire or has been annotated
+     * with a default implementation, or the role has a default binding, then
+     * that is represented by the desire returned. If there is no default
+     * desire, then null is returned.
+     * <p>
+     * The returned desire, if it exists, is equivalent to getting a matching,
+     * default bind rule and applying it to this desire.
+     * 
+     * @return The default bind rule for this desire, if one exists
+     */
+    Desire getDefaultDesire();
 
     /**
      * Get a comparator for ordering bind rules.  The resulting comparator will

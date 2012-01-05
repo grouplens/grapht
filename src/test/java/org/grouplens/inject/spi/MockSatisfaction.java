@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.graph;
+package org.grouplens.inject.spi;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -25,38 +25,39 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.inject.graph.Desire;
-import org.grouplens.inject.graph.Node;
-import org.grouplens.inject.graph.Role;
 import org.grouplens.inject.resolver.ContextMatcher;
 
 import com.google.common.base.Function;
 
 /**
- * MockNode is a simple implementation of Nodes for certain types of test cases.
- * It can be full configured by its constructors, although
+ * MockSatisfaction is a simple implementation of Satisfactions for certain
+ * types of test cases. It can be configured by its constructors, although
  * {@link #makeProvider(Function)} always returns the same provider.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class MockNode implements Node {
+public class MockSatisfaction implements Satisfaction {
     private final Provider<?> provider;
     private final Class<?> type;
     private final List<Desire> dependencies;
     
-    public MockNode() {
+    public MockSatisfaction() {
         this(Object.class, new Object(), new ArrayList<Desire>());
     }
     
-    public MockNode(Class<?> type, List<Desire> dependencies) {
+    public MockSatisfaction(Class<?> type) {
+        this(type, new ArrayList<Desire>());
+    }
+    
+    public MockSatisfaction(Class<?> type, List<Desire> dependencies) {
         this(type, new NullProvider(), dependencies);
     }
     
-    public MockNode(Class<?> type, Object instance, List<Desire> dependencies) {
+    public MockSatisfaction(Class<?> type, Object instance, List<Desire> dependencies) {
         this(type, new InstanceProvider(instance), dependencies);
     }
     
-    public MockNode(Class<?> type, Provider<?> provider, List<Desire> dependencies) {
+    public MockSatisfaction(Class<?> type, Provider<?> provider, List<Desire> dependencies) {
         this.type = type;
         this.provider = provider;
         this.dependencies = dependencies;

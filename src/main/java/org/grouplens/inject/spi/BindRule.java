@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.graph;
+package org.grouplens.inject.spi;
 
 /**
  * A rule expressing an injector binding.  Bind rules can <i>match</i> desires,

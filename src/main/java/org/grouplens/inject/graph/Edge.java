@@ -18,6 +18,7 @@
  */
 package org.grouplens.inject.graph;
 
+
 /**
  * <p>
  * Edge is an immutable, unidirectional connection between two Nodes, the head

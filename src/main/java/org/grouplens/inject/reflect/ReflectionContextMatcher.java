@@ -21,7 +21,7 @@ package org.grouplens.inject.reflect;
 import java.lang.annotation.Annotation;
 
 import org.grouplens.inject.resolver.ContextMatcher;
-import org.grouplens.inject.resolver.SatisfactionAndRole;
+import org.grouplens.inject.spi.SatisfactionAndRole;
 
 public class ReflectionContextMatcher implements ContextMatcher {
     private final Class<?> type;

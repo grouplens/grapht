@@ -28,6 +28,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings("rawtypes")
 public class TestTypes {
 
     @Test
@@ -51,6 +52,7 @@ public class TestTypes {
     @Test(expected = IllegalArgumentException.class)
     public void testEraseWildcard() throws NoSuchFieldException {
         class WildTest {
+            @SuppressWarnings("unused")
             public List<? extends InputStream> field;
         }
 

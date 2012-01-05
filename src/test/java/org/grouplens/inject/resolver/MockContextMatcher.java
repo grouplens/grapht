@@ -19,7 +19,7 @@
 package org.grouplens.inject.resolver;
 
 import org.grouplens.inject.resolver.ContextMatcher;
-import org.grouplens.inject.resolver.SatisfactionAndRole;
+import org.grouplens.inject.spi.SatisfactionAndRole;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;

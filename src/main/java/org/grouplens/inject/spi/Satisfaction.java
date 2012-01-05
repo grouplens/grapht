@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.graph;
+package org.grouplens.inject.spi;
 
 import java.lang.reflect.Type;
 import java.util.Comparator;
@@ -50,21 +50,23 @@ public interface Satisfaction {
     List<Desire> getDependencies();
 
     /**
-     * Get the type of this satisfaction.
-     *
+     * Get the type of this satisfaction. If this is a synthetic Satisfaction,
+     * then a null type is returned.
+     * 
      * @return The type of objects to be instantiated by this satisfaction.
      */
     Type getType();
 
     /**
-     * Get the type-erased class of this satisfaction's type.
-     *
+     * Get the type-erased class of this satisfaction's type. If this is a
+     * synthetic Satisfaction, then null is returned.
+     * 
      * @return The class object for this satisfaction's type.
      */
     Class<?> getErasedType();
 
     /**
-     * Create a provider from this node.
+     * Create a provider from this satisfaction.
      *
      * @param dependencies A function mapping desires to providers of their
      *                     instances.

@@ -18,6 +18,7 @@
  */
 package org.grouplens.inject.graph;
 
+
 /**
  * <p>
  * A Node represents a conceptual node within a graph. Nodes within the same

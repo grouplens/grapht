@@ -28,15 +28,15 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
-import org.grouplens.inject.graph.MockBindRule;
-import org.grouplens.inject.graph.MockDesire;
-import org.grouplens.inject.graph.MockNode;
 import org.grouplens.inject.graph.MockNodeRepository;
 import org.grouplens.inject.graph.Node;
+import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.MockBindRule;
+import org.grouplens.inject.spi.MockDesire;
+import org.grouplens.inject.spi.MockSatisfaction;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -52,7 +52,7 @@ public class DefaultResolverTest {
     @Test
     public void testSatisfiableDesireNoDependenciesSuccess() throws Exception {
         // Test resolving a single root desire that is already satisfiable
-        Node node = new MockNode(A.class, new ArrayList<Desire>());
+        Node node = new MockSatisfaction(A.class, new ArrayList<Desire>());
         Desire desire = new MockDesire(node);
 
         Graph g = resolver.resolve(Collections.singleton(desire), new HashMap<ContextChain, Collection<? extends BindRule>>());
@@ -64,7 +64,7 @@ public class DefaultResolverTest {
     @Test
     public void testSingleDesireOneBindingSuccess() throws Exception {
         // Test resolving a single root desire that has a single bind rule
-        Node node = new MockNode(A.class, new ArrayList<Desire>());
+        Node node = new MockSatisfaction(A.class, new ArrayList<Desire>());
         Desire rootDesire = new MockDesire();
         Desire finalDesire = new MockDesire(node);
 
@@ -82,7 +82,7 @@ public class DefaultResolverTest {
     @Test
     public void testSingleRootChainedDesiresSuccess() throws Exception {
         // Test resolving a single root desire through a chain of bind rules
-        Node node = new MockNode(A.class, new ArrayList<Desire>());
+        Node node = new MockSatisfaction(A.class, new ArrayList<Desire>());
         Desire rootDesire = new MockDesire();
         Desire intermediateDesire = new MockDesire();
         Desire finalDesire = new MockDesire(node);
@@ -102,8 +102,8 @@ public class DefaultResolverTest {
     public void testMultipleSatisfiableDesiresSuccess() throws Exception {
         // Test resolving a single root desire, where the chain of bind rules
         // contains multiple satisfiable desires, and the deepest is selected
-        Node firstNode = new MockNode(A.class, new ArrayList<Desire>());
-        Node secondNode = new MockNode(B.class, new ArrayList<Desire>());
+        Node firstNode = new MockSatisfaction(A.class, new ArrayList<Desire>());
+        Node secondNode = new MockSatisfaction(B.class, new ArrayList<Desire>());
 
         Desire rootDesire = new MockDesire(firstNode);
         Desire finalDesire = new MockDesire(secondNode);
@@ -125,8 +125,8 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire(); // Desire for A
         Desire bDep = new MockDesire(); // Desire for B
 
-        Node rootNode = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node depNode = new MockNode(Bp.class, Arrays.<Desire>asList());
+        Node rootNode = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node depNode = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
 
         Desire aBinding = new MockDesire(rootNode); // Ap
         Desire bBinding = new MockDesire(depNode); // Bp
@@ -160,10 +160,10 @@ public class DefaultResolverTest {
         Desire bDep = new MockDesire(); // for B
         Desire cDep = new MockDesire(); // for C
 
-        Node n1 = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node n2 = new MockNode(Bp.class, Arrays.asList(cDep));
-        Node n3 = new MockNode(Cp.class, Arrays.<Desire>asList());
-        Node n4 = new MockNode(Cp.class, Arrays.<Desire>asList());
+        Node n1 = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node n2 = new MockSatisfaction(Bp.class, Arrays.asList(cDep));
+        Node n3 = new MockSatisfaction(Cp.class, Arrays.<Desire>asList());
+        Node n4 = new MockSatisfaction(Cp.class, Arrays.<Desire>asList());
 
         Desire aBinding = new MockDesire(n1);
         Desire bBinding = new MockDesire(n2);
@@ -206,10 +206,10 @@ public class DefaultResolverTest {
         Desire bDep = new MockDesire(); // for B
         Desire cDep = new MockDesire(); // for C
 
-        Node n1 = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node n2 = new MockNode(Bp.class, Arrays.asList(cDep));
-        Node n3 = new MockNode(Cp.class, Arrays.<Desire>asList());
-        Node n4 = new MockNode(Cp.class, Arrays.<Desire>asList());
+        Node n1 = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node n2 = new MockSatisfaction(Bp.class, Arrays.asList(cDep));
+        Node n3 = new MockSatisfaction(Cp.class, Arrays.<Desire>asList());
+        Node n4 = new MockSatisfaction(Cp.class, Arrays.<Desire>asList());
 
         Desire aBinding = new MockDesire(n1);
         Desire bBinding = new MockDesire(n2);
@@ -253,9 +253,9 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire(); // Desire for A
         Desire bDep = new MockDesire(); // Desire for B
 
-        Node rootNode = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node depNode = new MockNode(Bp.class, Arrays.<Desire>asList());
-        Node ignoredNode = new MockNode(Bp.class, Arrays.<Desire>asList());
+        Node rootNode = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node depNode = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
+        Node ignoredNode = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
         
         Desire aBinding = new MockDesire(rootNode); // Ap
         Desire bBinding = new MockDesire(depNode); // Bp
@@ -292,8 +292,8 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire(); // Desire for A
         Desire bDep = new MockDesire(); // Desire for B
 
-        Node rootNode = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node depNode = new MockNode(Bp.class, Arrays.<Desire>asList());
+        Node rootNode = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node depNode = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
 
         Desire aBinding = new MockDesire(rootNode); // Ap
         Desire bBinding = new MockDesire(depNode); // Bp
@@ -322,9 +322,9 @@ public class DefaultResolverTest {
     @Test
     public void testMultipleRootsNoDependenciesSuccess() throws Exception {
         // Test that multiple root desires are resolved, when they have no dependencies
-        Node rn1 = new MockNode(A.class, Arrays.<Desire>asList());
-        Node rn2 = new MockNode(B.class, Arrays.<Desire>asList());
-        Node rn3 = new MockNode(C.class, Arrays.<Desire>asList());
+        Node rn1 = new MockSatisfaction(A.class, Arrays.<Desire>asList());
+        Node rn2 = new MockSatisfaction(B.class, Arrays.<Desire>asList());
+        Node rn3 = new MockSatisfaction(C.class, Arrays.<Desire>asList());
 
         Desire rd1 = new MockDesire(rn1);
         Desire rd2 = new MockDesire(rn2);
@@ -351,9 +351,9 @@ public class DefaultResolverTest {
         Desire bDep = new MockDesire(); // for B
         Desire cDep = new MockDesire(); // for C
 
-        Node rn1 = new MockNode(Ap.class, Arrays.asList(cDep));
-        Node rn2 = new MockNode(Bp.class, Arrays.asList(cDep));
-        Node nd = new MockNode(Cp.class, Arrays.<Desire>asList());
+        Node rn1 = new MockSatisfaction(Ap.class, Arrays.asList(cDep));
+        Node rn2 = new MockSatisfaction(Bp.class, Arrays.asList(cDep));
+        Node nd = new MockSatisfaction(Cp.class, Arrays.<Desire>asList());
 
 
         Desire aBinding = new MockDesire(rn1);
@@ -389,9 +389,9 @@ public class DefaultResolverTest {
         Desire bDep = new MockDesire(); // for B
         Desire cDep = new MockDesire(); // for C
 
-        Node n1 = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node n2 = new MockNode(Bp.class, Arrays.asList(cDep));
-        Node n3 = new MockNode(Cp.class, Arrays.<Desire>asList());
+        Node n1 = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node n2 = new MockSatisfaction(Bp.class, Arrays.asList(cDep));
+        Node n3 = new MockSatisfaction(Cp.class, Arrays.<Desire>asList());
 
         Desire aBinding = new MockDesire(n1);
         Desire bBinding = new MockDesire(n2);
@@ -433,9 +433,9 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire();
         Desire bDep = new MockDesire();
         
-        Node na = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node nb1 = new MockNode(B.class, Arrays.asList(aDep));
-        Node nb2 = new MockNode(Bp.class, Arrays.<Desire>asList());
+        Node na = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node nb1 = new MockSatisfaction(B.class, Arrays.asList(aDep));
+        Node nb2 = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
         
         Desire aBinding = new MockDesire(na);
         Desire bBinding1 = new MockDesire(nb1);
@@ -478,8 +478,8 @@ public class DefaultResolverTest {
         // that do not apply, the resolving will succeed
         Desire aDep = new MockDesire();
         
-        Node na1 = new MockNode(Ap.class, Arrays.<Desire>asList());
-        Node na2 = new MockNode(A.class, Arrays.<Desire>asList());
+        Node na1 = new MockSatisfaction(Ap.class, Arrays.<Desire>asList());
+        Node na2 = new MockSatisfaction(A.class, Arrays.<Desire>asList());
         
         Desire aBinding1 = new MockDesire(na1);
         Desire aBinding2 = new MockDesire(na2);
@@ -506,8 +506,8 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire();
         Desire bDep = new MockDesire();
         
-        Node na = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node nb = new MockNode(Bp.class, Arrays.<Desire>asList());
+        Node na = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node nb = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
         
         Desire aBinding = new MockDesire(na);
         Desire obBinding = new MockDesire(nb);
@@ -536,7 +536,7 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire();
         Desire bDep = new MockDesire();
         
-        Node na = new MockNode(Ap.class, Arrays.asList(bDep));
+        Node na = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
         
         Desire aBinding = new MockDesire(na);
         
@@ -562,8 +562,8 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire(); // for A
         Desire bDep = new MockDesire(); // for B
         
-        Node an = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node bn = new MockNode(Bp.class, Arrays.asList(aDep));
+        Node an = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node bn = new MockSatisfaction(Bp.class, Arrays.asList(aDep));
         
         Desire aBinding = new MockDesire(an);
         Desire bBinding = new MockDesire(bn);
@@ -587,9 +587,9 @@ public class DefaultResolverTest {
         Desire aDep = new MockDesire(); // Desire for A
         Desire bDep = new MockDesire(); // Desire for B
 
-        Node rootNode = new MockNode(Ap.class, Arrays.asList(bDep));
-        Node depNode = new MockNode(Bp.class, Arrays.<Desire>asList());
-        Node otherDepNode = new MockNode(Bp.class, Arrays.<Desire>asList());
+        Node rootNode = new MockSatisfaction(Ap.class, Arrays.asList(bDep));
+        Node depNode = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
+        Node otherDepNode = new MockSatisfaction(Bp.class, Arrays.<Desire>asList());
         
         Desire aBinding = new MockDesire(rootNode); // Ap
         Desire bBinding = new MockDesire(depNode); // Bp
@@ -632,7 +632,7 @@ public class DefaultResolverTest {
     public void testNoBindRulesFail() throws Exception {
         // Test that not providing applicable bind rules will throw an exception,
         // even if other bind rules are given
-        Node rn = new MockNode();
+        Node rn = new MockSatisfaction();
         Desire rd = new MockDesire();
         
         Desire dep = new MockDesire();
@@ -654,7 +654,7 @@ public class DefaultResolverTest {
     public void testNonLeafSatisfiableDesireFail() throws Exception {
         // Test that a chain of desires, where an intermediate desire is
         // satisfiable but the leaf node is not, still throws an exception
-        Node firstNode = new MockNode(A.class, new ArrayList<Desire>());
+        Node firstNode = new MockSatisfaction(A.class, new ArrayList<Desire>());
 
         Desire rootDesire = new MockDesire(firstNode);
         Desire finalDesire = new MockDesire();

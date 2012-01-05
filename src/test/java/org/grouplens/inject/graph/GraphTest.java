@@ -22,10 +22,11 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
-import org.grouplens.inject.graph.Node;
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.MockDesire;
+import org.grouplens.inject.spi.MockSatisfaction;
 import org.junit.Test;
 
 public class GraphTest {
@@ -35,7 +36,7 @@ public class GraphTest {
     @Test
     public void testAddNode() {
         Graph graph = new Graph();
-        Node node = new MockNode();
+        Node node = new MockSatisfaction();
         
         Assert.assertTrue(graph.addNode(node));
         Set<Node> nodes = graph.getNodes();
@@ -47,7 +48,7 @@ public class GraphTest {
     @Test
     public void testUnknownNode() {
         Graph graph = new Graph();
-        Node node = new MockNode();
+        Node node = new MockSatisfaction();
         
         Assert.assertFalse(graph.getNodes().contains(node));
         Assert.assertNull(graph.getOutgoingEdges(node));
@@ -56,7 +57,7 @@ public class GraphTest {
     @Test
     public void testAddExistingNode() {
         Graph graph = new Graph();
-        Node node = new MockNode();
+        Node node = new MockSatisfaction();
         graph.addNode(node);
         
         Assert.assertFalse(graph.addNode(node));
@@ -67,8 +68,8 @@ public class GraphTest {
     @Test
     public void testRemoveNode() {
         Graph graph = new Graph();
-        Node node = new MockNode();
-        Node node2 = new MockNode();
+        Node node = new MockSatisfaction();
+        Node node2 = new MockSatisfaction();
         
         graph.addNode(node);
         graph.addNode(node2);
@@ -83,8 +84,8 @@ public class GraphTest {
     @Test
     public void testRemoveNonExistingNode() {
         Graph graph = new Graph();
-        Node node = new MockNode();
-        graph.addNode(new MockNode());
+        Node node = new MockSatisfaction();
+        graph.addNode(new MockSatisfaction());
         
         Assert.assertFalse(graph.removeNode(node));
         Assert.assertEquals(1, graph.getNodes().size());
@@ -94,10 +95,10 @@ public class GraphTest {
     public void testReplaceNode() {
         Graph graph = new Graph();
         
-        Node toBeReplaced = new MockNode();
-        Node outgoingNode = new MockNode();
-        Node incomingNode = new MockNode();
-        Node otherNode = new MockNode();
+        Node toBeReplaced = new MockSatisfaction();
+        Node outgoingNode = new MockSatisfaction();
+        Node incomingNode = new MockSatisfaction();
+        Node otherNode = new MockSatisfaction();
         
         Edge outgoing = new Edge(toBeReplaced, outgoingNode, new MockDesire());
         Edge incoming = new Edge(incomingNode, toBeReplaced, new MockDesire());
@@ -108,7 +109,7 @@ public class GraphTest {
         graph.addEdge(outgoing);
         graph.addEdge(incoming);
         
-        Node newNode = new MockNode();
+        Node newNode = new MockSatisfaction();
         Assert.assertTrue(graph.replaceNode(toBeReplaced, newNode));
         
         // verify that the node was replaced properly
@@ -133,10 +134,10 @@ public class GraphTest {
     @Test
     public void testReplaceNonExistingNode() {
         Graph graph = new Graph();
-        graph.addNode(new MockNode());
+        graph.addNode(new MockSatisfaction());
         
-        Node toReplace = new MockNode();
-        Node newNode = new MockNode();
+        Node toReplace = new MockSatisfaction();
+        Node newNode = new MockSatisfaction();
         
         Assert.assertFalse(graph.replaceNode(toReplace, newNode));
         Assert.assertFalse(graph.getNodes().contains(newNode));
@@ -147,8 +148,8 @@ public class GraphTest {
     @Test
     public void testAddEdge() {
         Graph graph = new Graph();
-        Node head = new MockNode();
-        Node tail = new MockNode();
+        Node head = new MockSatisfaction();
+        Node tail = new MockSatisfaction();
         
         Edge edge = new Edge(head, tail, new MockDesire());
         Assert.assertTrue(graph.addEdge(edge));
@@ -173,8 +174,8 @@ public class GraphTest {
     @Test
     public void testAddExistingEdge() {
         Graph graph = new Graph();
-        Node head = new MockNode();
-        Node tail = new MockNode();
+        Node head = new MockSatisfaction();
+        Node tail = new MockSatisfaction();
         Desire desire = new MockDesire();
         
         Edge edge = new Edge(head, tail, desire);
@@ -186,8 +187,8 @@ public class GraphTest {
     @Test
     public void testRemoveEdge() {
         Graph graph = new Graph();
-        Node head = new MockNode();
-        Node tail = new MockNode();
+        Node head = new MockSatisfaction();
+        Node tail = new MockSatisfaction();
         Desire desire = new MockDesire();
         
         Edge edge = new Edge(head, tail, desire);
@@ -207,8 +208,8 @@ public class GraphTest {
     @Test
     public void testRemoveNonExistingEdge() {
         Graph graph = new Graph();
-        Node head = new MockNode();
-        Node tail = new MockNode();
+        Node head = new MockSatisfaction();
+        Node tail = new MockSatisfaction();
         graph.addEdge(new Edge(head, tail, new MockDesire()));
         
         Edge edge = new Edge(head, tail, new MockDesire());
@@ -223,8 +224,8 @@ public class GraphTest {
     public void testReplaceEdge() {
         Graph graph = new Graph();
         
-        Node head = new MockNode();
-        Node tail = new MockNode();
+        Node head = new MockSatisfaction();
+        Node tail = new MockSatisfaction();
         
         Desire desire1 = new MockDesire();
         Desire desire2 = new MockDesire();
@@ -252,8 +253,8 @@ public class GraphTest {
     public void testReplaceNonExistingEdge() {
         Graph graph = new Graph();
         
-        Node head = new MockNode();
-        Node tail = new MockNode();
+        Node head = new MockSatisfaction();
+        Node tail = new MockSatisfaction();
         graph.addEdge(new Edge(head, tail, new MockDesire()));
         
         Edge notInGraph = new Edge(tail, head, new MockDesire());
@@ -268,9 +269,9 @@ public class GraphTest {
     @Test
     public void testNodeIterate() {
         Graph graph = new Graph();
-        Node node1 = new MockNode();
-        Node node2 = new MockNode();
-        Node node3 = new MockNode();
+        Node node1 = new MockSatisfaction();
+        Node node2 = new MockSatisfaction();
+        Node node3 = new MockSatisfaction();
         
         graph.addNode(node1);
         graph.addNode(node2);
@@ -287,11 +288,11 @@ public class GraphTest {
     public void testGetIncomingEdges() {
         Graph graph = new Graph();
         
-        Node tail = new MockNode();
+        Node tail = new MockSatisfaction();
         
-        Edge edge1 = new Edge(new MockNode(), tail, new MockDesire());
-        Edge edge2 = new Edge(new MockNode(), tail, new MockDesire());
-        Edge edge3 = new Edge(new MockNode(), tail, new MockDesire());
+        Edge edge1 = new Edge(new MockSatisfaction(), tail, new MockDesire());
+        Edge edge2 = new Edge(new MockSatisfaction(), tail, new MockDesire());
+        Edge edge3 = new Edge(new MockSatisfaction(), tail, new MockDesire());
         
         graph.addEdge(edge1);
         graph.addEdge(edge2);
@@ -308,11 +309,11 @@ public class GraphTest {
     public void testGetOutgoingEdges() {
         Graph graph = new Graph();
         
-        Node head = new MockNode();
+        Node head = new MockSatisfaction();
         
-        Edge edge1 = new Edge(head, new MockNode(), new MockDesire());
-        Edge edge2 = new Edge(head, new MockNode(), new MockDesire());
-        Edge edge3 = new Edge(head, new MockNode(), new MockDesire());
+        Edge edge1 = new Edge(head, new MockSatisfaction(), new MockDesire());
+        Edge edge2 = new Edge(head, new MockSatisfaction(), new MockDesire());
+        Edge edge3 = new Edge(head, new MockSatisfaction(), new MockDesire());
         
         graph.addEdge(edge1);
         graph.addEdge(edge2);

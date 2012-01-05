@@ -22,20 +22,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
-import org.grouplens.inject.graph.BindRule;
-import org.grouplens.inject.graph.Desire;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.graph.Node;
-import org.grouplens.inject.graph.NodeRepository;
-import org.grouplens.inject.graph.Role;
+import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Satisfaction;
+import org.grouplens.inject.spi.SatisfactionAndRole;
 
 import com.google.common.collect.Ordering;
 
@@ -69,99 +69,178 @@ import com.google.common.collect.Ordering;
  * A summary of these rules is that the best specified BindRule is applied,
  * where the context that the BindRule is activated in has more priority than
  * the type of the BindRule.
- * </p>
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class DefaultResolver implements Resolver {
-    private final NodeRepository repository;
     private final int maxDepth;
 
     /**
      * <p>
-     * Create a new DefaultResolver that uses the given NodeRepository for a
-     * source of default bindings. The created resolver will use a max
-     * dependency depth of 100 to guess if there are cycles in the dependency
+     * Create a new DefaultResolver. The created resolver will use a max
+     * dependency depth of 100 to estimate if there are cycles in the dependency
      * hierarchy.
-     * <p>
-     * The provided NodeRepository must be compatible with any Desires and
-     * BindRules that are passed to {@link #resolve(Collection, Map)}.
-     * 
-     * @param repository The NodeRepository to use
-     * @throws NullPointerException if repository is null
      */
-    public DefaultResolver(NodeRepository repository) {
-        this(repository, 100);
+    public DefaultResolver() {
+        this(100);
     }
 
     /**
      * <p>
-     * Create a new DefaultResolver that uses the given NodeRepository for a
-     * source of default bindings. <tt>maxDepth</tt> represents the maximum
+     * Create a new DefaultResolver. <tt>maxDepth</tt> represents the maximum
      * depth of the dependency hierarchy before it is assume that there is a
      * cycle. This constructor can be used to increase this depth in the event
      * that configuration requires it, although for most purposes the default
      * 100 should be sufficient.
-     * <p>
-     * The provided NodeRepository must be compatible with any Desires and
-     * BindRules that are passed to {@link #resolve(Collection, Map)}.
      * 
-     * @param repository The NodeRepository to use
      * @param maxDepth The maximum depth of the dependency hierarchy
-     * @throws NullPointerException if repository is null
      * @throws IllegalArgumentException if maxDepth is less than 1
      */
-    public DefaultResolver(NodeRepository repository, int maxDepth) {
-        if (repository == null)
-            throw new NullPointerException("NodeRepository cannot be null");
+    public DefaultResolver(int maxDepth) {
         if (maxDepth <= 0)
             throw new IllegalArgumentException("Max depth must be at least 1");
         
-        this.repository = repository;
         this.maxDepth = maxDepth;
     }
 
     @Override
-    public Graph resolve(Collection<? extends Desire> rootDesires,
-                         Map<ContextChain, Collection<? extends BindRule>> bindRules) {
-        Graph graph = new Graph();
-        for (Desire desire: rootDesires) {
-            // resolve all root desires, each starting at the empty context
-            resolveFully(desire, graph, bindRules, new ArrayList<SatisfactionAndRole>());
+    public ResolverResult resolve(Satisfaction rootSatisfaction,
+                                  Map<ContextChain, Collection<? extends BindRule>> bindRules) {
+        // the initial graph we construct is actually a tree because each resolved satisfaction
+        // uses a new node. This means that all dependency nodes only have a single incoming edge,
+        // so rootSatisfaction is the root of a depdendency tree
+        Graph<Satisfaction, List<Desire>> dependencyTree = new Graph<Satisfaction, List<Desire>>();
+        Node<Satisfaction> rootNode = new Node<Satisfaction>(rootSatisfaction);
+        dependencyTree.addNode(rootNode);
+        
+        for (Desire dependency: rootSatisfaction.getDependencies()) {
+            resolveFully(dependency, rootNode, dependencyTree, bindRules, new ArrayList<SatisfactionAndRole>());
         }
-        return graph;
+        
+        // we pass the tree into depuplicate() to remove duplicate dependency sequences,
+        // which converts the tree into a graph that shares nodes if possible
+        return deduplicate(dependencyTree, rootNode);
     }
     
-    private Node resolveFully(Desire desire, Graph graph, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
+    private ResolverResult deduplicate(Graph<Satisfaction, List<Desire>> fullTree, Node<Satisfaction> rootNode) {
+        // accumulate all leaf nodes for the initial merge set
+        Set<Node<Satisfaction>> leafNodes = new HashSet<Node<Satisfaction>>();
+        for (Node<Satisfaction> n: fullTree.getNodes()) {
+            // no outgoing edges implies no dependencies so it's a leaf
+            if (fullTree.getOutgoingEdges(n).isEmpty()) {
+                leafNodes.add(n);
+            }
+        }
+        
+        // merge all nodes with equivalent configurations
+        Graph<Satisfaction, Desire> merged = new Graph<Satisfaction, Desire>();
+        Node<Satisfaction> newRoot = merge(leafNodes, null, fullTree, rootNode, merged);
+        
+        return new ResolverResult(merged, newRoot);
+    }
+    
+    private Node<Satisfaction> merge(Set<Node<Satisfaction>> toMerge, Map<Node<Satisfaction>, Node<Satisfaction>> levelMap, 
+                                     Graph<Satisfaction, List<Desire>> original, Node<Satisfaction> originalRoot,
+                                     Graph<Satisfaction, Desire> merged) {
+        // this is a map from nodes in toMerge to their potentially merged new nodes in the merged graph
+        Map<Node<Satisfaction>, Node<Satisfaction>> currentLevelMap = new HashMap<Node<Satisfaction>, Node<Satisfaction>>();
+        
+        // accumulated set of all incoming edges to nodes in toMerge
+        Set<Node<Satisfaction>> nextMerge = new HashSet<Node<Satisfaction>>();
+
+        // this is a map from satisfactions to a map of its possible dependency
+        // configurations to the new node in the merged graph
+        Map<Satisfaction, Map<Set<Node<Satisfaction>>, Node<Satisfaction>>> mergeMap = new HashMap<Satisfaction, Map<Set<Node<Satisfaction>>,Node<Satisfaction>>>();
+        
+        
+        for (Node<Satisfaction> oldNode: toMerge) {
+            // lookup map of all node's dependency possibilities
+            Map<Set<Node<Satisfaction>>, Node<Satisfaction>> depOptions = mergeMap.get(oldNode.getPayload());
+            if (depOptions == null) {
+                depOptions = new HashMap<Set<Node<Satisfaction>>, Node<Satisfaction>>();
+                mergeMap.put(oldNode.getPayload(), depOptions);
+            }
+            
+            // accumulate the set of dependencies for this node, filtering
+            // them through the previous level map
+            Set<Node<Satisfaction>> dependencies = new HashSet<Node<Satisfaction>>();
+            for (Edge<Satisfaction, List<Desire>> dep: original.getOutgoingEdges(oldNode)) {
+                Node<Satisfaction> filtered = levelMap.get(dep.getTail());
+                assert filtered != null; // all dependencies should have been merged previously
+                dependencies.add(filtered);
+            }
+            
+            Node<Satisfaction> newNode = depOptions.get(dependencies);
+            if (newNode == null) {
+                // this configuration for the satisfaction has not been seen before
+                // - add it to merged graph, and connect to its dependencies
+                newNode = new Node<Satisfaction>(oldNode.getPayload());
+                merged.addNode(newNode);
+                
+                for (Edge<Satisfaction, List<Desire>> dep: original.getOutgoingEdges(oldNode)) {
+                    Node<Satisfaction> filtered = levelMap.get(dep.getTail());
+                    // add the edge, but convert from all desires to just the original/root desire
+                    merged.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getPayload().get(0)));
+                }
+                
+                // update merge map so subsequent appearances of this configuration reuse this node
+                depOptions.put(dependencies, newNode);
+            }
+            
+            // we have the merged node, record it in this level map and update next merge set
+            currentLevelMap.put(oldNode, newNode);
+            for (Edge<Satisfaction, List<Desire>> parent: original.getIncomingEdges(oldNode)) {
+                nextMerge.add(parent.getHead());
+            }
+        }
+        
+        if (!nextMerge.isEmpty()) {
+            // recurse to the next level in the dependency hierarchy if we have any more nodes
+            return merge(nextMerge, currentLevelMap, original, originalRoot, merged);
+        } else {
+            // return the old root node mapped to the new graph
+            return currentLevelMap.get(originalRoot);
+        }
+    }
+    
+    private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
+                              Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
         
         // resolve the current node
-        Node resolved = resolve(desire, bindRules, context);
-        graph.addNode(resolved);
+        SatisfactionAndDesires resolved = resolve(desire, bindRules, context);
+        Node<Satisfaction> newNode = new Node<Satisfaction>(resolved.satisfaction);
+        
+        // add the node to the graph, and connect it with its parent
+        graph.addNode(newNode);
+        graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.desires));
         
         // update the context
         List<SatisfactionAndRole> newContext = new ArrayList<SatisfactionAndRole>(context);
-        newContext.add(new SatisfactionAndRole(resolved, desire.getRole()));
+        newContext.add(new SatisfactionAndRole(resolved.satisfaction, desire.getRole()));
         
-        List<Desire> dependencies = resolved.getDependencies();
+        List<Desire> dependencies = resolved.satisfaction.getDependencies();
         for (Desire d: dependencies) {
-            // complete the sub graph for the given desire, and then record the
-            // edge for this desire.
-            Node completedDependency = resolveFully(d, graph, bindRules, newContext);
-            graph.addEdge(new Edge(resolved, completedDependency, d));
+            // complete the sub graph for the given desire
+            // - the call to resolveFully() is responsible for adding the dependency edges
+            //   so we don't need to process the returned node
+            resolveFully(d, newNode, graph, bindRules, newContext);
         }
-        return resolved;
     }
     
-    private Node resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
+    private SatisfactionAndDesires resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
         
+        List<Desire> desireChain = new ArrayList<Desire>();
         Desire currentDesire = desire;
         while(true) {
+            // remember the current desire in the chain of followed desires
+            desireChain.add(currentDesire);
+            
             // collect all bind rules that apply to this desire
             List<ContextAndBindRule> validRules = new ArrayList<ContextAndBindRule>();
             for (ContextChain chain: bindRules.keySet()) {
@@ -176,42 +255,43 @@ public class DefaultResolver implements Resolver {
                 }
             }
             
-            // also add the default bind rule if it can apply to the desire
-            // - here we assume that the default bind rule will not match an
-            //   instantiable desire that has no declared default
-            BindRule defaultRule = repository.defaultBindRule();
-            if (defaultRule.matches(currentDesire)) {
-                // we use the null context to distinguish this rule from the empty context
-                validRules.add(new ContextAndBindRule(null, defaultRule));
-            }
-            
-            if (validRules.isEmpty()) {
-                if (currentDesire.isInstantiable()) {
-                    // the desire can be converted to a node, so we're done
-                    return currentDesire.getNode();
+            if (!validRules.isEmpty()) {
+                // we have a bind rule to apply
+                Comparator<ContextAndBindRule> ordering = Ordering.from(new ContextClosenessComparator(context))
+                                                                  .compound(new ContextLengthComparator())
+                                                                  .compound(new TypeDeltaComparator(context))
+                                                                  .compound(new BindRuleComparator(currentDesire));
+                Collections.sort(validRules, ordering);
+
+                if (validRules.size() > 1) {
+                    // must check if the 2nd bind rule is equivalent in order to the first
+                    if (ordering.compare(validRules.get(0), validRules.get(1)) == 0) {
+                        // TODO REVIEW: return more information in the message?
+                        throw new ResolverException("Too many choices for desire: " + currentDesire);
+                    }
+                }
+
+                // apply the bind rule to get a new desire
+                BindRule selectedRule = validRules.get(0).rule;
+                appliedRules.add(selectedRule);
+                currentDesire = selectedRule.apply(currentDesire);
+            } else {
+                // attempt to use the default desire, or terminate if we've found
+                // a satisfiable desire
+                Desire defaultDesire = currentDesire.getDefaultDesire();
+                if (defaultDesire == null) {
+                    if (currentDesire.isInstantiable()) {
+                        // the desire can be converted to a node, so we're done
+                        return new SatisfactionAndDesires(currentDesire.getSatisfaction(), desireChain);
+                    } else {
+                        // no more rules and we can't make a node
+                        throw new ResolverException("Unable to satisfy desire: " + currentDesire + ", root desire: " + desire);
+                    }
                 } else {
-                    // no more rules and we can't make a node
-                    throw new ResolverException("Unable to satisfy desire: " + currentDesire + ", root desire: " + desire);
+                    // continue with the default desire
+                    currentDesire = defaultDesire;
                 }
             }
-            
-            Comparator<ContextAndBindRule> ordering = Ordering.from(new ContextClosenessComparator(context))
-                                                              .compound(new ContextLengthComparator())
-                                                              .compound(new TypeDeltaComparator(context))
-                                                              .compound(new BindRuleComparator(currentDesire));
-            Collections.sort(validRules, ordering);
-            
-            if (validRules.size() > 1) {
-                // must check if the 2nd bind rule is equivalent in order to the first
-                if (ordering.compare(validRules.get(0), validRules.get(1)) == 0) {
-                    // TODO REVIEW: return more information in the message?
-                    throw new ResolverException("Too many choices for desire: " + currentDesire);
-                }
-            }
-            
-            BindRule selectedRule = validRules.get(0).rule;
-            appliedRules.add(selectedRule);
-            currentDesire = selectedRule.apply(currentDesire);
         }
     }
 
@@ -249,13 +329,6 @@ public class DefaultResolver implements Resolver {
         
         @Override
         public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
-            // special cases for null contexts
-            if (o1.context == null) {
-                return (o2.context == null ? 0 : 1); // move null contexts to end of the list
-            } else if (o2.context == null) {
-                return (o1.context == null ? 0 : -1); //    ""
-            }
-            
             int lastIndex1 = o1.context.getContexts().size() - 1;
             int lastIndex2 = o2.context.getContexts().size() - 1;
             
@@ -279,7 +352,7 @@ public class DefaultResolver implements Resolver {
                 
                 if (match1 && match2) {
                     // the chains apply to this node so we need to compare them
-                    int cmp = currentNode.getNode().contextComparator(currentNode.getRole()).compare(m1, m2);
+                    int cmp = currentNode.getSatisfaction().contextComparator(currentNode.getRole()).compare(m1, m2);
                     if (cmp != 0) {
                         // one chain finally has a type delta difference, so the
                         // comparison of the chain equals the matcher comparison
@@ -303,13 +376,6 @@ public class DefaultResolver implements Resolver {
     private static class ContextLengthComparator implements Comparator<ContextAndBindRule> {
         @Override
         public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
-            // special cases for null contexts
-            if (o1.context == null) {
-                return (o2.context == null ? 0 : 1); // move null contexts to end of the list
-            } else if (o2.context == null) {
-                return (o1.context == null ? 0 : -1); //    ""
-            }
-            
             int l1 = o1.context.getContexts().size();
             int l2 = o2.context.getContexts().size();
             // select longer contexts over shorter (i.e. longer < shorter)
@@ -330,13 +396,6 @@ public class DefaultResolver implements Resolver {
         
         @Override
         public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
-            // special cases for null contexts
-            if (o1.context == null) {
-                return (o2.context == null ? 0 : 1); // move null contexts to end of the list
-            } else if (o2.context == null) {
-                return (o1.context == null ? 0 : -1); //    ""
-            }
-            
             int lastIndex1 = o1.context.getContexts().size() - 1;
             int lastIndex2 = o2.context.getContexts().size() - 1;
             
@@ -374,12 +433,27 @@ public class DefaultResolver implements Resolver {
      * limits the bind rule's scope.
      */
     private static class ContextAndBindRule {
-        final ContextChain context; // this is null if the BindRule was the default rule from the NodeRepository
+        final ContextChain context;
         final BindRule rule;
         
-        public ContextAndBindRule(@Nullable ContextChain context, BindRule rule) {
+        public ContextAndBindRule(ContextChain context, BindRule rule) {
             this.context = context;
             this.rule = rule;
+        }
+    }
+
+    /*
+     * SatisfactionAndDesires represents a resolved Satisfaction with the list
+     * of Desires that led to its resolution. All desires in the list can be
+     * assumed to be satisfied by the satisfaction.
+     */
+    private static class SatisfactionAndDesires {
+        final Satisfaction satisfaction;
+        final List<Desire> desires;
+        
+        public SatisfactionAndDesires(Satisfaction satisfaction, List<Desire> desires) {
+            this.satisfaction = satisfaction;
+            this.desires = desires;
         }
     }
 }
