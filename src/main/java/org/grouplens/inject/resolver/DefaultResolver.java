@@ -19,6 +19,7 @@
 package org.grouplens.inject.resolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -114,10 +115,10 @@ public class DefaultResolver implements Resolver {
         dependencyTree.addNode(rootNode);
         
         for (Desire dependency: rootSatisfaction.getDependencies()) {
-            resolveFully(dependency, rootNode, dependencyTree, bindRules, new ArrayList<SatisfactionAndRole>());
+            resolveFully(dependency, rootNode, dependencyTree, bindRules, Arrays.asList(new SatisfactionAndRole(rootSatisfaction, null)));
         }
         
-        // we pass the tree into depuplicate() to remove duplicate dependency sequences,
+        // we pass the tree into deduplicate() to remove duplicate dependency sequences,
         // which converts the tree into a graph that shares nodes if possible
         return deduplicate(dependencyTree, rootNode);
     }

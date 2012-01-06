@@ -18,18 +18,63 @@
  */
 package org.grouplens.inject.resolver;
 
+import javax.annotation.Nullable;
+
 import org.grouplens.inject.resolver.ContextMatcher;
+import org.grouplens.inject.spi.MockRole;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
+    private final MockRole role;
     
     public MockContextMatcher(Class<?> type) {
+        this(type, null);
+    }
+    
+    public MockContextMatcher(Class<?> type, @Nullable MockRole role) {
         this.type = type;
+        this.role = role;
+
     }
     
     @Override
     public boolean matches(SatisfactionAndRole n) {
-        return type.isAssignableFrom(n.getNode().getErasedType());
+        boolean typeMatch = type.isAssignableFrom(n.getSatisfaction().getErasedType());
+        boolean roleMatch = false;
+        
+        if (role != null) {
+            // this context matches a specific role, so we accept any role
+            // that matches it or is a sub-role of it
+            MockRole c = (MockRole) n.getRole();
+            while(c != null) {
+                if (c == role) {
+                    // found the match
+                    roleMatch = true;
+                    break;
+                }
+                
+                if (!c.isInheritenceEnabled()) {
+                    // role has no parent
+                    break;
+                }
+                c = c.getParent();
+            }
+        } else {
+            // this context matches the default role, so we accept the role
+            // if it is null, or eventually inherits the default
+            roleMatch = true;
+            MockRole c = (MockRole) n.getRole();
+            while(c != null) {
+                if (!c.isInheritenceEnabled()) {
+                    // does not extend from the default
+                    roleMatch = false;
+                    break;
+                }
+                c = c.getParent();
+            }
+        }
+        
+        return typeMatch && roleMatch;
     }
 }
