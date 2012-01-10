@@ -18,8 +18,18 @@
  */
 package org.grouplens.inject.reflect;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+import org.grouplens.inject.spi.Desire;
 
 /**
  * Static helper methods for working with types.
@@ -48,5 +58,68 @@ public final class Types {
         } else {
             throw new IllegalArgumentException();
         }
+    }
+
+    /**
+     * Get the type that is provided by a given implementation of
+     * {@link Provider}.
+     * 
+     * @param providerClass The provider's class
+     * @return The provided class type
+     * @throws IllegalArgumentException if the class doesn't actually implement
+     *             Provider
+     */
+    public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
+        // FIXME: I don't know if this is capable of getting the generics
+        // properly, but that's not my concern right now
+        try {
+            return providerClass.getMethod("get").getReturnType();
+        } catch (SecurityException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class does not implement get()");
+        }
+    }
+    
+    public static List<Desire> getProviderDesires(Class<? extends Provider<?>> providerType) {
+        return getDesires(providerType, true);
+    }
+    
+    public static List<Desire> getDesires(Class<?> type) {
+        return getDesires(type, false);
+    }
+    
+    private static List<Desire> getDesires(Class<?> type, boolean isProvider) {
+        List<Desire> desires = new ArrayList<Desire>();
+
+        boolean ctorFound = false;
+        for (Constructor<?> ctor: type.getConstructors()) {
+            if (ctor.getAnnotation(Inject.class) != null) {
+                if (!ctorFound) {
+                    ctorFound = true;
+                    for (int i = 0; i < ctor.getParameterTypes().length; i++) {
+                        desires.add(new ConstructorParameterDesire(ctor, i, isProvider));
+                    }
+                } else {
+                    // at the moment there can only be one injectable constructor
+                    // FIXME: return a better exception with more information
+                    throw new RuntimeException("Too many injectable constructors");
+                }
+            }
+        }
+        
+        for (Method m: type.getMethods()) {
+            if (m.getAnnotation(Inject.class) != null) {
+                if (m.getParameterTypes().length != 1 || m.getReturnType() != null) {
+                    // invalid setter injection point
+                    // FIXME: better exception as above
+                    throw new RuntimeException("Invalid setter injection method");
+                }
+                
+                desires.add(new SetterMethodDesire(m, isProvider));
+            }
+        }
+        
+        return Collections.unmodifiableList(desires);
     }
 }

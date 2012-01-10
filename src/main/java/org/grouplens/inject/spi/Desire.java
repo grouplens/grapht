@@ -37,59 +37,6 @@ import java.util.Comparator;
  */
 public interface Desire {
     /**
-     * Query whether a particular satisfaction will satisfy this desire. If true, then
-     * an instance of the type represented by <var>satisfaction</var> is type-compatible
-     * with this desire. This is equivalent to
-     * {@link Class#isAssignableFrom(Class)}.
-     *
-     * @review Do we actually need this method? I (ML) am inclined to delete
-     *         it, since we'll likely be deleting isSatisfiedBy(Desire).
-     *
-     * @param satisfaction The satisfaction in question.
-     * @return <tt>true</tt> if the satisfaction is compatible with the desire (can
-     *         satisfy it); <tt>false</tt> otherwise.
-     * @throws IllegalArgumentException if <var>satisfaction</var> is not from the same
-     *         graph implementation as this desire.
-     * @see Class#isAssignableFrom(Class)
-     */
-    boolean isSatisfiedBy(Satisfaction satisfaction);
-
-    /**
-     * Query whether a particular desire is a subset of this desire. If true,
-     * then any node satisfying <var>desire</var> will also satisfy this desire.
-     * This method is used to check establish transitive chains through desires
-     * while resolving them to nodes.
-     *
-     * <p>
-     * For parameter desires, this checks whether the other desire is for the
-     * same type and parameter annotation, or a parameter inherited by this
-     * desire's parameter annotation.
-     *
-     * <p>
-     * For component desires, this checks whether the other desire is compatible
-     * with this desire. Compatibility is defined by the following:
-     * <ul>
-     * <li>Anything satisfying the other desire is type-compatible with (can be
-     * assigned to) this desire.
-     * <li>Some as-yet-undefined type conversion rules.
-     * </ul>
-     *
-     * @review Do we actually need this method? I (MDE) am inclined to delete
-     *         it. {@link BindRule#matches(Desire)} may be all we need.
-     * 
-     * @param desire The desire to check.
-     * @return <tt>true</tt> if any node satisfying <var>desire</var> will
-     *         satisfy this desire.
-     * @throws IllegalArgumentException if <var>desire</var> is not from the
-     *         same graph implementation as this desire.
-     * @see #isSatisfiedBy(Node)
-     * @deprecated We don't think we need this method, so it's deprecated pending
-     * removal.
-     */
-    @Deprecated
-    boolean isSatisfiedBy(Desire desire);
-
-    /**
      * Query whether this desire is for a parameter (primitive or string with a
      * parameter annotation).
      *
@@ -117,6 +64,15 @@ public interface Desire {
      *         of the desire type.
      */
     boolean isInstantiable();
+
+    /**
+     * Return whether or not this desire is a transient desire. A transient
+     * desire is only needed during the instantiation of the satisfaction, but
+     * once the instance has been built it is no longer necessary.
+     * 
+     * @return True if the desire is transient
+     */
+    boolean isTransient();
 
     /**
      * Get the satisfaction (concrete type) if this desire is fully resolved.

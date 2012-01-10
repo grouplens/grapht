@@ -20,34 +20,35 @@ package org.grouplens.inject.reflect;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.inject.resolver.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
-import org.grouplens.inject.spi.Role;
-import org.grouplens.inject.spi.Satisfaction;
 
 import com.google.common.base.Function;
 
 /**
- * Node implementation wrapping an instance. It has no dependencies, and
+ * Satisfaction implementation wrapping an instance. It has no dependencies, and
  * the resulting providers just return the instance.
+ * 
+ * @author Michael Ekstrand <ekstrand@cs.umn.edu>
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class InstanceSatisfaction implements Satisfaction {
-    Object instance;
-    Type type;
+class InstanceSatisfaction extends ReflectionSatisfaction {
+    private final Object instance;
 
     /**
      * Create a new instance node wrapping an instance.
+     * 
      * @param obj The object to return.
-     * @param type The type of the object.
+     * @throws NullPointerException if obj is null
      */
-    InstanceSatisfaction(Object obj, Type type) {
+    public InstanceSatisfaction(Object obj) {
+        if (obj == null) {
+            throw new NullPointerException("Instance cannot be null");
+        }
         instance = obj;
-        this.type = type;
     }
 
     @Override
@@ -73,10 +74,5 @@ class InstanceSatisfaction implements Satisfaction {
                 return instance;
             }
         };
-    }
-
-    @Override
-    public Comparator<ContextMatcher> contextComparator(Role role) {
-        throw new UnsupportedOperationException();
     }
 }

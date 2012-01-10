@@ -18,27 +18,56 @@
  */
 package org.grouplens.inject.reflect;
 
-import java.lang.annotation.Annotation;
-
 import org.grouplens.inject.resolver.ContextMatcher;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 
-public class ReflectionContextMatcher implements ContextMatcher {
+class ReflectionContextMatcher implements ContextMatcher {
+    // FIXME: will this have to be changed to Type?
     private final Class<?> type;
-    private final Class<? extends Annotation> roleAnnotation;
+    private final AnnotationRole role;
     
     public ReflectionContextMatcher(Class<?> type) {
         this(type, null);
     }
     
-    public ReflectionContextMatcher(Class<?> type, Class<? extends Annotation> role) {
+    public ReflectionContextMatcher(Class<?> type, AnnotationRole role) {
         this.type = type;
-        roleAnnotation = role;
+        this.role = role;
     }
     
     @Override
     public boolean matches(SatisfactionAndRole n) {
-        // FIXME: handle role inheritence, and generics correctly
-        return type.isAssignableFrom(n.getSatisfaction().getErasedType()) && roleAnnotation.equals(null);
+        // FIXME: handle generics correctly
+        if (type.isAssignableFrom(n.getSatisfaction().getErasedType())) {
+            // type is a match, so check the role
+            AnnotationRole current = (AnnotationRole) n.getRole();
+            if (role != null) {
+                // make sure the satisfaction's role inherits from this role
+                while(current != null) {
+                    if (current.equals(role)) {
+                        // the satisfaction's role inherits from the matcher's role
+                        return true;
+                    }
+                    current = (current.inheritsRole() ? current.getParentRole() : null);
+                }
+                
+                // at this point the role does not extend from the matcher's role
+                return false;
+            } else {
+                // make sure the satisfaction's role inherits from the default
+                while(current != null) {
+                    if (!current.inheritsRole()) {
+                        // the role does not inherit the default role
+                        return false;
+                    }
+                    current = current.getParentRole();
+                }
+                
+                // at this point, the role inherits the default
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

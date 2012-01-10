@@ -28,6 +28,7 @@ package org.grouplens.inject.spi;
  *
  */
 public interface BindRule {
+    // FIXME: [ML] Add a method to stop following bind rules
     /**
      * Query whether this bind rule applies to some desire.
      * 
