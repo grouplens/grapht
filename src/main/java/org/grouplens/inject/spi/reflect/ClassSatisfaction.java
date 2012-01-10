@@ -1,4 +1,4 @@
-package org.grouplens.inject.reflect;
+package org.grouplens.inject.spi.reflect;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -11,10 +11,20 @@ import com.google.common.base.Function;
 
 class ClassSatisfaction extends ReflectionSatisfaction {
     private final Class<?> type;
-    
+
+    /**
+     * Create a satisfaction wrapping the given class type.
+     * 
+     * @param type The type to wrap
+     * @throws NullPointerException if type is null
+     * @throws IllegalArgumentException if the type cannot be instantiated
+     */
     public ClassSatisfaction(Class<?> type) {
         if (type == null) {
             throw new NullPointerException("Class type cannot be null");
+        }
+        if (!Types.isInstantiable(type)) {
+            throw new IllegalArgumentException("Type cannot be instantiated");
         }
         this.type = type;
     }
@@ -35,14 +45,8 @@ class ClassSatisfaction extends ReflectionSatisfaction {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
-        return new Provider() {
-            @Override
-            public Object get() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        };
+        return new InjectionProviderImpl(type, getDependencies(), dependencies);
     }
 }

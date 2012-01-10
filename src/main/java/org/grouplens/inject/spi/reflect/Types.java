@@ -16,10 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.reflect;
+package org.grouplens.inject.spi.reflect;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -79,6 +80,10 @@ public final class Types {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class does not implement get()");
         }
+    }
+    
+    public static boolean isInstantiable(Class<?> type) {
+        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
     }
     
     public static List<Desire> getProviderDesires(Class<? extends Provider<?>> providerType) {

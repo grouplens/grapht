@@ -1,4 +1,4 @@
-package org.grouplens.inject.reflect;
+package org.grouplens.inject.spi.reflect;
 
 import java.lang.reflect.Type;
 import java.util.Collections;

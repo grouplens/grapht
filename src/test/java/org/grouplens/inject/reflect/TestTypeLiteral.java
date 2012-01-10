@@ -27,6 +27,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.grouplens.inject.spi.reflect.TypeLiteral;
 import org.junit.Test;
 
 

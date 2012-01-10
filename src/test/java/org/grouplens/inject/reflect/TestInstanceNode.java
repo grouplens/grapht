@@ -31,6 +31,8 @@ import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.Satisfaction;
+import org.grouplens.inject.spi.reflect.ClasspathSatisfactionRepository;
+import org.grouplens.inject.spi.reflect.InstanceSatisfaction;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;

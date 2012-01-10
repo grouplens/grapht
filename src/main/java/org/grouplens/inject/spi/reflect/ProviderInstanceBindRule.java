@@ -1,4 +1,4 @@
-package org.grouplens.inject.reflect;
+package org.grouplens.inject.spi.reflect;
 
 public class ProviderInstanceBindRule {
 

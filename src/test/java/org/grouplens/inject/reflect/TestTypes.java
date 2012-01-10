@@ -18,6 +18,8 @@
  */
 package org.grouplens.inject.reflect;
 
+import org.grouplens.inject.spi.reflect.TypeLiteral;
+import org.grouplens.inject.spi.reflect.Types;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
