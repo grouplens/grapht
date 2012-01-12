@@ -27,7 +27,13 @@ import org.grouplens.inject.spi.Desire;
 
 import com.google.common.base.Function;
 
-class ClassSatisfaction extends ReflectionSatisfaction {
+/**
+ * ClassSatisfaction is a satisfaction that instantiates instances of a given
+ * type.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class ClassSatisfaction extends ReflectionSatisfaction {
     private final Class<?> type;
 
     /**

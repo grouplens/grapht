@@ -18,20 +18,60 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import org.grouplens.inject.spi.BindRule;
+import javax.annotation.Nullable;
+
 import org.grouplens.inject.spi.Desire;
 
-public class ClassBindRule implements BindRule {
+/**
+ * ClassBindRule is a reflection bind rule that binds a subclass to a
+ * higher-level type. If the implementation type is instantiable, the bind rule
+ * will satisfy all matching desires with a {@link ClassSatisfaction}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class ClassBindRule extends ReflectionBindRule {
+    private final Class<?> implType;
 
-    @Override
-    public boolean matches(Desire desire) {
-        // TODO Auto-generated method stub
-        return false;
+    /**
+     * Create a ClassBindRule that binds <tt>implType</tt> to any desire for
+     * <tt>sourceType</tt>.
+     * 
+     * @param implType The implementation type that satisfies the desire
+     * @param sourceType The source type matched by this bind rule
+     * @param role The role matched by this desire
+     * @param generated True if this was an automatically generated rule
+     * @throws NullPointerException if implType or sourceType are null
+     * @throws IllegalArgumentException if implType does not extend sourceType
+     */
+    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  boolean generated) {
+        super(sourceType, role, generated);
+        if (implType == null) {
+            throw new NullPointerException("Implementation type cannot be null");
+        }
+        if (!sourceType.isAssignableFrom(implType)) {
+            throw new IllegalArgumentException(implType + " does not extend " + sourceType);
+        }
+        this.implType = implType;
     }
 
     @Override
     public Desire apply(Desire desire) {
-        // TODO Auto-generated method stub
-        return null;
+        ReflectionDesire rd = (ReflectionDesire) desire;
+        // we can pass in null for the satisfaction here, because ReflectionDesire
+        // will create a ClassSatisfaction for us if implType is instantiable
+        return new ReflectionDesire(implType, rd.getInjectionPoint(), null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ClassBindRule)) {
+            return false;
+        }
+        return ((ClassBindRule) o).implType.equals(implType);
+    }
+    
+    @Override
+    public int hashCode() {
+        return implType.hashCode();
     }
 }

@@ -35,7 +35,7 @@ import com.google.common.base.Function;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class InstanceSatisfaction extends ReflectionSatisfaction {
+public class InstanceSatisfaction extends ReflectionSatisfaction {
     private final Object instance;
 
     /**

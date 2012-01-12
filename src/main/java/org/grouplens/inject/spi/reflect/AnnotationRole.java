@@ -35,9 +35,9 @@ import org.grouplens.inject.spi.Role;
  * AnnotationRole is a Role implementation that wraps Roles and Parameters
  * described by the annotations defined in org.grouplens.inject.annotation.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class AnnotationRole implements Role {
+public class AnnotationRole implements Role {
     private final Class<? extends Annotation> roleType;
 
     /**

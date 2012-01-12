@@ -18,15 +18,38 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import javax.annotation.Nullable;
+
 import org.grouplens.inject.spi.Desire;
 
-class InstanceBindRule<T> extends ReflectionBindRule {
-    private final T instance;
-    
-    public InstanceBindRule(T instance, AnnotationRole role, Class<? super T> sourceType, boolean generated) {
-        super(role, sourceType, generated);
+/**
+ * InstanceBindRule is a reflection bind rule that satisfies matching desires
+ * with an {@link InstanceSatisfaction}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class InstanceBindRule extends ReflectionBindRule {
+    private final Object instance;
+
+    /**
+     * Create an InstanceBindRule that binds the given instance to desires for
+     * the source type and role.
+     * 
+     * @param instance The instance to bind
+     * @param sourceType The source type matched by this bind rule
+     * @param role The role matched by this bind rule
+     * @param generated True if the rule was automatically generated
+     * @throws NullPointerException if instance or sourceType are null
+     * @throws IllegalArgumentException if instance is not an instance of the
+     *             source type
+     */
+    public InstanceBindRule(Object instance,  Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
+        super(sourceType, role, generated);
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");
+        }
+        if (sourceType.isInstance(instance)) {
+            throw new IllegalArgumentException("Instance does not extend source type");
         }
         this.instance = instance;
     }
@@ -37,5 +60,16 @@ class InstanceBindRule<T> extends ReflectionBindRule {
         return new ReflectionDesire(instance.getClass(), origDesire.getInjectionPoint(), new InstanceSatisfaction(instance));
     }
     
-    // FIXME: document and implement equals/hashCode
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof InstanceBindRule)) {
+            return false;
+        }
+        return ((InstanceBindRule) o).instance == instance;
+    }
+    
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(instance);
+    }
 }

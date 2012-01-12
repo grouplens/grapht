@@ -28,9 +28,9 @@ import org.grouplens.inject.spi.Desire;
  * implementation to represent a desire, except that the point of injection is
  * abstracted by an {@link InjectionPoint}.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class ReflectionDesire implements Desire {
+public class ReflectionDesire implements Desire {
     private final Class<?> desiredType;
     private final InjectionPoint injectPoint;
     private final ReflectionSatisfaction satisfaction;
@@ -52,7 +52,7 @@ class ReflectionDesire implements Desire {
      * Create a ReflectionDesire that represents the dependency for
      * <tt>desiredType</tt> that will be injected into the given InjectionPoint.
      * The optional satisfaction will satisfy this desire. If null is provided,
-     * the desired type is examined to see if it's already satisfiable.
+     * and the desired type instantiable, a ClassSatisfaction is created.
      * 
      * @param desiredType The desired type of the dependency
      * @param injectPoint The injection point of the desire
@@ -72,8 +72,8 @@ class ReflectionDesire implements Desire {
             throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
         }
         
-        if (satisfaction == null) {
-            satisfaction = Types.getSatisfaction(desiredType);
+        if (satisfaction == null && Types.isInstantiable(desiredType)) {
+            satisfaction = new ClassSatisfaction(desiredType);
         }
         
         this.desiredType = desiredType;
@@ -127,12 +127,20 @@ class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
-        // TODO Auto-generated method stub
+        // FIXME: This needs to take into account -> default role bindings
+        // and @ImplementedBy and @ProvidedBy annotations on the desired type
         return null;
     }
 
     @Override
     public Comparator<BindRule> ruleComparator() {
+        // FIXME: part of the bind-rule comparing will be whether or not it
+        // is a generated rule.  It will not have to compare type distance
+        // because it is assumed all bind rules will have a source type equaling
+        // the desired type.
+        
+        // It will however have to determine role applicability ordering.
+        // as well as generics specificity
         // TODO Auto-generated method stub
         return null;
     }

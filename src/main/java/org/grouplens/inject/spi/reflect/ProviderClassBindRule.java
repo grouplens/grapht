@@ -18,6 +18,63 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-public class ProviderClassBindRule {
+import javax.annotation.Nullable;
+import javax.inject.Provider;
 
+import org.grouplens.inject.spi.Desire;
+
+/**
+ * ProviderClassBindRule is a bind rule between a type and a Provider class
+ * type. It satisfies all matching desires with a
+ * {@link ProviderClassSatisfaction}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class ProviderClassBindRule extends ReflectionBindRule {
+    private final Class<? extends Provider<?>> providerType;
+
+    /**
+     * Create a ProviderClassBindRule that binds the given Provider type to the
+     * source type and role. An exception is thrown if the provider does not
+     * provide instances of the source type.
+     * 
+     * @param providerType The Provider implementation to bind to
+     * @param sourceType The source type matched by this bind rule
+     * @param role The role matched by this bind rule
+     * @param generated True if this rule was automatically generated
+     * @throws NullPointerException if providerType or sourceType are null
+     * @throws IllegalArgumentException if providerType does not provide
+     *             implementations of sourceType
+     */
+    public ProviderClassBindRule(Class<? extends Provider<?>> providerType, Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
+        super(sourceType, role, generated);
+        if (providerType == null) {
+            throw new NullPointerException("Provider type cannot be null");
+        }
+        if (!sourceType.isAssignableFrom(Types.getProvidedType(providerType))) {
+            throw new IllegalArgumentException("Provider type does not provide instances of " + sourceType);
+        }
+        
+        this.providerType = providerType;
+    }
+
+    @Override
+    public Desire apply(Desire desire) {
+        ReflectionDesire rd = (ReflectionDesire) desire;
+        ProviderClassSatisfaction satisfaction = new ProviderClassSatisfaction(providerType);
+        return new ReflectionDesire(satisfaction.getErasedType(), rd.getInjectionPoint(), satisfaction);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ProviderClassBindRule)) {
+            return false;
+        }
+        return ((ProviderClassBindRule) o).providerType.equals(providerType);
+    }
+    
+    @Override
+    public int hashCode() {
+        return providerType.hashCode();
+    }
 }

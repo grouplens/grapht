@@ -18,16 +18,43 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import javax.annotation.Nullable;
+
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 
-abstract class ReflectionBindRule implements BindRule {
+/**
+ * ReflectionBindRule is an abstract implementation of BindRule. It is a partial
+ * function from desires to desires. Its matching logic only depends on the
+ * source type and role of the rule, and not what the function produces. A
+ * ReflectionBindRule will only match a desire if the desire's desired type
+ * equals the source type, and only if the desire's role inherits from the role
+ * of the bind rule.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public abstract class ReflectionBindRule implements BindRule {
     private final AnnotationRole role;
     private final Class<?> sourceType;
     
     private final boolean generated;
-    
-    public ReflectionBindRule(AnnotationRole role, Class<?> sourceType, boolean generated) {
+
+    /**
+     * Create a bind rule that matches a desire when the desired type equals
+     * <tt>sourceType</tt> and the desire's role inherits from <tt>role</tt>.
+     * <tt>generated</tt> is a flag of whether or not this bind rule was
+     * automatically generated for a user or if it was declared manually.
+     * 
+     * @param sourceType The source type this bind rule matches
+     * @param role The role the bind rule applies to
+     * @param generated True if the bind rule was automatically generated
+     * @throws NullPointerException if sourceType is null
+     */
+    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
+        if (sourceType == null) {
+            throw new NullPointerException("Source type cannot be null");
+        }
+        
         this.role = role;
         this.sourceType = sourceType;
         this.generated = generated;

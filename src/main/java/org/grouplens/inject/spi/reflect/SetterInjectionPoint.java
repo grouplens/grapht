@@ -29,7 +29,7 @@ import org.grouplens.inject.annotation.PassThrough;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class SetterInjectionPoint implements InjectionPoint {
+public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
     private final AnnotationRole role;
     private final boolean forProvider;

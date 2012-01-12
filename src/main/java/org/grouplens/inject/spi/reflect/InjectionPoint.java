@@ -26,7 +26,7 @@ import org.grouplens.inject.spi.Desire;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-interface InjectionPoint {
+public interface InjectionPoint {
     /**
      * Return the type required to satisfy the injection point.
      * 

@@ -18,24 +18,44 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
 
-public class ProviderInstanceBindRule<T> extends ReflectionBindRule {
-    private final Provider<? extends T> provider;
-    
-    // FIXME: I think we can move a lot of the bind rule implementations into
-    // a single class BindRules with static methods to return implementations for
-    // the different types that we need
-    // FIXME: can the same be done for satisfactions? Is it worth it?
-    
-    public ProviderInstanceBindRule(Provider<? extends T> provider, AnnotationRole role, Class<? super T> sourceType, boolean generated) {
-        super(role, sourceType, generated);
+/**
+ * ProviderInstanceBindRule is a reflection bind rule that satisfies all
+ * matching desires with a {@link ProviderInstanceSatisfaction}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class ProviderInstanceBindRule extends ReflectionBindRule {
+    private final Provider<?> provider;
+
+    /**
+     * Create a ProviderInstanceBindRule that binds <tt>provider</tt> to the
+     * given source type and role. An exception is thrown if the provider does
+     * not provide instances of the source type.
+     * 
+     * @param provider The provider that will satisfy any desires matched by
+     *            this bind rule
+     * @param sourceType The source type this bind rule matches to
+     * @param role The role this bind rule matches to
+     * @param generated True if the bind rule was automatically generated
+     * @throws NullPointerException if provider or sourceType are null
+     * @throws IllegalArgumentException if the provider's created instances do
+     *             not extend from sourceType
+     */
+    @SuppressWarnings("unchecked")
+    public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
+        super(sourceType, role, generated);
         if (provider == null) {
             throw new NullPointerException("Provider instance cannot be null");
         }
-        // FIXME: verify that the provider provides objects that extend from sourceType
+        if (!sourceType.isAssignableFrom(Types.getProvidedType((Class<? extends Provider<?>>) provider.getClass()))) {
+            throw new IllegalArgumentException("Provider does not provide instances of " + sourceType);
+        }
+        
         this.provider = provider;
     }
 
@@ -46,5 +66,16 @@ public class ProviderInstanceBindRule<T> extends ReflectionBindRule {
         return new ReflectionDesire(satisfaction.getErasedType(), origDesire.getInjectionPoint(), satisfaction);
     }
 
-    // FIXME: document and implement equals/hashcode
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ProviderInstanceBindRule)) {
+            return false;
+        }
+        return ((ProviderInstanceBindRule) o).provider == provider;
+    }
+    
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(provider);
+    }
 }

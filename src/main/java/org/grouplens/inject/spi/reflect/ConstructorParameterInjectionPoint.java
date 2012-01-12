@@ -31,7 +31,7 @@ import org.grouplens.inject.annotation.PassThrough;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class ConstructorParameterInjectionPoint implements InjectionPoint {
+public class ConstructorParameterInjectionPoint implements InjectionPoint {
     private final AnnotationRole role;
     private final Constructor<?> ctor;
     private final int parameter;

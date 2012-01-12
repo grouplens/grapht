@@ -30,10 +30,11 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.grouplens.inject.annotation.ProvidedBy;
-
 /**
  * Static helper methods for working with types.
+ * 
+ * @author Michael Ekstrand <ekstrand@cs.umn.edu>
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public final class Types {
     private Types() {}
@@ -82,36 +83,6 @@ public final class Types {
         }
     }
     
-    /**
-     * Return a satisfaction for the given type if it is satisfiable. A type is
-     * satisfiable if it is an instantiable type, or if it has been annotated
-     * with the {@link ProvidedBy} annotation. If the type cannot be satisfied,
-     * null is returned. In this case, bind rules must be used to find a
-     * satisfaction.
-     * 
-     * @param parameterType The type of parameter that will be satisfied byt the
-     *            return satisfaction
-     * @return A satisfaction for the given type, or null if it can't be on its
-     *         own
-     */
-    public static ReflectionSatisfaction getSatisfaction(Class<?> parameterType) {
-        ProvidedBy provider = parameterType.getAnnotation(ProvidedBy.class);
-        if (provider != null) {
-            // we have a provider type, so return a provider class satisfaction,
-            // even if the desired type is an interface or abstract, we assume
-            // the provider can be used successfully
-            return new ProviderClassSatisfaction(provider.value());
-        } else {
-            // no provider is found, so we check if this is an instantiable class
-            if (Types.isInstantiable(parameterType)) {
-                return new ClassSatisfaction(parameterType);
-            }
-        }
-        
-        // no satisfaction is possible with the current type information
-        return null;
-    }
-
     /**
      * Return true if the type is not abstract and not an interface.
      * 

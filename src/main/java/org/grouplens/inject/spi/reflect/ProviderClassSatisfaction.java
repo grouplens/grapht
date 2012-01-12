@@ -33,7 +33,7 @@ import com.google.common.base.Function;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class ProviderClassSatisfaction extends ReflectionSatisfaction {
+public class ProviderClassSatisfaction extends ReflectionSatisfaction {
     private final Class<? extends Provider<?>> providerType;
 
     /**

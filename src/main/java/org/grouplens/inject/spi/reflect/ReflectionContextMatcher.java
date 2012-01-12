@@ -18,18 +18,40 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import javax.annotation.Nullable;
+
 import org.grouplens.inject.resolver.ContextMatcher;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 
-class ReflectionContextMatcher implements ContextMatcher {
+/**
+ * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
+ * type inherits from the matcher's type and if the node's role inherits from
+ * the matcher's role.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class ReflectionContextMatcher implements ContextMatcher {
     private final Class<?> type;
     private final AnnotationRole role;
-    
+
+    /**
+     * Create a ReflectionContextMatcher that matches the given type and the
+     * default role.
+     * 
+     * @param type The type to match
+     */
     public ReflectionContextMatcher(Class<?> type) {
         this(type, null);
     }
-    
-    public ReflectionContextMatcher(Class<?> type, AnnotationRole role) {
+
+    /**
+     * Create a ReflectionContextMatcher that matches the given type and the
+     * given role.
+     * 
+     * @param type The type to match
+     * @param role The role to match
+     */
+    public ReflectionContextMatcher(Class<?> type, @Nullable AnnotationRole role) {
         this.type = type;
         this.role = role;
     }
@@ -52,5 +74,10 @@ class ReflectionContextMatcher implements ContextMatcher {
         }
         ReflectionContextMatcher r = (ReflectionContextMatcher) o;
         return r.type.equals(type) && r.role.equals(role);
+    }
+    
+    @Override
+    public int hashCode() {
+        return type.hashCode() ^ role.hashCode();
     }
 }
