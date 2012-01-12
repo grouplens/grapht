@@ -107,8 +107,8 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     private Constructor<T> getConstructor() {
         for (ReflectionDesire d: desires) {
             if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
-                // since we only allow one injectable constructor, any ConstructorParameterDesire
-                // will have the same constructor
+                // since we only allow one injectable constructor, any ConstructorParameterInjectionPoint
+                // will have the same constructor as all other constructor parameter injection points
                 return (Constructor<T>) ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getConstructor();
             }
         }

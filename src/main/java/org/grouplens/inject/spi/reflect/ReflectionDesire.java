@@ -183,13 +183,13 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Comparator<BindRule> ruleComparator() {
-        // FIXME: part of the bind-rule comparing will be whether or not it
-        // is a generated rule.  It will not have to compare type distance
-        // because it is assumed all bind rules will have a source type equaling
-        // the desired type.
-        
-        // It will however have to determine role applicability ordering.
-        // as well as generics specificity
+        // 1st comparison is manual vs generated bind rules
+        //  - manual bind rules are preferred over any generated rules
+        // 2nd comparison is how close the desire's role is to the bind rules
+        //  - we know that the desires is a sub-role of any bind rules, so choose
+        //    the bind rule with the closest distance
+        // 3rd comparison is how well the generics match
+        //  - for now, we don't track generic types so it is ignored
         // TODO Auto-generated method stub
         return null;
     }
