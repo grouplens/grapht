@@ -222,7 +222,7 @@ public class DefaultResolver implements Resolver {
         List<SatisfactionAndRole> newContext = new ArrayList<SatisfactionAndRole>(context);
         newContext.add(new SatisfactionAndRole(resolved.satisfaction, desire.getRole()));
         
-        List<Desire> dependencies = resolved.satisfaction.getDependencies();
+        List<? extends Desire> dependencies = resolved.satisfaction.getDependencies();
         for (Desire d: dependencies) {
             // complete the sub graph for the given desire
             // - the call to resolveFully() is responsible for adding the dependency edges
