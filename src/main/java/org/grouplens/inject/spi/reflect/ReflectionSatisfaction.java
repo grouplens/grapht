@@ -16,6 +16,7 @@ import com.google.common.base.Function;
 // There is a good chance that this will be needed because I think that 
 // contextComparator() will be shared by most satisfaction implementations.
 abstract class ReflectionSatisfaction implements Satisfaction {
+    
     @Override
     public Comparator<ContextMatcher> contextComparator(Role role) {
         // TODO Auto-generated method stub

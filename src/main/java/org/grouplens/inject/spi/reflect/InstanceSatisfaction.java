@@ -52,7 +52,7 @@ class InstanceSatisfaction extends ReflectionSatisfaction {
     }
 
     @Override
-    public List<Desire> getDependencies() {
+    public List<? extends Desire> getDependencies() {
         return Collections.emptyList();
     }
 
@@ -74,5 +74,18 @@ class InstanceSatisfaction extends ReflectionSatisfaction {
                 return instance;
             }
         };
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof InstanceSatisfaction)) {
+            return false;
+        }
+        return ((InstanceSatisfaction) o).instance == instance;
+    }
+    
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(instance);
     }
 }

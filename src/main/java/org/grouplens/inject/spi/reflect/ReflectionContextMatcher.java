@@ -22,7 +22,6 @@ import org.grouplens.inject.resolver.ContextMatcher;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 
 class ReflectionContextMatcher implements ContextMatcher {
-    // FIXME: will this have to be changed to Type?
     private final Class<?> type;
     private final AnnotationRole role;
     
@@ -40,34 +39,18 @@ class ReflectionContextMatcher implements ContextMatcher {
         // FIXME: handle generics correctly
         if (type.isAssignableFrom(n.getSatisfaction().getErasedType())) {
             // type is a match, so check the role
-            AnnotationRole current = (AnnotationRole) n.getRole();
-            if (role != null) {
-                // make sure the satisfaction's role inherits from this role
-                while(current != null) {
-                    if (current.equals(role)) {
-                        // the satisfaction's role inherits from the matcher's role
-                        return true;
-                    }
-                    current = (current.inheritsRole() ? current.getParentRole() : null);
-                }
-                
-                // at this point the role does not extend from the matcher's role
-                return false;
-            } else {
-                // make sure the satisfaction's role inherits from the default
-                while(current != null) {
-                    if (!current.inheritsRole()) {
-                        // the role does not inherit the default role
-                        return false;
-                    }
-                    current = current.getParentRole();
-                }
-                
-                // at this point, the role inherits the default
-                return true;
-            }
+            return AnnotationRole.inheritsRole((AnnotationRole) n.getRole(), role);
         }
         
         return false;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ReflectionContextMatcher)) {
+            return false;
+        }
+        ReflectionContextMatcher r = (ReflectionContextMatcher) o;
+        return r.type.equals(type) && r.role.equals(role);
     }
 }

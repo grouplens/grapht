@@ -30,7 +30,7 @@ class ClassSatisfaction extends ReflectionSatisfaction {
     }
     
     @Override
-    public List<Desire> getDependencies() {
+    public List<? extends Desire> getDependencies() {
         return Types.getDesires(type);
     }
 
@@ -48,5 +48,18 @@ class ClassSatisfaction extends ReflectionSatisfaction {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
         return new InjectionProviderImpl(type, getDependencies(), dependencies);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ClassSatisfaction)) {
+            return false;
+        }
+        return ((ClassSatisfaction) o).type.equals(type);
+    }
+    
+    @Override
+    public int hashCode() {
+        return type.hashCode();
     }
 }

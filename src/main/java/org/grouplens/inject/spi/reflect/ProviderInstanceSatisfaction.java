@@ -34,7 +34,7 @@ class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     }
     
     @Override
-    public List<Desire> getDependencies() {
+    public List<? extends Desire> getDependencies() {
         return Collections.emptyList();
     }
 
@@ -52,5 +52,18 @@ class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     @Override
     public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
         return provider;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ProviderInstanceSatisfaction)) {
+            return false;
+        }
+        return ((ProviderInstanceSatisfaction) o).provider == provider;
+    }
+    
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(provider);
     }
 }

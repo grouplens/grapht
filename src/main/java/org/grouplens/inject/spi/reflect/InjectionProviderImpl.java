@@ -20,7 +20,7 @@ import com.google.common.base.Function;
 // FIXME: we need better exceptions for dependency failures
 public class InjectionProviderImpl<T> implements Provider<T> {
     private final Class<T> type;
-    private final List<Desire> desires;
+    private final List<ReflectionDesire> desires;
     private final Function<? super Desire, ? extends Provider<?>> providers;
 
     /**
@@ -32,7 +32,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
      * @param desires The dependency desires for the instance
      * @param providers The providers that satisfy the desires of the type
      */
-    public InjectionProviderImpl(Class<T> type, List<Desire> desires, Function<? super Desire, ? extends Provider<?>> providers) {
+    public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, Function<? super Desire, ? extends Provider<?>> providers) {
         this.type = type;
         this.desires = desires;
         this.providers = providers;
@@ -43,15 +43,15 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         // find constructor and build up necessary constructor arguments
         Constructor<T> ctor = getConstructor();
         Object[] args = new Object[ctor.getParameterTypes().length];
-        for (Desire d: desires) {
-            if (d instanceof ConstructorParameterDesire) {
+        for (ReflectionDesire d: desires) {
+            if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                 // this desire is a constructor argument so create it now
-                ConstructorParameterDesire cd = (ConstructorParameterDesire) d;
                 Provider<?> provider = providers.apply(d);
                 if (provider == null) {
                     throw new RuntimeException("Unable to satisfy dependency");
                 }
                 
+                ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                 args[cd.getConstructorParameter()] = provider.get();
             }
         }
@@ -65,15 +65,15 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         }
         
         // complete injection by satisfying any setter method dependencies
-        for (Desire d: desires) {
-            if (d instanceof SetterMethodDesire) {
-                SetterMethodDesire sd = (SetterMethodDesire) d;
+        for (ReflectionDesire d: desires) {
+            if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                 Provider<?> provider = providers.apply(d);
                 if (provider == null) {
                     throw new RuntimeException("Unable to satisfy dependency");
                 }
                 
                 try {
+                    SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
                     sd.getSetterMethod().invoke(instance, provider.get());
                 } catch (Exception e) {
                     throw new RuntimeException("Unable to inject setter dependency", e);
@@ -87,11 +87,11 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     
     @SuppressWarnings("unchecked")
     private Constructor<T> getConstructor() {
-        for (Desire d: desires) {
-            if (d instanceof ConstructorParameterDesire) {
+        for (ReflectionDesire d: desires) {
+            if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                 // since we only allow one injectable constructor, any ConstructorParameterDesire
                 // will have the same constructor
-                return (Constructor<T>) ((ConstructorParameterDesire) d).getConstructor();
+                return (Constructor<T>) ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getConstructor();
             }
         }
         

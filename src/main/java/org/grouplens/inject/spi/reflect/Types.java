@@ -30,7 +30,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.annotation.ProvidedBy;
 
 /**
  * Static helper methods for working with types.
@@ -82,20 +82,56 @@ public final class Types {
         }
     }
     
+    /**
+     * Return a satisfaction for the given type if it is satisfiable. A type is
+     * satisfiable if it is an instantiable type, or if it has been annotated
+     * with the {@link ProvidedBy} annotation. If the type cannot be satisfied,
+     * null is returned. In this case, bind rules must be used to find a
+     * satisfaction.
+     * 
+     * @param parameterType The type of parameter that will be satisfied byt the
+     *            return satisfaction
+     * @return A satisfaction for the given type, or null if it can't be on its
+     *         own
+     */
+    public static ReflectionSatisfaction getSatisfaction(Class<?> parameterType) {
+        ProvidedBy provider = parameterType.getAnnotation(ProvidedBy.class);
+        if (provider != null) {
+            // we have a provider type, so return a provider class satisfaction,
+            // even if the desired type is an interface or abstract, we assume
+            // the provider can be used successfully
+            return new ProviderClassSatisfaction(provider.value());
+        } else {
+            // no provider is found, so we check if this is an instantiable class
+            if (Types.isInstantiable(parameterType)) {
+                return new ClassSatisfaction(parameterType);
+            }
+        }
+        
+        // no satisfaction is possible with the current type information
+        return null;
+    }
+
+    /**
+     * Return true if the type is not abstract and not an interface.
+     * 
+     * @param type A class type
+     * @return True if the class type is instantiable
+     */
     public static boolean isInstantiable(Class<?> type) {
         return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
     }
-    
-    public static List<Desire> getProviderDesires(Class<? extends Provider<?>> providerType) {
-        return getDesires(providerType, true);
-    }
-    
-    public static List<Desire> getDesires(Class<?> type) {
-        return getDesires(type, false);
-    }
-    
-    private static List<Desire> getDesires(Class<?> type, boolean isProvider) {
-        List<Desire> desires = new ArrayList<Desire>();
+
+    /**
+     * Return a list of desires that must satisfied in order to instantiate the
+     * given type.
+     * 
+     * @param type The class type whose dependencies will be queried
+     * @return The dependency desires for the given type
+     * @throws NullPointerException if the type is null
+     */
+    public static List<ReflectionDesire> getDesires(Class<?> type) {
+        List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
 
         boolean ctorFound = false;
         for (Constructor<?> ctor: type.getConstructors()) {
@@ -103,7 +139,7 @@ public final class Types {
                 if (!ctorFound) {
                     ctorFound = true;
                     for (int i = 0; i < ctor.getParameterTypes().length; i++) {
-                        desires.add(new ConstructorParameterDesire(ctor, i, isProvider));
+                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i)));
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
@@ -121,7 +157,7 @@ public final class Types {
                     throw new RuntimeException("Invalid setter injection method");
                 }
                 
-                desires.add(new SetterMethodDesire(m, isProvider));
+                desires.add(new ReflectionDesire(new SetterInjectionPoint(m)));
             }
         }
         

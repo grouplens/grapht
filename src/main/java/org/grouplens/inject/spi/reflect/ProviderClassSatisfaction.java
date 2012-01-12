@@ -40,8 +40,8 @@ class ProviderClassSatisfaction extends ReflectionSatisfaction {
     }
     
     @Override
-    public List<Desire> getDependencies() {
-        return Types.getProviderDesires(providerType);
+    public List<? extends Desire> getDependencies() {
+        return Types.getDesires(providerType);
     }
 
     @Override
@@ -61,5 +61,18 @@ class ProviderClassSatisfaction extends ReflectionSatisfaction {
         // but we can assume correctly that it will build a provider
         Provider<Provider<?>> providerBuilder = new InjectionProviderImpl(providerType, getDependencies(), dependencies);
         return providerBuilder.get();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ProviderClassSatisfaction)) {
+            return false;
+        }
+        return ((ProviderClassSatisfaction) o).providerType.equals(providerType);
+    }
+    
+    @Override
+    public int hashCode() {
+        return providerType.hashCode();
     }
 }

@@ -37,10 +37,11 @@ public interface BindRule {
      *         to further resolve it.
      */
     boolean matches(Desire desire);
-    
+
     /**
-     * Apply this rule to a desire, producing a desire <tt>d2</tt> such that
-     * <code>desire.isSatisfiedBy(d2)</code> is true.
+     * Apply this rule to a desire, producing a desire <tt>d2</tt> such that the
+     * returned desire satisfies the input desire. The returned desire may or
+     * may not be resolved to a satisfaction.
      * 
      * @param desire The desire to apply to.
      * @return The result of applying this rule to the desire, bringing it

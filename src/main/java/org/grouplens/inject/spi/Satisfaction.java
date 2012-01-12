@@ -47,7 +47,7 @@ public interface Satisfaction {
      * @return A list of dependencies which must be satisfied in order to
      *         instantiate this satisfaction.
      */
-    List<Desire> getDependencies();
+    List<? extends Desire> getDependencies();
 
     /**
      * Get the type of this satisfaction. If this is a synthetic Satisfaction,
