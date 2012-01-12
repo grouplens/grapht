@@ -20,6 +20,13 @@ package org.grouplens.inject.spi.reflect;
 
 import java.util.Comparator;
 
+import org.grouplens.inject.annotation.DefaultBoolean;
+import org.grouplens.inject.annotation.DefaultDouble;
+import org.grouplens.inject.annotation.DefaultInt;
+import org.grouplens.inject.annotation.DefaultString;
+import org.grouplens.inject.annotation.DefaultType;
+import org.grouplens.inject.annotation.ImplementedBy;
+import org.grouplens.inject.annotation.ProvidedBy;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 
@@ -127,8 +134,50 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
-        // FIXME: This needs to take into account -> default role bindings
-        // and @ImplementedBy and @ProvidedBy annotations on the desired type
+        // First we check the role if it has a default binding
+        AnnotationRole role = getRole();
+        if (role != null) {
+            // FIXME: if a role inherits from another role, do we also inherit that role's
+            // potential default bindings?
+            if (role.isParameter()) {
+                DefaultDouble dfltDouble = role.getRoleType().getAnnotation(DefaultDouble.class);
+                if (dfltDouble != null) {
+                    return new InstanceBindRule(dfltDouble.value(), Double.class, role, true).apply(this);
+                }
+                DefaultInt dfltInt = role.getRoleType().getAnnotation(DefaultInt.class);
+                if (dfltInt != null) {
+                    return new InstanceBindRule(dfltInt.value(), Integer.class, role, true).apply(this);
+                }
+                DefaultBoolean dfltBool = role.getRoleType().getAnnotation(DefaultBoolean.class);
+                if (dfltBool != null) {
+                    return new InstanceBindRule(dfltBool.value(), Boolean.class, role, true).apply(this);
+                }
+                DefaultString dfltStr = role.getRoleType().getAnnotation(DefaultString.class);
+                if (dfltStr != null) {
+                    return new InstanceBindRule(dfltStr.value(), String.class, role, true).apply(this);
+                }
+            } else {
+                DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
+                if (impl != null) {
+                    return new ClassBindRule(impl.value(), getDesiredType(), role, true).apply(this);
+                }
+            }
+        }
+        
+        // Now check the desired type for @ImplementedBy or @ProvidedBy
+        // FIXME: similarly to the above about roles, do we inherit providers or implementation
+        // defaults from super types
+        ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
+        if (provided != null) {
+            return new ProviderClassBindRule(provided.value(), getDesiredType(), role, true).apply(this);
+        }
+        ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
+        if (impl != null) {
+            return new ClassBindRule(impl.value(), getDesiredType(), role, true).apply(this);
+        }
+        
+        // There are no annotations on the role or the type that indicate a default binding or value
+        // so we return null
         return null;
     }
 

@@ -20,15 +20,9 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
-import org.grouplens.inject.annotation.DefaultBoolean;
-import org.grouplens.inject.annotation.DefaultDouble;
-import org.grouplens.inject.annotation.DefaultInt;
-import org.grouplens.inject.annotation.DefaultString;
-import org.grouplens.inject.annotation.DefaultType;
 import org.grouplens.inject.annotation.InheritsDefaultRole;
 import org.grouplens.inject.annotation.InheritsRole;
 import org.grouplens.inject.annotation.Parameter;
-import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Role;
 
 /**
@@ -169,39 +163,6 @@ public class AnnotationRole implements Role {
         return null;
     }
 
-    /**
-     * @return A default bind rule declared for this role, or null if the
-     *         annotation role has no binding
-     */
-    public BindRule getDefaultBinding() {
-        if (isParameter()) {
-            DefaultDouble dfltDouble = roleType.getAnnotation(DefaultDouble.class);
-            if (dfltDouble != null) {
-                // FIXME: return a parameter binding/instance binding
-            }
-            DefaultInt dfltInt = roleType.getAnnotation(DefaultInt.class);
-            if (dfltInt != null) {
-                // FIXME: return a ""
-            }
-            DefaultBoolean dfltBool = roleType.getAnnotation(DefaultBoolean.class);
-            if (dfltBool != null) {
-                // FIXME: return a ""
-            }
-            DefaultString dfltStr = roleType.getAnnotation(DefaultString.class);
-            if (dfltStr != null) {
-                // FIXME: return a ""
-            }
-        } else {
-            DefaultType impl = roleType.getAnnotation(DefaultType.class);
-            if (impl != null) {
-                // FIXME: return a type bind rule
-            }
-        }
-        
-        // if there is no specified default, return a null binding
-        return null;
-    }
-    
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof AnnotationRole)) {
