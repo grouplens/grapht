@@ -136,9 +136,11 @@ public class ReflectionDesire implements Desire {
     public Desire getDefaultDesire() {
         // First we check the role if it has a default binding
         AnnotationRole role = getRole();
+        // FIXME: should we normalize primitive types at all?
         if (role != null) {
             // FIXME: if a role inherits from another role, do we also inherit that role's
             // potential default bindings?
+            // -YES and we check all role parents before moving to type defaults
             if (role.isParameter()) {
                 DefaultDouble dfltDouble = role.getRoleType().getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
@@ -165,8 +167,6 @@ public class ReflectionDesire implements Desire {
         }
         
         // Now check the desired type for @ImplementedBy or @ProvidedBy
-        // FIXME: similarly to the above about roles, do we inherit providers or implementation
-        // defaults from super types
         ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
         if (provided != null) {
             return new ProviderClassBindRule(provided.value(), getDesiredType(), role, true).apply(this);
