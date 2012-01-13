@@ -24,24 +24,34 @@ import org.grouplens.inject.resolver.ContextMatcher;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
 
-// There is a good chance that this will be needed because I think that 
-// contextComparator() will be shared by most satisfaction implementations.
-abstract class ReflectionSatisfaction implements Satisfaction {
-    
+/**
+ * ReflectionSatisfaction is an abstract satisfaction that implements the
+ * context comparing logic for its subclasses.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public abstract class ReflectionSatisfaction implements Satisfaction {
     @Override
     public Comparator<ContextMatcher> contextComparator(Role role) {
-        // FIXME: how do we compare context matchers given a satisfaction
-        // and a role.  The purpose of the comparator is to measure
-        // how close the matcher is to the satisfaction and role.
-        
-        // We know that in order to match, the satisfaction is a subtype of
-        // the context type, and the role is a subtype of the context role.
-        // So then we order by type and role distance from the satisfaction/role
-        // to the respective matcher's types and roles.
-        
-        // Do we prefer role distance over type distance? or vice versa?
-        
-        // TODO Auto-generated method stub
-        return null;
+        final AnnotationRole r = (AnnotationRole) role;
+        return new Comparator<ContextMatcher>() {
+            @Override
+            public int compare(ContextMatcher o1, ContextMatcher o2) {
+                ReflectionContextMatcher cm1 = (ReflectionContextMatcher) o1;
+                ReflectionContextMatcher cm2 = (ReflectionContextMatcher) o2;
+                
+                // #1 - order by type distance, select the matcher that is closest
+                int td1 = Types.getTypeDistance(getErasedType(), cm1.getMatchedType());
+                int td2 = Types.getTypeDistance(getErasedType(), cm2.getMatchedType());
+                if (td1 != td2) {
+                    return td1 - td2;
+                }
+                
+                // #2 - order by role distance, select the matcher that is closest
+                int rd1 = AnnotationRole.getRoleDistance(r, cm1.getMatchedRole());
+                int rd2 = AnnotationRole.getRoleDistance(r, cm2.getMatchedRole());
+                return rd1 - rd2;
+            }
+        };
     }
 }

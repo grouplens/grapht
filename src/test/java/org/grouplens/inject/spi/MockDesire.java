@@ -19,14 +19,10 @@
 package org.grouplens.inject.spi;
 
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * MockDesire is a simple Desire implementation for use within certain types of
- * tests. The satisfiable nodes and desires can be configured by mutating the
- * sets returned by {@link #getSatisfiableDesires()} and
- * {@link #getSatisfiableNodes()}.
+ * tests.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
@@ -35,9 +31,6 @@ public class MockDesire implements Desire {
     private final Satisfaction satisfaction;
     
     private final Desire defaultDesire;
-    
-    private final Set<Satisfaction> satisfiableSatisfactions;
-    private final Set<Desire> satisfiableDesires;
     
     public MockDesire() {
         this(null);
@@ -55,29 +48,8 @@ public class MockDesire implements Desire {
         this.satisfaction = satisfaction;
         this.role = role;
         this.defaultDesire = dflt;
-        
-        this.satisfiableDesires = new HashSet<Desire>();
-        this.satisfiableSatisfactions = new HashSet<Satisfaction>();
     }
     
-    public Set<Satisfaction> getSatisfyingSatisfaction() {
-        return satisfiableSatisfactions;
-    }
-    
-    public Set<Desire> getSatisfyingDesires() {
-        return satisfiableDesires;
-    }
-    
-    @Override
-    public boolean isSatisfiedBy(Satisfaction satisfaction) {
-        return this.satisfaction.equals(satisfaction) || satisfiableSatisfactions.contains(satisfaction);
-    }
-
-    @Override
-    public boolean isSatisfiedBy(Desire desire) {
-        return defaultDesire.equals(desire) || satisfiableDesires.contains(desire);
-    }
-
     @Override
     public boolean isInstantiable() {
         return satisfaction != null;
@@ -111,5 +83,10 @@ public class MockDesire implements Desire {
     @Override
     public Desire getDefaultDesire() {
         return defaultDesire;
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 }

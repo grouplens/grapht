@@ -63,6 +63,34 @@ public final class Types {
     }
 
     /**
+     * Return the type distance between the child and parent types. If the child
+     * does not extend from parent, then a negative value is returned.
+     * Otherwise, the number of steps between child and parent is returned. As
+     * an example, if child is an immediate subclass of parent, then 1 is
+     * returned. If child and parent are equal than 0 is returned.
+     * 
+     * @param child The child type
+     * @param parent The parent type
+     * @return The type distance
+     * @throws NullPointerException if child or parent are null
+     */
+    public static int getTypeDistance(Class<?> child, Class<?> parent) {
+        if (!parent.isAssignableFrom(child)) {
+            // if child does not extend from the parent, return -1
+            return -1;
+        }
+        
+        // at this point we can assume at some point a superclass of child
+        // will equal parent
+        int distance = 0;
+        while(!child.equals(parent)) {
+            distance++;
+            child = child.getSuperclass();
+        }
+        return distance;
+    }
+    
+    /**
      * Get the type that is provided by a given implementation of
      * {@link Provider}.
      * 

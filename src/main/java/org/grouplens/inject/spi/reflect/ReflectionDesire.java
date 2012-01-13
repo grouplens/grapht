@@ -186,12 +186,36 @@ public class ReflectionDesire implements Desire {
         // 1st comparison is manual vs generated bind rules
         //  - manual bind rules are preferred over any generated rules
         // 2nd comparison is how close the desire's role is to the bind rules
-        //  - we know that the desires is a sub-role of any bind rules, so choose
+        //  - we know that the desire's is a sub-role of any bind rules, so choose
         //    the bind rule with the closest distance
         // 3rd comparison is how well the generics match
         //  - for now, we don't track generic types so it is ignored
-        // TODO Auto-generated method stub
-        return null;
+        return new Comparator<BindRule>() {
+            @Override
+            public int compare(BindRule o1, BindRule o2) {
+                ReflectionBindRule b1 = (ReflectionBindRule) o1;
+                ReflectionBindRule b2 = (ReflectionBindRule) o2;
+                
+                // #1 - select manual over generated
+                if (b1.isGenerated() != b2.isGenerated()) {
+                    if (b1.isGenerated()) {
+                        return 1; // b2 is a manual rule
+                    } else {
+                        return -1; // b1 is a manual rule
+                    }
+                }
+                
+                // #2 - select shorter role distance
+                int d1 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(), b1.getRole());
+                int d2 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(), b2.getRole());
+                if (d1 != d2) {
+                    return d1 - d2;
+                }
+
+                // #3 - generics specificity TODO
+                return 0;
+            }
+        };
     }
     
     @Override

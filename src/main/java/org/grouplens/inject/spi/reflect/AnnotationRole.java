@@ -20,6 +20,8 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
+import javax.annotation.Nullable;
+
 import org.grouplens.inject.annotation.InheritsDefaultRole;
 import org.grouplens.inject.annotation.InheritsRole;
 import org.grouplens.inject.annotation.Parameter;
@@ -60,30 +62,48 @@ public class AnnotationRole implements Role {
      * @return True or false if child inherits from parent
      */
     public static boolean inheritsRole(AnnotationRole child, AnnotationRole parent) {
+        return getRoleDistance(child, parent) >= 0;
+    }
+
+    /**
+     * Return the distance between the two roles. 0 is returned if the two roles
+     * are equal. A negative number is returned if the child role does not
+     * inherit the parent role.
+     * 
+     * @param child The potential child role
+     * @param parent The parent role
+     * @return The distance between the two roles
+     */
+    public static int getRoleDistance(@Nullable AnnotationRole child, 
+                                      @Nullable AnnotationRole parent) {
+        int distance = 0;
+        
         if (parent != null) {
             // make sure the child role inherits from the parent
             while(child != null) {
                 if (child.equals(parent)) {
                     // the original child eventually inherits from the parent
-                    return true;
+                    return distance;
                 }
+                distance++;
                 child = (child.inheritsRole() ? child.getParentRole() : null);
             }
             
             // at this point the child cannot extend from the parent
-            return false;
+            return -1;
         } else {
             // make sure the child role inherits from the default
             while(child != null) {
                 if (!child.inheritsRole()) {
                     // the role does not inherit the default role
-                    return false;
+                    return -1;
                 }
+                distance++;
                 child = child.getParentRole();
             }
             
             // at this point, the child role inherits the default
-            return true;
+            return distance;
         }
     }
     

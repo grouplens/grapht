@@ -32,7 +32,7 @@ import com.google.common.base.Function;
  * type assuming that the type can be represented as a set of desires, and that
  * those desires are satisfied by other Provider implementations.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  * @param <T> The object type that is provided
  */
 // FIXME: we need better exceptions for dependency failures

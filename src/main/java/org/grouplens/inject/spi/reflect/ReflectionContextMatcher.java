@@ -56,6 +56,20 @@ public class ReflectionContextMatcher implements ContextMatcher {
         this.role = role;
     }
     
+    /**
+     * @return The type matched by this matcher
+     */
+    public Class<?> getMatchedType() {
+        return type;
+    }
+    
+    /**
+     * @return The role matched by this matcher
+     */
+    public AnnotationRole getMatchedRole() {
+        return role;
+    }
+    
     @Override
     public boolean matches(SatisfactionAndRole n) {
         // FIXME: handle generics correctly

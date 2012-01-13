@@ -68,6 +68,20 @@ public abstract class ReflectionBindRule implements BindRule {
         return generated;
     }
     
+    /**
+     * @return The annotation role matched by this bind rule
+     */
+    public AnnotationRole getRole() {
+        return role;
+    }
+    
+    /**
+     * @return The source type matched by this bind rule
+     */
+    public Class<?> getSourceType() {
+        return sourceType;
+    }
+    
     @Override
     public boolean matches(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
