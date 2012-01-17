@@ -51,6 +51,13 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
         this.provider = provider;
     }
     
+    /**
+     * @return The provider instance returned by {@link #makeProvider(Function)}
+     */
+    public Provider<?> getProvider() {
+        return provider;
+    }
+    
     @Override
     public List<? extends Desire> getDependencies() {
         return Collections.emptyList();

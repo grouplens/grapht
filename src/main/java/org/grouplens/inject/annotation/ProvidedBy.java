@@ -26,6 +26,12 @@ import java.lang.annotation.Target;
 
 import javax.inject.Provider;
 
+/**
+ * ProvidedBy specifies a Provider implementation to act as a default binding
+ * for types annotated with it.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

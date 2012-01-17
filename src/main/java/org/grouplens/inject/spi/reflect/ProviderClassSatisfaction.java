@@ -47,7 +47,7 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
         if (providerType == null) {
             throw new NullPointerException("Provider class cannot be null");
         }
-        if (Provider.class.isAssignableFrom(providerType)) {
+        if (!Provider.class.isAssignableFrom(providerType)) {
             throw new IllegalArgumentException("Class type is not a Provider implementation");
         }
         if (!Types.isInstantiable(providerType)) {
@@ -55,6 +55,14 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
         }
         
         this.providerType = providerType;
+    }
+    
+    /**
+     * @return The Provider class that provides instances satisfying this
+     *         satisfaction
+     */
+    public Class<? extends Provider<?>> getProviderType() {
+        return providerType;
     }
     
     @Override

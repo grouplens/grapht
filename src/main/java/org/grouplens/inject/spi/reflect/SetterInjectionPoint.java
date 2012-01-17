@@ -69,7 +69,7 @@ public class SetterInjectionPoint implements InjectionPoint {
 
     @Override
     public Class<?> getType() {
-        return setter.getParameterTypes()[0];
+        return Types.box(setter.getParameterTypes()[0]);
     }
 
     @Override

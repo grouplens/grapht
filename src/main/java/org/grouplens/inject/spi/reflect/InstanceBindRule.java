@@ -48,7 +48,7 @@ public class InstanceBindRule extends ReflectionBindRule {
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");
         }
-        if (sourceType.isInstance(instance)) {
+        if (!sourceType.isInstance(instance)) {
             throw new IllegalArgumentException("Instance does not extend source type");
         }
         this.instance = instance;

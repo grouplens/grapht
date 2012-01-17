@@ -24,6 +24,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * ImplementedBy specifies an implementation to act as a default binding for
+ * types annotated with it.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented

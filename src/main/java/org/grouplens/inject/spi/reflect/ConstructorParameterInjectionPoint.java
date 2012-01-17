@@ -97,7 +97,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
 
     @Override
     public Class<?> getType() {
-        return ctor.getParameterTypes()[parameter];
+        return Types.box(ctor.getParameterTypes()[parameter]);
     }
 
     @Override
@@ -112,5 +112,10 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
         }
         ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) o;
         return cp.ctor.equals(ctor) && cp.parameter == parameter;
+    }
+    
+    @Override
+    public int hashCode() {
+        return ctor.hashCode() ^ parameter;
     }
 }

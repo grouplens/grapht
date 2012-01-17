@@ -40,11 +40,42 @@ public final class Types {
     private Types() {}
 
     /**
+     * Return the boxed version of the given type if the type is primitive.
+     * Otherwise, if the type is not a primitive the original type is returned.
+     * As an example, int.class is converted to Integer.class.
+     * 
+     * @param type The possibly unboxed type
+     * @return The boxed type
+     */
+    public static Class<?> box(Class<?> type) {
+        if (int.class.equals(type)) {
+            return Integer.class;
+        } else if (short.class.equals(type)) {
+            return Short.class;
+        } else if (byte.class.equals(type)) {
+            return Byte.class;
+        } else if (long.class.equals(type)) {
+            return Long.class;
+        } else if (boolean.class.equals(type)) {
+            return Boolean.class;
+        } else if (char.class.equals(type)) {
+            return Character.class;
+        } else if (float.class.equals(type)) {
+            return Float.class;
+        } else if (double.class.equals(type)) {
+            return Double.class;
+        } else {
+            return type;
+        }
+    }
+
+    /**
      * Compute the erasure of a type.
+     * 
      * @param type The type to erase.
      * @return The class representing the erasure of the type.
-     * @throws IllegalArgumentException if <var>type</var> is unerasable (e.g. it is a type
-     * variable or a wildcard).
+     * @throws IllegalArgumentException if <var>type</var> is unerasable (e.g.
+     *             it is a type variable or a wildcard).
      */
     public static Class<?> erase(Type type) {
         if (type instanceof Class) {
@@ -150,7 +181,7 @@ public final class Types {
         
         for (Method m: type.getMethods()) {
             if (m.getAnnotation(Inject.class) != null) {
-                if (m.getParameterTypes().length != 1 || m.getReturnType() != null) {
+                if (m.getParameterTypes().length != 1 || !m.getReturnType().equals(void.class)) {
                     // invalid setter injection point
                     // FIXME: better exception as above
                     throw new RuntimeException("Invalid setter injection method");

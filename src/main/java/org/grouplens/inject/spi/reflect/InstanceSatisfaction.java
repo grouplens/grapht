@@ -50,6 +50,13 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
         }
         instance = obj;
     }
+    
+    /**
+     * @return The instance that satisfies this satisfaction
+     */
+    public Object getInstance() {
+        return instance;
+    }
 
     @Override
     public List<? extends Desire> getDependencies() {
