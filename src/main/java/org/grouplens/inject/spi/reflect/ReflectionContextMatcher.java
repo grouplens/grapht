@@ -1,5 +1,5 @@
 /*
- * LensKit, a reference implementation of recommender algorithms.
+ * LensKit, an open source recommender systems toolkit.
  * Copyright 2010-2011 Regents of the University of Minnesota
  *
  * This program is free software; you can redistribute it and/or modify
@@ -92,6 +92,6 @@ public class ReflectionContextMatcher implements ContextMatcher {
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ role.hashCode();
+        return type.hashCode() ^ (role == null ? 0 : role.hashCode());
     }
 }
