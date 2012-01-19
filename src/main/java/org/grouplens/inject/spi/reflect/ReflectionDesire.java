@@ -225,4 +225,9 @@ public class ReflectionDesire implements Desire {
                 r.injectPoint.equals(injectPoint) && 
                 (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction)));
     }
+    
+    @Override
+    public int hashCode() {
+        return desiredType.hashCode() ^ injectPoint.hashCode() ^ (satisfaction == null ? 0 : satisfaction.hashCode());
+    }
 }
