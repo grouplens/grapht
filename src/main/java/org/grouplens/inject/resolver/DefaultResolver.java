@@ -33,6 +33,7 @@ import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.graph.Node;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;

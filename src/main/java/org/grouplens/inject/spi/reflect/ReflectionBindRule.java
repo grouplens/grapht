@@ -37,35 +37,35 @@ public abstract class ReflectionBindRule implements BindRule {
     private final AnnotationRole role;
     private final Class<?> sourceType;
     
-    private final boolean generated;
+    private final int weight;
 
     /**
      * Create a bind rule that matches a desire when the desired type equals
      * <tt>sourceType</tt> and the desire's role inherits from <tt>role</tt>.
-     * <tt>generated</tt> is a flag of whether or not this bind rule was
-     * automatically generated for a user or if it was declared manually.
+     * <tt>weight</tt> is an integer value that specifies the priority between
+     * matching bind rules. Lower weights have a higher priority.
      * 
      * @param sourceType The source type this bind rule matches
      * @param role The role the bind rule applies to
-     * @param generated True if the bind rule was automatically generated
+     * @param weight The weight or precedence of the rule
      * @throws NullPointerException if sourceType is null
      */
-    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
+    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
         
         this.role = role;
         this.sourceType = Types.box(sourceType);
-        this.generated = generated;
+        this.weight = weight;
     }
 
     /**
-     * @return True if this was a generated binding, false if the binding was
-     *         specified manually by a programmer or config file
+     * @return The weight or precedence of the rule
      */
-    public boolean isGenerated() {
-        return generated;
+    @Override
+    public int getWeight() {
+        return weight;
     }
     
     /**
@@ -102,11 +102,11 @@ public abstract class ReflectionBindRule implements BindRule {
             return false;
         }
         ReflectionBindRule r = (ReflectionBindRule) o;
-        return r.generated == generated && (r.role == null ? role == null : r.role.equals(role)) && r.sourceType.equals(sourceType);
+        return r.weight == weight && (r.role == null ? role == null : r.role.equals(role)) && r.sourceType.equals(sourceType);
     }
     
     @Override
     public int hashCode() {
-        return sourceType.hashCode() ^ (role == null ? 0 : role.hashCode()) ^ (generated ? 1 : 0);
+        return sourceType.hashCode() ^ (role == null ? 0 : role.hashCode()) ^ weight;
     }
 }

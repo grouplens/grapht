@@ -142,24 +142,24 @@ public class ReflectionDesire implements Desire {
             if (role.isParameter()) {
                 DefaultDouble dfltDouble = role.getRoleType().getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
-                    return new InstanceBindRule(dfltDouble.value(), Double.class, role, true).apply(this);
+                    return new InstanceBindRule(dfltDouble.value(), Double.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
                 DefaultInt dfltInt = role.getRoleType().getAnnotation(DefaultInt.class);
                 if (dfltInt != null) {
-                    return new InstanceBindRule(dfltInt.value(), Integer.class, role, true).apply(this);
+                    return new InstanceBindRule(dfltInt.value(), Integer.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
                 DefaultBoolean dfltBool = role.getRoleType().getAnnotation(DefaultBoolean.class);
                 if (dfltBool != null) {
-                    return new InstanceBindRule(dfltBool.value(), Boolean.class, role, true).apply(this);
+                    return new InstanceBindRule(dfltBool.value(), Boolean.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
                 DefaultString dfltStr = role.getRoleType().getAnnotation(DefaultString.class);
                 if (dfltStr != null) {
-                    return new InstanceBindRule(dfltStr.value(), String.class, role, true).apply(this);
+                    return new InstanceBindRule(dfltStr.value(), String.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
             } else {
                 DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
                 if (impl != null) {
-                    return new ClassBindRule(impl.value(), getDesiredType(), role, true).apply(this);
+                    return new ClassBindRule(impl.value(), getDesiredType(), role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
             }
             
@@ -170,11 +170,11 @@ public class ReflectionDesire implements Desire {
         // Now check the desired type for @ImplementedBy or @ProvidedBy
         ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
         if (provided != null) {
-            return new ProviderClassBindRule(provided.value(), getDesiredType(), role, true).apply(this);
+            return new ProviderClassBindRule(provided.value(), getDesiredType(), role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
         }
         ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
         if (impl != null) {
-            return new ClassBindRule(impl.value(), getDesiredType(), role, true).apply(this);
+            return new ClassBindRule(impl.value(), getDesiredType(), role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
         }
         
         // There are no annotations on the role or the type that indicate a default binding or value
@@ -198,12 +198,8 @@ public class ReflectionDesire implements Desire {
                 ReflectionBindRule b2 = (ReflectionBindRule) o2;
                 
                 // #1 - select manual over generated
-                if (b1.isGenerated() != b2.isGenerated()) {
-                    if (b1.isGenerated()) {
-                        return 1; // b2 is a manual rule
-                    } else {
-                        return -1; // b1 is a manual rule
-                    }
+                if (b1.getWeight() != b2.getWeight()) {
+                    return b1.getWeight() - b2.getWeight();
                 }
                 
                 // #2 - select shorter role distance

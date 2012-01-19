@@ -28,6 +28,23 @@ package org.grouplens.inject.spi;
  *
  */
 public interface BindRule {
+    /**
+     * The highest precedence bind rule, representing manual bind rules.
+     */
+    public static final int MANUAL_BIND_RULE = 0;
+
+    /**
+     * The precendence for the first tier of generated bind rules, usually where
+     * the matching type is between the manual source and implementation type.
+     */
+    public static final int FIRST_TIER_GENERATED_BIND_RULE = 1;
+
+    /**
+     * The precendence for a second tier of generated bind rules, lower than the
+     * other bind rules.
+     */
+    public static final int SECOND_TIER_GENERATED_BIND_RULE = 2;
+    
     // FIXME: [ML] Add a method to stop following bind rules
     /**
      * Query whether this bind rule applies to some desire.
@@ -48,4 +65,10 @@ public interface BindRule {
      *         closer to resolution.
      */
     Desire apply(Desire desire);
+
+    /**
+     * @return The weight of this bind rule compared to other bind rules that
+     *         match the same desire
+     */
+    int getWeight();
 }

@@ -38,13 +38,13 @@ public class InstanceBindRule extends ReflectionBindRule {
      * @param instance The instance to bind
      * @param sourceType The source type matched by this bind rule
      * @param role The role matched by this bind rule
-     * @param generated True if the rule was automatically generated
+     * @param weight The weight of the rule
      * @throws NullPointerException if instance or sourceType are null
      * @throws IllegalArgumentException if instance is not an instance of the
      *             source type
      */
-    public InstanceBindRule(Object instance,  Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
-        super(sourceType, role, generated);
+    public InstanceBindRule(Object instance,  Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
+        super(sourceType, role, weight);
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");
         }

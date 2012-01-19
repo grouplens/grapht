@@ -16,9 +16,9 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.resolver;
+package org.grouplens.inject.spi;
 
-import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.grouplens.inject.resolver.ContextChain;
 
 /**
  * <p>

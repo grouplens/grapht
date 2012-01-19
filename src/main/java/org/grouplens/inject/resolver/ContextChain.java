@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 
 public class ContextChain {

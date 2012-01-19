@@ -21,7 +21,6 @@ package org.grouplens.inject.spi;
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.resolver.ContextChain;
-import org.grouplens.inject.resolver.ContextMatcher;
 
 /**
  * SatisfactionAndRole is a simple pairing between a Satisfaction and a Role. Roles are defined

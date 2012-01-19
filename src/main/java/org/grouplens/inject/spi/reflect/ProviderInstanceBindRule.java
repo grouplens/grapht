@@ -41,14 +41,14 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
      *            this bind rule
      * @param sourceType The source type this bind rule matches to
      * @param role The role this bind rule matches to
-     * @param generated True if the bind rule was automatically generated
+     * @param weight The weight of the rule
      * @throws NullPointerException if provider or sourceType are null
      * @throws IllegalArgumentException if the provider's created instances do
      *             not extend from sourceType
      */
     @SuppressWarnings("unchecked")
-    public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, @Nullable AnnotationRole role, boolean generated) {
-        super(sourceType, role, generated);
+    public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
+        super(sourceType, role, weight);
         if (provider == null) {
             throw new NullPointerException("Provider instance cannot be null");
         }

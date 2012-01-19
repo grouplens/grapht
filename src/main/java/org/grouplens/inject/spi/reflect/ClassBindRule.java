@@ -39,12 +39,12 @@ public class ClassBindRule extends ReflectionBindRule {
      * @param implType The implementation type that satisfies the desire
      * @param sourceType The source type matched by this bind rule
      * @param role The role matched by this desire
-     * @param generated True if this was an automatically generated rule
+     * @param weight The weight of the bind rule
      * @throws NullPointerException if implType or sourceType are null
      * @throws IllegalArgumentException if implType does not extend sourceType
      */
-    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  boolean generated) {
-        super(sourceType, role, generated);
+    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  int weight) {
+        super(sourceType, role, weight);
         if (implType == null) {
             throw new NullPointerException("Implementation type cannot be null");
         }

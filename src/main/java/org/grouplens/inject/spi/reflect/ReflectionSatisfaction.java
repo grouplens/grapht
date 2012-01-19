@@ -20,7 +20,7 @@ package org.grouplens.inject.spi.reflect;
 
 import java.util.Comparator;
 
-import org.grouplens.inject.resolver.ContextMatcher;
+import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
 

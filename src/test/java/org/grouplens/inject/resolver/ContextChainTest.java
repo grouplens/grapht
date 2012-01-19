@@ -23,7 +23,9 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.MockContextMatcher;
 import org.grouplens.inject.spi.MockSatisfaction;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 import org.junit.Test;

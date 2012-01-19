@@ -16,12 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.resolver;
+package org.grouplens.inject.spi;
 
 import javax.annotation.Nullable;
 
-import org.grouplens.inject.resolver.ContextMatcher;
-import org.grouplens.inject.spi.MockRole;
+import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.SatisfactionAndRole;
 
 public class MockContextMatcher implements ContextMatcher {

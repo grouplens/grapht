@@ -25,7 +25,6 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.inject.resolver.ContextMatcher;
 
 import com.google.common.base.Function;
 
