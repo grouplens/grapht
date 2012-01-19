@@ -74,6 +74,8 @@ public class ReflectionDesire implements Desire {
         if (desiredType == null || injectPoint == null) {
             throw new NullPointerException("Desired type and injection point cannot be null");
         }
+        
+        desiredType = Types.box(desiredType);
         if (!injectPoint.getType().isAssignableFrom(desiredType) || 
             (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType()))) {
             throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
@@ -136,11 +138,7 @@ public class ReflectionDesire implements Desire {
     public Desire getDefaultDesire() {
         // First we check the role if it has a default binding
         AnnotationRole role = getRole();
-        // FIXME: should we normalize primitive types at all?
-        if (role != null) {
-            // FIXME: if a role inherits from another role, do we also inherit that role's
-            // potential default bindings?
-            // -YES and we check all role parents before moving to type defaults
+        while(role != null) {
             if (role.isParameter()) {
                 DefaultDouble dfltDouble = role.getRoleType().getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
@@ -164,6 +162,9 @@ public class ReflectionDesire implements Desire {
                     return new ClassBindRule(impl.value(), getDesiredType(), role, true).apply(this);
                 }
             }
+            
+            // there was no default binding on the role, so check its parent role
+            role = (role.inheritsRole() ? role.getParentRole() : null);
         }
         
         // Now check the desired type for @ImplementedBy or @ProvidedBy

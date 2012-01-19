@@ -56,7 +56,7 @@ public abstract class ReflectionBindRule implements BindRule {
         }
         
         this.role = role;
-        this.sourceType = sourceType;
+        this.sourceType = Types.box(sourceType);
         this.generated = generated;
     }
 
@@ -94,5 +94,19 @@ public abstract class ReflectionBindRule implements BindRule {
         
         // the type and roles are not a match, so return false
         return false;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ReflectionBindRule)) {
+            return false;
+        }
+        ReflectionBindRule r = (ReflectionBindRule) o;
+        return r.generated == generated && (r.role == null ? role == null : r.role.equals(role)) && r.sourceType.equals(sourceType);
+    }
+    
+    @Override
+    public int hashCode() {
+        return sourceType.hashCode() ^ (role == null ? 0 : role.hashCode()) ^ (generated ? 1 : 0);
     }
 }

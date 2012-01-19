@@ -48,7 +48,9 @@ public class ClassBindRule extends ReflectionBindRule {
         if (implType == null) {
             throw new NullPointerException("Implementation type cannot be null");
         }
-        if (!sourceType.isAssignableFrom(implType)) {
+        
+        implType = Types.box(implType);
+        if (!Types.box(sourceType).isAssignableFrom(implType)) {
             throw new IllegalArgumentException(implType + " does not extend " + sourceType);
         }
         this.implType = implType;
@@ -67,11 +69,11 @@ public class ClassBindRule extends ReflectionBindRule {
         if (!(o instanceof ClassBindRule)) {
             return false;
         }
-        return ((ClassBindRule) o).implType.equals(implType);
+        return super.equals(o) && ((ClassBindRule) o).implType.equals(implType);
     }
     
     @Override
     public int hashCode() {
-        return implType.hashCode();
+        return super.hashCode() ^ implType.hashCode();
     }
 }

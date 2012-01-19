@@ -71,11 +71,11 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
         if (!(o instanceof ProviderInstanceBindRule)) {
             return false;
         }
-        return ((ProviderInstanceBindRule) o).provider == provider;
+        return super.equals(o) && ((ProviderInstanceBindRule) o).provider == provider;
     }
     
     @Override
     public int hashCode() {
-        return System.identityHashCode(provider);
+        return super.hashCode() ^ System.identityHashCode(provider);
     }
 }

@@ -13,6 +13,91 @@ import org.junit.Test;
 
 public class ReflectionBindRuleTest {
     @Test
+    public void testClassBindRuleEquals() throws Exception {
+        // four variations of the arguments
+        ClassBindRule rule1 = new ClassBindRule(A.class, A.class, null, false);
+        ClassBindRule rule2 = new ClassBindRule(B.class, A.class, null, false);
+        ClassBindRule rule3 = new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), false);
+        ClassBindRule rule4 = new ClassBindRule(A.class, A.class, null, true);
+        
+        Assert.assertEquals(rule1, new ClassBindRule(A.class, A.class, null, false));
+        Assert.assertEquals(rule2, new ClassBindRule(B.class, A.class, null, false));
+        Assert.assertEquals(rule3, new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), false));
+        Assert.assertEquals(rule4, new ClassBindRule(A.class, A.class, null, true));
+        
+        Assert.assertFalse(rule1.equals(rule2));
+        Assert.assertFalse(rule2.equals(rule3));
+        Assert.assertFalse(rule3.equals(rule4));
+        Assert.assertFalse(rule1.equals(rule4));
+    }
+    
+    @Test
+    public void testInstanceBindRuleEquals() throws Exception {
+        // four variations of the arguments
+        A i1 = new A();
+        A i2 = new A();
+        
+        InstanceBindRule rule1 = new InstanceBindRule(i1, A.class, null, false);
+        InstanceBindRule rule2 = new InstanceBindRule(i1, A.class, null, true);
+        InstanceBindRule rule3 = new InstanceBindRule(i2, A.class, new AnnotationRole(RoleA.class), false);
+        InstanceBindRule rule4 = new InstanceBindRule(i2, A.class, null, true);
+        
+        Assert.assertEquals(rule1, new InstanceBindRule(i1, A.class, null, false));
+        Assert.assertEquals(rule2, new InstanceBindRule(i1, A.class, null, true));
+        Assert.assertEquals(rule3, new InstanceBindRule(i2, A.class, new AnnotationRole(RoleA.class), false));
+        Assert.assertEquals(rule4, new InstanceBindRule(i2, A.class, null, true));
+        
+        Assert.assertFalse(rule1.equals(new InstanceBindRule(i2, A.class, null, false)));
+        
+        Assert.assertFalse(rule1.equals(rule2));
+        Assert.assertFalse(rule2.equals(rule3));
+        Assert.assertFalse(rule3.equals(rule4));
+        Assert.assertFalse(rule1.equals(rule4));
+    }
+    
+    @Test
+    public void testProviderBindRuleEquals() throws Exception {
+        // four variations of the arguments
+        ProviderClassBindRule rule1 = new ProviderClassBindRule(PA.class, A.class, null, false);
+        ProviderClassBindRule rule2 = new ProviderClassBindRule(PA.class, A.class, null, true);
+        ProviderClassBindRule rule3 = new ProviderClassBindRule(PA.class, A.class, new AnnotationRole(RoleA.class), false);
+        
+        Assert.assertEquals(rule1, new ProviderClassBindRule(PA.class, A.class, null, false));
+        Assert.assertEquals(rule2, new ProviderClassBindRule(PA.class, A.class, null, true));
+        Assert.assertEquals(rule3, new ProviderClassBindRule(PA.class, A.class, new AnnotationRole(RoleA.class), false));
+        
+        Assert.assertFalse(rule1.equals(rule2));
+        Assert.assertFalse(rule2.equals(rule3));
+        Assert.assertFalse(rule1.equals(rule3));
+    }
+    
+    @Test
+    public void testProviderInstanceBindRuleEquals() throws Exception {
+        // four variations of the arguments
+        PA p1 = new PA();
+        PA p2 = new PA();
+        
+        ProviderInstanceBindRule rule1 = new ProviderInstanceBindRule(p1, A.class, null, false);
+        ProviderInstanceBindRule rule2 = new ProviderInstanceBindRule(p1, A.class, null, true);
+        ProviderInstanceBindRule rule3 = new ProviderInstanceBindRule(p2, A.class, new AnnotationRole(RoleA.class), false);
+        
+        Assert.assertEquals(rule1, new ProviderInstanceBindRule(p1, A.class, null, false));
+        Assert.assertEquals(rule2, new ProviderInstanceBindRule(p1, A.class, null, true));
+        Assert.assertEquals(rule3, new ProviderInstanceBindRule(p2, A.class, new AnnotationRole(RoleA.class), false));
+        
+        Assert.assertFalse(rule1.equals(rule2));
+        Assert.assertFalse(rule2.equals(rule3));
+        Assert.assertFalse(rule1.equals(rule3));
+    }
+    
+    @Test
+    public void testPrimitiveMatch() throws Exception {
+        // test boxing/unboxing of types
+        doMatchTest(Integer.class, null, int.class, null, true);
+        doMatchTest(int.class, null, Integer.class, null, true);
+    }
+    
+    @Test
     public void testExactClassNoRoleMatch() throws Exception {
         doMatchTest(A.class, null, A.class, null, true);
     }

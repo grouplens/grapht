@@ -87,7 +87,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
             return false;
         }
         ReflectionContextMatcher r = (ReflectionContextMatcher) o;
-        return r.type.equals(type) && r.role.equals(role);
+        return r.type.equals(type) && (r.role == null ? role == null : r.role.equals(role));
     }
     
     @Override

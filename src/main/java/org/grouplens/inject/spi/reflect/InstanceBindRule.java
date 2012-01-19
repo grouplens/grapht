@@ -48,7 +48,7 @@ public class InstanceBindRule extends ReflectionBindRule {
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");
         }
-        if (!sourceType.isInstance(instance)) {
+        if (!Types.box(sourceType).isInstance(instance)) {
             throw new IllegalArgumentException("Instance does not extend source type");
         }
         this.instance = instance;
@@ -65,11 +65,11 @@ public class InstanceBindRule extends ReflectionBindRule {
         if (!(o instanceof InstanceBindRule)) {
             return false;
         }
-        return ((InstanceBindRule) o).instance == instance;
+        return super.equals(o) && ((InstanceBindRule) o).instance == instance;
     }
     
     @Override
     public int hashCode() {
-        return System.identityHashCode(instance);
+        return super.hashCode() ^ System.identityHashCode(instance);
     }
 }

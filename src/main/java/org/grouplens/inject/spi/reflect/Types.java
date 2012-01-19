@@ -134,7 +134,7 @@ public final class Types {
         // FIXME: I don't know if this is capable of getting the generics
         // properly, but that's not my concern right now
         try {
-            return providerClass.getMethod("get").getReturnType();
+            return Types.box(providerClass.getMethod("get").getReturnType());
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {

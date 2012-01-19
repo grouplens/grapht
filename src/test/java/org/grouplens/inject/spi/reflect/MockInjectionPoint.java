@@ -15,7 +15,7 @@ public class MockInjectionPoint implements InjectionPoint {
     private final boolean trans;
     
     public MockInjectionPoint(Class<?> type, @Nullable AnnotationRole role, boolean trans) {
-        this.type = type;
+        this.type = Types.box(type);
         this.role = role;
         this.trans = trans;
     }
