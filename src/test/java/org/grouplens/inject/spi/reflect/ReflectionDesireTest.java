@@ -130,9 +130,9 @@ public class ReflectionDesireTest {
     
     @Test
     public void testBindRuleComparator() throws Exception {
-        BindRule b1 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleB.class), false);
-        BindRule b2 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleA.class), false);
-        BindRule b3 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleA.class), true);
+        BindRule b1 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleB.class), 0);
+        BindRule b2 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleA.class), 0);
+        BindRule b3 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleA.class), 1);
         
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceB.class, new AnnotationRole(RoleB.class), false));
         Comparator<BindRule> cmp = desire.ruleComparator();

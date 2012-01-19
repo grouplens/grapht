@@ -56,4 +56,9 @@ public class MockBindRule implements BindRule {
     public Desire apply(Desire desire) {
         return bindings.get(desire);
     }
+
+    @Override
+    public int getWeight() {
+        return 0;
+    }
 }
