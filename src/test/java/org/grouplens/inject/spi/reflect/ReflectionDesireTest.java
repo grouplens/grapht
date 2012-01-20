@@ -27,6 +27,7 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.inject.spi.reflect.types.InterfaceA;
 import org.grouplens.inject.spi.reflect.types.InterfaceB;
 import org.grouplens.inject.spi.reflect.types.ParameterA;
@@ -59,7 +60,7 @@ public class ReflectionDesireTest {
     public void testSubtypeInjectionPointSatisfactionConstructor() throws Exception {
         ClassSatisfaction satis = new ClassSatisfaction(B.class);
         InjectionPoint inject = new MockInjectionPoint(A.class, null, false);
-        ReflectionDesire desire = new ReflectionDesire(B.class, inject, satis);
+        ReflectionDesire desire = new ReflectionDesire(B.class, inject, satis, DefaultSource.ROLE_AND_TYPE);
         
         Assert.assertEquals(B.class, desire.getDesiredType());
         Assert.assertEquals(satis, desire.getSatisfaction());

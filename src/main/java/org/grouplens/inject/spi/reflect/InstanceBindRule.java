@@ -21,6 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 
 /**
  * InstanceBindRule is a reflection bind rule that satisfies matching desires
@@ -57,7 +58,11 @@ public class InstanceBindRule extends ReflectionBindRule {
     @Override
     public Desire apply(Desire desire) {
         ReflectionDesire origDesire = (ReflectionDesire) desire;
-        return new ReflectionDesire(instance.getClass(), origDesire.getInjectionPoint(), new InstanceSatisfaction(instance));
+        // The NONE DefaultSource is used so that any time this bind rule is applied,
+        // we know a default cannot be followed (which would effectively bypass the
+        // instance binding, which seems strange).
+        return new ReflectionDesire(instance.getClass(), origDesire.getInjectionPoint(), 
+                                    new InstanceSatisfaction(instance), DefaultSource.NONE);
     }
     
     @Override

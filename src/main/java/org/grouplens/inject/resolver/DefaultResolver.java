@@ -281,7 +281,9 @@ public class DefaultResolver implements Resolver {
                 // attempt to use the default desire, or terminate if we've found
                 // a satisfiable desire
                 Desire defaultDesire = currentDesire.getDefaultDesire();
-                if (defaultDesire == null || defaultDesire.equals(currentDesire)) {
+                if (defaultDesire == null || desireChain.contains(defaultDesire)) {
+                    // we don't use the default if there wasn't one, or using the
+                    // default would create a cycle of desires
                     if (currentDesire.isInstantiable()) {
                         // the desire can be converted to a node, so we're done
                         return new SatisfactionAndDesires(currentDesire.getSatisfaction(), desireChain);

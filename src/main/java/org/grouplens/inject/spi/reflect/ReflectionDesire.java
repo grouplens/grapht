@@ -38,11 +38,32 @@ import org.grouplens.inject.spi.Desire;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ReflectionDesire implements Desire {
+    public static enum DefaultSource {
+        /**
+         * Neither type nor role will be examined for a default desire.
+         */
+        NONE,
+        /**
+         * Only the desired type is examined for a default desire.
+         */
+        TYPE,
+        /**
+         * Only the role of the desire (or its injection point) is examined for
+         * a default desire.
+         */
+        ROLE,
+        /**
+         * Both type and role are examined for defaults, prioritizing role over
+         * type. This is the default.
+         */
+        ROLE_AND_TYPE
+    }
+    
     private final Class<?> desiredType;
     private final InjectionPoint injectPoint;
     private final ReflectionSatisfaction satisfaction;
-    
-    private boolean forceNoDefault;
+
+    private final DefaultSource dfltSource;
 
     /**
      * Create a ReflectionDesire that immediately wraps the given
@@ -54,9 +75,9 @@ public class ReflectionDesire implements Desire {
      * @throws NullPointerException if injectPoint is null
      */
     public ReflectionDesire(InjectionPoint injectPoint) {
-        this(injectPoint.getType(), injectPoint, null);
+        this(injectPoint.getType(), injectPoint, null, DefaultSource.ROLE_AND_TYPE);
     }
-    
+
     /**
      * Create a ReflectionDesire that represents the dependency for
      * <tt>desiredType</tt> that will be injected into the given InjectionPoint.
@@ -67,31 +88,32 @@ public class ReflectionDesire implements Desire {
      * @param injectPoint The injection point of the desire
      * @param satisfaction The satisfaction satisfying this desire, if there is
      *            one
-     * @throws NullPointerException if desiredType or injectPoint is null
+     *            @param dfltSource The source of default bindings for this desire
+     * @throws NullPointerException if desiredType, injectPoint, or dfltSource is null
      * @throws IllegalArgumentException if desiredType is not assignable to the
      *             type of the injection point, or if the satisfaction's type is
      *             not assignable to the desired type
      */
-    public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint, ReflectionSatisfaction satisfaction) {
-        if (desiredType == null || injectPoint == null) {
-            throw new NullPointerException("Desired type and injection point cannot be null");
+    public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint,
+                            ReflectionSatisfaction satisfaction, DefaultSource dfltSource) {
+        if (desiredType == null || injectPoint == null || dfltSource == null) {
+            throw new NullPointerException("Desired type, injection point, and default source cannot be null");
         }
-        
+
         desiredType = Types.box(desiredType);
-        if (!injectPoint.getType().isAssignableFrom(desiredType) || 
-            (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType()))) {
-            throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
+        if (!injectPoint.getType().isAssignableFrom(desiredType) || (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType()))) {
+            throw new IllegalArgumentException(
+                                               "No type hierarchy between injection point, desired type, and satisfaction");
         }
-        
+
         if (satisfaction == null && Types.isInstantiable(desiredType)) {
             satisfaction = new ClassSatisfaction(desiredType);
         }
-        
+
         this.desiredType = desiredType;
         this.injectPoint = injectPoint;
         this.satisfaction = satisfaction;
-        
-        forceNoDefault = false;
+        this.dfltSource = dfltSource;
     }
 
     /**
@@ -111,7 +133,7 @@ public class ReflectionDesire implements Desire {
     public InjectionPoint getInjectionPoint() {
         return injectPoint;
     }
-    
+
     @Override
     public boolean isParameter() {
         AnnotationRole role = getRole();
@@ -132,7 +154,7 @@ public class ReflectionDesire implements Desire {
     public ReflectionSatisfaction getSatisfaction() {
         return satisfaction;
     }
-    
+
     @Override
     public boolean isTransient() {
         return injectPoint.isTransient();
@@ -140,54 +162,66 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
-        // Do not return a desire if defaults have been force disabled (e.g. this
-        // desire was a default desire)
-        if (forceNoDefault) {
-            return null;
-        }
-        
-        // First we check the role if it has a default binding
         AnnotationRole role = getRole();
-        while(role != null) {
-            if (role.isParameter()) {
-                DefaultDouble dfltDouble = role.getRoleType().getAnnotation(DefaultDouble.class);
-                if (dfltDouble != null) {
-                    return new InstanceBindRule(dfltDouble.value(), Double.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+
+            // Check the role first, but only if the role source hasn't been disabled
+        if (dfltSource == DefaultSource.ROLE || dfltSource == DefaultSource.ROLE_AND_TYPE) {
+            while (role != null) {
+                if (role.isParameter()) {
+                    DefaultDouble dfltDouble = role.getRoleType()
+                                                   .getAnnotation(DefaultDouble.class);
+                    if (dfltDouble != null) {
+                        return new InstanceBindRule(dfltDouble.value(), Double.class, role,
+                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    }
+                    DefaultInt dfltInt = role.getRoleType().getAnnotation(DefaultInt.class);
+                    if (dfltInt != null) {
+                        return new InstanceBindRule(dfltInt.value(), Integer.class, role,
+                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    }
+                    DefaultBoolean dfltBool = role.getRoleType()
+                                                  .getAnnotation(DefaultBoolean.class);
+                    if (dfltBool != null) {
+                        return new InstanceBindRule(dfltBool.value(), Boolean.class, role,
+                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    }
+                    DefaultString dfltStr = role.getRoleType().getAnnotation(DefaultString.class);
+                    if (dfltStr != null) {
+                        return new InstanceBindRule(dfltStr.value(), String.class, role,
+                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    }
+                } else {
+                    DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
+                    if (impl != null) {
+                        return new ClassBindRule(impl.value(), getDesiredType(), role,
+                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    }
                 }
-                DefaultInt dfltInt = role.getRoleType().getAnnotation(DefaultInt.class);
-                if (dfltInt != null) {
-                    return new InstanceBindRule(dfltInt.value(), Integer.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                }
-                DefaultBoolean dfltBool = role.getRoleType().getAnnotation(DefaultBoolean.class);
-                if (dfltBool != null) {
-                    return new InstanceBindRule(dfltBool.value(), Boolean.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                }
-                DefaultString dfltStr = role.getRoleType().getAnnotation(DefaultString.class);
-                if (dfltStr != null) {
-                    return new InstanceBindRule(dfltStr.value(), String.class, role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                }
-            } else {
-                DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
-                if (impl != null) {
-                    return new ClassBindRule(impl.value(), getDesiredType(), role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                }
+
+                // there was no default binding on the role, so check its parent
+                // role
+                role = (role.inheritsRole() ? role.getParentRole() : null);
             }
-            
-            // there was no default binding on the role, so check its parent role
-            role = (role.inheritsRole() ? role.getParentRole() : null);
         }
         
-        // Now check the desired type for @ImplementedBy or @ProvidedBy
-        ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
-        if (provided != null) {
-            return new ProviderClassBindRule(provided.value(), getDesiredType(), role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-        }
-        ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
-        if (impl != null) {
-            return new ClassBindRule(impl.value(), getDesiredType(), role, BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-        }
         
-        // There are no annotations on the role or the type that indicate a default binding or value
+        // Now check the desired type for @ImplementedBy or @ProvidedBy if the type
+        // source has not been disabled.
+        if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.ROLE_AND_TYPE) {
+            ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
+            if (provided != null) {
+                return new ProviderClassBindRule(provided.value(), getDesiredType(), role,
+                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+            }
+            ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
+            if (impl != null) {
+                return new ClassBindRule(impl.value(), getDesiredType(), role,
+                                         BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+            }
+        }
+
+        // There are no annotations on the role or the type that indicate a
+        // default binding or value, or the defaults have been disabled,
         // so we return null
         return null;
     }
@@ -195,26 +229,29 @@ public class ReflectionDesire implements Desire {
     @Override
     public Comparator<BindRule> ruleComparator() {
         // 1st comparison is manual vs generated bind rules
-        //  - manual bind rules are preferred over any generated rules
+        // - manual bind rules are preferred over any generated rules
         // 2nd comparison is how close the desire's role is to the bind rules
-        //  - we know that the desire's is a sub-role of any bind rules, so choose
-        //    the bind rule with the closest distance
+        // - we know that the desire's is a sub-role of any bind rules, so
+        // choose
+        // the bind rule with the closest distance
         // 3rd comparison is how well the generics match
-        //  - for now, we don't track generic types so it is ignored
+        // - for now, we don't track generic types so it is ignored
         return new Comparator<BindRule>() {
             @Override
             public int compare(BindRule o1, BindRule o2) {
                 ReflectionBindRule b1 = (ReflectionBindRule) o1;
                 ReflectionBindRule b2 = (ReflectionBindRule) o2;
-                
+
                 // #1 - select manual over generated
                 if (b1.getWeight() != b2.getWeight()) {
                     return b1.getWeight() - b2.getWeight();
                 }
-                
+
                 // #2 - select shorter role distance
-                int d1 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(), b1.getRole());
-                int d2 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(), b2.getRole());
+                int d1 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(),
+                                                        b1.getRole());
+                int d2 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(),
+                                                        b2.getRole());
                 if (d1 != d2) {
                     return d1 - d2;
                 }
@@ -224,7 +261,7 @@ public class ReflectionDesire implements Desire {
             }
         };
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ReflectionDesire)) {
@@ -233,16 +270,17 @@ public class ReflectionDesire implements Desire {
         ReflectionDesire r = (ReflectionDesire) o;
         return (r.desiredType.equals(desiredType) && 
                 r.injectPoint.equals(injectPoint) && 
-                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction)));
+                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction)) &&
+                r.dfltSource.equals(dfltSource));
     }
-    
+
     @Override
     public int hashCode() {
-        return desiredType.hashCode() ^ injectPoint.hashCode() ^ (satisfaction == null ? 0 : satisfaction.hashCode());
+        return desiredType.hashCode() ^ injectPoint.hashCode() ^ (satisfaction == null ? 0 : satisfaction.hashCode()) ^ dfltSource.hashCode();
     }
-    
+
     @Override
     public String toString() {
-        return "ReflectionDesire(type=" + desiredType + ", inject=" + injectPoint + ", satisfaction=" + satisfaction + ")";
+        return "ReflectionDesire(type=" + desiredType + ", inject=" + injectPoint + ", satisfaction=" + satisfaction + ", source=" + dfltSource + ")";
     }
 }

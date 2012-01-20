@@ -21,6 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 
 /**
  * ClassBindRule is a reflection bind rule that binds a subclass to a
@@ -61,7 +62,10 @@ public class ClassBindRule extends ReflectionBindRule {
         ReflectionDesire rd = (ReflectionDesire) desire;
         // we can pass in null for the satisfaction here, because ReflectionDesire
         // will create a ClassSatisfaction for us if implType is instantiable
-        return new ReflectionDesire(implType, rd.getInjectionPoint(), null);
+        // - The default source is set to TYPE so that @ImplementedBy and @ProvidedBy
+        //   on the impl type can be followed, but any role defaults on the injection
+        //   point will be disabled.
+        return new ReflectionDesire(implType, rd.getInjectionPoint(), null, DefaultSource.TYPE);
     }
 
     @Override

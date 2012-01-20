@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 
 /**
  * ProviderInstanceBindRule is a reflection bind rule that satisfies all
@@ -63,7 +64,11 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
     public Desire apply(Desire desire) {
         ReflectionDesire origDesire = (ReflectionDesire) desire;
         ProviderInstanceSatisfaction satisfaction = new ProviderInstanceSatisfaction(provider);
-        return new ReflectionDesire(satisfaction.getErasedType(), origDesire.getInjectionPoint(), satisfaction);
+        // The NONE DefaultSource is used so that any time this bind rule is applied,
+        // we know a default cannot be followed (which would effectively bypass the
+        // provider instance binding, which seems strange).
+        return new ReflectionDesire(satisfaction.getErasedType(), origDesire.getInjectionPoint(),
+                                    satisfaction, DefaultSource.NONE);
     }
 
     @Override

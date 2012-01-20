@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 
 /**
  * ProviderClassBindRule is a bind rule between a type and a Provider class
@@ -62,7 +63,11 @@ public class ProviderClassBindRule extends ReflectionBindRule {
     public Desire apply(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
         ProviderClassSatisfaction satisfaction = new ProviderClassSatisfaction(providerType);
-        return new ReflectionDesire(satisfaction.getErasedType(), rd.getInjectionPoint(), satisfaction);
+        // The NONE DefaultSource is used so that any time this bind rule is applied,
+        // we know a default cannot be followed (which would effectively bypass the
+        // provider class binding, which seems strange).
+        return new ReflectionDesire(satisfaction.getErasedType(), rd.getInjectionPoint(), 
+                                    satisfaction, DefaultSource.NONE);
     }
     
     @Override
