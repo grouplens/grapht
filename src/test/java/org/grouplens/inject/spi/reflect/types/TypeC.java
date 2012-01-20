@@ -20,7 +20,29 @@ package org.grouplens.inject.spi.reflect.types;
 
 import javax.inject.Inject;
 
+import org.grouplens.inject.spi.reflect.ConstructorParameterInjectionPoint;
+import org.grouplens.inject.spi.reflect.InjectionPoint;
+import org.grouplens.inject.spi.reflect.SetterInjectionPoint;
+
 public class TypeC {
+    public static final InjectionPoint CONSTRUCTOR;
+    public static final InjectionPoint INTERFACE_A;
+    public static final InjectionPoint TYPE_A;
+    public static final InjectionPoint INTERFACE_B;
+    public static final InjectionPoint TYPE_B;
+    
+    static {
+        try {
+            CONSTRUCTOR = new ConstructorParameterInjectionPoint(TypeC.class.getConstructor(int.class), 0);
+            INTERFACE_A = new SetterInjectionPoint(TypeC.class.getMethod("setRoleA", InterfaceA.class));
+            TYPE_A = new SetterInjectionPoint(TypeC.class.getMethod("setTypeA", TypeA.class));
+            INTERFACE_B = new SetterInjectionPoint(TypeC.class.getMethod("setRoleE", InterfaceB.class));
+            TYPE_B = new SetterInjectionPoint(TypeC.class.getMethod("setTypeB", TypeB.class));
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     private final int value;
     private InterfaceA a1;
     private TypeA a2;

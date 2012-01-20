@@ -77,4 +77,9 @@ public class ProviderClassBindRule extends ReflectionBindRule {
     public int hashCode() {
         return super.hashCode() ^ providerType.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "ProviderClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + providerType + ")";
+    }
 }

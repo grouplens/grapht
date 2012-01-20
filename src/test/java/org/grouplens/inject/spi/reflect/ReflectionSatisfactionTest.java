@@ -40,12 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ReflectionSatisfactionTest {
-    private InjectionPoint ctorTypeCIP;
-    private InjectionPoint roleAIP;
-    private InjectionPoint typeAIP;
-    private InjectionPoint roleEIP;
-    private InjectionPoint typeBIP;
-    
     private InjectionPoint ctorProviderCIP;
     
     private Set<InjectionPoint> typeCInjectPoints;
@@ -53,23 +47,16 @@ public class ReflectionSatisfactionTest {
     
     @Before
     public void setup() throws Exception {
-        ctorTypeCIP = new ConstructorParameterInjectionPoint(TypeC.class.getConstructor(int.class), 0);
-        roleAIP = new SetterInjectionPoint(TypeC.class.getMethod("setRoleA", InterfaceA.class));
-        typeAIP = new SetterInjectionPoint(TypeC.class.getMethod("setTypeA", TypeA.class));
-        roleEIP = new SetterInjectionPoint(TypeC.class.getMethod("setRoleE", InterfaceB.class));
-        typeBIP = new SetterInjectionPoint(TypeC.class.getMethod("setTypeB", TypeB.class));
-        
         ctorProviderCIP = new ConstructorParameterInjectionPoint(ProviderC.class.getConstructor(int.class), 0);
-        
         
         typeCInjectPoints = new HashSet<InjectionPoint>();
         providerCInjectPoints = new HashSet<InjectionPoint>();
         
-        typeCInjectPoints.add(ctorTypeCIP);
-        typeCInjectPoints.add(roleAIP);
-        typeCInjectPoints.add(typeAIP);
-        typeCInjectPoints.add(roleEIP);
-        typeCInjectPoints.add(typeBIP);
+        typeCInjectPoints.add(TypeC.CONSTRUCTOR);
+        typeCInjectPoints.add(TypeC.INTERFACE_A);
+        typeCInjectPoints.add(TypeC.TYPE_A);
+        typeCInjectPoints.add(TypeC.INTERFACE_B);
+        typeCInjectPoints.add(TypeC.TYPE_B);
         
         providerCInjectPoints.add(ctorProviderCIP);
     }
@@ -98,11 +85,11 @@ public class ReflectionSatisfactionTest {
         TypeB b2 = new TypeB();
         
         MockProviderFunction providers = new MockProviderFunction();
-        providers.add(ctorTypeCIP, new InstanceProvider<Integer>(10));
-        providers.add(roleAIP, new InstanceProvider<InterfaceA>(a1));
-        providers.add(typeAIP, new InstanceProvider<TypeA>(a2));
-        providers.add(roleEIP, new InstanceProvider<InterfaceB>(b1));
-        providers.add(typeBIP, new InstanceProvider<TypeB>(b2));
+        providers.add(TypeC.CONSTRUCTOR, new InstanceProvider<Integer>(10));
+        providers.add(TypeC.INTERFACE_A, new InstanceProvider<InterfaceA>(a1));
+        providers.add(TypeC.TYPE_A, new InstanceProvider<TypeA>(a2));
+        providers.add(TypeC.INTERFACE_B, new InstanceProvider<InterfaceB>(b1));
+        providers.add(TypeC.TYPE_B, new InstanceProvider<TypeB>(b2));
         
         Provider<?> provider = new ClassSatisfaction(TypeC.class).makeProvider(providers);
         Object o = provider.get();

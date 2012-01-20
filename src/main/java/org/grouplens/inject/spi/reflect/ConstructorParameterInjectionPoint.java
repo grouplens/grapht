@@ -118,4 +118,9 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     public int hashCode() {
         return ctor.hashCode() ^ parameter;
     }
+    
+    @Override
+    public String toString() {
+        return "ConstructorParameter(ctor=" + ctor + ", param=" + parameter + ")";
+    }
 }

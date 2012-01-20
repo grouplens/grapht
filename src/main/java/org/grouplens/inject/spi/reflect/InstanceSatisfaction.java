@@ -95,4 +95,9 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
     public int hashCode() {
         return System.identityHashCode(instance);
     }
+    
+    @Override
+    public String toString() {
+        return "InstanceSatisfaction(" + instance + ")";
+    }
 }

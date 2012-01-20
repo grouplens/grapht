@@ -41,6 +41,8 @@ public class ReflectionDesire implements Desire {
     private final Class<?> desiredType;
     private final InjectionPoint injectPoint;
     private final ReflectionSatisfaction satisfaction;
+    
+    private boolean forceNoDefault;
 
     /**
      * Create a ReflectionDesire that immediately wraps the given
@@ -88,6 +90,8 @@ public class ReflectionDesire implements Desire {
         this.desiredType = desiredType;
         this.injectPoint = injectPoint;
         this.satisfaction = satisfaction;
+        
+        forceNoDefault = false;
     }
 
     /**
@@ -136,6 +140,12 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
+        // Do not return a desire if defaults have been force disabled (e.g. this
+        // desire was a default desire)
+        if (forceNoDefault) {
+            return null;
+        }
+        
         // First we check the role if it has a default binding
         AnnotationRole role = getRole();
         while(role != null) {
@@ -229,5 +239,10 @@ public class ReflectionDesire implements Desire {
     @Override
     public int hashCode() {
         return desiredType.hashCode() ^ injectPoint.hashCode() ^ (satisfaction == null ? 0 : satisfaction.hashCode());
+    }
+    
+    @Override
+    public String toString() {
+        return "ReflectionDesire(type=" + desiredType + ", inject=" + injectPoint + ", satisfaction=" + satisfaction + ")";
     }
 }

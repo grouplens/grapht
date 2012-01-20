@@ -56,6 +56,11 @@ public class Node<T> {
         return payload;
     }
     
+    @Override
+    public String toString() {
+        return "Node@" + System.identityHashCode(this) + "(" + payload + ")";
+    }
+    
     // do not override equals() and hashCode(), we want nodes to 
     // use instance equality
 }

@@ -91,4 +91,9 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     public int hashCode() {
         return System.identityHashCode(provider);
     }
+    
+    @Override
+    public String toString() {
+        return "ProviderInstanceSatisfaction(" + getErasedType() + ", " + provider + ")";
+    }
 }

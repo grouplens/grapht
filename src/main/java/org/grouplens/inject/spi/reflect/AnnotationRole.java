@@ -195,4 +195,9 @@ public class AnnotationRole implements Role {
     public int hashCode() {
         return roleType.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "AnnotationRole(" + roleType + ")";
+    }
 }

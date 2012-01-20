@@ -72,4 +72,9 @@ public class InstanceBindRule extends ReflectionBindRule {
     public int hashCode() {
         return super.hashCode() ^ System.identityHashCode(instance);
     }
+    
+    @Override
+    public String toString() {
+        return "InstanceBindRule(" + getRole() + ":" + getSourceType() + " -> " + instance + ")";
+    }
 }

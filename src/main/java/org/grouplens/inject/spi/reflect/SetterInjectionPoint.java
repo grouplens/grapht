@@ -89,4 +89,9 @@ public class SetterInjectionPoint implements InjectionPoint {
     public int hashCode() {
         return setter.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "Setter(method=" + setter + ")";
+    }
 }

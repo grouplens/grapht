@@ -88,4 +88,9 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
     public int hashCode() {
         return type.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "ClassSatisfaction(" + type + ")";
+    }
 }

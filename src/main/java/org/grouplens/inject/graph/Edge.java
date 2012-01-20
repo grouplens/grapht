@@ -91,5 +91,10 @@ public class Edge<N, E> {
         return payload;
     }
     
+    @Override
+    public String toString() {
+        return "Edge(head=" + head + ", tail=" + tail + ", label=" + payload + ")";
+    }
+    
     // do not override equals() or hashCode() because edges use instance equality
 }

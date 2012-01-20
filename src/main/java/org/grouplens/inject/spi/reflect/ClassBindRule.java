@@ -76,4 +76,9 @@ public class ClassBindRule extends ReflectionBindRule {
     public int hashCode() {
         return super.hashCode() ^ implType.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "ClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + implType + ")";
+    }
 }

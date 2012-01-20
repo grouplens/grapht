@@ -94,4 +94,9 @@ public class ReflectionContextMatcher implements ContextMatcher {
     public int hashCode() {
         return type.hashCode() ^ (role == null ? 0 : role.hashCode());
     }
+    
+    @Override
+    public String toString() {
+        return "ReflectionContextMatcher(" + role + ":" + type + ")";
+    }
 }
