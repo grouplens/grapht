@@ -16,10 +16,10 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.spi.reflect;
+package org.grouplens.inject.types;
 
-import org.grouplens.inject.spi.reflect.TypeLiteral;
-import org.grouplens.inject.spi.reflect.Types;
+import org.grouplens.inject.types.TypeLiteral;
+import org.grouplens.inject.types.Types;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 

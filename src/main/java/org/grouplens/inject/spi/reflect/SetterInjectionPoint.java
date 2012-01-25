@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import javax.inject.Provider;
 
 import org.grouplens.inject.annotation.PassThrough;
+import org.grouplens.inject.types.Types;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.

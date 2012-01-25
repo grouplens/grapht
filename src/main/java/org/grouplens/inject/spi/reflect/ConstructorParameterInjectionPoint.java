@@ -24,6 +24,7 @@ import java.lang.reflect.Constructor;
 import javax.inject.Provider;
 
 import org.grouplens.inject.annotation.PassThrough;
+import org.grouplens.inject.types.Types;
 
 /**
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter

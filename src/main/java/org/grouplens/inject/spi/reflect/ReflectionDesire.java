@@ -18,7 +18,12 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.grouplens.inject.annotation.DefaultBoolean;
 import org.grouplens.inject.annotation.DefaultDouble;
@@ -29,6 +34,9 @@ import org.grouplens.inject.annotation.ImplementedBy;
 import org.grouplens.inject.annotation.ProvidedBy;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.types.Types;
+
+import javax.inject.Inject;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary
@@ -38,6 +46,48 @@ import org.grouplens.inject.spi.Desire;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ReflectionDesire implements Desire {
+    /**
+     * Return a list of desires that must satisfied in order to instantiate the
+     * given type.
+     *
+     * @param type The class type whose dependencies will be queried
+     * @return The dependency desires for the given type
+     * @throws NullPointerException if the type is null
+     */
+    public static List<ReflectionDesire> getDesires(Class<?> type) {
+        List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
+
+        boolean ctorFound = false;
+        for (Constructor<?> ctor: type.getConstructors()) {
+            if (ctor.getAnnotation(Inject.class) != null) {
+                if (!ctorFound) {
+                    ctorFound = true;
+                    for (int i = 0; i < ctor.getParameterTypes().length; i++) {
+                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i)));
+                    }
+                } else {
+                    // at the moment there can only be one injectable constructor
+                    // FIXME: return a better exception with more information
+                    throw new RuntimeException("Too many injectable constructors");
+                }
+            }
+        }
+
+        for (Method m: type.getMethods()) {
+            if (m.getAnnotation(Inject.class) != null) {
+                if (m.getParameterTypes().length != 1 || !m.getReturnType().equals(void.class)) {
+                    // invalid setter injection point
+                    // FIXME: better exception as above
+                    throw new RuntimeException("Invalid setter injection method");
+                }
+
+                desires.add(new ReflectionDesire(new SetterInjectionPoint(m)));
+            }
+        }
+
+        return Collections.unmodifiableList(desires);
+    }
+
     public static enum DefaultSource {
         /**
          * Neither type nor role will be examined for a default desire.

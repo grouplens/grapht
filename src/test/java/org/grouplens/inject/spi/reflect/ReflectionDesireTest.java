@@ -71,7 +71,7 @@ public class ReflectionDesireTest {
     public void testInheritedRoleDefault() throws Exception {
         // Test that the default desire for the setRoleE injection point in TypeC
         // defaults to TypeB.  This also tests role default inheritence
-        List<ReflectionDesire> desires = Types.getDesires(TypeC.class);
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleE", InterfaceB.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
@@ -84,7 +84,7 @@ public class ReflectionDesireTest {
     public void testRoleParameterDefault() throws Exception {
         // Test that the default desire for the constructor injection in TypeC
         // defaults to the int value 5
-        List<ReflectionDesire> desires = Types.getDesires(TypeC.class);
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
         ReflectionDesire dflt = getDefaultDesire(0, desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof InstanceSatisfaction);
@@ -97,7 +97,7 @@ public class ReflectionDesireTest {
     public void testProvidedByDefault() throws Exception {
         // Test that the default desire for the setTypeA injection point in TypeC
         // is satisfied by a provider satisfaction to ProviderA
-        List<ReflectionDesire> desires = Types.getDesires(TypeC.class);
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setTypeA", TypeA.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ProviderClassSatisfaction);
@@ -110,7 +110,7 @@ public class ReflectionDesireTest {
     public void testImplementedByDefault() throws Exception {
         // Test that the default desire for the setRoleA injection point in TypeC
         // is satisfied by a type binding to TypeA
-        List<ReflectionDesire> desires = Types.getDesires(TypeC.class);
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleA", InterfaceA.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
@@ -123,7 +123,7 @@ public class ReflectionDesireTest {
     public void testNoDefaultDesire() throws Exception {
         // Test that there is no default desire for the setTypeB injection point
         // in TypeC, but that it is still satisfiable
-        List<ReflectionDesire> desires = Types.getDesires(TypeC.class);
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setTypeB", TypeB.class), desires);
         
         Assert.assertNull(dflt);

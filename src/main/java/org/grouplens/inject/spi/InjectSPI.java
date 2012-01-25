@@ -25,11 +25,11 @@ import javax.inject.Provider;
 
 
 public interface InjectSPI {
-    <T> BindRule bind(@Nullable Class<? extends Annotation> role, Class<T> source, 
-                      Class<? extends T> impl, int weight);
+    <T> BindRule bindType(@Nullable Class<? extends Annotation> role, Class<T> source,
+                          Class<? extends T> impl, int weight);
     
-    <T> BindRule bind(@Nullable Class<? extends Annotation> role, Class<T> source,
-                      T instance, int weight);
+    <T> BindRule bindInstance(@Nullable Class<? extends Annotation> role, Class<T> source,
+                              T instance, int weight);
     
     <T> BindRule bindProvider(@Nullable Class<? extends Annotation> role, Class<T> source, 
                               Class<? extends Provider<? extends T>> providerType, int weight);
