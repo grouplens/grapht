@@ -18,17 +18,21 @@
  */
 package org.grouplens.inject.types;
 
-import org.grouplens.inject.types.TypeLiteral;
-import org.grouplens.inject.types.Types;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Supplier;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("rawtypes")
 public class TestTypes {
@@ -66,5 +70,57 @@ public class TestTypes {
         assertThat(param, CoreMatchers.<Object>instanceOf(WildcardType.class));
         // finally, throw an illegal argument exception
         Types.erase(param);
+    }
+
+    @Test
+    public void testUnboundedWildcard() {
+        TypeLiteral tlit = new TypeLiteral<Predicate<?>>() {};
+        ParameterizedType ptype = (ParameterizedType) tlit.getType();
+        WildcardType wildcard = (WildcardType) ptype.getActualTypeArguments()[0];
+        WildcardType wcbld = Types.wildcardType();
+        assertArrayEquals(wildcard.getUpperBounds(), wcbld.getUpperBounds());
+        assertArrayEquals(wildcard.getLowerBounds(), wcbld.getLowerBounds());
+        assertEquals(wildcard, wcbld);
+        assertEquals(wildcard.hashCode(), wcbld.hashCode());
+    }
+
+    @Test
+    public void testUpperBoundedWildcard() {
+        TypeLiteral tlit = new TypeLiteral<Supplier<? extends Type>>() {};
+        ParameterizedType ptype = (ParameterizedType) tlit.getType();
+        WildcardType wildcard = (WildcardType) ptype.getActualTypeArguments()[0];
+        WildcardType wcbld = Types.wildcardExtends(Type.class);
+        assertArrayEquals(wildcard.getUpperBounds(), wcbld.getUpperBounds());
+        assertArrayEquals(wildcard.getLowerBounds(), wcbld.getLowerBounds());
+        assertEquals(wildcard, wcbld);
+        assertEquals(wildcard.hashCode(), wcbld.hashCode());
+    }
+
+    @Test
+    public void testLowerBoundedWildcard() {
+        TypeLiteral tlit = new TypeLiteral<Predicate<? super InputStream>>() {};
+        ParameterizedType ptype = (ParameterizedType) tlit.getType();
+        WildcardType wildcard = (WildcardType) ptype.getActualTypeArguments()[0];
+        WildcardType wcbld = Types.wildcardSuper(InputStream.class);
+        assertArrayEquals(wildcard.getUpperBounds(), wcbld.getUpperBounds());
+        assertArrayEquals(wildcard.getLowerBounds(), wcbld.getLowerBounds());
+        assertEquals(wildcard, wcbld);
+        assertEquals(wildcard.hashCode(), wcbld.hashCode());
+    }
+
+    @Test
+    public void testParameterizedType() {
+        TypeLiteral tlit = new TypeLiteral<Function<? super InputStream,? extends List<? extends String>>>() {};
+        ParameterizedType ptype = (ParameterizedType) tlit.getType();
+        ParameterizedType built =
+                Types.parameterizedType(Function.class,
+                                        Types.wildcardSuper(InputStream.class),
+                                        Types.wildcardExtends(Types.parameterizedType(
+                                                List.class, Types.wildcardExtends(String.class))));
+        assertEquals(ptype.getRawType(), built.getRawType());
+        assertArrayEquals(ptype.getActualTypeArguments(), built.getActualTypeArguments());
+        assertEquals(ptype.getOwnerType(), built.getOwnerType());
+        assertEquals(ptype, built);
+        assertEquals(ptype.hashCode(), built.hashCode());
     }
 }

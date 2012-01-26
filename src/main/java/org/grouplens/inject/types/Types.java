@@ -18,11 +18,8 @@
  */
 package org.grouplens.inject.types;
 
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 import javax.inject.Provider;
+import java.lang.reflect.*;
 
 /**
  * Static helper methods for working with types.
@@ -144,5 +141,46 @@ public final class Types {
      */
     public static boolean isInstantiable(Class<?> type) {
         return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
+    }
+
+    /**
+     * Visit a type using a {@link TypeVisitor}.
+     * @param type The type to visit.
+     * @param visitor The type visitor.
+     * @param <T> The return type of the visitor.
+     * @return The value returned from the visitor.
+     * @see TypeVisitor#apply(java.lang.reflect.Type)
+     */
+    public static <T> T visit(Type type, TypeVisitor<T> visitor) {
+        return visitor.apply(type);
+    }
+
+    public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
+        TypeVariable[] vars = cls.getTypeParameters();
+        if (args.length != vars.length) {
+            throw new IllegalArgumentException("wrong number of arguments");
+        }
+        return new ParameterizedTypeImpl(cls, args, null);
+    }
+
+    public static WildcardType wildcardExtends(Type... upperBounds) {
+        return wildcardType(upperBounds, null);
+    }
+
+    public static WildcardType wildcardSuper(Type... lowerBounds) {
+        return wildcardType(null, lowerBounds);
+    }
+
+    public static WildcardType wildcardType(Type[] upper, Type[] lower) {
+        if (upper == null || upper.length == 0) {
+            upper = new Type[]{Object.class};
+        }
+        if (lower == null) {
+            lower = new Type[0];
+        }
+        return new WildcardTypeImpl(upper, lower);
+    }
+    public static WildcardType wildcardType() {
+        return wildcardType(null, null);
     }
 }
