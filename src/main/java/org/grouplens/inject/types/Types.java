@@ -155,6 +155,12 @@ public final class Types {
         return visitor.apply(type);
     }
 
+    /**
+     * Create a new parameterized type from a class and actual arguments.
+     * @param cls The raw type to wrap.
+     * @param args The actual arguments for <var>cls</var>'s type parameters.
+     * @return A {@link ParameterizedType} instantiated <var>cls</var> with <var>args</var>.
+     */
     public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
         TypeVariable[] vars = cls.getTypeParameters();
         if (args.length != vars.length) {
@@ -163,14 +169,32 @@ public final class Types {
         return new ParameterizedTypeImpl(cls, args, null);
     }
 
+    /**
+     * Create a new wildcard type extending a set of upper bounds.
+     * @param upperBounds The upper bounds of the type (like {@code ? extends Foo}).
+     * @return A wildcard type representing the specified bounded wildcard.
+     */
     public static WildcardType wildcardExtends(Type... upperBounds) {
         return wildcardType(upperBounds, null);
     }
 
+    /**
+     * Create a wildcard type extending a set of lower bounds.  The wildcard
+     * {@code ? super Foo} translates to {@code wildcardSuper(Foo.class)}.
+     * @param lowerBounds The lower bounds of the wildcard type.
+     * @return A reprsentation of the specified type.
+     */
     public static WildcardType wildcardSuper(Type... lowerBounds) {
         return wildcardType(null, lowerBounds);
     }
 
+    /**
+     * Create a wildcard type with the specified upper and lower bounds.
+     * @param upper The type's upper bounds. {@code null} is equivalent to unbounded
+     *              (bounded above by {@link Object}).
+     * @param lower The type's lower bounds. {@code null} is equivalent to an unbounded type.
+     * @return The specified wildcard type.
+     */
     public static WildcardType wildcardType(Type[] upper, Type[] lower) {
         if (upper == null || upper.length == 0) {
             upper = new Type[]{Object.class};
@@ -180,7 +204,28 @@ public final class Types {
         }
         return new WildcardTypeImpl(upper, lower);
     }
+
+    private static final WildcardType UNBOUNDED_TYPE = wildcardType(null, null);
+
+    /**
+     * Create an unbounded wildcard type.
+     * @return An unbounded wildcard type.
+     */
     public static WildcardType wildcardType() {
-        return wildcardType(null, null);
+        return UNBOUNDED_TYPE;
+    }
+
+    /**
+     * Find a type assignment to make two types compatible. Given two types α and β,
+     * this finds an assignment Γ of free variables in α such that Γ(α) is a subtype
+     * of (assignable to) β.
+     * @param alpha The type for which to find an assignment.
+     * @param beta The target type — the assignment will make α compatible
+     *             with this type.
+     * @return A type assignment which makes α assignable to β, or {@code null} if
+     *         no such assignment exists.
+     */
+    public static TypeAssignment findCompatibleAssignment(Type alpha, Type beta) {
+        return TypeReifier.makeCompatible(alpha, beta);
     }
 }

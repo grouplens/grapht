@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,8 +23,16 @@ public class TypeAssignment implements Function<Type, Type> {
     private final Map<TypeVariable<?>,Type> map;
 
     /**
+     * Construct a new, empty type assignment.
+     */
+    public TypeAssignment() {
+        base = null;
+        map = Collections.emptyMap();
+    }
+
+    /**
      * Construct a new type assignment from a map.
-     * @param assignment
+     * @param assignment The assignment of variables used by this assignment.
      */
     public TypeAssignment(@Nonnull Map<TypeVariable<?>,Type> assignment) {
         map = assignment;
