@@ -58,6 +58,11 @@ public class ProviderClassBindRule extends ReflectionBindRule {
         
         this.providerType = providerType;
     }
+    
+    @Override
+    public boolean terminatesChain() {
+        return true;
+    }
 
     @Override
     public Desire apply(Desire desire) {

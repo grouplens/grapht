@@ -23,13 +23,24 @@ import java.lang.annotation.Annotation;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.reflect.types.InterfaceA;
+import org.grouplens.inject.spi.reflect.types.ProviderA;
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleB;
 import org.grouplens.inject.spi.reflect.types.RoleD;
+import org.grouplens.inject.spi.reflect.types.TypeA;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ReflectionBindRuleTest {
+    @Test
+    public void testTerminatesChain() {
+        Assert.assertTrue(new InstanceBindRule(new Object(), Object.class, null, 0).terminatesChain());
+        Assert.assertTrue(new ProviderInstanceBindRule(new ProviderA(), InterfaceA.class, null, 0).terminatesChain());
+        Assert.assertTrue(new ProviderClassBindRule(ProviderA.class, InterfaceA.class, null, 0).terminatesChain());
+        Assert.assertFalse(new ClassBindRule(TypeA.class, InterfaceA.class, null, 0).terminatesChain());
+    }
+    
     @Test
     public void testClassBindRuleEquals() throws Exception {
         // four variations of the arguments

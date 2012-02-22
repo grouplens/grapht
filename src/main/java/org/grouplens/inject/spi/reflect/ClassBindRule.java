@@ -56,6 +56,11 @@ public class ClassBindRule extends ReflectionBindRule {
         }
         this.implType = implType;
     }
+    
+    @Override
+    public boolean terminatesChain() {
+        return false;
+    }
 
     @Override
     public Desire apply(Desire desire) {

@@ -277,6 +277,12 @@ public class DefaultResolver implements Resolver {
                 BindRule selectedRule = validRules.get(0).rule;
                 appliedRules.add(selectedRule);
                 currentDesire = selectedRule.apply(currentDesire);
+                
+                // possibly terminate if the bind rule terminates
+                if (selectedRule.terminatesChain() && currentDesire.isInstantiable()) {
+                    desireChain.add(currentDesire);
+                    return new SatisfactionAndDesires(currentDesire.getSatisfaction(), desireChain);
+                }
             } else {
                 // attempt to use the default desire, or terminate if we've found
                 // a satisfiable desire

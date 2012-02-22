@@ -88,8 +88,9 @@ public class ReflectionDesire implements Desire {
      * @param injectPoint The injection point of the desire
      * @param satisfaction The satisfaction satisfying this desire, if there is
      *            one
-     *            @param dfltSource The source of default bindings for this desire
-     * @throws NullPointerException if desiredType, injectPoint, or dfltSource is null
+     * @param dfltSource The source of default bindings for this desire
+     * @throws NullPointerException if desiredType, injectPoint, or dfltSource
+     *             is null
      * @throws IllegalArgumentException if desiredType is not assignable to the
      *             type of the injection point, or if the satisfaction's type is
      *             not assignable to the desired type

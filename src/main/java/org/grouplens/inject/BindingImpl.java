@@ -34,7 +34,6 @@ class BindingImpl<T> implements Binding<T> {
     private final Set<Class<?>> excludeTypes;
     
     private Class<? extends Annotation> role;
-    private CachePolicy policy;
     
     private boolean bindingCompleted;
     
@@ -50,7 +49,6 @@ class BindingImpl<T> implements Binding<T> {
             }
         }
         
-        policy = CachePolicy.SHARED;
         bindingCompleted = false;
     }
     
@@ -78,18 +76,10 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> cachePolicy(CachePolicy policy) {
-        if (policy == null) {
-            throw new NullPointerException("CachePolicy cannot be null");
-        }
-        validateState();
-        this.policy = policy;
-        return this;
-    }
-
-    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(Class<? extends T> impl) {
+        // FIXME: validate that impl is assignable to all source types, not just
+        // the first that defines the type parameter.
         InjectSPI spi = context.getSPI();
         ContextChain chain = context.getContextChain();
         RootContextImpl root = context.getRootContext();
@@ -100,7 +90,6 @@ class BindingImpl<T> implements Binding<T> {
         // TODO create generated bindings based on source, impl,
         // and exclude sets
         // FIXME record selected cache policy somehow
-        // REVIEW: Should we get rid of cache policy and say everything is always shared?
     }
 
     @Override

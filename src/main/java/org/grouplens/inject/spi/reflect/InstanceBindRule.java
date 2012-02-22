@@ -56,6 +56,11 @@ public class InstanceBindRule extends ReflectionBindRule {
     }
 
     @Override
+    public boolean terminatesChain() {
+        return true;
+    }
+    
+    @Override
     public Desire apply(Desire desire) {
         ReflectionDesire origDesire = (ReflectionDesire) desire;
         // The NONE DefaultSource is used so that any time this bind rule is applied,
