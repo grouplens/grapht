@@ -28,13 +28,13 @@ import org.grouplens.inject.spi.InjectSPI;
 
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public <T> BindRule bind(Class<? extends Annotation> role, Class<T> source,
-                             Class<? extends T> impl, int weight) {
+    public <T> BindRule bindType(Class<? extends Annotation> role, Class<T> source,
+                                 Class<? extends T> impl, int weight) {
         return new ClassBindRule(impl, source, role(role), weight);
     }
 
     @Override
-    public <T> BindRule bind(Class<? extends Annotation> role, Class<T> source, T instance, int weight) {
+    public <T> BindRule bindInstance(Class<? extends Annotation> role, Class<T> source, T instance, int weight) {
         return new InstanceBindRule(instance, source, role(role), weight);
     }
 

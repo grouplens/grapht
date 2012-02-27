@@ -26,6 +26,7 @@ import javax.inject.Provider;
 import org.grouplens.inject.spi.Desire;
 
 import com.google.common.base.Function;
+import org.grouplens.inject.types.Types;
 
 /**
  * ClassSatisfaction is a satisfaction that instantiates instances of a given
@@ -57,7 +58,7 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
     
     @Override
     public List<? extends Desire> getDependencies() {
-        return Types.getDesires(type);
+        return ReflectionDesire.getDesires(type);
     }
 
     @Override

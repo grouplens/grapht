@@ -26,6 +26,7 @@ import javax.inject.Provider;
 import org.grouplens.inject.spi.Desire;
 
 import com.google.common.base.Function;
+import org.grouplens.inject.types.Types;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -67,7 +68,7 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
     
     @Override
     public List<? extends Desire> getDependencies() {
-        return Types.getDesires(providerType);
+        return ReflectionDesire.getDesires(providerType);
     }
 
     @Override

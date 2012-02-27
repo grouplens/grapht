@@ -16,19 +16,10 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.spi.reflect;
+package org.grouplens.inject.types;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
 import javax.inject.Provider;
+import java.lang.reflect.*;
 
 /**
  * Static helper methods for working with types.
@@ -153,44 +144,93 @@ public final class Types {
     }
 
     /**
-     * Return a list of desires that must satisfied in order to instantiate the
-     * given type.
-     * 
-     * @param type The class type whose dependencies will be queried
-     * @return The dependency desires for the given type
-     * @throws NullPointerException if the type is null
+     * Visit a type using a {@link TypeVisitor}.
+     * @param type The type to visit.
+     * @param visitor The type visitor.
+     * @param <T> The return type of the visitor.
+     * @return The value returned from the visitor.
+     * @see TypeVisitor#apply(java.lang.reflect.Type)
      */
-    public static List<ReflectionDesire> getDesires(Class<?> type) {
-        List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
+    public static <T> T visit(Type type, TypeVisitor<T> visitor) {
+        return visitor.apply(type);
+    }
 
-        boolean ctorFound = false;
-        for (Constructor<?> ctor: type.getConstructors()) {
-            if (ctor.getAnnotation(Inject.class) != null) {
-                if (!ctorFound) {
-                    ctorFound = true;
-                    for (int i = 0; i < ctor.getParameterTypes().length; i++) {
-                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i)));
-                    }
-                } else {
-                    // at the moment there can only be one injectable constructor
-                    // FIXME: return a better exception with more information
-                    throw new RuntimeException("Too many injectable constructors");
-                }
-            }
+    /**
+     * Create a new parameterized type from a class and actual arguments.
+     * @param cls The raw type to wrap.
+     * @param args The actual arguments for <var>cls</var>'s type parameters.
+     * @return A {@link ParameterizedType} instantiated <var>cls</var> with <var>args</var>.
+     */
+    public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
+        TypeVariable<?>[] vars = cls.getTypeParameters();
+        if (args.length != vars.length) {
+            throw new IllegalArgumentException("wrong number of arguments");
         }
-        
-        for (Method m: type.getMethods()) {
-            if (m.getAnnotation(Inject.class) != null) {
-                if (m.getParameterTypes().length != 1 || !m.getReturnType().equals(void.class)) {
-                    // invalid setter injection point
-                    // FIXME: better exception as above
-                    throw new RuntimeException("Invalid setter injection method");
-                }
-                
-                desires.add(new ReflectionDesire(new SetterInjectionPoint(m)));
-            }
+        return new ParameterizedTypeImpl(cls, args, null);
+    }
+
+    /**
+     * Create a new wildcard type extending a set of upper bounds.
+     * @param upperBounds The upper bounds of the type (like {@code ? extends Foo}).
+     * @return A wildcard type representing the specified bounded wildcard.
+     */
+    public static WildcardType wildcardExtends(Type... upperBounds) {
+        return wildcardType(upperBounds, null);
+    }
+
+    /**
+     * Create a wildcard type extending a set of lower bounds.  The wildcard
+     * {@code ? super Foo} translates to {@code wildcardSuper(Foo.class)}.
+     * @param lowerBounds The lower bounds of the wildcard type.
+     * @return A reprsentation of the specified type.
+     */
+    public static WildcardType wildcardSuper(Type... lowerBounds) {
+        return wildcardType(null, lowerBounds);
+    }
+
+    /**
+     * Create a wildcard type with the specified upper and lower bounds.
+     * @param upper The type's upper bounds. {@code null} is equivalent to unbounded
+     *              (bounded above by {@link Object}).
+     * @param lower The type's lower bounds. {@code null} is equivalent to an unbounded type.
+     * @return The specified wildcard type.
+     */
+    public static WildcardType wildcardType(Type[] upper, Type[] lower) {
+        if (upper == null || upper.length == 0) {
+            upper = new Type[]{Object.class};
         }
-        
-        return Collections.unmodifiableList(desires);
+        if (lower == null) {
+            lower = new Type[0];
+        }
+        return new WildcardTypeImpl(upper, lower);
+    }
+
+    private static final WildcardType UNBOUNDED_TYPE = wildcardType(null, null);
+
+    /**
+     * Create an unbounded wildcard type.
+     * @return An unbounded wildcard type.
+     */
+    public static WildcardType wildcardType() {
+        return UNBOUNDED_TYPE;
+    }
+
+    /**
+     * <p>
+     * Find a type assignment to make two types compatible. Given two types α
+     * and β, this finds an assignment Γ of free variables in α such that Γ(α)
+     * is a subtype of (assignable to) β.
+     * <p>
+     * At the moment, α must be a Class and β must be a Class or
+     * ParameterizedType.
+     * 
+     * @param alpha The type for which to find an assignment.
+     * @param beta The target type — the assignment will make α compatible with
+     *            this type.
+     * @return A type assignment which makes α assignable to β, or {@code null}
+     *         if no such assignment exists.
+     */
+    public static TypeAssignment findCompatibleAssignment(Type alpha, Type beta) {
+        return TypeReifier.makeCompatible(alpha, beta);
     }
 }

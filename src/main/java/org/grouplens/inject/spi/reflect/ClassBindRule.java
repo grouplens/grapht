@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
+import org.grouplens.inject.types.Types;
 
 /**
  * ClassBindRule is a reflection bind rule that binds a subclass to a

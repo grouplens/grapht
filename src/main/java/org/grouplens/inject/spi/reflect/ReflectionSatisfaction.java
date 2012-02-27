@@ -23,6 +23,7 @@ import java.util.Comparator;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
+import org.grouplens.inject.types.Types;
 
 /**
  * ReflectionSatisfaction is an abstract satisfaction that implements the

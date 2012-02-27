@@ -85,7 +85,7 @@ class BindingImpl<T> implements Binding<T> {
         RootContextImpl root = context.getRootContext();
         
         for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bind(role, (Class) source, impl, 0));
+            root.addBindRule(chain, spi.bindType(role, (Class) source, impl, 0));
         }
         // TODO create generated bindings based on source, impl,
         // and exclude sets
@@ -100,7 +100,7 @@ class BindingImpl<T> implements Binding<T> {
         RootContextImpl root = context.getRootContext();
         
         for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bind(role, (Class) source, instance, 0));
+            root.addBindRule(chain, spi.bindInstance(role, (Class) source, instance, 0));
         }
     }
 

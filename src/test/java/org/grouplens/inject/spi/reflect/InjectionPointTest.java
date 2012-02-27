@@ -109,7 +109,7 @@ public class InjectionPointTest {
     }
     
     private Set<InjectionPoint> getInjectionPoints(Class<?> types) {
-        List<ReflectionDesire> desires = Types.getDesires(types);
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(types);
         Set<InjectionPoint> points = new HashSet<InjectionPoint>();
         for (ReflectionDesire rd: desires) {
             points.add(rd.getInjectionPoint());

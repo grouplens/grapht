@@ -23,6 +23,7 @@ import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
+import org.grouplens.inject.types.Types;
 
 /**
  * ProviderInstanceBindRule is a reflection bind rule that satisfies all
