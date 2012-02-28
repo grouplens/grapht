@@ -24,10 +24,9 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
-import org.grouplens.inject.types.TypeAssignment;
-import org.grouplens.inject.types.Types;
 
 import com.google.common.base.Function;
+import org.grouplens.inject.types.Types;
 
 /**
  * ClassSatisfaction is a satisfaction that instantiates instances of a given
@@ -36,42 +35,35 @@ import com.google.common.base.Function;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ClassSatisfaction extends ReflectionSatisfaction {
-    private final TypeAssignment assignment;
     private final Class<?> type;
 
     /**
-     * Create a satisfaction wrapping the given class type. TypeAssignment is an
-     * assignment of TypeVariables so that the class has no more free variables.
+     * Create a satisfaction wrapping the given class type.
      * 
      * @param type The type to wrap
-     * @param assignment The TypeAssignment to apply to the type
-     * @throws NullPointerException if type or assignment is null
+     * @throws NullPointerException if type is null
      * @throws IllegalArgumentException if the type cannot be instantiated
      */
-    public ClassSatisfaction(Class<?> type, TypeAssignment assignment) {
+    public ClassSatisfaction(Class<?> type) {
         if (type == null) {
             throw new NullPointerException("Class type cannot be null");
         }
-        if (assignment == null) {
-            throw new NullPointerException("TypeAssignment cannot be null");
-        }
         
-        type = (Class<?>) Types.box(type);
+        type = Types.box(type);
         if (!Types.isInstantiable(type)) {
             throw new IllegalArgumentException("Type cannot be instantiated");
         }
         this.type = type;
-        this.assignment = assignment;
     }
     
     @Override
     public List<? extends Desire> getDependencies() {
-        return ReflectionDesire.getDesires(type, assignment);
+        return ReflectionDesire.getDesires(type);
     }
 
     @Override
     public Type getType() {
-        return assignment.apply(type);
+        return type;
     }
 
     @Override
@@ -90,17 +82,16 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
         if (!(o instanceof ClassSatisfaction)) {
             return false;
         }
-        ClassSatisfaction s = (ClassSatisfaction) o;
-        return s.type.equals(type) && s.assignment.equals(assignment);
+        return ((ClassSatisfaction) o).type.equals(type);
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ assignment.hashCode();
+        return type.hashCode();
     }
     
     @Override
     public String toString() {
-        return "ClassSatisfaction(" + getType() + ")";
+        return "ClassSatisfaction(" + type + ")";
     }
 }

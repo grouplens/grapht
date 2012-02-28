@@ -10,31 +10,9 @@ import java.lang.reflect.*;
  * @author Michael Ekstrand
  */
 public abstract class TypeVisitor<T> implements Function<Type, T> {
-    protected final boolean defaultToNull;
-
     /**
-     * Construct a new type visitor, controlling whether it will return null.
-     * 
-     * @param defaultNull If {@code true}, return {@code null} in
-     *            {@link #visitDefault(Type)}; otherwise, throw
-     *            {@link IllegalArgumentException}.
-     */
-    protected TypeVisitor(boolean defaultNull) {
-        defaultToNull = defaultNull;
-    }
-
-    /**
-     * Construct a new type visitor that returns null in
-     * {@link #visitDefault(Type)}.
-     */
-    protected TypeVisitor() {
-        this(true);
-    }
-
-    /**
-     * Apply this visitor to a type, invoking the proper method based on the
-     * type's actual class.
-     * 
+     * Apply this visitor to a type, invoking the proper method based on the type's
+     * actual class.
      * @param type The type to visit.
      * @return The return value of the visit method.
      */
@@ -56,20 +34,14 @@ public abstract class TypeVisitor<T> implements Function<Type, T> {
     }
 
     /**
-     * Default vist method, called by all type-specific visit methods in the
-     * base class. The base implementation of this method returns <tt>null</tt>
-     * or throws {@link IllegalArgumentException}, depending on how the visitor
-     * was constructed.
-     * 
+     * Default vist method, called by all type-specific visit methods in the base class.
+     * The base implementation of this method returns <tt>null</tt>; override it to use
+     * other default behavior (e.g. throwing {@link IllegalArgumentException}).
      * @param type The type being visited.
      * @return The default computation result.
      */
-    public T visitDefault(Type type) {
-        if (defaultToNull) {
-            return null;
-        } else {
-            throw new IllegalArgumentException("unsupported type " + type.toString());
-        }
+    public T visitDefault(@SuppressWarnings("UnusedParameters") Type type) {
+        return null;
     }
 
     public T visitClass(Class<?> cls) {

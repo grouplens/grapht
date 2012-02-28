@@ -8,7 +8,6 @@ import java.util.Arrays;
 
 /**
  * Implementation of parameterized types.
- * 
  * @author Michael Ekstrand
  */
 class ParameterizedTypeImpl implements ParameterizedType {

@@ -27,6 +27,8 @@ public interface Binding<T> {
     
     Binding<T> exclude(Class<?> exclude);
     
+    Binding<T> cachePolicy(CachePolicy policy);
+    
     void to(Class<? extends T> impl);
     
     void to(T instance);

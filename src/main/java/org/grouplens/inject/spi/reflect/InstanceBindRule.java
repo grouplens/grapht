@@ -18,8 +18,6 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import java.lang.reflect.Type;
-
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
@@ -47,22 +45,17 @@ public class InstanceBindRule extends ReflectionBindRule {
      * @throws IllegalArgumentException if instance is not an instance of the
      *             source type
      */
-    public InstanceBindRule(Object instance,  Type sourceType, @Nullable AnnotationRole role, int weight) {
+    public InstanceBindRule(Object instance,  Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
         super(sourceType, role, weight);
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");
         }
-        if (Types.findCompatibleAssignment(instance.getClass(), Types.box(sourceType)) == null) {
+        if (!Types.box(sourceType).isInstance(instance)) {
             throw new IllegalArgumentException("Instance does not extend source type");
         }
         this.instance = instance;
     }
 
-    @Override
-    public boolean terminatesChain() {
-        return true;
-    }
-    
     @Override
     public Desire apply(Desire desire) {
         ReflectionDesire origDesire = (ReflectionDesire) desire;
@@ -88,10 +81,6 @@ public class InstanceBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        if (getRole() == null) {
-            return "InstanceBindRule(" + getSourceType() + " -> " + instance + ")";
-        } else {
-            return "InstanceBindRule(" + getRole() + ":" + getSourceType() + " -> " + instance + ")";
-        }
+        return "InstanceBindRule(" + getRole() + ":" + getSourceType() + " -> " + instance + ")";
     }
 }

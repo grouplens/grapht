@@ -18,8 +18,6 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import java.lang.reflect.Type;
-
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.BindRule;
@@ -38,7 +36,7 @@ import org.grouplens.inject.types.Types;
  */
 public abstract class ReflectionBindRule implements BindRule {
     private final AnnotationRole role;
-    private final Type sourceType;
+    private final Class<?> sourceType;
     
     private final int weight;
 
@@ -53,7 +51,7 @@ public abstract class ReflectionBindRule implements BindRule {
      * @param weight The weight or precedence of the rule
      * @throws NullPointerException if sourceType is null
      */
-    public ReflectionBindRule(Type sourceType, @Nullable AnnotationRole role, int weight) {
+    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
@@ -81,15 +79,13 @@ public abstract class ReflectionBindRule implements BindRule {
     /**
      * @return The source type matched by this bind rule
      */
-    public Type getSourceType() {
+    public Class<?> getSourceType() {
         return sourceType;
     }
     
     @Override
     public boolean matches(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
-        // FIXME: broken
-        
         // bind rules match type by equality
         if (rd.getDesiredType().equals(sourceType)) {
             // if the type is equal, then the roles match if

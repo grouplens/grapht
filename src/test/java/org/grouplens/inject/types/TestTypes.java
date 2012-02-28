@@ -21,11 +21,8 @@ package org.grouplens.inject.types;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -84,8 +81,6 @@ public class TestTypes {
         assertArrayEquals(wildcard.getUpperBounds(), wcbld.getUpperBounds());
         assertArrayEquals(wildcard.getLowerBounds(), wcbld.getLowerBounds());
         assertEquals(wildcard, wcbld);
-        assertTrue(wildcard.equals(wcbld));
-        assertTrue(wcbld.equals(wildcard));
         assertEquals(wildcard.hashCode(), wcbld.hashCode());
     }
 
@@ -98,8 +93,6 @@ public class TestTypes {
         assertArrayEquals(wildcard.getUpperBounds(), wcbld.getUpperBounds());
         assertArrayEquals(wildcard.getLowerBounds(), wcbld.getLowerBounds());
         assertEquals(wildcard, wcbld);
-        assertTrue(wildcard.equals(wcbld));
-        assertTrue(wcbld.equals(wildcard));
         assertEquals(wildcard.hashCode(), wcbld.hashCode());
     }
 
@@ -112,8 +105,6 @@ public class TestTypes {
         assertArrayEquals(wildcard.getUpperBounds(), wcbld.getUpperBounds());
         assertArrayEquals(wildcard.getLowerBounds(), wcbld.getLowerBounds());
         assertEquals(wildcard, wcbld);
-        assertTrue(wildcard.equals(wcbld));
-        assertTrue(wcbld.equals(wildcard));
         assertEquals(wildcard.hashCode(), wcbld.hashCode());
     }
 
@@ -130,17 +121,6 @@ public class TestTypes {
         assertArrayEquals(ptype.getActualTypeArguments(), built.getActualTypeArguments());
         assertEquals(ptype.getOwnerType(), built.getOwnerType());
         assertEquals(ptype, built);
-        assertTrue(ptype.equals(built));
-        assertTrue(built.equals(ptype));
         assertEquals(ptype.hashCode(), built.hashCode());
-    }
-
-    @Test
-    public void testWildcardInstantiableCheck() {
-        Type wc = Types.parameterizedType(Function.class,
-                                          Types.wildcardSuper(Element.class),
-                                          String.class);
-        Type t2 = new TypeLiteral<Function<? super Node,String>>() {}.getType();
-        assertTrue(TypeUtils.isAssignable(t2, wc));
     }
 }

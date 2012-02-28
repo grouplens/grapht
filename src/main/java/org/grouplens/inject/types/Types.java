@@ -18,13 +18,8 @@
  */
 package org.grouplens.inject.types;
 
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
-
 import javax.inject.Provider;
+import java.lang.reflect.*;
 
 /**
  * Static helper methods for working with types.
@@ -43,7 +38,7 @@ public final class Types {
      * @param type The possibly unboxed type
      * @return The boxed type
      */
-    public static Type box(Type type) {
+    public static Class<?> box(Class<?> type) {
         if (int.class.equals(type)) {
             return Integer.class;
         } else if (short.class.equals(type)) {
@@ -116,7 +111,7 @@ public final class Types {
         }
         return distance;
     }
-
+    
     /**
      * Get the type that is provided by a given implementation of
      * {@link Provider}.
@@ -126,9 +121,11 @@ public final class Types {
      * @throws IllegalArgumentException if the class doesn't actually implement
      *             Provider
      */
-    public static Type getProvidedType(Class<? extends Provider<?>> providerClass) {
+    public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
+        // FIXME: I don't know if this is capable of getting the generics
+        // properly, but that's not my concern right now
         try {
-            return Types.box(providerClass.getMethod("get").getGenericReturnType());
+            return Types.box(providerClass.getMethod("get").getReturnType());
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -142,9 +139,8 @@ public final class Types {
      * @param type A class type
      * @return True if the class type is instantiable
      */
-    public static boolean isInstantiable(Type type) {
-        Class<?> erased = Types.erase(type);
-        return !Modifier.isAbstract(erased.getModifiers()) && !erased.isInterface();
+    public static boolean isInstantiable(Class<?> type) {
+        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
     }
 
     /**
@@ -159,46 +155,22 @@ public final class Types {
         return visitor.apply(type);
     }
 
-    /**
-     * Create a new parameterized type from a class and actual arguments.
-     * @param cls The raw type to wrap.
-     * @param args The actual arguments for <var>cls</var>'s type parameters.
-     * @return A {@link ParameterizedType} instantiated <var>cls</var> with <var>args</var>.
-     */
     public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
-        TypeVariable<?>[] vars = cls.getTypeParameters();
+        TypeVariable[] vars = cls.getTypeParameters();
         if (args.length != vars.length) {
             throw new IllegalArgumentException("wrong number of arguments");
         }
         return new ParameterizedTypeImpl(cls, args, null);
     }
 
-    /**
-     * Create a new wildcard type extending a set of upper bounds.
-     * @param upperBounds The upper bounds of the type (like {@code ? extends Foo}).
-     * @return A wildcard type representing the specified bounded wildcard.
-     */
     public static WildcardType wildcardExtends(Type... upperBounds) {
         return wildcardType(upperBounds, null);
     }
 
-    /**
-     * Create a wildcard type extending a set of lower bounds.  The wildcard
-     * {@code ? super Foo} translates to {@code wildcardSuper(Foo.class)}.
-     * @param lowerBounds The lower bounds of the wildcard type.
-     * @return A reprsentation of the specified type.
-     */
     public static WildcardType wildcardSuper(Type... lowerBounds) {
         return wildcardType(null, lowerBounds);
     }
 
-    /**
-     * Create a wildcard type with the specified upper and lower bounds.
-     * @param upper The type's upper bounds. {@code null} is equivalent to unbounded
-     *              (bounded above by {@link Object}).
-     * @param lower The type's lower bounds. {@code null} is equivalent to an unbounded type.
-     * @return The specified wildcard type.
-     */
     public static WildcardType wildcardType(Type[] upper, Type[] lower) {
         if (upper == null || upper.length == 0) {
             upper = new Type[]{Object.class};
@@ -208,33 +180,7 @@ public final class Types {
         }
         return new WildcardTypeImpl(upper, lower);
     }
-
-    private static final WildcardType UNBOUNDED_TYPE = wildcardType(null, null);
-
-    /**
-     * Create an unbounded wildcard type.
-     * @return An unbounded wildcard type.
-     */
     public static WildcardType wildcardType() {
-        return UNBOUNDED_TYPE;
-    }
-
-    /**
-     * <p>
-     * Find a type assignment to make two types compatible. Given two types α
-     * and β, this finds an assignment Γ of free variables in α such that Γ(α)
-     * is a subtype of (assignable to) β.
-     * <p>
-     * At the moment, α must be a Class and β must be a Class or
-     * ParameterizedType.
-     * 
-     * @param alpha The type for which to find an assignment.
-     * @param beta The target type — the assignment will make α compatible with
-     *            this type.
-     * @return A type assignment which makes α assignable to β, or {@code null}
-     *         if no such assignment exists.
-     */
-    public static TypeAssignment findCompatibleAssignment(Type alpha, Type beta) {
-        return TypeReifier.makeCompatible(alpha, beta);
+        return wildcardType(null, null);
     }
 }

@@ -26,8 +26,6 @@ import javax.inject.Provider;
 import org.grouplens.inject.spi.Desire;
 
 import com.google.common.base.Function;
-
-import org.grouplens.inject.types.TypeAssignment;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -38,24 +36,17 @@ import org.grouplens.inject.types.Types;
  */
 public class ProviderClassSatisfaction extends ReflectionSatisfaction {
     private final Class<? extends Provider<?>> providerType;
-    private final TypeAssignment assignment;
 
     /**
      * Create a ProviderClassSatisfaction that wraps a given provider type.
-     * TypeAssignment is an assignment of TypeVariables so that the class has no
-     * more free variables.
      * 
      * @param providerType The provider class type
-     * @throws NullPointerException if providerType or assignment is null
-     * @throws IllegalArgumentException if the class is not a Provider, or is
-     *             not instantiable
+     * @throws NullPointerException if providerType is null
+     * @throws IllegalArgumentException if the class is not a Provider, or is not instantiable
      */
-    public ProviderClassSatisfaction(Class<? extends Provider<?>> providerType, TypeAssignment assignment) {
+    public ProviderClassSatisfaction(Class<? extends Provider<?>> providerType) {
         if (providerType == null) {
             throw new NullPointerException("Provider class cannot be null");
-        }
-        if (assignment == null) {
-            throw new NullPointerException("TypeAssignment cannot be null");
         }
         if (!Provider.class.isAssignableFrom(providerType)) {
             throw new IllegalArgumentException("Class type is not a Provider implementation");
@@ -65,7 +56,6 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
         }
         
         this.providerType = providerType;
-        this.assignment = assignment;
     }
     
     /**
@@ -78,17 +68,17 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
     
     @Override
     public List<? extends Desire> getDependencies() {
-        return ReflectionDesire.getDesires(providerType, assignment);
+        return ReflectionDesire.getDesires(providerType);
     }
 
     @Override
     public Type getType() {
-        return assignment.apply(Types.getProvidedType(providerType));
+        return Types.getProvidedType(providerType);
     }
 
     @Override
     public Class<?> getErasedType() {
-        return Types.erase(getType());
+        return Types.getProvidedType(providerType);
     }
 
     @Override
@@ -105,17 +95,16 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
         if (!(o instanceof ProviderClassSatisfaction)) {
             return false;
         }
-        ProviderClassSatisfaction p = (ProviderClassSatisfaction) o;
-        return p.providerType.equals(providerType) && p.assignment.equals(assignment);
+        return ((ProviderClassSatisfaction) o).providerType.equals(providerType);
     }
     
     @Override
     public int hashCode() {
-        return providerType.hashCode() ^ assignment.hashCode();
+        return providerType.hashCode();
     }
     
     @Override
     public String toString() {
-        return "ProviderClassSatisfaction(" + getType() + ", " + providerType + ")";
+        return "ProviderClassSatisfaction(" + getErasedType() + ", " + providerType + ")";
     }
 }

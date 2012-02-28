@@ -42,8 +42,8 @@ public abstract class ReflectionSatisfaction implements Satisfaction {
                 ReflectionContextMatcher cm2 = (ReflectionContextMatcher) o2;
                 
                 // #1 - order by type distance, select the matcher that is closest
-                int td1 = Types.getTypeDistance(getErasedType(), Types.erase(cm1.getMatchedType()));
-                int td2 = Types.getTypeDistance(getErasedType(), Types.erase(cm2.getMatchedType()));
+                int td1 = Types.getTypeDistance(getErasedType(), cm1.getMatchedType());
+                int td2 = Types.getTypeDistance(getErasedType(), cm2.getMatchedType());
                 if (td1 != td2) {
                     return td1 - td2;
                 }
@@ -51,8 +51,6 @@ public abstract class ReflectionSatisfaction implements Satisfaction {
                 // #2 - order by role distance, select the matcher that is closest
                 int rd1 = AnnotationRole.getRoleDistance(r, cm1.getMatchedRole());
                 int rd2 = AnnotationRole.getRoleDistance(r, cm2.getMatchedRole());
-                
-                // #3 - FIXME: we need to apply generics I think, but are they #2 or #3 in ordering?
                 return rd1 - rd2;
             }
         };

@@ -33,7 +33,6 @@ import org.grouplens.inject.spi.Desire;
  */
 public class MockBindRule implements BindRule {
     private final Map<Desire, Desire> bindings;
-    private boolean terminate;
     
     public MockBindRule() {
         bindings = new HashMap<Desire, Desire>();
@@ -42,10 +41,6 @@ public class MockBindRule implements BindRule {
     public MockBindRule(Desire in, Desire out) {
         this();
         addMapping(in, out);
-    }
-    
-    public void setTerminatesChain(boolean terminate) {
-        this.terminate = terminate;
     }
     
     public void addMapping(Desire in, Desire out) {
@@ -65,10 +60,5 @@ public class MockBindRule implements BindRule {
     @Override
     public int getWeight() {
         return 0;
-    }
-
-    @Override
-    public boolean terminatesChain() {
-        return terminate;
     }
 }

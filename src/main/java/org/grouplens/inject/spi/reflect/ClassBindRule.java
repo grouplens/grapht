@@ -18,27 +18,24 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import java.lang.reflect.Type;
-
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
-import org.grouplens.inject.types.TypeAssignment;
 import org.grouplens.inject.types.Types;
 
 /**
- * TypeBindRule is a reflection bind rule that binds a subclass to a
+ * ClassBindRule is a reflection bind rule that binds a subclass to a
  * higher-level type. If the implementation type is instantiable, the bind rule
  * will satisfy all matching desires with a {@link ClassSatisfaction}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class TypeBindRule extends ReflectionBindRule {
+public class ClassBindRule extends ReflectionBindRule {
     private final Class<?> implType;
 
     /**
-     * Create a TypeBindRule that binds <tt>implType</tt> to any desire for
+     * Create a ClassBindRule that binds <tt>implType</tt> to any desire for
      * <tt>sourceType</tt>.
      * 
      * @param implType The implementation type that satisfies the desire
@@ -48,47 +45,36 @@ public class TypeBindRule extends ReflectionBindRule {
      * @throws NullPointerException if implType or sourceType are null
      * @throws IllegalArgumentException if implType does not extend sourceType
      */
-    public TypeBindRule(Class<?> implType, Type sourceType, @Nullable AnnotationRole role,  int weight) {
+    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  int weight) {
         super(sourceType, role, weight);
         if (implType == null) {
             throw new NullPointerException("Implementation type cannot be null");
         }
         
-        implType = (Class<?>) Types.box(implType);
-        if (Types.findCompatibleAssignment(implType, sourceType) == null) {
+        implType = Types.box(implType);
+        if (!Types.box(sourceType).isAssignableFrom(implType)) {
             throw new IllegalArgumentException(implType + " does not extend " + sourceType);
         }
         this.implType = implType;
-    }
-    
-    @Override
-    public boolean terminatesChain() {
-        return false;
     }
 
     @Override
     public Desire apply(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
-        
-        ClassSatisfaction satisfaction = null;
-        if (Types.isInstantiable(implType)) {
-            TypeAssignment assignment = Types.findCompatibleAssignment(implType, rd.getDesiredType());
-            satisfaction = new ClassSatisfaction(implType, assignment);
-        }
-        
-        // The default source is set to TYPE so that @ImplementedBy and @ProvidedBy
-        // on the impl type can be followed, but any role defaults on the injection
-        // point will be disabled.
-        return new ReflectionDesire(implType, rd.getInjectionPoint(), 
-                                    satisfaction, DefaultSource.TYPE);
+        // we can pass in null for the satisfaction here, because ReflectionDesire
+        // will create a ClassSatisfaction for us if implType is instantiable
+        // - The default source is set to TYPE so that @ImplementedBy and @ProvidedBy
+        //   on the impl type can be followed, but any role defaults on the injection
+        //   point will be disabled.
+        return new ReflectionDesire(implType, rd.getInjectionPoint(), null, DefaultSource.TYPE);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof TypeBindRule)) {
+        if (!(o instanceof ClassBindRule)) {
             return false;
         }
-        return super.equals(o) && ((TypeBindRule) o).implType.equals(implType);
+        return super.equals(o) && ((ClassBindRule) o).implType.equals(implType);
     }
     
     @Override
@@ -98,10 +84,6 @@ public class TypeBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        if (getRole() == null) {
-            return "TypeBindRule(" + getSourceType() + " -> " + implType + ")";
-        } else {
-            return "TypeBindRule(" + getRole() + ":" + getSourceType() + " -> " + implType + ")";
-        }
+        return "ClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + implType + ")";
     }
 }

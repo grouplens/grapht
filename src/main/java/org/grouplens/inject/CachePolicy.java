@@ -16,37 +16,30 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.spi.reflect;
-
-import org.grouplens.inject.spi.Desire;
+package org.grouplens.inject;
 
 /**
- * InjectionPoint represents a point of injection for an instantiable type.
- * Examples include a constructor parameter, a setter method, or a field.
+ * CachePolicy controls the behavior of instant creation after dependency
+ * resolution has been completed.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public interface InjectionPoint {
+public enum CachePolicy {
     /**
-     * Return the type required to satisfy the injection point.
-     * 
-     * @return The type of the injection point
+     * A new instance is created every time a binding is used to satisfy a
+     * dependency.
      */
-    Class<?> getType();
-
+    NEW,
     /**
-     * Return any role on this injection point, or null if it is the default
-     * role.
-     * 
-     * @return The role on the injection point
+     * <p>
+     * Instances of a type are shared as much as possible. Because of
+     * context-specific bindings, a type satisfying one dependency might require
+     * a different set of resolved dependencies compared to another dependency
+     * of the same type. In this case, separate instances are required.
+     * <p>
+     * However, when a type's resolved dependencies are the same, instances can
+     * be shared. Thus, a type with no dependencies and a SHARED policy is
+     * effectively a singleton within the scope of the configuration injector.
      */
-    AnnotationRole getRole();
-
-    /**
-     * Return whether or not this injection point is a transient, with the same
-     * definition of {@link Desire#isTransient()}.
-     * 
-     * @return True if the injection point is for a transient desire
-     */
-    boolean isTransient();
+    SHARED
 }

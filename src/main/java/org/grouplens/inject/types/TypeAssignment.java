@@ -7,14 +7,12 @@ import javax.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An assignment of type variables to types. When applied to other types, it
- * fills them in according to this assignment.
- * 
+ * An assignment of type variables to types. When applied to other types, it fills them
+ * in according to this assignment.
  * @author Michael Ekstrand
  */
 public class TypeAssignment implements Function<Type, Type> {
@@ -24,16 +22,8 @@ public class TypeAssignment implements Function<Type, Type> {
     private final Map<TypeVariable<?>,Type> map;
 
     /**
-     * Construct a new, empty type assignment.
-     */
-    public TypeAssignment() {
-        base = null;
-        map = Collections.emptyMap();
-    }
-
-    /**
      * Construct a new type assignment from a map.
-     * @param assignment The assignment of variables used by this assignment.
+     * @param assignment
      */
     public TypeAssignment(@Nonnull Map<TypeVariable<?>,Type> assignment) {
         map = assignment;
@@ -41,9 +31,7 @@ public class TypeAssignment implements Function<Type, Type> {
     }
 
     /**
-     * Construct a derived type assignment, delegating to the base assignment as
-     * necessary.
-     * 
+     * Construct a derived type assignment, delegating to the base assignment as necessary.
      * @param base A type assignment to delegate to.
      * @param assignment The variable assignment for this assignment.
      */
@@ -51,19 +39,10 @@ public class TypeAssignment implements Function<Type, Type> {
         map = assignment;
         this.base = base;
     }
-    
-    /**
-     * @return The backing map for this assignment
-     */
-    public Map<TypeVariable<?>, Type> getAssignment() {
-        return Collections.unmodifiableMap(map);
-    }
 
     /**
-     * Apply this type assignment to a type. If the type is a variable, it is
-     * substituted; if it is another kind of type, free variables are
-     * substituted using this assignment.
-     * 
+     * Apply this type assignment to a type. If the type is a variable, it is substituted;
+     * if it is another kind of type, free variables are substituted using this assignment.
      * @param type The type to substitute.
      * @return The type with variables substituted according to this assignment.
      */
@@ -71,32 +50,12 @@ public class TypeAssignment implements Function<Type, Type> {
     public Type apply(Type type) {
         return Types.visit(type, new Visitor());
     }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof TypeAssignment)) {
-            return false;
-        }
-        TypeAssignment t = (TypeAssignment) o;
-        return t.map.equals(map) && (base == null ? t.base == null : base.equals(t.base));
-    }
-    
-    @Override
-    public int hashCode() {
-        return map.hashCode() ^ (base == null ? 0 : base.hashCode());
-    }
-    
-    @Override
-    public String toString() {
-        return map.toString();
-    }
 
     /**
      * Give this type assignment a new base assignment.
-     * 
      * @param base The base assignment to use.
-     * @return A type assignment with the same assignments as this one but a
-     *         base/fallback assignment of <var>base</var>.
+     * @return A type assignment with the same assignments as this one but a base/fallback
+     * assignment of <var>base</var>.
      */
     public TypeAssignment withBase(TypeAssignment base) {
         return new TypeAssignment(base, map);
@@ -109,7 +68,7 @@ public class TypeAssignment implements Function<Type, Type> {
         }
 
         @Override
-        public Type visitTypeVariable(TypeVariable<?> var) {
+        public Type visitTypeVariable(TypeVariable var) {
             Type type = map.get(var);
             if (base != null && type == null) {
                 type = base.apply(var);
@@ -133,10 +92,9 @@ public class TypeAssignment implements Function<Type, Type> {
     }
 
     /**
-     * Create a type assignment from a parameterized type. The resulting
-     * assignment assigns the formal parameters of the raw type to the actual
-     * arguments in the parameterized type.
-     * 
+     * Create a type assignment from a parameterized type. The resulting assignment
+     * assigns the formal parameters of the raw type to the actual arguments in the
+     * parameterized type.
      * @param type The type from which to generate the type assignment.
      * @return A type assignment mapping formals to actuals.
      */
