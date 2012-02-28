@@ -20,10 +20,12 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 
 import javax.inject.Provider;
 
 import org.grouplens.inject.annotation.PassThrough;
+import org.grouplens.inject.types.TypeAssignment;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -37,6 +39,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     private final Constructor<?> ctor;
     private final int parameter;
     private final boolean forProvider;
+    
+    private final TypeAssignment assignment;
 
     /**
      * Create a ConstructorParameterInjectionPoint that wraps the given
@@ -45,13 +49,15 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
      * @param ctor The constructor to wrap
      * @param parameter The parameter index of this injection point within
      *            ctor's parameters
-     * @throws NullPointerException if ctor is null
+     * @param assignment The TypeAssignment to apply to the type of this
+     *            injection point
+     * @throws NullPointerException if ctor or assignment is null
      * @throws IndexOutOfBoundsException if parameter is not a valid index into
      *             the constructor's parameters
      */
-    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int parameter) {
-        if (ctor == null) {
-            throw new NullPointerException("Constructor cannot be null");
+    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int parameter, TypeAssignment assignment) {
+        if (ctor == null || assignment == null) {
+            throw new NullPointerException("Constructor and assignment cannot be null");
         }
         
         int numArgs = ctor.getParameterTypes().length;
@@ -62,6 +68,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
         this.role = AnnotationRole.getRole(ctor.getParameterAnnotations()[parameter]);
         this.ctor = ctor;
         this.parameter = parameter;
+        this.assignment = assignment;
         this.forProvider = Provider.class.isAssignableFrom(ctor.getDeclaringClass());
     }
 
@@ -97,8 +104,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public Class<?> getType() {
-        return Types.box(ctor.getParameterTypes()[parameter]);
+    public Type getType() {
+        return assignment.apply(Types.box(ctor.getGenericParameterTypes()[parameter]));
     }
 
     @Override
@@ -107,17 +114,22 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     }
     
     @Override
+    public TypeAssignment getTypeAssignment() {
+        return assignment;
+    }
+    
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof ConstructorParameterInjectionPoint)) {
             return false;
         }
         ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) o;
-        return cp.ctor.equals(ctor) && cp.parameter == parameter;
+        return cp.ctor.equals(ctor) && cp.parameter == parameter && cp.assignment.equals(assignment);
     }
     
     @Override
     public int hashCode() {
-        return ctor.hashCode() ^ parameter;
+        return ctor.hashCode() ^ parameter ^ assignment.hashCode();
     }
     
     @Override

@@ -20,6 +20,7 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import org.grouplens.inject.annotation.ImplementedBy;
 import org.grouplens.inject.annotation.ProvidedBy;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.types.TypeAssignment;
 import org.grouplens.inject.types.Types;
 
 import javax.inject.Inject;
@@ -54,7 +56,7 @@ public class ReflectionDesire implements Desire {
      * @return The dependency desires for the given type
      * @throws NullPointerException if the type is null
      */
-    public static List<ReflectionDesire> getDesires(Class<?> type) {
+    public static List<ReflectionDesire> getDesires(Class<?> type, TypeAssignment assignment) {
         List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
 
         boolean ctorFound = false;
@@ -63,7 +65,7 @@ public class ReflectionDesire implements Desire {
                 if (!ctorFound) {
                     ctorFound = true;
                     for (int i = 0; i < ctor.getParameterTypes().length; i++) {
-                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i)));
+                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i, assignment)));
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
@@ -81,7 +83,7 @@ public class ReflectionDesire implements Desire {
                     throw new RuntimeException("Invalid setter injection method");
                 }
 
-                desires.add(new ReflectionDesire(new SetterInjectionPoint(m)));
+                desires.add(new ReflectionDesire(new SetterInjectionPoint(m, assignment)));
             }
         }
 
@@ -109,7 +111,7 @@ public class ReflectionDesire implements Desire {
         ROLE_AND_TYPE
     }
     
-    private final Class<?> desiredType;
+    private final Type desiredType;
     private final InjectionPoint injectPoint;
     private final ReflectionSatisfaction satisfaction;
 
@@ -145,20 +147,21 @@ public class ReflectionDesire implements Desire {
      *             type of the injection point, or if the satisfaction's type is
      *             not assignable to the desired type
      */
-    public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint,
+    public ReflectionDesire(Type desiredType, InjectionPoint injectPoint,
                             ReflectionSatisfaction satisfaction, DefaultSource dfltSource) {
         if (desiredType == null || injectPoint == null || dfltSource == null) {
             throw new NullPointerException("Desired type, injection point, and default source cannot be null");
         }
 
         desiredType = Types.box(desiredType);
-        if (!injectPoint.getType().isAssignableFrom(desiredType) || (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType()))) {
-            throw new IllegalArgumentException(
-                                               "No type hierarchy between injection point, desired type, and satisfaction");
+        if (!Types.erase(injectPoint.getType()).isAssignableFrom(Types.erase(desiredType)) || 
+            (satisfaction != null && !Types.erase(desiredType).isAssignableFrom(satisfaction.getErasedType()))) {
+            throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
         }
 
         if (satisfaction == null && Types.isInstantiable(desiredType)) {
-            satisfaction = new ClassSatisfaction(desiredType);
+            satisfaction = new ClassSatisfaction(Types.erase(desiredType), 
+                                                 injectPoint.getTypeAssignment());
         }
 
         this.desiredType = desiredType;
@@ -172,7 +175,7 @@ public class ReflectionDesire implements Desire {
      * 
      * @return The desired type
      */
-    public Class<?> getDesiredType() {
+    public Type getDesiredType() {
         return desiredType;
     }
 
@@ -244,7 +247,7 @@ public class ReflectionDesire implements Desire {
                 } else {
                     DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
                     if (impl != null) {
-                        return new ClassBindRule(impl.value(), getDesiredType(), role,
+                        return new TypeBindRule(impl.value(), getDesiredType(), role,
                                                  BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                     }
                 }
@@ -259,14 +262,14 @@ public class ReflectionDesire implements Desire {
         // Now check the desired type for @ImplementedBy or @ProvidedBy if the type
         // source has not been disabled.
         if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.ROLE_AND_TYPE) {
-            ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
+            ProvidedBy provided = Types.erase(getDesiredType()).getAnnotation(ProvidedBy.class);
             if (provided != null) {
                 return new ProviderClassBindRule(provided.value(), getDesiredType(), role,
                                                  BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
             }
-            ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
+            ImplementedBy impl = Types.erase(getDesiredType()).getAnnotation(ImplementedBy.class);
             if (impl != null) {
-                return new ClassBindRule(impl.value(), getDesiredType(), role,
+                return new TypeBindRule(impl.value(), getDesiredType(), role,
                                          BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
             }
         }

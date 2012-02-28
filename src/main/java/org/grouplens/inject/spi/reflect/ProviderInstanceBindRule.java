@@ -54,7 +54,8 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
         if (provider == null) {
             throw new NullPointerException("Provider instance cannot be null");
         }
-        if (!sourceType.isAssignableFrom(Types.getProvidedType((Class<? extends Provider<?>>) provider.getClass()))) {
+        Class<?> providedType = Types.erase(Types.getProvidedType((Class<? extends Provider<?>>) provider.getClass()));
+        if (Types.findCompatibleAssignment(providedType, sourceType) == null) {
             throw new IllegalArgumentException("Provider does not provide instances of " + sourceType);
         }
         

@@ -18,11 +18,14 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import java.lang.reflect.Type;
+
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
+import org.grouplens.inject.types.TypeAssignment;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -48,12 +51,12 @@ public class ProviderClassBindRule extends ReflectionBindRule {
      * @throws IllegalArgumentException if providerType does not provide
      *             implementations of sourceType
      */
-    public ProviderClassBindRule(Class<? extends Provider<?>> providerType, Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
+    public ProviderClassBindRule(Class<? extends Provider<?>> providerType, Type sourceType, @Nullable AnnotationRole role, int weight) {
         super(sourceType, role, weight);
         if (providerType == null) {
             throw new NullPointerException("Provider type cannot be null");
         }
-        if (!sourceType.isAssignableFrom(Types.getProvidedType(providerType))) {
+        if (Types.findCompatibleAssignment(Types.erase(Types.getProvidedType(providerType)), sourceType) == null) {
             throw new IllegalArgumentException("Provider type does not provide instances of " + sourceType);
         }
         
@@ -68,7 +71,10 @@ public class ProviderClassBindRule extends ReflectionBindRule {
     @Override
     public Desire apply(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
-        ProviderClassSatisfaction satisfaction = new ProviderClassSatisfaction(providerType);
+        TypeAssignment assignment = Types.findCompatibleAssignment(Types.erase(Types.getProvidedType(providerType)), 
+                                                                   rd.getDesiredType());
+        ProviderClassSatisfaction satisfaction = new ProviderClassSatisfaction(providerType, assignment);
+        
         // The NONE DefaultSource is used so that any time this bind rule is applied,
         // we know a default cannot be followed (which would effectively bypass the
         // provider class binding, which seems strange).

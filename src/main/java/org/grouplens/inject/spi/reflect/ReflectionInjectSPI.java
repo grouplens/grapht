@@ -30,7 +30,7 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public <T> BindRule bindType(Class<? extends Annotation> role, Class<T> source,
                                  Class<? extends T> impl, int weight) {
-        return new ClassBindRule(impl, source, role(role), weight);
+        return new TypeBindRule(impl, source, role(role), weight);
     }
 
     @Override

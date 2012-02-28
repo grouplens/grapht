@@ -25,6 +25,7 @@ import javax.inject.Provider;
 
 
 public interface InjectSPI {
+    // FIXME: turn these into types
     <T> BindRule bindType(@Nullable Class<? extends Annotation> role, Class<T> source,
                           Class<? extends T> impl, int weight);
     
@@ -40,4 +41,6 @@ public interface InjectSPI {
     ContextMatcher context(@Nullable Class<? extends Annotation> role, Class<?> type);
     
     // FIXME: Do I need to add desires and satisfaction handling here?
+    
+    // FIXME: Add a method to create a synthetic satisfaction to be used as the root node
 }

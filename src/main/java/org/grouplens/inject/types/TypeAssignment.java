@@ -51,6 +51,13 @@ public class TypeAssignment implements Function<Type, Type> {
         map = assignment;
         this.base = base;
     }
+    
+    /**
+     * @return The backing map for this assignment
+     */
+    public Map<TypeVariable<?>, Type> getAssignment() {
+        return Collections.unmodifiableMap(map);
+    }
 
     /**
      * Apply this type assignment to a type. If the type is a variable, it is
@@ -63,6 +70,25 @@ public class TypeAssignment implements Function<Type, Type> {
     @Override
     public Type apply(Type type) {
         return Types.visit(type, new Visitor());
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TypeAssignment)) {
+            return false;
+        }
+        TypeAssignment t = (TypeAssignment) o;
+        return t.map.equals(map) && (base == null ? t.base == null : base.equals(t.base));
+    }
+    
+    @Override
+    public int hashCode() {
+        return map.hashCode() ^ (base == null ? 0 : base.hashCode());
+    }
+    
+    @Override
+    public String toString() {
+        return map.toString();
     }
 
     /**

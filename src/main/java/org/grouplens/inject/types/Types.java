@@ -18,8 +18,13 @@
  */
 package org.grouplens.inject.types;
 
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+
 import javax.inject.Provider;
-import java.lang.reflect.*;
 
 /**
  * Static helper methods for working with types.
@@ -38,7 +43,7 @@ public final class Types {
      * @param type The possibly unboxed type
      * @return The boxed type
      */
-    public static Class<?> box(Class<?> type) {
+    public static Type box(Type type) {
         if (int.class.equals(type)) {
             return Integer.class;
         } else if (short.class.equals(type)) {
@@ -111,7 +116,7 @@ public final class Types {
         }
         return distance;
     }
-    
+
     /**
      * Get the type that is provided by a given implementation of
      * {@link Provider}.
@@ -121,11 +126,9 @@ public final class Types {
      * @throws IllegalArgumentException if the class doesn't actually implement
      *             Provider
      */
-    public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
-        // FIXME: I don't know if this is capable of getting the generics
-        // properly, but that's not my concern right now
+    public static Type getProvidedType(Class<? extends Provider<?>> providerClass) {
         try {
-            return Types.box(providerClass.getMethod("get").getReturnType());
+            return Types.box(providerClass.getMethod("get").getGenericReturnType());
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -139,8 +142,9 @@ public final class Types {
      * @param type A class type
      * @return True if the class type is instantiable
      */
-    public static boolean isInstantiable(Class<?> type) {
-        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
+    public static boolean isInstantiable(Type type) {
+        Class<?> erased = Types.erase(type);
+        return !Modifier.isAbstract(erased.getModifiers()) && !erased.isInterface();
     }
 
     /**

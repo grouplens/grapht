@@ -18,7 +18,10 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import java.lang.reflect.Type;
+
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.types.TypeAssignment;
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -32,7 +35,7 @@ public interface InjectionPoint {
      * 
      * @return The type of the injection point
      */
-    Class<?> getType();
+    Type getType();
 
     /**
      * Return any role on this injection point, or null if it is the default
@@ -49,4 +52,12 @@ public interface InjectionPoint {
      * @return True if the injection point is for a transient desire
      */
     boolean isTransient();
+
+    /**
+     * The TypeAssignment that satisfies any free variables in the type of this
+     * injection point.
+     * 
+     * @return The free variable assignment
+     */
+    TypeAssignment getTypeAssignment();
 }

@@ -18,10 +18,13 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import java.lang.reflect.Type;
+
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.grouplens.inject.types.Types;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
@@ -31,7 +34,7 @@ import org.grouplens.inject.spi.SatisfactionAndRole;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ReflectionContextMatcher implements ContextMatcher {
-    private final Class<?> type;
+    private final Type type;
     private final AnnotationRole role;
 
     /**
@@ -40,7 +43,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * 
      * @param type The type to match
      */
-    public ReflectionContextMatcher(Class<?> type) {
+    public ReflectionContextMatcher(Type type) {
         this(type, null);
     }
 
@@ -51,7 +54,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * @param type The type to match
      * @param role The role to match
      */
-    public ReflectionContextMatcher(Class<?> type, @Nullable AnnotationRole role) {
+    public ReflectionContextMatcher(Type type, @Nullable AnnotationRole role) {
         this.type = type;
         this.role = role;
     }
@@ -59,7 +62,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
     /**
      * @return The type matched by this matcher
      */
-    public Class<?> getMatchedType() {
+    public Type getMatchedType() {
         return type;
     }
     
@@ -72,9 +75,14 @@ public class ReflectionContextMatcher implements ContextMatcher {
     
     @Override
     public boolean matches(SatisfactionAndRole n) {
-        // FIXME: handle generics correctly
-        if (type.isAssignableFrom(n.getSatisfaction().getErasedType())) {
-            // type is a match, so check the role
+        // context matching follows Java's type inheritence,
+        //  i.e. the type of the satisfaction must be a subclass
+        //   and the type variables must fit the bounds
+        if (Types.erase(type).isAssignableFrom(n.getSatisfaction().getErasedType())) {
+            // type is a match, so check type variables
+            
+            
+            
             return AnnotationRole.inheritsRole((AnnotationRole) n.getRole(), role);
         }
         
