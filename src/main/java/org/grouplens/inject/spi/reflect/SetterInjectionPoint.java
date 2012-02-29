@@ -18,11 +18,10 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import javax.inject.Provider;
-
-import org.grouplens.inject.annotation.PassThrough;
+import org.grouplens.inject.annotation.Transient;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -33,7 +32,6 @@ import org.grouplens.inject.types.Types;
 public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
     private final AnnotationRole role;
-    private final boolean forProvider;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -48,9 +46,9 @@ public class SetterInjectionPoint implements InjectionPoint {
             throw new IllegalArgumentException("Setter must have a single parameter");
         }
         
+        // FIXME: should we check the setter's method annotations as well?
         this.role = AnnotationRole.getRole(setter.getParameterAnnotations()[0]);
         this.setter = setter;
-        this.forProvider = Provider.class.isAssignableFrom(setter.getDeclaringClass());
     }
     
     /**
@@ -62,10 +60,18 @@ public class SetterInjectionPoint implements InjectionPoint {
     
     @Override
     public boolean isTransient() {
-        // the desire is transient if it's a dependency for a provider but 
-        // is not a pass-through dependency (i.e. it's not used by the provided
-        // object after creation).
-        return forProvider && setter.getAnnotation(PassThrough.class) == null;
+        // we'll check both setter and parameter annotations
+        if (setter.getAnnotation(Transient.class) != null) {
+            return true;
+        }
+        
+        for (Annotation a: setter.getParameterAnnotations()[0]) {
+            if (a instanceof Transient) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     @Override

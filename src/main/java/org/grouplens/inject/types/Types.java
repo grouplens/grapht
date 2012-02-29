@@ -156,7 +156,7 @@ public final class Types {
     }
 
     public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
-        TypeVariable[] vars = cls.getTypeParameters();
+        TypeVariable<?>[] vars = cls.getTypeParameters();
         if (args.length != vars.length) {
             throw new IllegalArgumentException("wrong number of arguments");
         }

@@ -21,9 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
-import javax.inject.Provider;
-
-import org.grouplens.inject.annotation.PassThrough;
+import org.grouplens.inject.annotation.Transient;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -36,7 +34,6 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     private final AnnotationRole role;
     private final Constructor<?> ctor;
     private final int parameter;
-    private final boolean forProvider;
 
     /**
      * Create a ConstructorParameterInjectionPoint that wraps the given
@@ -62,7 +59,6 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
         this.role = AnnotationRole.getRole(ctor.getParameterAnnotations()[parameter]);
         this.ctor = ctor;
         this.parameter = parameter;
-        this.forProvider = Provider.class.isAssignableFrom(ctor.getDeclaringClass());
     }
 
     /**
@@ -82,18 +78,16 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     
     @Override
     public boolean isTransient() {
-        boolean passThrough = false;
+        // we only check parameter annotations for the constructor
+        // injection point
         Annotation[] annots = ctor.getParameterAnnotations()[parameter];
         for (int i = 0; i < annots.length; i++) {
-            if (annots[i] instanceof PassThrough) {
-                passThrough = true;
-                break;
+            if (annots[i] instanceof Transient) {
+                return true;
             }
         }
         
-        // the desire is transient if it is for a provider and the parameter has
-        // not been annotated as a pass-through dependency
-        return forProvider && !passThrough;
+        return false;
     }
 
     @Override
