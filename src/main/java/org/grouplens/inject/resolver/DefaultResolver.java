@@ -158,10 +158,10 @@ public class DefaultResolver implements Resolver {
         
         for (Node<Satisfaction> oldNode: toMerge) {
             // lookup map of all node's dependency possibilities
-            Map<Set<Node<Satisfaction>>, Node<Satisfaction>> depOptions = mergeMap.get(oldNode.getPayload());
+            Map<Set<Node<Satisfaction>>, Node<Satisfaction>> depOptions = mergeMap.get(oldNode.getLabel());
             if (depOptions == null) {
                 depOptions = new HashMap<Set<Node<Satisfaction>>, Node<Satisfaction>>();
-                mergeMap.put(oldNode.getPayload(), depOptions);
+                mergeMap.put(oldNode.getLabel(), depOptions);
             }
             
             // accumulate the set of dependencies for this node, filtering
@@ -177,13 +177,13 @@ public class DefaultResolver implements Resolver {
             if (newNode == null) {
                 // this configuration for the satisfaction has not been seen before
                 // - add it to merged graph, and connect to its dependencies
-                newNode = new Node<Satisfaction>(oldNode.getPayload());
+                newNode = new Node<Satisfaction>(oldNode.getLabel());
                 merged.addNode(newNode);
                 
                 for (Edge<Satisfaction, List<Desire>> dep: original.getOutgoingEdges(oldNode)) {
                     Node<Satisfaction> filtered = levelMap.get(dep.getTail());
                     // add the edge, but convert from all desires to just the original/root desire
-                    merged.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getPayload().get(0)));
+                    merged.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getLabel().get(0)));
                 }
                 
                 // update merge map so subsequent appearances of this configuration reuse this node

@@ -22,12 +22,12 @@ package org.grouplens.inject.graph;
 /**
  * <p>
  * A Node represents a conceptual node within a graph. Nodes within the same
- * graph can contain payload instances that represent domain-specific data for
+ * graph can contain label instances that represent domain-specific data for
  * the graph.
  * <p>
- * Nodes use instance equality, regardless of how their payloads might implement
+ * Nodes use instance equality, regardless of how their labels might implement
  * equality or how they compare. Thus, if two Node instances in a graph have the
- * same payload, they are still considered separate nodes from the graph's
+ * same label, they are still considered separate nodes from the graph's
  * perspective.
  * 
  * @see Edge
@@ -35,30 +35,30 @@ package org.grouplens.inject.graph;
  * @author Michael Ludwig <mludwig@cs.umn.edu
  */
 public class Node<T> {
-    private final T payload;
+    private final T label;
 
     /**
-     * Create a new Node that uses the specified payload instance.
+     * Create a new Node that uses the specified label instance.
      * 
-     * @param payload The payload instance to store with this node
-     * @throws NullPointerException if payload is null
+     * @param label The label instance to store with this node
+     * @throws NullPointerException if label is null
      */
-    public Node(T payload) {
-        if (payload == null)
-            throw new NullPointerException("Payload cannot be null");
-        this.payload = payload;
+    public Node(T label) {
+        if (label == null)
+            throw new NullPointerException("Label cannot be null");
+        this.label = label;
     }
     
     /**
-     * @return The current payload instance of the Node
+     * @return The current label instance of the Node
      */
-    public T getPayload() {
-        return payload;
+    public T getLabel() {
+        return label;
     }
     
     @Override
     public String toString() {
-        return "Node@" + System.identityHashCode(this) + "(" + payload + ")";
+        return "Node@" + System.identityHashCode(this) + "(" + label + ")";
     }
     
     // do not override equals() and hashCode(), we want nodes to 

@@ -56,42 +56,42 @@ public class ResolverInjectionTest {
         Resolver resolver = new DefaultResolver();
         ResolverResult r = resolver.resolve(root, new HashMap<ContextChain, Collection<? extends BindRule>>());
         
-        Assert.assertEquals(root, r.getRootNode().getPayload());
+        Assert.assertEquals(root, r.getRootNode().getLabel());
         Assert.assertEquals(5, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
         for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(r.getRootNode())) {
-            ReflectionDesire d = (ReflectionDesire) e.getPayload();
+            ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
                 // A ParameterA defaults to 5
                 Assert.assertFalse(deps.containsKey(TypeC.CONSTRUCTOR));
-                Assert.assertTrue(e.getTail().getPayload() instanceof InstanceSatisfaction);
-                Assert.assertEquals(5, ((InstanceSatisfaction) e.getTail().getPayload()).getInstance());
+                Assert.assertTrue(e.getTail().getLabel() instanceof InstanceSatisfaction);
+                Assert.assertEquals(5, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
                 deps.put(TypeC.CONSTRUCTOR, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_A)) {
                 // An InterfaceA is implemented by TypeA, which is then provided by Provider A
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_A));
-                Assert.assertTrue(e.getTail().getPayload() instanceof ProviderClassSatisfaction);
-                Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) e.getTail().getPayload()).getProviderType());
+                Assert.assertTrue(e.getTail().getLabel() instanceof ProviderClassSatisfaction);
+                Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) e.getTail().getLabel()).getProviderType());
                 deps.put(TypeC.INTERFACE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_A)) {
                 // A TypeA is provided by a ProviderA
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_A));
-                Assert.assertTrue(e.getTail().getPayload() instanceof ProviderClassSatisfaction);
-                Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) e.getTail().getPayload()).getProviderType());
+                Assert.assertTrue(e.getTail().getLabel() instanceof ProviderClassSatisfaction);
+                Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) e.getTail().getLabel()).getProviderType());
                 deps.put(TypeC.TYPE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_B)) {
                 // RoleE inherits RoleD and that defaults to TypeB
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_B));
-                Assert.assertTrue(e.getTail().getPayload() instanceof ClassSatisfaction);
-                Assert.assertEquals(TypeB.class, e.getTail().getPayload().getErasedType());
+                Assert.assertTrue(e.getTail().getLabel() instanceof ClassSatisfaction);
+                Assert.assertEquals(TypeB.class, e.getTail().getLabel().getErasedType());
                 deps.put(TypeC.INTERFACE_B, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_B)) {
                 // TypeB is satisfiable on its own
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_B));
-                Assert.assertTrue(e.getTail().getPayload() instanceof ClassSatisfaction);
-                Assert.assertEquals(TypeB.class, e.getTail().getPayload().getErasedType());
+                Assert.assertTrue(e.getTail().getLabel() instanceof ClassSatisfaction);
+                Assert.assertEquals(TypeB.class, e.getTail().getLabel().getErasedType());
                 deps.put(TypeC.TYPE_B, e.getTail());
             } else {
                 Assert.fail();
@@ -132,42 +132,42 @@ public class ResolverInjectionTest {
         Resolver resolver = new DefaultResolver();
         ResolverResult r = resolver.resolve(root, bindRules);
         
-        Assert.assertEquals(root, r.getRootNode().getPayload());
+        Assert.assertEquals(root, r.getRootNode().getLabel());
         Assert.assertEquals(5, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
         for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(r.getRootNode())) {
-            ReflectionDesire d = (ReflectionDesire) e.getPayload();
+            ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
                 // ParameterA was set to 10
                 Assert.assertFalse(deps.containsKey(TypeC.CONSTRUCTOR));
-                Assert.assertTrue(e.getTail().getPayload() instanceof InstanceSatisfaction);
-                Assert.assertEquals(10, ((InstanceSatisfaction) e.getTail().getPayload()).getInstance());
+                Assert.assertTrue(e.getTail().getLabel() instanceof InstanceSatisfaction);
+                Assert.assertEquals(10, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
                 deps.put(TypeC.CONSTRUCTOR, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_A)) {
                 // An InterfaceA is implemented by TypeA, which is then provided by Provider A
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_A));
-                Assert.assertTrue(e.getTail().getPayload() instanceof ClassSatisfaction);
-                Assert.assertEquals(PrimeA.class, e.getTail().getPayload().getErasedType());
+                Assert.assertTrue(e.getTail().getLabel() instanceof ClassSatisfaction);
+                Assert.assertEquals(PrimeA.class, e.getTail().getLabel().getErasedType());
                 deps.put(TypeC.INTERFACE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_A)) {
                 // A TypeA is provided by a ProviderA
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_A));
-                Assert.assertTrue(e.getTail().getPayload() instanceof InstanceSatisfaction);
-                Assert.assertSame(a, ((InstanceSatisfaction) e.getTail().getPayload()).getInstance());
+                Assert.assertTrue(e.getTail().getLabel() instanceof InstanceSatisfaction);
+                Assert.assertSame(a, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
                 deps.put(TypeC.TYPE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_B)) {
                 // RoleE inherits RoleD and that defaults to TypeB
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_B));
-                Assert.assertTrue(e.getTail().getPayload() instanceof ClassSatisfaction);
-                Assert.assertEquals(PrimeB.class, e.getTail().getPayload().getErasedType());
+                Assert.assertTrue(e.getTail().getLabel() instanceof ClassSatisfaction);
+                Assert.assertEquals(PrimeB.class, e.getTail().getLabel().getErasedType());
                 deps.put(TypeC.INTERFACE_B, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_B)) {
                 // TypeB is satisfiable on its own
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_B));
-                Assert.assertTrue(e.getTail().getPayload() instanceof InstanceSatisfaction);
-                Assert.assertSame(b, ((InstanceSatisfaction) e.getTail().getPayload()).getInstance());
+                Assert.assertTrue(e.getTail().getLabel() instanceof InstanceSatisfaction);
+                Assert.assertSame(b, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
                 deps.put(TypeC.TYPE_B, e.getTail());
             } else {
                 Assert.fail();

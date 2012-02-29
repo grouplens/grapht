@@ -60,7 +60,7 @@ public class DefaultResolverTest {
         Assert.assertEquals(1, r.getGraph().getNodes().size());
         
         Node<Satisfaction> node = r.getRootNode();
-        Assert.assertEquals(sat, node.getPayload());
+        Assert.assertEquals(sat, node.getLabel());
         Assert.assertTrue(r.getGraph().getOutgoingEdges(node).isEmpty());
         Assert.assertTrue(r.getGraph().getNodes().contains(node));
     }
@@ -75,9 +75,9 @@ public class DefaultResolverTest {
         ResolverResult r = resolver.resolve(rootSat, new HashMap<ContextChain, Collection<? extends BindRule>>());
         
         Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(rootSat, r.getRootNode().getPayload());
+        Assert.assertEquals(rootSat, r.getRootNode().getLabel());
         Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getPayload());
+        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
     }
 
     @Test
@@ -96,9 +96,9 @@ public class DefaultResolverTest {
         
         ResolverResult r = resolver.resolve(root, bindings);
         Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(root, r.getRootNode().getPayload());
+        Assert.assertEquals(root, r.getRootNode().getLabel());
         Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getPayload());
+        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
     }
 
     @Test
@@ -120,9 +120,9 @@ public class DefaultResolverTest {
         
         ResolverResult r = resolver.resolve(root, bindings);
         Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(root, r.getRootNode().getPayload());
+        Assert.assertEquals(root, r.getRootNode().getLabel());
         Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getPayload());
+        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
     }
     
     @Test
@@ -170,14 +170,14 @@ public class DefaultResolverTest {
         Assert.assertEquals(2, r.getGraph().getOutgoingEdges(n1).size());
         
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(dr1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(dr1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n3).size());
-        Assert.assertEquals(dr2, r.getGraph().getEdges(n1, n3).iterator().next().getPayload());
+        Assert.assertEquals(dr2, r.getGraph().getEdges(n1, n3).iterator().next().getLabel());
 
         Assert.assertEquals(1, r.getGraph().getEdges(n2, n4).size());
-        Assert.assertEquals(d3, r.getGraph().getEdges(n2, n4).iterator().next().getPayload());
+        Assert.assertEquals(d3, r.getGraph().getEdges(n2, n4).iterator().next().getLabel());
         Assert.assertEquals(1, r.getGraph().getEdges(n3, on4).size());
-        Assert.assertEquals(d3, r.getGraph().getEdges(n3, on4).iterator().next().getPayload());
+        Assert.assertEquals(d3, r.getGraph().getEdges(n3, on4).iterator().next().getLabel());
     }
     
     @Test
@@ -201,9 +201,9 @@ public class DefaultResolverTest {
         ResolverResult r = resolver.resolve(r1, bindings);
 
         Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(r1, r.getRootNode().getPayload());
+        Assert.assertEquals(r1, r.getRootNode().getLabel());
         Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(or2, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getPayload());
+        Assert.assertEquals(or2, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
     }
     
     @Test
@@ -244,10 +244,10 @@ public class DefaultResolverTest {
         Assert.assertNull(on3);
         
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
 
         Assert.assertEquals(1, r.getGraph().getEdges(n2, n3).size());
-        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getPayload());
+        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getLabel());
     }
 
     @Test
@@ -289,10 +289,10 @@ public class DefaultResolverTest {
         Assert.assertNull(on3);
         
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
 
         Assert.assertEquals(1, r.getGraph().getEdges(n2, n3).size());
-        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getPayload());
+        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getLabel());
     }
     
     @Test
@@ -328,7 +328,7 @@ public class DefaultResolverTest {
         Assert.assertNull(on2);
         
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
     }
 
     @Test
@@ -355,7 +355,7 @@ public class DefaultResolverTest {
         
         ResolverResult r = resolver.resolve(r1, bindings);
         Assert.assertEquals(4, r.getGraph().getNodes().size());
-        Assert.assertEquals(r1, r.getRootNode().getPayload());
+        Assert.assertEquals(r1, r.getRootNode().getLabel());
         Assert.assertEquals(3, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), sd1);
@@ -363,13 +363,13 @@ public class DefaultResolverTest {
         Node<Satisfaction> n3 = getNode(r.getGraph(), sd3);
         
         Assert.assertEquals(1, r.getGraph().getEdges(r.getRootNode(), n1).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(r.getRootNode(), n1).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(r.getRootNode(), n1).iterator().next().getLabel());
         
         Assert.assertEquals(1, r.getGraph().getEdges(r.getRootNode(), n2).size());
-        Assert.assertEquals(d2, r.getGraph().getEdges(r.getRootNode(), n2).iterator().next().getPayload());
+        Assert.assertEquals(d2, r.getGraph().getEdges(r.getRootNode(), n2).iterator().next().getLabel());
         
         Assert.assertEquals(1, r.getGraph().getEdges(r.getRootNode(), n3).size());
-        Assert.assertEquals(d3, r.getGraph().getEdges(r.getRootNode(), n3).iterator().next().getPayload());
+        Assert.assertEquals(d3, r.getGraph().getEdges(r.getRootNode(), n3).iterator().next().getLabel());
     }
 
     @Test
@@ -395,13 +395,13 @@ public class DefaultResolverTest {
         
         ResolverResult r = resolver.resolve(r1, bindings);
         Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(r1, r.getRootNode().getPayload());
+        Assert.assertEquals(r1, r.getRootNode().getLabel());
         Assert.assertEquals(3, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
         
         Set<Desire> edges = new HashSet<Desire>();
         for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(r.getRootNode())) {
-            Assert.assertEquals(sd1, e.getTail().getPayload());
-            edges.add(e.getPayload());
+            Assert.assertEquals(sd1, e.getTail().getLabel());
+            edges.add(e.getLabel());
         }
         
         Assert.assertTrue(edges.contains(d1));
@@ -429,17 +429,17 @@ public class DefaultResolverTest {
         
         ResolverResult r = resolver.resolve(s1, bindings);
         Assert.assertEquals(3, r.getGraph().getNodes().size());
-        Assert.assertEquals(s1, r.getRootNode().getPayload());
+        Assert.assertEquals(s1, r.getRootNode().getLabel());
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), s1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), s2);
         Node<Satisfaction> n3 = getNode(r.getGraph(), s3);
         
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
         
         Assert.assertEquals(1, r.getGraph().getEdges(n2, n3).size());
-        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getPayload());
+        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getLabel());
     }
 
     @Test
@@ -570,42 +570,42 @@ public class DefaultResolverTest {
         
         // the resulting graph should be s1->s2->s1->s2->s1->os2 = 6 nodes
         Assert.assertEquals(6, r.getGraph().getNodes().size());
-        Assert.assertEquals(s1, r.getRootNode().getPayload());
+        Assert.assertEquals(s1, r.getRootNode().getLabel());
         
         // edge s1->s2 by d1
         Set<Edge<Satisfaction, Desire>> edges = r.getGraph().getOutgoingEdges(r.getRootNode()); 
         Assert.assertEquals(1, edges.size());
         Edge<Satisfaction, Desire> e1 = edges.iterator().next();
-        Assert.assertEquals(s2, e1.getTail().getPayload());
-        Assert.assertEquals(d1, e1.getPayload());
+        Assert.assertEquals(s2, e1.getTail().getLabel());
+        Assert.assertEquals(d1, e1.getLabel());
         
         // edge s2->s1 by d2
         edges = r.getGraph().getOutgoingEdges(e1.getTail()); 
         Assert.assertEquals(1, edges.size());
         Edge<Satisfaction, Desire> e2 = edges.iterator().next();
-        Assert.assertEquals(s1, e2.getTail().getPayload());
-        Assert.assertEquals(d2, e2.getPayload());
+        Assert.assertEquals(s1, e2.getTail().getLabel());
+        Assert.assertEquals(d2, e2.getLabel());
         
         // edge s1->s2 by d1
         edges = r.getGraph().getOutgoingEdges(e2.getTail()); 
         Assert.assertEquals(1, edges.size());
         Edge<Satisfaction, Desire> e3 = edges.iterator().next();
-        Assert.assertEquals(s2, e3.getTail().getPayload());
-        Assert.assertEquals(d1, e3.getPayload());
+        Assert.assertEquals(s2, e3.getTail().getLabel());
+        Assert.assertEquals(d1, e3.getLabel());
         
         // edge s2->s1 by d2
         edges = r.getGraph().getOutgoingEdges(e3.getTail()); 
         Assert.assertEquals(1, edges.size());
         Edge<Satisfaction, Desire> e4 = edges.iterator().next();
-        Assert.assertEquals(s1, e4.getTail().getPayload());
-        Assert.assertEquals(d2, e4.getPayload());
+        Assert.assertEquals(s1, e4.getTail().getLabel());
+        Assert.assertEquals(d2, e4.getLabel());
         
         // edge s1->os2 by d1
         edges = r.getGraph().getOutgoingEdges(e4.getTail()); 
         Assert.assertEquals(1, edges.size());
         Edge<Satisfaction, Desire> e5 = edges.iterator().next();
-        Assert.assertEquals(os2, e5.getTail().getPayload());
-        Assert.assertEquals(d1, e5.getPayload());
+        Assert.assertEquals(os2, e5.getTail().getLabel());
+        Assert.assertEquals(d1, e5.getLabel());
         
         Assert.assertTrue(r.getGraph().getOutgoingEdges(e5.getTail()).isEmpty());
     }
@@ -640,7 +640,7 @@ public class DefaultResolverTest {
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
     }
 
     @Test
@@ -670,7 +670,7 @@ public class DefaultResolverTest {
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getPayload());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
     }
 
     @Test(expected=ResolverException.class)
@@ -779,7 +779,7 @@ public class DefaultResolverTest {
     // Note that this won't work if a Satisfaction is present in multiple places
     private Node<Satisfaction> getNode(Graph<Satisfaction, Desire> g, Satisfaction s) {
         for (Node<Satisfaction> n: g.getNodes()) {
-            if (n.getPayload().equals(s)) {
+            if (n.getLabel().equals(s)) {
                 return n;
             }
         }
@@ -789,7 +789,7 @@ public class DefaultResolverTest {
     // Find the node for s connected to p by the given desire, d
     private Node<Satisfaction> getNode(Graph<Satisfaction, Desire> g, Node<Satisfaction> p, Satisfaction s, Desire d) {
         for (Edge<Satisfaction, Desire> e: g.getOutgoingEdges(p)) {
-            if (e.getPayload().equals(d) && e.getTail().getPayload().equals(s)) {
+            if (e.getLabel().equals(d) && e.getTail().getLabel().equals(s)) {
                 return e.getTail();
             }
         }

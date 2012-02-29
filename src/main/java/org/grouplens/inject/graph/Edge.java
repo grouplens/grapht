@@ -18,19 +18,18 @@
  */
 package org.grouplens.inject.graph;
 
-
 /**
  * <p>
  * Edge is an immutable, unidirectional connection between two Nodes, the head
  * and the tail. An Edge is used when representing a directional graph,
  * connecting any two nodes within the graph. Thus, an edge from X to Y is
  * different from an edge from Y to X. Additionally, the edge stores a
- * domain-specific payload representing the relationship between the head and
- * tail node.
+ * domain-specific label representing the information between the head and tail
+ * node.
  * <p>
- * Edges use instance equality, regardless of how their payloads might implement
+ * Edges use instance equality, regardless of how their labels might implement
  * equality or how their attached Nodes. Thus, if two Edges instances in a graph
- * have the same payload and nodes, they are still considered separate nodes
+ * have the same label and nodes, they are still considered separate edges
  * from the graph's perspective. In those situations, the graph has multiple
  * edges from one node to the other.
  * 
@@ -40,25 +39,25 @@ public class Edge<N, E> {
     private final Node<N> head;
     private final Node<N> tail;
     
-    private final E payload;
+    private final E label;
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and
-     * ending at <tt>tail</tt>. The provided payload is a domain-specific
+     * ending at <tt>tail</tt>. The provided label is a domain-specific
      * object to be associated with the edge between the two nodes.
      * 
      * @param head The start or head node of the edge
      * @param tail The end or tail node of the edge
-     * @param payload The payload data along the edge
-     * @throws NullPointerException if the head, tail, or payload are null
+     * @param label The label data along the edge
+     * @throws NullPointerException if the head, tail, or label are null
      */
-    public Edge(Node<N> head, Node<N> tail, E payload) {
-        if (head == null || tail == null || payload == null)
+    public Edge(Node<N> head, Node<N> tail, E label) {
+        if (head == null || tail == null || label == null)
             throw new NullPointerException("Arguments cannot be null");
         
         this.head = head;
         this.tail = tail;
-        this.payload = payload;
+        this.label = label;
     }
 
     /**
@@ -82,18 +81,18 @@ public class Edge<N, E> {
     }
 
     /**
-     * Get the payload associated with this edge. This may be null if no
-     * payload was assigned to the edge
+     * Get the label associated with this edge. This may be null if no
+     * label was assigned to the edge
      * 
-     * @return The payload on this edge
+     * @return The label on this edge
      */
-    public E getPayload() {
-        return payload;
+    public E getLabel() {
+        return label;
     }
     
     @Override
     public String toString() {
-        return "Edge(head=" + head + ", tail=" + tail + ", label=" + payload + ")";
+        return "Edge(head=" + head + ", tail=" + tail + ", label=" + label + ")";
     }
     
     // do not override equals() or hashCode() because edges use instance equality
