@@ -20,8 +20,10 @@ package org.grouplens.inject.spi.reflect;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Satisfaction;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
@@ -71,11 +73,10 @@ public class ReflectionContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(SatisfactionAndRole n) {
-        // FIXME: handle generics correctly
-        if (type.isAssignableFrom(n.getSatisfaction().getErasedType())) {
+    public boolean matches(Pair<Satisfaction, Role> n) {
+        if (type.isAssignableFrom(n.getLeft().getErasedType())) {
             // type is a match, so check the role
-            return AnnotationRole.inheritsRole((AnnotationRole) n.getRole(), role);
+            return AnnotationRole.inheritsRole((AnnotationRole) n.getRight(), role);
         }
         
         return false;

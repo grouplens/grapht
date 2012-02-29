@@ -18,6 +18,7 @@
  */
 package org.grouplens.inject.spi;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.resolver.ContextChain;
 
 /**
@@ -48,5 +49,5 @@ public interface ContextMatcher {
      * @param n The node and role in the current dependency context
      * @return True if this matcher matches the node and role, false otherwise
      */
-    boolean matches(SatisfactionAndRole n);
+    boolean matches(Pair<Satisfaction, Role> n);
 }

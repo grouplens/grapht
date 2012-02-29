@@ -23,11 +23,13 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.MockContextMatcher;
 import org.grouplens.inject.spi.MockSatisfaction;
-import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Satisfaction;
 import org.junit.Test;
 
 public class ContextChainTest {
@@ -125,9 +127,9 @@ public class ContextChainTest {
         }
         ContextChain chain = new ContextChain(matchers);
         
-        List<SatisfactionAndRole> context = new ArrayList<SatisfactionAndRole>();
+        List<Pair<Satisfaction, Role>> context = new ArrayList<Pair<Satisfaction, Role>>();
         for (Class<?> type: contextTypes) {
-            context.add(new SatisfactionAndRole(new MockSatisfaction(type, new ArrayList<Desire>()), null));
+            context.add(Pair.<Satisfaction, Role>of(new MockSatisfaction(type, new ArrayList<Desire>()), null));
         }
         
         Assert.assertEquals(expectedMatch, chain.matches(context));

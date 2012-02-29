@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Satisfaction;
 
 public class ContextChain {
     private final List<ContextMatcher> matchers;
@@ -36,7 +38,7 @@ public class ContextChain {
         return Collections.unmodifiableList(matchers);
     }
     
-    public boolean matches(List<SatisfactionAndRole> nodes) {
+    public boolean matches(List<Pair<Satisfaction, Role>> nodes) {
         int i = 0;
         for (ContextMatcher cm: matchers) {
             boolean found = false;

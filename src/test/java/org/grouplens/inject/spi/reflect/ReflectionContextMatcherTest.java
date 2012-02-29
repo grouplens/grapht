@@ -20,7 +20,9 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
-import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Satisfaction;
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleB;
 import org.grouplens.inject.spi.reflect.types.RoleC;
@@ -85,7 +87,7 @@ public class ReflectionContextMatcherTest {
                              boolean expected) {
         AnnotationRole mr = (matcherRole == null ? null : new AnnotationRole(matcherRole));
         AnnotationRole sr = (satisfactionRole == null ? null : new AnnotationRole(satisfactionRole));
-        SatisfactionAndRole node = new SatisfactionAndRole(new ClassSatisfaction(satisfactionType), sr);
+        Pair<Satisfaction, Role> node = Pair.<Satisfaction, Role>of(new ClassSatisfaction(satisfactionType), sr);
         
         ReflectionContextMatcher cm = new ReflectionContextMatcher(matcherType, mr);
         Assert.assertEquals(expected, cm.matches(node));

@@ -20,8 +20,7 @@ package org.grouplens.inject.spi;
 
 import javax.annotation.Nullable;
 
-import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.SatisfactionAndRole;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
@@ -38,14 +37,14 @@ public class MockContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(SatisfactionAndRole n) {
-        boolean typeMatch = type.isAssignableFrom(n.getSatisfaction().getErasedType());
+    public boolean matches(Pair<Satisfaction, Role> n) {
+        boolean typeMatch = type.isAssignableFrom(n.getLeft().getErasedType());
         boolean roleMatch = false;
         
         if (role != null) {
             // this context matches a specific role, so we accept any role
             // that matches it or is a sub-role of it
-            MockRole c = (MockRole) n.getRole();
+            MockRole c = (MockRole) n.getRight();
             while(c != null) {
                 if (c == role) {
                     // found the match
@@ -63,7 +62,7 @@ public class MockContextMatcher implements ContextMatcher {
             // this context matches the default role, so we accept the role
             // if it is null, or eventually inherits the default
             roleMatch = true;
-            MockRole c = (MockRole) n.getRole();
+            MockRole c = (MockRole) n.getRight();
             while(c != null) {
                 if (!c.isInheritenceEnabled()) {
                     // does not extend from the default

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.graph.Node;
@@ -37,7 +38,6 @@ import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
-import org.grouplens.inject.spi.SatisfactionAndRole;
 
 import com.google.common.collect.Ordering;
 
@@ -106,6 +106,7 @@ public class DefaultResolver implements Resolver {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ResolverResult resolve(Satisfaction rootSatisfaction,
                                   Map<ContextChain, Collection<? extends BindRule>> bindRules) {
         // the initial graph we construct is actually a tree because each resolved satisfaction
@@ -116,7 +117,7 @@ public class DefaultResolver implements Resolver {
         dependencyTree.addNode(rootNode);
         
         for (Desire dependency: rootSatisfaction.getDependencies()) {
-            resolveFully(dependency, rootNode, dependencyTree, bindRules, Arrays.asList(new SatisfactionAndRole(rootSatisfaction, null)));
+            resolveFully(dependency, rootNode, dependencyTree, bindRules, Arrays.asList(Pair.<Satisfaction, Role>of(rootSatisfaction, null)));
         }
         
         // we pass the tree into deduplicate() to remove duplicate dependency sequences,
@@ -206,24 +207,24 @@ public class DefaultResolver implements Resolver {
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
-                              Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
+                              Map<ContextChain, Collection<? extends BindRule>> bindRules, List<Pair<Satisfaction, Role>> context) {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
         
         // resolve the current node
-        SatisfactionAndDesires resolved = resolve(desire, bindRules, context);
-        Node<Satisfaction> newNode = new Node<Satisfaction>(resolved.satisfaction);
+        Pair<Satisfaction, List<Desire>> resolved = resolve(desire, bindRules, context);
+        Node<Satisfaction> newNode = new Node<Satisfaction>(resolved.getLeft());
         
         // add the node to the graph, and connect it with its parent
         graph.addNode(newNode);
-        graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.desires));
+        graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.getRight()));
         
         // update the context
-        List<SatisfactionAndRole> newContext = new ArrayList<SatisfactionAndRole>(context);
-        newContext.add(new SatisfactionAndRole(resolved.satisfaction, desire.getRole()));
+        List<Pair<Satisfaction, Role>> newContext = new ArrayList<Pair<Satisfaction, Role>>(context);
+        newContext.add(Pair.of(resolved.getLeft(), desire.getRole()));
         
-        List<? extends Desire> dependencies = resolved.satisfaction.getDependencies();
+        List<? extends Desire> dependencies = resolved.getLeft().getDependencies();
         for (Desire d: dependencies) {
             // complete the sub graph for the given desire
             // - the call to resolveFully() is responsible for adding the dependency edges
@@ -232,7 +233,7 @@ public class DefaultResolver implements Resolver {
         }
     }
     
-    private SatisfactionAndDesires resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<SatisfactionAndRole> context) {
+    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<Pair<Satisfaction, Role>> context) {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
@@ -244,14 +245,14 @@ public class DefaultResolver implements Resolver {
             desireChain.add(currentDesire);
             
             // collect all bind rules that apply to this desire
-            List<ContextAndBindRule> validRules = new ArrayList<ContextAndBindRule>();
+            List<Pair<ContextChain, BindRule>> validRules = new ArrayList<Pair<ContextChain, BindRule>>();
             for (ContextChain chain: bindRules.keySet()) {
                 if (chain.matches(context)) {
                     // the context applies to the current context, so go through all
                     // bind rules within it and record those that match the desire
                     for (BindRule br: bindRules.get(chain)) {
                         if (br.matches(currentDesire) && !appliedRules.contains(br)) {
-                            validRules.add(new ContextAndBindRule(chain, br));
+                            validRules.add(Pair.of(chain, br));
                         }
                     }
                 }
@@ -259,10 +260,10 @@ public class DefaultResolver implements Resolver {
             
             if (!validRules.isEmpty()) {
                 // we have a bind rule to apply
-                Comparator<ContextAndBindRule> ordering = Ordering.from(new ContextClosenessComparator(context))
-                                                                  .compound(new ContextLengthComparator())
-                                                                  .compound(new TypeDeltaComparator(context))
-                                                                  .compound(new BindRuleComparator(currentDesire));
+                Comparator<Pair<ContextChain, BindRule>> ordering = Ordering.from(new ContextClosenessComparator(context))
+                                                                            .compound(new ContextLengthComparator())
+                                                                            .compound(new TypeDeltaComparator(context))
+                                                                            .compound(new BindRuleComparator(currentDesire));
                 Collections.sort(validRules, ordering);
 
                 if (validRules.size() > 1) {
@@ -274,7 +275,7 @@ public class DefaultResolver implements Resolver {
                 }
 
                 // apply the bind rule to get a new desire
-                BindRule selectedRule = validRules.get(0).rule;
+                BindRule selectedRule = validRules.get(0).getRight();
                 appliedRules.add(selectedRule);
                 currentDesire = selectedRule.apply(currentDesire);
             } else {
@@ -286,7 +287,7 @@ public class DefaultResolver implements Resolver {
                     // default would create a cycle of desires
                     if (currentDesire.isInstantiable()) {
                         // the desire can be converted to a node, so we're done
-                        return new SatisfactionAndDesires(currentDesire.getSatisfaction(), desireChain);
+                        return Pair.of(currentDesire.getSatisfaction(), desireChain);
                     } else {
                         // no more rules and we can't make a node
                         throw new ResolverException("Unable to satisfy desire: " + currentDesire + ", root desire: " + desire);
@@ -300,10 +301,10 @@ public class DefaultResolver implements Resolver {
     }
 
     /*
-     * A Comparator that orders ContextAndBindRule based on the BindRule/Desire
+     * A Comparator that orders Pair<ContextChain, BindRule> based on the BindRule/Desire
      * implementation that orders BindRules.
      */
-    private static class BindRuleComparator implements Comparator<ContextAndBindRule> {
+    private static class BindRuleComparator implements Comparator<Pair<ContextChain, BindRule>> {
         private final Desire desire;
         
         public BindRuleComparator(Desire desire) {
@@ -311,9 +312,9 @@ public class DefaultResolver implements Resolver {
         }
         
         @Override
-        public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
+        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
             Comparator<BindRule> ruleComparator = desire.ruleComparator();
-            return ruleComparator.compare(o1.rule, o2.rule);
+            return ruleComparator.compare(o1.getRight(), o2.getRight());
         }
     }
     
@@ -324,17 +325,17 @@ public class DefaultResolver implements Resolver {
      * This comparator assumes that both context chains are the same length,
      * and that they match the exact same nodes in the context.
      */
-    private static class TypeDeltaComparator implements Comparator<ContextAndBindRule> {
-        private final List<SatisfactionAndRole> context;
+    private static class TypeDeltaComparator implements Comparator<Pair<ContextChain, BindRule>> {
+        private final List<Pair<Satisfaction, Role>> context;
         
-        public TypeDeltaComparator(List<SatisfactionAndRole> context) {
+        public TypeDeltaComparator(List<Pair<Satisfaction, Role>> context) {
             this.context = context;
         }
         
         @Override
-        public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
-            int lastIndex1 = o1.context.getContexts().size() - 1;
-            int lastIndex2 = o2.context.getContexts().size() - 1;
+        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+            int lastIndex1 = o1.getLeft().getContexts().size() - 1;
+            int lastIndex2 = o2.getLeft().getContexts().size() - 1;
             
             int matcher = 0; // measured from the last index
             for (int i = context.size() - 1; i >= 0; i--) {
@@ -343,9 +344,9 @@ public class DefaultResolver implements Resolver {
                     break;
                 }
                 
-                SatisfactionAndRole currentNode = context.get(i);
-                ContextMatcher m1 = o1.context.getContexts().get(lastIndex1 - matcher);
-                ContextMatcher m2 = o2.context.getContexts().get(lastIndex2 - matcher);
+                Pair<Satisfaction, Role> currentNode = context.get(i);
+                ContextMatcher m1 = o1.getLeft().getContexts().get(lastIndex1 - matcher);
+                ContextMatcher m2 = o2.getLeft().getContexts().get(lastIndex2 - matcher);
                 
                 boolean match1 = m1.matches(currentNode);
                 boolean match2 = m2.matches(currentNode);
@@ -356,7 +357,7 @@ public class DefaultResolver implements Resolver {
                 
                 if (match1 && match2) {
                     // the chains apply to this node so we need to compare them
-                    int cmp = currentNode.getSatisfaction().contextComparator(currentNode.getRole()).compare(m1, m2);
+                    int cmp = currentNode.getLeft().contextComparator(currentNode.getRight()).compare(m1, m2);
                     if (cmp != 0) {
                         // one chain finally has a type delta difference, so the
                         // comparison of the chain equals the matcher comparison
@@ -377,11 +378,11 @@ public class DefaultResolver implements Resolver {
     /*
      * A Comparator that compares rules based on how long the matching contexts are.
      */
-    private static class ContextLengthComparator implements Comparator<ContextAndBindRule> {
+    private static class ContextLengthComparator implements Comparator<Pair<ContextChain, BindRule>> {
         @Override
-        public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
-            int l1 = o1.context.getContexts().size();
-            int l2 = o2.context.getContexts().size();
+        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+            int l1 = o1.getLeft().getContexts().size();
+            int l2 = o2.getLeft().getContexts().size();
             // select longer contexts over shorter (i.e. longer < shorter)
             return l2 - l1;
         }
@@ -391,17 +392,17 @@ public class DefaultResolver implements Resolver {
      * A Comparator that compares rules based on how close a context matcher chain is to the
      * end of the current context.
      */
-    private static class ContextClosenessComparator implements Comparator<ContextAndBindRule> {
-        private final List<SatisfactionAndRole> context;
+    private static class ContextClosenessComparator implements Comparator<Pair<ContextChain, BindRule>> {
+        private final List<Pair<Satisfaction, Role>> context;
         
-        public ContextClosenessComparator(List<SatisfactionAndRole> context) {
+        public ContextClosenessComparator(List<Pair<Satisfaction, Role>> context) {
             this.context = context;
         }
         
         @Override
-        public int compare(ContextAndBindRule o1, ContextAndBindRule o2) {
-            int lastIndex1 = o1.context.getContexts().size() - 1;
-            int lastIndex2 = o2.context.getContexts().size() - 1;
+        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+            int lastIndex1 = o1.getLeft().getContexts().size() - 1;
+            int lastIndex2 = o2.getLeft().getContexts().size() - 1;
             
             int matcher = 0; // measured from the last index
             for (int i = context.size() - 1; i >= 0; i--) {
@@ -410,8 +411,8 @@ public class DefaultResolver implements Resolver {
                     break;
                 }
                 
-                boolean match1 = o1.context.getContexts().get(lastIndex1 - matcher).matches(context.get(i));
-                boolean match2 = o2.context.getContexts().get(lastIndex2 - matcher).matches(context.get(i));
+                boolean match1 = o1.getLeft().getContexts().get(lastIndex1 - matcher).matches(context.get(i));
+                boolean match2 = o2.getLeft().getContexts().get(lastIndex2 - matcher).matches(context.get(i));
                 
                 if (match1 && match2) {
                     // both chains match this context element, so go to the next matcher
@@ -429,35 +430,6 @@ public class DefaultResolver implements Resolver {
             // or at least one of the chains was empty (that part is a little strange,
             // but we'll get correct results when we sort by context chain length next).
             return 0;
-        }
-    }
-    
-    /*
-     * ContextAndBindRule represents a paired context and bind rule. The context
-     * limits the bind rule's scope.
-     */
-    private static class ContextAndBindRule {
-        final ContextChain context;
-        final BindRule rule;
-        
-        public ContextAndBindRule(ContextChain context, BindRule rule) {
-            this.context = context;
-            this.rule = rule;
-        }
-    }
-
-    /*
-     * SatisfactionAndDesires represents a resolved Satisfaction with the list
-     * of Desires that led to its resolution. All desires in the list can be
-     * assumed to be satisfied by the satisfaction.
-     */
-    private static class SatisfactionAndDesires {
-        final Satisfaction satisfaction;
-        final List<Desire> desires;
-        
-        public SatisfactionAndDesires(Satisfaction satisfaction, List<Desire> desires) {
-            this.satisfaction = satisfaction;
-            this.desires = desires;
         }
     }
 }
