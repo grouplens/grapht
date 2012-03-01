@@ -39,5 +39,5 @@ public interface InjectSPI {
     
     ContextMatcher context(@Nullable Class<? extends Annotation> role, Class<?> type);
     
-    // FIXME: Do I need to add desires and satisfaction handling here?
+    Desire desire(@Nullable Class<? extends Annotation> role, Class<?> type);
 }

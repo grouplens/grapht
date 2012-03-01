@@ -20,10 +20,12 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.ContextMatcher;
+import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.InjectSPI;
 
 public class ReflectionInjectSPI implements InjectSPI {
@@ -53,6 +55,27 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public ContextMatcher context(Class<? extends Annotation> role, Class<?> type) {
         return new ReflectionContextMatcher(type, role(role));
+    }
+    
+    @Override
+    public Desire desire(final @Nullable Class<? extends Annotation> role, final Class<?> type) {
+        final AnnotationRole realRole = role(role);
+        return new ReflectionDesire(new InjectionPoint() {
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
+            
+            @Override
+            public Class<?> getType() {
+                return type;
+            }
+            
+            @Override
+            public AnnotationRole getRole() {
+                return realRole;
+            }
+        });
     }
     
     private AnnotationRole role(Class<? extends Annotation> role) {
