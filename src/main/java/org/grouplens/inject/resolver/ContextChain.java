@@ -27,6 +27,7 @@ import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
 
+// TODO document this class
 public class ContextChain {
     private final List<ContextMatcher> matchers;
     

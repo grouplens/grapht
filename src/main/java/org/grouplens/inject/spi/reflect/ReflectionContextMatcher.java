@@ -74,7 +74,8 @@ public class ReflectionContextMatcher implements ContextMatcher {
     
     @Override
     public boolean matches(Pair<Satisfaction, Role> n) {
-        if (type.isAssignableFrom(n.getLeft().getErasedType())) {
+        // we must check for nulls in case it is a synthetic satisfaction
+        if (n.getLeft().getErasedType() != null && type.isAssignableFrom(n.getLeft().getErasedType())) {
             // type is a match, so check the role
             return AnnotationRole.inheritsRole((AnnotationRole) n.getRight(), role);
         }
