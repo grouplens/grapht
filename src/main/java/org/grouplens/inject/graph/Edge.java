@@ -18,6 +18,8 @@
  */
 package org.grouplens.inject.graph;
 
+import javax.annotation.Nullable;
+
 /**
  * <p>
  * Edge is an immutable, unidirectional connection between two Nodes, the head
@@ -49,11 +51,11 @@ public class Edge<N, E> {
      * @param head The start or head node of the edge
      * @param tail The end or tail node of the edge
      * @param label The label data along the edge
-     * @throws NullPointerException if the head, tail, or label are null
+     * @throws NullPointerException if the head, tail
      */
-    public Edge(Node<N> head, Node<N> tail, E label) {
-        if (head == null || tail == null || label == null)
-            throw new NullPointerException("Arguments cannot be null");
+    public Edge(Node<N> head, Node<N> tail, @Nullable E label) {
+        if (head == null || tail == null)
+            throw new NullPointerException("Head and tail cannot be null");
         
         this.head = head;
         this.tail = tail;
@@ -86,7 +88,7 @@ public class Edge<N, E> {
      * 
      * @return The label on this edge
      */
-    public E getLabel() {
+    public @Nullable E getLabel() {
         return label;
     }
     

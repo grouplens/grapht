@@ -18,6 +18,8 @@
  */
 package org.grouplens.inject.graph;
 
+import javax.annotation.Nullable;
+
 
 /**
  * <p>
@@ -41,18 +43,15 @@ public class Node<T> {
      * Create a new Node that uses the specified label instance.
      * 
      * @param label The label instance to store with this node
-     * @throws NullPointerException if label is null
      */
-    public Node(T label) {
-        if (label == null)
-            throw new NullPointerException("Label cannot be null");
+    public Node(@Nullable T label) {
         this.label = label;
     }
     
     /**
-     * @return The current label instance of the Node
+     * @return The current label instance of the Node, which can be null
      */
-    public T getLabel() {
+    public @Nullable T getLabel() {
         return label;
     }
     

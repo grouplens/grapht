@@ -366,13 +366,11 @@ public class Graph<N, E> {
      * @param newLabel The new label for the new edge that is replacing
      *            oldEdge
      * @return The new edge, or null if oldEdge was not in this graph
-     * @throws NullPointerException if oldEdge or newLabel are null
+     * @throws NullPointerException if oldEdge is null
      */
     public Edge<N, E> updateEdgeLabel(Edge<N, E> oldEdge, E newLabel) {
         if (oldEdge == null)
             throw new NullPointerException("Old edge cannot be null");
-        if (newLabel == null)
-            throw new NullPointerException("New label cannot be null");
         
         Set<Edge<N, E>> outgoingEdges = outgoing.get(oldEdge.getHead());
         if (outgoingEdges != null) {
