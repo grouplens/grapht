@@ -143,18 +143,6 @@ public final class Types {
         return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
     }
 
-    /**
-     * Visit a type using a {@link TypeVisitor}.
-     * @param type The type to visit.
-     * @param visitor The type visitor.
-     * @param <T> The return type of the visitor.
-     * @return The value returned from the visitor.
-     * @see TypeVisitor#apply(java.lang.reflect.Type)
-     */
-    public static <T> T visit(Type type, TypeVisitor<T> visitor) {
-        return visitor.apply(type);
-    }
-
     public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
         TypeVariable<?>[] vars = cls.getTypeParameters();
         if (args.length != vars.length) {

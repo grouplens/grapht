@@ -244,7 +244,7 @@ public class ReflectionDesire implements Desire {
                     DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
                     if (impl != null) {
                         return new ClassBindRule(impl.value(), getDesiredType(), role,
-                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
                     }
                 }
 
@@ -266,7 +266,7 @@ public class ReflectionDesire implements Desire {
             ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
             if (impl != null) {
                 return new ClassBindRule(impl.value(), getDesiredType(), role,
-                                         BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                                         BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
             }
         }
 

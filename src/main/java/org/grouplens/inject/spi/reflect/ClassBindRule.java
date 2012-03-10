@@ -33,6 +33,7 @@ import org.grouplens.inject.types.Types;
  */
 public class ClassBindRule extends ReflectionBindRule {
     private final Class<?> implType;
+    private final boolean terminate;
 
     /**
      * Create a ClassBindRule that binds <tt>implType</tt> to any desire for
@@ -45,7 +46,8 @@ public class ClassBindRule extends ReflectionBindRule {
      * @throws NullPointerException if implType or sourceType are null
      * @throws IllegalArgumentException if implType does not extend sourceType
      */
-    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  int weight) {
+    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  
+                         int weight, boolean terminate) {
         super(sourceType, role, weight);
         if (implType == null) {
             throw new NullPointerException("Implementation type cannot be null");
@@ -56,6 +58,7 @@ public class ClassBindRule extends ReflectionBindRule {
             throw new IllegalArgumentException(implType + " does not extend " + sourceType);
         }
         this.implType = implType;
+        this.terminate = terminate;
     }
 
     @Override
@@ -85,5 +88,10 @@ public class ClassBindRule extends ReflectionBindRule {
     @Override
     public String toString() {
         return "ClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + implType + ")";
+    }
+
+    @Override
+    public boolean terminatesChain() {
+        return terminate;
     }
 }

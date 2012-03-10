@@ -18,11 +18,15 @@
  */
 package org.grouplens.inject.resolver;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
+import javax.inject.Provider;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
 
 /**
@@ -33,27 +37,38 @@ import org.grouplens.inject.spi.Satisfaction;
  * dependency hierarchy that led to the desire being actively resolved.
  *
  * @see DefaultResolver
+ * @
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface Resolver {
     /**
      * <p>
-     * Resolve all dependencies of <tt>rootSatisfaction</tt> given the set of
-     * BindRules to apply. The BindRules are stored in a Map where the
-     * ContextChain keys represent the context rules that activate that
-     * collection of BindRules. The BindRules within a given collection for a
-     * ContextChain need not apply to the same Desires or types, they are merely
-     * activated at the same time.
-     * <p>
-     * This will return a ResolverResult containing a fully resolved dependency
-     * graph for the root satisfaction.
+     * Return a Provider that creates instances satisfying the given
+     * <tt>desire</tt>. The Resolver will use the BindRules previously
+     * configured for this Resolver. When determining context matching, this
+     * desire will is in the root context.
      * 
-     * @param rootSatisfaction The root object to be resolved
-     * @param bindRules The bind rule configuration that specifies how to
-     *            resolve desires into nodes
-     * @return A completed dependency graph for the given root and rules
-     * @throws ResolverException if the satisfaction could not be fully resolved
-     * @throws NullPointerException if rootSatisfaction or bindRules are null
+     * @param desire The desire to be resolved
+     * @return A provider that creates instances satisfying the desire
+     * @throws ResolverException if the desire could not be fully resolved
+     * @throws NullPointerException if desire is null
      */
-    ResolverResult resolve(Satisfaction rootSatisfaction, Map<ContextChain, Collection<? extends BindRule>> bindRules);
+    Provider<?> resolve(Desire desire);
+
+    /**
+     * Resolve the given Desire to a provider, as if the desire were needed in
+     * the given context. A null context is the same as the root context.
+     * 
+     * @review Is this necessary? If so, should it be at this API level?
+     * @param desire The desire to be resolved
+     * @param context The context this desire is resolved within
+     * @return A provider creating instances satisfying the desire
+     * @throws NullPointerException if desire is null
+     */
+    Provider<?> resolve(Desire desire, List<Pair<Satisfaction, Role>> context);
+    
+    /**
+     * @return The current dependency graph state cached by this Resolver
+     */
+    Graph<Satisfaction, Desire> getGraph();
 }

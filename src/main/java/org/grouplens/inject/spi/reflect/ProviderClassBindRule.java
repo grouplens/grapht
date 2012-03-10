@@ -88,4 +88,9 @@ public class ProviderClassBindRule extends ReflectionBindRule {
     public String toString() {
         return "ProviderClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + providerType + ")";
     }
+
+    @Override
+    public boolean terminatesChain() {
+        return true;
+    }
 }

@@ -23,25 +23,38 @@ import java.lang.annotation.Annotation;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.reflect.types.InterfaceA;
+import org.grouplens.inject.spi.reflect.types.ProviderA;
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleB;
 import org.grouplens.inject.spi.reflect.types.RoleD;
+import org.grouplens.inject.spi.reflect.types.TypeA;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ReflectionBindRuleTest {
     @Test
+    public void testTerminatesChain() {
+        Assert.assertTrue(new InstanceBindRule(new Object(), Object.class, null, 0).terminatesChain());
+        Assert.assertTrue(new ProviderInstanceBindRule(new ProviderA(), InterfaceA.class, null, 0).terminatesChain());
+        Assert.assertTrue(new ProviderClassBindRule(ProviderA.class, InterfaceA.class, null, 0).terminatesChain());
+        
+        Assert.assertFalse(new ClassBindRule(TypeA.class, InterfaceA.class, null, 0, false).terminatesChain());
+        Assert.assertTrue(new ClassBindRule(TypeA.class, InterfaceA.class, null, 0, true).terminatesChain());
+    }
+    
+    @Test
     public void testClassBindRuleEquals() throws Exception {
         // four variations of the arguments
-        ClassBindRule rule1 = new ClassBindRule(A.class, A.class, null, 0);
-        ClassBindRule rule2 = new ClassBindRule(B.class, A.class, null, 0);
-        ClassBindRule rule3 = new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), 0);
-        ClassBindRule rule4 = new ClassBindRule(A.class, A.class, null, 1);
+        ClassBindRule rule1 = new ClassBindRule(A.class, A.class, null, 0, false);
+        ClassBindRule rule2 = new ClassBindRule(B.class, A.class, null, 0, false);
+        ClassBindRule rule3 = new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), 0, false);
+        ClassBindRule rule4 = new ClassBindRule(A.class, A.class, null, 1, false);
         
-        Assert.assertEquals(rule1, new ClassBindRule(A.class, A.class, null, 0));
-        Assert.assertEquals(rule2, new ClassBindRule(B.class, A.class, null, 0));
-        Assert.assertEquals(rule3, new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), 0));
-        Assert.assertEquals(rule4, new ClassBindRule(A.class, A.class, null, 1));
+        Assert.assertEquals(rule1, new ClassBindRule(A.class, A.class, null, 0, false));
+        Assert.assertEquals(rule2, new ClassBindRule(B.class, A.class, null, 0, false));
+        Assert.assertEquals(rule3, new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), 0, false));
+        Assert.assertEquals(rule4, new ClassBindRule(A.class, A.class, null, 1, false));
         
         Assert.assertFalse(rule1.equals(rule2));
         Assert.assertFalse(rule2.equals(rule3));
@@ -156,7 +169,7 @@ public class ReflectionBindRuleTest {
                              boolean expected) throws Exception {
         AnnotationRole br = (bindRole == null ? null : new AnnotationRole(bindRole));
         AnnotationRole dr = (desireRole == null ? null : new AnnotationRole(desireRole));
-        ClassBindRule rule = new ClassBindRule(bindType, bindType, br, 0);
+        ClassBindRule rule = new ClassBindRule(bindType, bindType, br, 0, false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(desireType, dr, false));
         
         Assert.assertEquals(expected, rule.matches(desire));
@@ -164,7 +177,7 @@ public class ReflectionBindRuleTest {
     
     @Test
     public void testSatisfiableClassBindRuleSuccess() throws Exception {
-        ClassBindRule rule = new ClassBindRule(B.class, A.class, null, 0);
+        ClassBindRule rule = new ClassBindRule(B.class, A.class, null, 0, false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false));
         
         ReflectionDesire applied = (ReflectionDesire) rule.apply(desire);
@@ -175,7 +188,7 @@ public class ReflectionBindRuleTest {
     
     @Test
     public void testUnsatisfiableClassBindRuleSuccess() throws Exception {
-        ClassBindRule rule = new ClassBindRule(C.class, C.class, null, 0);
+        ClassBindRule rule = new ClassBindRule(C.class, C.class, null, 0, false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(C.class, null, false));
         
         ReflectionDesire applied = (ReflectionDesire) rule.apply(desire);

@@ -31,24 +31,29 @@ import org.grouplens.inject.spi.InjectSPI;
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public <T> BindRule bindType(Class<? extends Annotation> role, Class<T> source,
-                                 Class<? extends T> impl, int weight) {
-        return new ClassBindRule(impl, source, role(role), weight);
+                                 Class<? extends T> impl, int weight, boolean terminate) {
+        return new ClassBindRule(impl, source, role(role), weight, terminate);
     }
 
     @Override
-    public <T> BindRule bindInstance(Class<? extends Annotation> role, Class<T> source, T instance, int weight) {
+    public <T> BindRule bindInstance(Class<? extends Annotation> role, Class<T> source, 
+                                     T instance, int weight, boolean terminate) {
+        // ignore terminate, since instance bindings always terminate
         return new InstanceBindRule(instance, source, role(role), weight);
     }
 
     @Override
     public <T> BindRule bindProvider(Class<? extends Annotation> role, Class<T> source,
-                                     Class<? extends Provider<? extends T>> providerType, int weight) {
+                                     Class<? extends Provider<? extends T>> providerType,
+                                     int weight, boolean terminate) {
+        // ignore terminate, since provider bindings always terminate
         return new ProviderClassBindRule(providerType, source, role(role), weight);
     }
 
     @Override
     public <T> BindRule bindProvider(Class<? extends Annotation> role, Class<T> source,
-                                     Provider<? extends T> provider, int weight) {
+                                     Provider<? extends T> provider, int weight, boolean terminate) {
+        // ignore terminate, since provider instance bindings always terminate
         return new ProviderInstanceBindRule(provider, source, role(role), weight);
     }
 

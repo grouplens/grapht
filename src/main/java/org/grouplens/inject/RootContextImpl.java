@@ -34,7 +34,7 @@ import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.InjectSPI;
 
-class RootContextImpl implements RootContext {
+class RootContextImpl implements Context {
     private final ContextImpl delegate;
     private final Set<Class<?>> defaultExcludes;
     
@@ -44,6 +44,10 @@ class RootContextImpl implements RootContext {
         delegate = new ContextImpl(spi, this, new ContextChain(new ArrayList<ContextMatcher>()));
         defaultExcludes = new HashSet<Class<?>>();
         bindRules = new HashMap<ContextChain, Collection<BindRule>>();
+    }
+    
+    public Map<ContextChain, Collection<BindRule>> getBindRules() {
+        return bindRules;
     }
     
     public void addBindRule(ContextChain context, BindRule rule) {
@@ -56,7 +60,6 @@ class RootContextImpl implements RootContext {
         inContext.add(rule);
     }
     
-    @Override
     public void addDefaultExclusion(Class<?> type) {
         if (type == null) {
             throw new NullPointerException("Exclusion type cannot be null");
@@ -64,7 +67,6 @@ class RootContextImpl implements RootContext {
         defaultExcludes.add(type);
     }
 
-    @Override
     public void removeDefaultExclusion(Class<?> type) {
         if (type == null) {
             throw new NullPointerException("Exclusion type cannot be null");
@@ -72,15 +74,8 @@ class RootContextImpl implements RootContext {
         defaultExcludes.remove(type);
     }
 
-    @Override
     public Set<Class<?>> getDefaultExclusions() {
         return Collections.unmodifiableSet(defaultExcludes);
-    }
-
-    @Override
-    public Map<ContextChain, Collection<? extends BindRule>> bindRules() {
-        Map<ContextChain, Collection<? extends BindRule>> copy = new HashMap<ContextChain, Collection<? extends BindRule>>(bindRules);
-        return copy;
     }
 
     @Override

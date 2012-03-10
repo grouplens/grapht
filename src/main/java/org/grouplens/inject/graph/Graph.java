@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 
 /**
  * Graph is a utility class for composing Nodes and Edges into a usable graph,
@@ -57,6 +59,79 @@ public class Graph<N, E> {
      */
     public Set<Node<N>> getNodes() {
         return new HashSet<Node<N>>(outgoing.keySet());
+    }
+
+    /**
+     * Return the first encountered node that has a label
+     * {@link Object#equals(Object) equal} to <tt>label</tt>. If multiple nodes
+     * have this label, only the first is returned. This should be used as a
+     * convenience where uniqueness is guaranteed, or is not important.
+     * 
+     * @param label The label to match
+     * @return A node with a matching label, or null if no node exists
+     */
+    public Node<N> getNode(@Nullable N label) {
+        for (Node<N> node: outgoing.keySet()) {
+            if (node.getLabel() == null) {
+                if (label == null) {
+                    return node;
+                }
+            } else {
+                if (node.getLabel().equals(label)) {
+                    return node;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the first encountered outgoing edge of <tt>head</tt> that has a
+     * label {@link Object#equals(Object) equal} to <tt>label</tt>. If multiple
+     * edges leaving the head node share the label, only the first is returned.
+     * This should be used as a convenience where uniqueness is guaranteed, or
+     * is not important.
+     * 
+     * @param head The head node for all outgoing edges searched
+     * @param label The label to match on outgoing edges of head
+     * @return The edge leaving head with the given label, or null
+     */
+    public Edge<N, E> getOutgoingEdge(Node<N> head, @Nullable E label) {
+        return getEdge(outgoing.get(head), label);
+    }
+
+    /**
+     * Return the first encountered incoming edge of <tt>tail</tt> that has a
+     * label {@link Object#equals(Object) equal} to <tt>label</tt>. If multiple
+     * edges entering the tail node share the label, only the first is returned.
+     * This should be used as a convenience where uniqueness is guaranteed, or
+     * is not important.
+     * 
+     * @param tail The tail node for all incoming edges searched
+     * @param label The label to match on outgoing edges of tail
+     * @return The edge entering tail with the given label, or null
+     */
+    public Edge<N, E> getIncomingEdge(Node<N> tail, @Nullable E label) {
+        return getEdge(incoming.get(tail), label);
+    }
+    
+    private Edge<N, E> getEdge(Set<Edge<N, E>> edges, E label) {
+        if (edges == null) {
+            return null;
+        }
+        
+        for (Edge<N, E> e: edges) {
+            if (e.getLabel() == null) {
+                if (label == null) {
+                    return e;
+                }
+            } else {
+                if (e.getLabel().equals(label)) {
+                    return e;
+                }
+            }
+        }
+        return null;
     }
 
     /**

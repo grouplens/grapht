@@ -26,16 +26,17 @@ import javax.inject.Provider;
 
 public interface InjectSPI {
     <T> BindRule bindType(@Nullable Class<? extends Annotation> role, Class<T> source,
-                          Class<? extends T> impl, int weight);
+                          Class<? extends T> impl, int weight, boolean terminate);
     
     <T> BindRule bindInstance(@Nullable Class<? extends Annotation> role, Class<T> source,
-                              T instance, int weight);
+                              T instance, int weight, boolean terminate);
     
     <T> BindRule bindProvider(@Nullable Class<? extends Annotation> role, Class<T> source, 
-                              Class<? extends Provider<? extends T>> providerType, int weight);
+                              Class<? extends Provider<? extends T>> providerType, int weight,
+                              boolean terminate);
     
     <T> BindRule bindProvider(@Nullable Class<? extends Annotation> role, Class<T> source, 
-                              Provider<? extends T> provider, int weight);
+                              Provider<? extends T> provider, int weight, boolean terminate);
     
     ContextMatcher context(@Nullable Class<? extends Annotation> role, Class<?> type);
     

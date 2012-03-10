@@ -34,7 +34,7 @@ class BindingImpl<T> implements Binding<T> {
     private final Set<Class<?>> excludeTypes;
     
     private Class<? extends Annotation> role;
-    private CachePolicy policy;
+    private boolean terminate;
     
     private boolean bindingCompleted;
     
@@ -50,8 +50,8 @@ class BindingImpl<T> implements Binding<T> {
             }
         }
         
-        policy = CachePolicy.SHARED;
         bindingCompleted = false;
+        terminate = false;
     }
     
     private void validateState() {
@@ -62,6 +62,9 @@ class BindingImpl<T> implements Binding<T> {
     
     @Override
     public Binding<T> withRole(Class<? extends Annotation> role) {
+        if (role == null) {
+            throw new NullPointerException("Role cannot be null");
+        }
         validateState();
         this.role = role;
         return this;
@@ -76,14 +79,11 @@ class BindingImpl<T> implements Binding<T> {
         excludeTypes.add(exclude);
         return this;
     }
-
+    
     @Override
-    public Binding<T> cachePolicy(CachePolicy policy) {
-        if (policy == null) {
-            throw new NullPointerException("CachePolicy cannot be null");
-        }
+    public Binding<T> terminateChain() {
         validateState();
-        this.policy = policy;
+        terminate = true;
         return this;
     }
 
@@ -95,12 +95,10 @@ class BindingImpl<T> implements Binding<T> {
         RootContextImpl root = context.getRootContext();
         
         for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindType(role, (Class) source, impl, 0));
+            root.addBindRule(chain, spi.bindType(role, (Class) source, impl, 0, terminate));
         }
         // TODO create generated bindings based on source, impl,
         // and exclude sets
-        // FIXME record selected cache policy somehow
-        // REVIEW: Should we get rid of cache policy and say everything is always shared?
     }
 
     @Override
@@ -111,7 +109,7 @@ class BindingImpl<T> implements Binding<T> {
         RootContextImpl root = context.getRootContext();
         
         for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindInstance(role, (Class) source, instance, 0));
+            root.addBindRule(chain, spi.bindInstance(role, (Class) source, instance, 0, terminate));
         }
     }
 
@@ -123,7 +121,7 @@ class BindingImpl<T> implements Binding<T> {
         RootContextImpl root = context.getRootContext();
         
         for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindProvider(role, (Class) source, provider, 0));
+            root.addBindRule(chain, spi.bindProvider(role, (Class) source, provider, 0, terminate));
         }
     }
 
@@ -135,7 +133,7 @@ class BindingImpl<T> implements Binding<T> {
         RootContextImpl root = context.getRootContext();
         
         for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindProvider(role, (Class) source, provider, 0));
+            root.addBindRule(chain, spi.bindProvider(role, (Class) source, provider, 0, terminate));
         }        
     }
 }

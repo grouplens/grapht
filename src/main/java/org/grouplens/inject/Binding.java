@@ -23,13 +23,11 @@ import java.lang.annotation.Annotation;
 import javax.inject.Provider;
 
 public interface Binding<T> {
-    // FIXME: add a terminateChain() method?
+    Binding<T> terminateChain();
     
     Binding<T> withRole(Class<? extends Annotation> role);
     
     Binding<T> exclude(Class<?> exclude);
-    
-    Binding<T> cachePolicy(CachePolicy policy);
     
     void to(Class<? extends T> impl);
     

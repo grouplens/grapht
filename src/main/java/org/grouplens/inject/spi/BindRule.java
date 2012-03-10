@@ -45,7 +45,6 @@ public interface BindRule {
      */
     public static final int SECOND_TIER_GENERATED_BIND_RULE = 2;
     
-    // FIXME: [ML] Add a method to stop following bind rules
     /**
      * Query whether this bind rule applies to some desire.
      * 
@@ -71,4 +70,10 @@ public interface BindRule {
      *         match the same desire
      */
     int getWeight();
+    
+    /**
+     * @return True if no more bind rules should be followed after this rule is
+     *         applied to a Desire.
+     */
+    boolean terminatesChain();
 }
