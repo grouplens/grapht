@@ -101,7 +101,7 @@ class BindingImpl<T> implements Binding<T> {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindInstance(role, sourceType, instance, 0, terminate));
+        config.addBindRule(chain, config.getSPI().bindInstance(role, sourceType, instance, 0));
     }
 
     @Override
@@ -109,7 +109,7 @@ class BindingImpl<T> implements Binding<T> {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0, terminate));
+        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0));
     }
 
     @Override
@@ -117,6 +117,6 @@ class BindingImpl<T> implements Binding<T> {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0, terminate));
+        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0));
     }
 }
