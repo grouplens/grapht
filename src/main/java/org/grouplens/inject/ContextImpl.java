@@ -24,9 +24,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.grouplens.inject.annotation.Parameter;
 import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.InjectSPI;
 
 /**
  * ContextImpl is the basic implementation of Context.
@@ -34,37 +34,43 @@ import org.grouplens.inject.spi.InjectSPI;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 class ContextImpl implements Context {
-    private final InjectSPI spi;
     private final ContextChain context;
     
-    private final RootContextImpl root;
+    private final InjectorConfigurationBuilder config;
     
-    public ContextImpl(InjectSPI spi, RootContextImpl root, ContextChain context) {
-        this.spi = spi;
-        this.root = root;
+    public ContextImpl(InjectorConfigurationBuilder config, ContextChain context) {
+        this.config = config;
         this.context = context;
     }
     
-    public RootContextImpl getRootContext() {
-        return root;
+    /**
+     * @return The root context
+     */
+    public InjectorConfigurationBuilder getBuilder() {
+        return config;
     }
     
+    /**
+     * @return The context chain of this context
+     */
     public ContextChain getContextChain() {
         return context;
     }
     
-    public InjectSPI getSPI() {
-        return spi;
-    }
-    
     @Override
     public <T> Binding<T> bind(Class<T> type) {
-        return new BindingImpl<T>(this, type, (Class<?>[]) null);
+        return new BindingImpl<T>(this, type);
     }
 
     @Override
-    public <T> Binding<T> bind(Class<T> type, Class<?>... otherTypes) {
-        return new BindingImpl<T>(this, type, otherTypes);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void bind(Class<? extends Annotation> param, Object value) {
+        Parameter p = param.getAnnotation(Parameter.class);
+        if (p == null) {
+            throw new IllegalArgumentException("Annotation must be annotated with Parameter");
+        }
+        Binding raw = bind(p.value()).withRole(param);
+        raw.to(value);
     }
 
     @Override
@@ -74,9 +80,9 @@ class ContextImpl implements Context {
 
     @Override
     public Context in(@Nullable Class<? extends Annotation> role, Class<?> type) {
-        ContextMatcher nextMatcher = spi.context(role, type);
+        ContextMatcher nextMatcher = config.getSPI().context(role, type);
         List<ContextMatcher> nextChain = new ArrayList<ContextMatcher>(context.getContexts());
         nextChain.add(nextMatcher);
-        return new ContextImpl(spi, root, new ContextChain(nextChain));
+        return new ContextImpl(config, new ContextChain(nextChain));
     }
 }

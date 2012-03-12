@@ -25,11 +25,17 @@ import java.util.Set;
 import javax.inject.Provider;
 
 import org.grouplens.inject.resolver.ContextChain;
-import org.grouplens.inject.spi.InjectSPI;
 
+/**
+ * BindingImpl is the default implementation of Binding that is used by
+ * {@link InjectorConfigurationBuilder}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @param <T> The bindings source's type
+ */
 class BindingImpl<T> implements Binding<T> {
     private final ContextImpl context;
-    private final Set<Class<?>> sourceTypes;
+    private final Class<T> sourceType;
     
     private final Set<Class<?>> excludeTypes;
     
@@ -38,17 +44,10 @@ class BindingImpl<T> implements Binding<T> {
     
     private boolean bindingCompleted;
     
-    public BindingImpl(ContextImpl context, Class<T> type, Class<?>... otherTypes) {
+    public BindingImpl(ContextImpl context, Class<T> type) {
         this.context = context;
-        sourceTypes = new HashSet<Class<?>>();
-        excludeTypes = new HashSet<Class<?>>();
-        
-        sourceTypes.add(type);
-        if (otherTypes != null) {
-            for (Class<?> t: otherTypes) {
-                sourceTypes.add(t);
-            }
-        }
+        sourceType = type;
+        excludeTypes = new HashSet<Class<?>>(context.getBuilder().getDefaultExclusions());
         
         bindingCompleted = false;
         terminate = false;
@@ -81,59 +80,43 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public Binding<T> terminateChain() {
+    public Binding<T> finalBinding() {
         validateState();
         terminate = true;
         return this;
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(Class<? extends T> impl) {
-        InjectSPI spi = context.getSPI();
         ContextChain chain = context.getContextChain();
-        RootContextImpl root = context.getRootContext();
+        InjectorConfigurationBuilder config = context.getBuilder();
         
-        for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindType(role, (Class) source, impl, 0, terminate));
-        }
+        config.addBindRule(chain, config.getSPI().bindType(role, sourceType, impl, 0, terminate));
         // TODO create generated bindings based on source, impl,
         // and exclude sets
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(T instance) {
-        InjectSPI spi = context.getSPI();
         ContextChain chain = context.getContextChain();
-        RootContextImpl root = context.getRootContext();
+        InjectorConfigurationBuilder config = context.getBuilder();
         
-        for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindInstance(role, (Class) source, instance, 0, terminate));
-        }
+        config.addBindRule(chain, config.getSPI().bindInstance(role, sourceType, instance, 0, terminate));
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void toProvider(Class<? extends Provider<? extends T>> provider) {
-        InjectSPI spi = context.getSPI();
         ContextChain chain = context.getContextChain();
-        RootContextImpl root = context.getRootContext();
+        InjectorConfigurationBuilder config = context.getBuilder();
         
-        for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindProvider(role, (Class) source, provider, 0, terminate));
-        }
+        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0, terminate));
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void toProvider(Provider<? extends T> provider) {
-        InjectSPI spi = context.getSPI();
         ContextChain chain = context.getContextChain();
-        RootContextImpl root = context.getRootContext();
+        InjectorConfigurationBuilder config = context.getBuilder();
         
-        for (Class<?> source: sourceTypes) {
-            root.addBindRule(chain, spi.bindProvider(role, (Class) source, provider, 0, terminate));
-        }        
+        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0, terminate));
     }
 }
