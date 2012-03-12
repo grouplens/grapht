@@ -21,6 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.BindRule;
@@ -28,6 +29,14 @@ import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.InjectSPI;
 
+/**
+ * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It
+ * uses Java's reflection API to find constructor and setter method injection
+ * points that have been annotated with {@link Inject} to determine a type's
+ * dependencies.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public <T> BindRule bindType(Class<? extends Annotation> role, Class<T> source,
@@ -37,7 +46,7 @@ public class ReflectionInjectSPI implements InjectSPI {
 
     @Override
     public <T> BindRule bindInstance(Class<? extends Annotation> role, Class<T> source, 
-                                     T instance, int weight, boolean terminate) {
+                                     T instance, int weight) {
         // ignore terminate, since instance bindings always terminate
         return new InstanceBindRule(instance, source, role(role), weight);
     }
@@ -45,14 +54,14 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public <T> BindRule bindProvider(Class<? extends Annotation> role, Class<T> source,
                                      Class<? extends Provider<? extends T>> providerType,
-                                     int weight, boolean terminate) {
+                                     int weight) {
         // ignore terminate, since provider bindings always terminate
         return new ProviderClassBindRule(providerType, source, role(role), weight);
     }
 
     @Override
     public <T> BindRule bindProvider(Class<? extends Annotation> role, Class<T> source,
-                                     Provider<? extends T> provider, int weight, boolean terminate) {
+                                     Provider<? extends T> provider, int weight) {
         // ignore terminate, since provider instance bindings always terminate
         return new ProviderInstanceBindRule(provider, source, role(role), weight);
     }
