@@ -18,15 +18,11 @@
  */
 package org.grouplens.inject.resolver;
 
-import java.util.List;
-
 import javax.inject.Provider;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
-import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
 
 /**
@@ -54,18 +50,6 @@ public interface Resolver {
      * @throws NullPointerException if desire is null
      */
     Provider<?> resolve(Desire desire);
-
-    /**
-     * Resolve the given Desire to a provider, as if the desire were needed in
-     * the given context. A null context is the same as the root context.
-     * 
-     * @review Is this necessary? If so, should it be at this API level?
-     * @param desire The desire to be resolved
-     * @param context The context this desire is resolved within
-     * @return A provider creating instances satisfying the desire
-     * @throws NullPointerException if desire is null
-     */
-    Provider<?> resolve(Desire desire, List<Pair<Satisfaction, Role>> context);
     
     /**
      * @return The current dependency graph state cached by this Resolver

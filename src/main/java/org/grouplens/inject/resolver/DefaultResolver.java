@@ -26,7 +26,6 @@ import java.util.Set;
 
 import javax.inject.Provider;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.InjectorConfiguration;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
@@ -116,13 +115,7 @@ public class DefaultResolver implements Resolver {
 
     @Override
     public Provider<?> resolve(Desire desire) {
-        return resolve(desire, null);
-    }
-    
-    @Override
-    public Provider<?> resolve(Desire desire, List<Pair<Satisfaction, Role>> context) {
         // Look up an outgoing edge for this desire
-        // FIXME: must do context matching, at the moment it only looks in the root
         Edge<Satisfaction, Desire> resolved = graph.getOutgoingEdge(root, desire);
         
         // This is only non-null if the desire was requested before at the root context,
