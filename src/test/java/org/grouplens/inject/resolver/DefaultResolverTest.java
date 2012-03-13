@@ -724,6 +724,35 @@ public class DefaultResolverTest {
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
         Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
     }
+    
+    @Test
+    public void testMultipleRequestsMergeSuccess() throws Exception {
+        // Test that multiple requests to resolve() will update the graph
+        // and share dependency nodes as expected
+        Assert.fail();
+    }
+    
+    @Test
+    public void testMultipleRequestsNoMergeSuccess() throws Exception {
+        // Test that multiple requests will keep nodes separate as required
+        // by dependency configuration
+        Assert.fail();
+    }
+    
+    @Test
+    public void testRequestDependencyMergeSuccess() throws Exception {
+        // Test that a request for a desire already in the graph as a dependency
+        // will have a new edge from the root to that dependency added.
+        Assert.fail();
+    }
+    
+    @Test
+    public void testRequestDependencyNoMergeSuccess() throws Exception {
+        // Test that a request for a desire already in the graph as a dependency,
+        // will create a new node if the dependency has a different configuration
+        // because of context-specific bind rules
+        Assert.fail();
+    }
 
     @Test(expected=ResolverException.class)
     public void testLimitedBindRuleApplicationsFail() throws Exception {

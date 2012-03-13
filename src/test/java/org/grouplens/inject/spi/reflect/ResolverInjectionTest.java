@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Provider;
+
 import org.grouplens.inject.InjectorConfiguration;
 import org.grouplens.inject.MockInjectorConfiguration;
 import org.grouplens.inject.graph.Edge;
@@ -56,8 +58,9 @@ public class ResolverInjectionTest {
         Desire rootDesire = new ReflectionInjectSPI().desire(null, TypeC.class);
         InjectorConfiguration config = new MockInjectorConfiguration(new HashMap<ContextChain, Collection<? extends BindRule>>());
         Resolver r = new DefaultResolver(config);
-        r.resolve(rootDesire);
-
+        Provider<?> p = r.resolve(rootDesire);
+        Assert.fail(); // FIXME: verify state of provider too
+        
         Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
         
         Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
@@ -133,7 +136,8 @@ public class ResolverInjectionTest {
                                     spi.bindInstance(null, TypeB.class, b, 0)));
         
         Resolver r = new DefaultResolver(new MockInjectorConfiguration(bindRules));
-        r.resolve(rootDesire);
+        Provider<?> p = r.resolve(rootDesire);
+        Assert.fail(); // FIXME: verify state of provider too
         
         Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
         
