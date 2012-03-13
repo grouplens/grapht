@@ -28,6 +28,8 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
+import org.grouplens.inject.InjectorConfiguration;
+import org.grouplens.inject.MockInjectorConfiguration;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.graph.Node;
@@ -40,26 +42,30 @@ import org.grouplens.inject.spi.MockDesire;
 import org.grouplens.inject.spi.MockRole;
 import org.grouplens.inject.spi.MockSatisfaction;
 import org.grouplens.inject.spi.Satisfaction;
-import org.junit.Before;
 import org.junit.Test;
 
 public class DefaultResolverTest {
-    private Resolver resolver;
-
-    @Before
-    public void setup() {
-        resolver = new DefaultResolver();
+    private Resolver createResolver(Map<ContextChain, Collection<? extends BindRule>> rules) {
+        InjectorConfiguration config = new MockInjectorConfiguration(rules);
+        return new DefaultResolver(config);
     }
-
+    
+    // bypass synthetic root and return node that resolves the desire 
+    private Node<Satisfaction> getRoot(Resolver r, Desire d) {
+        return r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), d).getTail();
+    }
+    
     @Test
     public void testNoDependenciesSuccess() throws Exception {
         // Test resolving a satisfaction that has no dependencies and is already satisfiable
         Satisfaction sat = new MockSatisfaction(A.class, new ArrayList<Desire>());
+        Desire desire = new MockDesire(sat);
 
-        ResolverResult r = resolver.resolve(sat, new HashMap<ContextChain, Collection<? extends BindRule>>());
-        Assert.assertEquals(1, r.getGraph().getNodes().size());
+        Resolver r = createResolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        r.resolve(desire);
+        Assert.assertEquals(1 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         
-        Node<Satisfaction> node = r.getRootNode();
+        Node<Satisfaction> node = getRoot(r, desire);
         Assert.assertEquals(sat, node.getLabel());
         Assert.assertTrue(r.getGraph().getOutgoingEdges(node).isEmpty());
         Assert.assertTrue(r.getGraph().getNodes().contains(node));
@@ -71,13 +77,16 @@ public class DefaultResolverTest {
         Satisfaction dep = new MockSatisfaction(B.class);
         Desire depDesire = new MockDesire(dep);
         Satisfaction rootSat = new MockSatisfaction(A.class, Arrays.asList(depDesire));
+        Desire rootDesire = new MockDesire(rootSat);
         
-        ResolverResult r = resolver.resolve(rootSat, new HashMap<ContextChain, Collection<? extends BindRule>>());
+        Resolver r = createResolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        r.resolve(rootDesire);
         
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(rootSat, r.getRootNode().getLabel());
-        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(rootSat, rootNode.getLabel());
+        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(rootNode).size());
+        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(rootNode).iterator().next().getTail().getLabel());
     }
 
     @Test
@@ -88,17 +97,20 @@ public class DefaultResolverTest {
         Desire d2 = new MockDesire();
         Desire d3 = new MockDesire(dep);
         Satisfaction root = new MockSatisfaction(A.class, Arrays.asList(d1));
+        Desire rootDesire = new MockDesire(root);
         
         Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
-        ResolverResult r = resolver.resolve(root, bindings);
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(root, r.getRootNode().getLabel());
-        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(root, rootNode.getLabel());
+        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(rootNode).size());
+        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(rootNode).iterator().next().getTail().getLabel());
     }
 
     @Test
@@ -118,11 +130,15 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
         
-        ResolverResult r = resolver.resolve(root, bindings);
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(root, r.getRootNode().getLabel());
-        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
+        Desire rootDesire = new MockDesire(root);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
+
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(root, rootNode.getLabel());
+        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(rootNode).size());
+        Assert.assertEquals(dep, r.getGraph().getOutgoingEdges(rootNode).iterator().next().getTail().getLabel());
     }
     
     @Test
@@ -157,16 +173,19 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, role2))),
                      Arrays.asList(new MockBindRule(d3, ob3))); 
         
-        ResolverResult r = resolver.resolve(r1, bindings);
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
-        Assert.assertEquals(5, r.getGraph().getNodes().size());
+        Assert.assertEquals(5 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), r2);
         Node<Satisfaction> n3 = getNode(r.getGraph(), r3);
         Node<Satisfaction> n4 = getNode(r.getGraph(), r4);
         Node<Satisfaction> on4 = getNode(r.getGraph(), or4);
 
-        Assert.assertEquals(n1, r.getRootNode());
+        Assert.assertEquals(n1, rootNode);
         Assert.assertEquals(2, r.getGraph().getOutgoingEdges(n1).size());
         
         Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
@@ -190,7 +209,6 @@ public class DefaultResolverTest {
         
         Desire b1 = new MockDesire(r2);
         Desire ob1 = new MockDesire(or2);
-        
 
         Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
@@ -198,12 +216,15 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
                      Arrays.asList(new MockBindRule(d1, ob1))); 
 
-        ResolverResult r = resolver.resolve(r1, bindings);
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
 
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(r1, r.getRootNode().getLabel());
-        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
-        Assert.assertEquals(or2, r.getGraph().getOutgoingEdges(r.getRootNode()).iterator().next().getTail().getLabel());
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(r1, rootNode.getLabel());
+        Assert.assertEquals(1, r.getGraph().getOutgoingEdges(rootNode).size());
+        Assert.assertEquals(or2, r.getGraph().getOutgoingEdges(rootNode).iterator().next().getTail().getLabel());
     }
     
     @Test
@@ -230,14 +251,16 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class))),
                      Arrays.asList(new MockBindRule(d2, b2)));
         
-        ResolverResult r = resolver.resolve(r1, bindings);
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), r2);
         Node<Satisfaction> n3 = getNode(r.getGraph(), r3);
         Node<Satisfaction> on3 = getNode(r.getGraph(), or3);
 
-        Assert.assertEquals(3, r.getGraph().getNodes().size());
+        Assert.assertEquals(3 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
         Assert.assertNotNull(n3);
@@ -275,14 +298,16 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class), new MockContextMatcher(B.class))),
                      Arrays.asList(new MockBindRule(d2, b2)));
         
-        ResolverResult r = resolver.resolve(r1, bindings);
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), r2);
         Node<Satisfaction> n3 = getNode(r.getGraph(), r3);
         Node<Satisfaction> on3 = getNode(r.getGraph(), or3);
 
-        Assert.assertEquals(3, r.getGraph().getNodes().size());
+        Assert.assertEquals(3 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
         Assert.assertNotNull(n3);
@@ -316,13 +341,15 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
                      Arrays.asList(new MockBindRule(d1, b1)));
         
-        ResolverResult r = resolver.resolve(r1, bindings);
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), r2);
         Node<Satisfaction> on2 = getNode(r.getGraph(), or2);
 
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
         Assert.assertNull(on2);
@@ -353,23 +380,27 @@ public class DefaultResolverTest {
                                    new MockBindRule(d2, b2),
                                    new MockBindRule(d3, b3)));
         
-        ResolverResult r = resolver.resolve(r1, bindings);
-        Assert.assertEquals(4, r.getGraph().getNodes().size());
-        Assert.assertEquals(r1, r.getRootNode().getLabel());
-        Assert.assertEquals(3, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
+        
+        Assert.assertEquals(4 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(r1, rootNode.getLabel());
+        Assert.assertEquals(3, r.getGraph().getOutgoingEdges(rootNode).size());
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), sd1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), sd2);
         Node<Satisfaction> n3 = getNode(r.getGraph(), sd3);
         
-        Assert.assertEquals(1, r.getGraph().getEdges(r.getRootNode(), n1).size());
-        Assert.assertEquals(d1, r.getGraph().getEdges(r.getRootNode(), n1).iterator().next().getLabel());
+        Assert.assertEquals(1, r.getGraph().getEdges(rootNode, n1).size());
+        Assert.assertEquals(d1, r.getGraph().getEdges(rootNode, n1).iterator().next().getLabel());
         
-        Assert.assertEquals(1, r.getGraph().getEdges(r.getRootNode(), n2).size());
-        Assert.assertEquals(d2, r.getGraph().getEdges(r.getRootNode(), n2).iterator().next().getLabel());
+        Assert.assertEquals(1, r.getGraph().getEdges(rootNode, n2).size());
+        Assert.assertEquals(d2, r.getGraph().getEdges(rootNode, n2).iterator().next().getLabel());
         
-        Assert.assertEquals(1, r.getGraph().getEdges(r.getRootNode(), n3).size());
-        Assert.assertEquals(d3, r.getGraph().getEdges(r.getRootNode(), n3).iterator().next().getLabel());
+        Assert.assertEquals(1, r.getGraph().getEdges(rootNode, n3).size());
+        Assert.assertEquals(d3, r.getGraph().getEdges(rootNode, n3).iterator().next().getLabel());
     }
 
     @Test
@@ -393,13 +424,17 @@ public class DefaultResolverTest {
                                    new MockBindRule(d2, b2),
                                    new MockBindRule(d3, b3)));
         
-        ResolverResult r = resolver.resolve(r1, bindings);
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
-        Assert.assertEquals(r1, r.getRootNode().getLabel());
-        Assert.assertEquals(3, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
+        Desire rootDesire = new MockDesire(r1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
+        
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(r1, rootNode.getLabel());
+        Assert.assertEquals(3, r.getGraph().getOutgoingEdges(rootNode).size());
         
         Set<Desire> edges = new HashSet<Desire>();
-        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(r.getRootNode())) {
+        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(rootNode)) {
             Assert.assertEquals(sd1, e.getTail().getLabel());
             edges.add(e.getLabel());
         }
@@ -427,9 +462,13 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2)));
         
-        ResolverResult r = resolver.resolve(s1, bindings);
-        Assert.assertEquals(3, r.getGraph().getNodes().size());
-        Assert.assertEquals(s1, r.getRootNode().getLabel());
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
+        
+        Assert.assertEquals(3 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(s1, rootNode.getLabel());
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), s1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), s2);
@@ -488,13 +527,16 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class, r2), new MockContextMatcher(D.class, r4))),
                      Arrays.asList(new MockBindRule(d7, b6))); // r2s1,r4s2:d7 -> s7
         
-        ResolverResult r = resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
         // there are 10 nodes, s2, s4 and s5 are duplicated
-        Assert.assertEquals(10, r.getGraph().getNodes().size());
+        Assert.assertEquals(10 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         
         // grab all of the nodes in the graph
-        Node<Satisfaction> n1 = r.getRootNode();
+        Node<Satisfaction> n1 = rootNode;
         Node<Satisfaction> n2 = getNode(r.getGraph(), n1, s2, d1);
         Node<Satisfaction> on2 = getNode(r.getGraph(), n1, s2, d2);
         Node<Satisfaction> n3 = getNode(r.getGraph(), n2, s3, d3);
@@ -530,7 +572,10 @@ public class DefaultResolverTest {
         Assert.assertEquals(0, r.getGraph().getOutgoingEdges(n6).size());
         Assert.assertEquals(0, r.getGraph().getOutgoingEdges(n7).size());
         
-        Assert.assertEquals(0, r.getGraph().getIncomingEdges(n1).size());
+        // special case for root (since the graph adds a synthetic root)
+        Assert.assertEquals(1, r.getGraph().getIncomingEdges(n1).size());
+        Assert.assertNull(r.getGraph().getIncomingEdges(n1).iterator().next().getHead().getLabel());
+        
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n2).size());
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(on2).size());
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n3).size());
@@ -566,14 +611,17 @@ public class DefaultResolverTest {
                                                     new MockContextMatcher(B.class))),
                      Arrays.asList(new MockBindRule(d1, ob1)));
         
-        ResolverResult r = resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
         // the resulting graph should be s1->s2->s1->s2->s1->os2 = 6 nodes
-        Assert.assertEquals(6, r.getGraph().getNodes().size());
-        Assert.assertEquals(s1, r.getRootNode().getLabel());
+        Assert.assertEquals(6 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(s1, rootNode.getLabel());
         
         // edge s1->s2 by d1
-        Set<Edge<Satisfaction, Desire>> edges = r.getGraph().getOutgoingEdges(r.getRootNode()); 
+        Set<Edge<Satisfaction, Desire>> edges = r.getGraph().getOutgoingEdges(rootNode); 
         Assert.assertEquals(1, edges.size());
         Edge<Satisfaction, Desire> e1 = edges.iterator().next();
         Assert.assertEquals(s2, e1.getTail().getLabel());
@@ -630,9 +678,11 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Bp.class))),
                      Arrays.asList(new MockBindRule(d1, ob1)));
         
-        ResolverResult r = resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
         
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), s1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), s2);
@@ -660,9 +710,11 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
                      Arrays.asList(new MockBindRule(d1, d1)));
         
-        ResolverResult r = resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
         
-        Assert.assertEquals(2, r.getGraph().getNodes().size());
+        Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), s1);
         Node<Satisfaction> n2 = getNode(r.getGraph(), s2);
@@ -685,7 +737,9 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d1)));
         
-        resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
     }
     
     @Test(expected=ResolverException.class)
@@ -706,9 +760,11 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2)));
         
-        resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
     }
-
+    
     @Test(expected=ResolverException.class)
     public void testTooManyBindRulesFail() throws Exception {
         // Test that providing too many choices for bind rules throws an exception
@@ -724,7 +780,10 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1), 
                                    new MockBindRule(d1, ob1)));
-        resolver.resolve(s1, bindings);
+        
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
     }
 
     @Test(expected=ResolverException.class)
@@ -739,7 +798,10 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
-        resolver.resolve(s1, bindings);
+        
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
     }
     
     @Test(expected=ResolverException.class)
@@ -755,7 +817,9 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d2, b2)));
 
-        resolver.resolve(s1, bindings);
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
     }
 
     @Test(expected=ResolverException.class)
@@ -773,17 +837,10 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(b1, b2))); 
-        resolver.resolve(s1, bindings);
-    }
-    
-    // Note that this won't work if a Satisfaction is present in multiple places
-    private Node<Satisfaction> getNode(Graph<Satisfaction, Desire> g, Satisfaction s) {
-        for (Node<Satisfaction> n: g.getNodes()) {
-            if (n.getLabel().equals(s)) {
-                return n;
-            }
-        }
-        return null;
+        
+        Desire rootDesire = new MockDesire(s1);
+        Resolver r = createResolver(bindings);
+        r.resolve(rootDesire);
     }
     
     // Find the node for s connected to p by the given desire, d
@@ -794,6 +851,10 @@ public class DefaultResolverTest {
             }
         }
         return null;
+    }
+    
+    private Node<Satisfaction> getNode(Graph<Satisfaction, Desire> g, Satisfaction s) {
+        return g.getNode(s);
     }
 
     private static class A {}

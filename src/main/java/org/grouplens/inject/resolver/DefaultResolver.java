@@ -193,6 +193,7 @@ public class DefaultResolver implements Resolver {
                         graph.addEdge(new Edge<Satisfaction, Desire>(this.root, newTail, label));
                     }
                 }
+                return;
             } // else it wasn't actually the root so keep going below
         } else {
             // if we don't have exactly 1 node left, there should be > 1,

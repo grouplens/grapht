@@ -24,12 +24,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.grouplens.inject.InjectorConfiguration;
+import org.grouplens.inject.MockInjectorConfiguration;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Node;
 import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.resolver.DefaultResolver;
 import org.grouplens.inject.resolver.Resolver;
-import org.grouplens.inject.resolver.ResolverResult;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
@@ -52,15 +53,17 @@ public class ResolverInjectionTest {
     public void testTypeCInjectionWithDefaults() throws Exception {
         // Test that TypeC can be resolved successfully without any bind rules.
         // All of TypeC's dependencies have defaults or are satisfiable.
-        ClassSatisfaction root = new ClassSatisfaction(TypeC.class);
-        Resolver resolver = new DefaultResolver();
-        ResolverResult r = resolver.resolve(root, new HashMap<ContextChain, Collection<? extends BindRule>>());
+        Desire rootDesire = new ReflectionInjectSPI().desire(null, TypeC.class);
+        InjectorConfiguration config = new MockInjectorConfiguration(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        Resolver r = new DefaultResolver(config);
+        r.resolve(rootDesire);
+
+        Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
         
-        Assert.assertEquals(root, r.getRootNode().getLabel());
-        Assert.assertEquals(5, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
+        Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
-        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(r.getRootNode())) {
+        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(resolvedRoot)) {
             ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
@@ -116,27 +119,28 @@ public class ResolverInjectionTest {
         // the bind rule configuration does not need to be very complicated, since
         // the resolver and bind rules are already tested.
         InjectSPI spi = new ReflectionInjectSPI();
-        ClassSatisfaction root = new ClassSatisfaction(TypeC.class);
+        Desire rootDesire = spi.desire(null, TypeC.class);
         
         TypeA a = new TypeA();
         TypeB b = new TypeB();
         
         Map<ContextChain, Collection<? extends BindRule>> bindRules = new HashMap<ContextChain, Collection<? extends BindRule>>();
         bindRules.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                      Arrays.asList(spi.bindInstance(ParameterA.class, Integer.class, 10, 0, false),
+                      Arrays.asList(spi.bindInstance(ParameterA.class, Integer.class, 10, 0),
                                     spi.bindType(RoleA.class, InterfaceA.class, PrimeA.class, 0, false),
                                     spi.bindType(RoleE.class, InterfaceB.class, PrimeB.class, 0, false),
-                                    spi.bindInstance(null, TypeA.class, a, 0, false),
-                                    spi.bindInstance(null, TypeB.class, b, 0, false)));
+                                    spi.bindInstance(null, TypeA.class, a, 0),
+                                    spi.bindInstance(null, TypeB.class, b, 0)));
         
-        Resolver resolver = new DefaultResolver();
-        ResolverResult r = resolver.resolve(root, bindRules);
+        Resolver r = new DefaultResolver(new MockInjectorConfiguration(bindRules));
+        r.resolve(rootDesire);
         
-        Assert.assertEquals(root, r.getRootNode().getLabel());
-        Assert.assertEquals(5, r.getGraph().getOutgoingEdges(r.getRootNode()).size());
+        Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
+        
+        Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
-        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(r.getRootNode())) {
+        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(resolvedRoot)) {
             ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
