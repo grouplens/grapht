@@ -50,8 +50,17 @@ public interface Resolver {
      * @throws NullPointerException if desire is null
      */
     Provider<?> resolve(Desire desire);
-    
+
     /**
+     * <p>
+     * Get the dependency graph as accumulated by the Resolver. This will
+     * contain the entire dependency state required to satisfy all previous
+     * requests to {@link #resolve(Desire)}.
+     * <p>
+     * The returned graph must contain a "root" node that has a null label. This
+     * should be the only node with a null label. The root node must have edges
+     * to the nodes that have satisfied all requested Desires.
+     * 
      * @return The current dependency graph state cached by this Resolver
      */
     Graph<Satisfaction, Desire> getGraph();
