@@ -729,21 +729,145 @@ public class DefaultResolverTest {
     public void testMultipleRequestsMergeSuccess() throws Exception {
         // Test that multiple requests to resolve() will update the graph
         // and share dependency nodes as expected
-        Assert.fail();
+        Desire a1 = new MockDesire(); // a's dependency
+        Desire d1 = new MockDesire(); // d's first dependency
+        Desire d2 = new MockDesire(); // d's second dependency
+        Satisfaction sa = new MockSatisfaction(A.class, Arrays.asList(a1));
+        Satisfaction sap = new MockSatisfaction(Ap.class, Arrays.asList(a1)); // variant of A
+        Satisfaction sd = new MockSatisfaction(D.class, Arrays.asList(d1, d2));
+        Satisfaction sb = new MockSatisfaction(B.class);
+        Satisfaction sc = new MockSatisfaction(C.class);
+        
+        Desire da = new MockDesire(sa);
+        Desire dap = new MockDesire(sap);
+        
+        // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
+        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
+                                   new MockBindRule(d1, new MockDesire(sb)),
+                                   new MockBindRule(d2, new MockDesire(sc))));
+        
+        Resolver r = createResolver(bindings);
+        r.resolve(da);
+        r.resolve(dap);
+        
+        Node<Satisfaction> root = r.getGraph().getNode(null);
+        Assert.assertEquals(5 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(2, r.getGraph().getOutgoingEdges(root).size()); // da and dap
+        
+        Node<Satisfaction> na = r.getGraph().getOutgoingEdge(root, da).getTail();
+        Node<Satisfaction> nap = r.getGraph().getOutgoingEdge(root, dap).getTail();
+        
+        // sa and sap were different satisfactions, so they should be separate nodes
+        Assert.assertNotSame(na, nap);
+        
+        // the resolved desire for a1, from da
+        Node<Satisfaction> ra1 = r.getGraph().getOutgoingEdge(na, a1).getTail();
+        Node<Satisfaction> ra1p = r.getGraph().getOutgoingEdge(nap, a1).getTail();
+        
+        // verify that both a and ap point to the sb satisfaction, and verify
+        // that sb (and also its children) are properly shared
+        Assert.assertSame(sd, ra1.getLabel());
+        Assert.assertSame(sd, ra1p.getLabel());
+        Assert.assertSame(ra1, ra1p);
+        
+        Assert.assertEquals(2, r.getGraph().getIncomingEdges(r.getGraph().getNode(sd)).size());
     }
     
     @Test
     public void testMultipleRequestsNoMergeSuccess() throws Exception {
         // Test that multiple requests will keep nodes separate as required
         // by dependency configuration
-        Assert.fail();
+        Desire a1 = new MockDesire(); // a's dependency
+        Desire d1 = new MockDesire(); // d's first dependency
+        Desire d2 = new MockDesire(); // d's second dependency
+        Satisfaction sa = new MockSatisfaction(A.class, Arrays.asList(a1));
+        Satisfaction sap = new MockSatisfaction(Ap.class, Arrays.asList(a1)); // variant of A
+        Satisfaction sd = new MockSatisfaction(D.class, Arrays.asList(d1, d2));
+        Satisfaction sb = new MockSatisfaction(B.class);
+        Satisfaction sbp = new MockSatisfaction(Bp.class); // variant of B
+        Satisfaction sc = new MockSatisfaction(C.class);
+        Satisfaction scp = new MockSatisfaction(Cp.class); // variant of C
+        
+        Desire da = new MockDesire(sa);
+        Desire dap = new MockDesire(sap);
+        
+        // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
+        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
+                                   new MockBindRule(d1, new MockDesire(sb)),
+                                   new MockBindRule(d2, new MockDesire(sc))));
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Ap.class))),
+                     Arrays.asList(new MockBindRule(d1, new MockDesire(sbp)),
+                                   new MockBindRule(d2, new MockDesire(scp))));
+        
+        Resolver r = createResolver(bindings);
+        r.resolve(da);
+        r.resolve(dap);
+        
+        Node<Satisfaction> root = r.getGraph().getNode(null);
+        Assert.assertEquals(8 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(2, r.getGraph().getOutgoingEdges(root).size()); // da and dap
+        
+        Node<Satisfaction> na = r.getGraph().getOutgoingEdge(root, da).getTail();
+        Node<Satisfaction> nap = r.getGraph().getOutgoingEdge(root, dap).getTail();
+        
+        // sa and sap were different satisfactions, so they should be separate nodes
+        Assert.assertNotSame(na, nap);
+        
+        // the resolved desire for a1, from da
+        Node<Satisfaction> ra1 = r.getGraph().getOutgoingEdge(na, a1).getTail();
+        Node<Satisfaction> ra1p = r.getGraph().getOutgoingEdge(nap, a1).getTail();
+        
+        // verify that both ra1 and ra1p are different nodes that both use the
+        // sd satisfaction because sd's dependencies are configured differently
+        Assert.assertNotSame(ra1, ra1p);
+        Assert.assertSame(sd, ra1.getLabel());
+        Assert.assertSame(sd, ra1p.getLabel());
+        
+        Assert.assertSame(sb, r.getGraph().getOutgoingEdge(ra1, d1).getTail().getLabel());
+        Assert.assertSame(sc, r.getGraph().getOutgoingEdge(ra1, d2).getTail().getLabel());
+        Assert.assertSame(sbp, r.getGraph().getOutgoingEdge(ra1p, d1).getTail().getLabel());
+        Assert.assertSame(scp, r.getGraph().getOutgoingEdge(ra1p, d2).getTail().getLabel());
     }
     
     @Test
     public void testRequestDependencyMergeSuccess() throws Exception {
         // Test that a request for a desire already in the graph as a dependency
         // will have a new edge from the root to that dependency added.
-        Assert.fail();
+        Desire a1 = new MockDesire(); // a's dependency
+        Desire d1 = new MockDesire(); // d's first dependency
+        Desire d2 = new MockDesire(); // d's second dependency
+        Satisfaction sa = new MockSatisfaction(A.class, Arrays.asList(a1));
+        Satisfaction sd = new MockSatisfaction(D.class, Arrays.asList(d1, d2));
+        Satisfaction sb = new MockSatisfaction(B.class);
+        Satisfaction sc = new MockSatisfaction(C.class);
+        
+        Desire da = new MockDesire(sa);
+        Desire dd = new MockDesire(sd);
+        // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
+        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
+                                   new MockBindRule(d1, new MockDesire(sb)),
+                                   new MockBindRule(d2, new MockDesire(sc))));
+        
+        Resolver r = createResolver(bindings);
+        r.resolve(da);
+        r.resolve(dd);
+        
+        Node<Satisfaction> root = r.getGraph().getNode(null);
+        Assert.assertEquals(4 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(2, r.getGraph().getOutgoingEdges(root).size()); // da and dd
+        
+        Node<Satisfaction> na = r.getGraph().getOutgoingEdge(root, da).getTail();
+        Node<Satisfaction> nd = r.getGraph().getOutgoingEdge(root, dd).getTail();
+        
+        // additionally verify that there is an edge going from na to nd
+        Assert.assertEquals(1, r.getGraph().getEdges(na, nd).size());
+        Assert.assertSame(nd, r.getGraph().getOutgoingEdge(na, a1).getTail());
     }
     
     @Test
@@ -751,7 +875,57 @@ public class DefaultResolverTest {
         // Test that a request for a desire already in the graph as a dependency,
         // will create a new node if the dependency has a different configuration
         // because of context-specific bind rules
-        Assert.fail();
+        Desire a1 = new MockDesire(); // a's dependency
+        Desire d1 = new MockDesire(); // d's first dependency
+        Desire d2 = new MockDesire(); // d's second dependency
+        Satisfaction sa = new MockSatisfaction(A.class, Arrays.asList(a1));
+        Satisfaction sd = new MockSatisfaction(D.class, Arrays.asList(d1, d2));
+        Satisfaction sb = new MockSatisfaction(B.class);
+        Satisfaction sbp = new MockSatisfaction(Bp.class); // variant of B
+        Satisfaction sc = new MockSatisfaction(C.class);
+        Satisfaction scp = new MockSatisfaction(Cp.class); // variant of C
+        
+        Desire da = new MockDesire(sa);
+        Desire dd = new MockDesire(sd);
+        
+        // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
+        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
+                                   new MockBindRule(d1, new MockDesire(sbp)),
+                                   new MockBindRule(d2, new MockDesire(scp))));
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
+                     Arrays.asList(new MockBindRule(d1, new MockDesire(sb)),
+                                   new MockBindRule(d2, new MockDesire(sc))));
+        
+        Resolver r = createResolver(bindings);
+        r.resolve(da);
+        r.resolve(dd);
+        
+        Node<Satisfaction> root = r.getGraph().getNode(null);
+        Assert.assertEquals(7 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(2, r.getGraph().getOutgoingEdges(root).size()); // da and dd
+        
+        // resolved root desire nodes
+        Node<Satisfaction> na = r.getGraph().getOutgoingEdge(root, da).getTail();
+        Node<Satisfaction> nd = r.getGraph().getOutgoingEdge(root, dd).getTail();
+        
+        // make sure that there is no edge between na and nd
+        Assert.assertTrue(r.getGraph().getEdges(na, nd).isEmpty());
+        
+        // look up dependency for na (which is also the sd satisfaction)
+        Node<Satisfaction> nad = r.getGraph().getOutgoingEdge(na, a1).getTail();
+        
+        // verify that the two sd nodes are different and have different edge
+        // configurations
+        Assert.assertNotSame(nd, nad); 
+        Assert.assertSame(sd, nd.getLabel());
+        Assert.assertSame(sd, nad.getLabel());
+        
+        Assert.assertSame(sb, r.getGraph().getOutgoingEdge(nad, d1).getTail().getLabel());
+        Assert.assertSame(sc, r.getGraph().getOutgoingEdge(nad, d2).getTail().getLabel());
+        Assert.assertSame(sbp, r.getGraph().getOutgoingEdge(nd, d1).getTail().getLabel());
+        Assert.assertSame(scp, r.getGraph().getOutgoingEdge(nd, d2).getTail().getLabel());
     }
 
     @Test(expected=ResolverException.class)

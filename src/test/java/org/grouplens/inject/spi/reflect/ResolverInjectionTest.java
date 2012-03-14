@@ -59,10 +59,20 @@ public class ResolverInjectionTest {
         InjectorConfiguration config = new MockInjectorConfiguration(new HashMap<ContextChain, Collection<? extends BindRule>>());
         Resolver r = new DefaultResolver(config);
         Provider<?> p = r.resolve(rootDesire);
-        Assert.fail(); // FIXME: verify state of provider too
+        
+        TypeC instance = (TypeC) p.get();
+        Assert.assertEquals(5, instance.getIntValue());
+        Assert.assertNotNull(instance.getInterfaceA());
+        Assert.assertTrue(instance.getInterfaceA() instanceof TypeB); // ProviderA actually creates TypeB's
+        Assert.assertSame(instance.getInterfaceA(), instance.getTypeA());
+        Assert.assertNotNull(instance.getInterfaceB());
+        Assert.assertTrue(instance.getInterfaceB() instanceof TypeB);
+        Assert.assertSame(instance.getInterfaceB(), instance.getTypeB());
+        
+        // also verify memoization
+        Assert.assertSame(instance, p.get());
         
         Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
-        
         Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
@@ -137,10 +147,20 @@ public class ResolverInjectionTest {
         
         Resolver r = new DefaultResolver(new MockInjectorConfiguration(bindRules));
         Provider<?> p = r.resolve(rootDesire);
-        Assert.fail(); // FIXME: verify state of provider too
+
+        TypeC instance = (TypeC) p.get();
+        Assert.assertEquals(10, instance.getIntValue());
+        Assert.assertNotNull(instance.getInterfaceA());
+        Assert.assertTrue(instance.getInterfaceA() instanceof PrimeA);
+        Assert.assertSame(a, instance.getTypeA());
+        Assert.assertNotNull(instance.getInterfaceB());
+        Assert.assertTrue(instance.getInterfaceB() instanceof PrimeB);
+        Assert.assertSame(b, instance.getTypeB());
+        
+        // also verify memoization
+        Assert.assertSame(instance, p.get());
         
         Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
-        
         Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
@@ -154,25 +174,25 @@ public class ResolverInjectionTest {
                 Assert.assertEquals(10, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
                 deps.put(TypeC.CONSTRUCTOR, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_A)) {
-                // An InterfaceA is implemented by TypeA, which is then provided by Provider A
+                // An InterfaceA has been bound to PrimeA
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_A));
                 Assert.assertTrue(e.getTail().getLabel() instanceof ClassSatisfaction);
                 Assert.assertEquals(PrimeA.class, e.getTail().getLabel().getErasedType());
                 deps.put(TypeC.INTERFACE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_A)) {
-                // A TypeA is provided by a ProviderA
+                // A TypeA has been bound to an instance
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_A));
                 Assert.assertTrue(e.getTail().getLabel() instanceof InstanceSatisfaction);
                 Assert.assertSame(a, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
                 deps.put(TypeC.TYPE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_B)) {
-                // RoleE inherits RoleD and that defaults to TypeB
+                // RoleE has been bound to PrimeB
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_B));
                 Assert.assertTrue(e.getTail().getLabel() instanceof ClassSatisfaction);
                 Assert.assertEquals(PrimeB.class, e.getTail().getLabel().getErasedType());
                 deps.put(TypeC.INTERFACE_B, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_B)) {
-                // TypeB is satisfiable on its own
+                // TypeB has been bound to an instance
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_B));
                 Assert.assertTrue(e.getTail().getLabel() instanceof InstanceSatisfaction);
                 Assert.assertSame(b, ((InstanceSatisfaction) e.getTail().getLabel()).getInstance());
