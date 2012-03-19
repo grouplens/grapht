@@ -70,9 +70,8 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Class<?> getErasedType() {
-        return Types.getProvidedType((Class<? extends Provider<?>>) provider.getClass());
+        return Types.getProvidedType(provider);
     }
 
     @Override

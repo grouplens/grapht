@@ -122,8 +122,6 @@ public final class Types {
      *             Provider
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
-        // FIXME: I don't know if this is capable of getting the generics
-        // properly, but that's not my concern right now
         try {
             return Types.box(providerClass.getMethod("get").getReturnType());
         } catch (SecurityException e) {
@@ -131,6 +129,18 @@ public final class Types {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class does not implement get()");
         }
+    }
+
+    /**
+     * Get the type that is provided by the Provider instance.
+     * 
+     * @param provider The provider instance queried
+     * @return The provided class type
+     * @see #getProvidedType(Class)
+     */
+    @SuppressWarnings("unchecked")
+    public static Class<?> getProvidedType(Provider<?> provider) {
+        return getProvidedType((Class<? extends Provider<?>>) provider.getClass());
     }
     
     /**

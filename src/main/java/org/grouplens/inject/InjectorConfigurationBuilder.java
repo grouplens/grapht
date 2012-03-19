@@ -35,6 +35,7 @@ import org.grouplens.inject.spi.InjectSPI;
 import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
 
 /**
+ * <p>
  * InjectorConfigurationBuilder is a Builder that creates
  * InjectorConfigurations. This uses its own implementations of {@link Context}
  * and {@link Binding} to accumulate {@link BindRule BindRules}. For simple
@@ -42,6 +43,15 @@ import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
  * InjectorConfigurationBuilder is useful for different implementations of
  * Injector that only need to change the inject behavior, but do not need to
  * modify configuration.
+ * <p>
+ * The fluent API provided by the InjectorConfigurationBuilder will by default
+ * generate additional {@link BindRule BindRules} when {@link Binding bindings}
+ * are completed. A BindRule has a source type and a target type; the source
+ * represents the type declared at the injection point and the target type is
+ * the satisfying implementation. The fluent API generates bindings for the
+ * super types of the source type, and the intermediate types between the source
+ * and target. This allows for much simpler binding configurations that still
+ * allow types to have narrower dependencies.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
@@ -51,32 +61,59 @@ public class InjectorConfigurationBuilder implements Builder<InjectorConfigurati
     
     private final Set<Class<?>> defaultExcludes;
     private final Map<ContextChain, Collection<BindRule>> bindRules;
-    
+    private final boolean generateRules;
+
     /**
      * Create a new InjectorConfigurationBuilder that uses a
-     * {@link ReflectionInjectSPI}.
+     * {@link ReflectionInjectSPI} and automatically generates bind rules for
+     * super and intermediate types.
      */
     public InjectorConfigurationBuilder() {
-        this(new ReflectionInjectSPI());
+        this(true);
     }
 
+    /**
+     * Create a new InjectorConfigurationBuilder that uses a
+     * {@link ReflectionInjectSPI}. If <tt>generateRules</tt> is true, bind
+     * rules for super and intermediate types are generated. If it is false,
+     * only one bind rule is created per binding.
+     * 
+     * @param generateRules True if additional bind rules should be generated
+     */
+    public InjectorConfigurationBuilder(boolean generateRules) {
+        this(new ReflectionInjectSPI(), generateRules);
+    }
+    
     /**
      * Create a new InjectorConfigurationBuilder that uses the given
      * {@link InjectSPI} instance.
      * 
      * @param spi The injection service provider to use
+     * @param generateRules True if additional bind rules should be generated
+     *            for intermediate and super types
      * @throws NullPointerException if spi is null
      */
-    public InjectorConfigurationBuilder(InjectSPI spi) {
+    public InjectorConfigurationBuilder(InjectSPI spi, boolean generateRules) {
         if (spi == null) {
             throw new NullPointerException("SPI cannot be null");
         }
         
         this.spi = spi;
+        this.generateRules = generateRules;
+        
         defaultExcludes = new HashSet<Class<?>>();
+        defaultExcludes.add(Object.class);
         bindRules = new HashMap<ContextChain, Collection<BindRule>>();
         
         root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
+    }
+    
+    /**
+     * @return True if bind rules for super and intermediate types should be
+     *         generated
+     */
+    public boolean getGenerateRules() {
+        return generateRules;
     }
     
     /**

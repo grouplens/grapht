@@ -81,7 +81,7 @@ public class InstanceBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "InstanceBindRule(" + getRole() + ":" + getSourceType() + " -> " + instance + ")";
+        return "InstanceBindRule(" + getWeight() + ", "  + getRole() + ":" + getSourceType() + " -> " + instance + ")";
     }
 
     @Override

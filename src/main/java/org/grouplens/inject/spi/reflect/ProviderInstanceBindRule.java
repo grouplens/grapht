@@ -48,13 +48,12 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
      * @throws IllegalArgumentException if the provider's created instances do
      *             not extend from sourceType
      */
-    @SuppressWarnings("unchecked")
     public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
         super(sourceType, role, weight);
         if (provider == null) {
             throw new NullPointerException("Provider instance cannot be null");
         }
-        if (!sourceType.isAssignableFrom(Types.getProvidedType((Class<? extends Provider<?>>) provider.getClass()))) {
+        if (!sourceType.isAssignableFrom(Types.getProvidedType(provider))) {
             throw new IllegalArgumentException("Provider does not provide instances of " + sourceType);
         }
         
@@ -87,7 +86,7 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "ProviderInstanceBindRule(" + getRole() + ":" + getSourceType() + " -> " + provider + ")";
+        return "ProviderInstanceBindRule(" + getWeight() + ", "  + getRole() + ":" + getSourceType() + " -> " + provider + ")";
     }
 
     @Override

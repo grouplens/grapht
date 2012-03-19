@@ -19,12 +19,17 @@
 package org.grouplens.inject;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Provider;
 
 import org.grouplens.inject.resolver.ContextChain;
+import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.types.Types;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by
@@ -87,36 +92,116 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(Class<? extends T> impl) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindType(role, sourceType, impl, 0, terminate));
-        // TODO create generated bindings based on source, impl,
-        // and exclude sets
+        if (config.getGenerateRules()) {
+            Map<Class<?>, Integer> bindPoints = generateBindPoints(impl);
+            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
+                BindRule rule = config.getSPI().bindType(role, (Class) e.getKey(), impl, e.getValue(), terminate);
+                config.addBindRule(chain, rule);
+            }
+        } else {
+            config.addBindRule(chain, config.getSPI().bindType(role, sourceType, impl, BindRule.MANUAL_BIND_RULE, terminate));
+        }
     }
 
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(T instance) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindInstance(role, sourceType, instance, 0));
+        if (config.getGenerateRules()) {
+            Map<Class<?>, Integer> bindPoints = generateBindPoints(instance.getClass());
+            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
+                BindRule rule = config.getSPI().bindInstance(role, (Class) e.getKey(), instance, e.getValue());
+                config.addBindRule(chain, rule);
+            }
+        } else {
+            config.addBindRule(chain, config.getSPI().bindInstance(role, sourceType, instance, BindRule.MANUAL_BIND_RULE));
+        }
     }
 
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void toProvider(Class<? extends Provider<? extends T>> provider) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0));
+        if (config.getGenerateRules()) {
+            Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
+            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
+                BindRule rule = config.getSPI().bindProvider(role, (Class) e.getKey(), provider, e.getValue());
+                config.addBindRule(chain, rule);
+            }
+        } else {
+            config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+        }
     }
 
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void toProvider(Provider<? extends T> provider) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
         
-        config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, 0));
+        if (config.getGenerateRules()) {
+            Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
+            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
+                BindRule rule = config.getSPI().bindProvider(role, (Class) e.getKey(), provider, e.getValue());
+                config.addBindRule(chain, rule);
+            }
+        } else {
+            config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+        }
+    }
+    
+    private Map<Class<?>, Integer> generateBindPoints(Class<?> target) {
+        Map<Class<?>, Integer> bindPoints = new HashMap<Class<?>, Integer>();
+        // start the recursion up the type hierarchy, starting at the target type
+        recordTypes(target, bindPoints);
+        return bindPoints;
+    }
+    
+    private void recordTypes(Class<?> type, Map<Class<?>, Integer> bindPoints) {
+        // check exclusions
+        if (type == null || excludeTypes.contains(type)) {
+            // the type is excluded, terminate recursion (this relies on Object
+            // being included in the exclude set)
+            return;
+        }
+        
+        int weight;
+        if (type.equals(sourceType)) {
+            // type is the source type, so this is the manual rule
+            weight = BindRule.MANUAL_BIND_RULE;
+        } else if (sourceType.isAssignableFrom(type)) {
+            // type is a subclass of the source type, and a superclass
+            // of the target type
+            weight = BindRule.FIRST_TIER_GENERATED_BIND_RULE;
+        } else if (type.isAssignableFrom(sourceType)) {
+            // type is a superclass of the source type, so it is also a superclass
+            // of the target type
+            weight = BindRule.SECOND_TIER_GENERATED_BIND_RULE;
+        } else {
+            // type is a superclass of the target type, but not of the source type
+            // so we don't generate any bindings
+            return;
+        }
+        
+        // record the type's weight
+        bindPoints.put(type, weight);
+        
+        // recurse to superclass and implemented interfaces
+        // - superclass is null for Object, interfaces, and primitives
+        // - interfaces holds implemented or extended interfaces depending on
+        //   if the type is a class or interface
+        recordTypes(type.getSuperclass(), bindPoints);
+        for (Class<?> i: type.getInterfaces()) {
+            recordTypes(i, bindPoints);
+        }
     }
 }

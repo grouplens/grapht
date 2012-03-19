@@ -77,7 +77,8 @@ public class ClassBindRule extends ReflectionBindRule {
         if (!(o instanceof ClassBindRule)) {
             return false;
         }
-        return super.equals(o) && ((ClassBindRule) o).implType.equals(implType);
+        ClassBindRule br = (ClassBindRule) o;
+        return super.equals(o) && br.implType.equals(implType) && br.terminate == terminate;
     }
     
     @Override
@@ -87,7 +88,7 @@ public class ClassBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "ClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + implType + ")";
+        return "ClassBindRule(" + getWeight() + ", " + getRole() + ":" + getSourceType() + " -> " + implType + ")";
     }
 
     @Override

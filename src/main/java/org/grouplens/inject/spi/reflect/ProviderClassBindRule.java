@@ -86,7 +86,7 @@ public class ProviderClassBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "ProviderClassBindRule(" + getRole() + ":" + getSourceType() + " -> " + providerType + ")";
+        return "ProviderClassBindRule(" + getWeight() + ", "  + getRole() + ":" + getSourceType() + " -> " + providerType + ")";
     }
 
     @Override

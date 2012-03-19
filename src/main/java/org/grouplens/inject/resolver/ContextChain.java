@@ -78,4 +78,9 @@ public class ContextChain {
     public int hashCode() {
         return matchers.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "ContextChain(" + matchers.toString() + ")";
+    }
 }
