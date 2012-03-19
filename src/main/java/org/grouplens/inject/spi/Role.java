@@ -23,7 +23,7 @@ package org.grouplens.inject.spi;
  * inherited and extend other roles. Implementations are responsible for
  * implementing these details.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface Role {
 

@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * from the graph's perspective. In those situations, the graph has multiple
  * edges from one node to the other.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class Edge<N, E> {
     private final Node<N> head;

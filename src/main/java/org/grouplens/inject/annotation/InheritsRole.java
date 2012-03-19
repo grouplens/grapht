@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * any context or role requirement that matches the parent role. Essentially, it
  * is identical to inheriting from a class type.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)

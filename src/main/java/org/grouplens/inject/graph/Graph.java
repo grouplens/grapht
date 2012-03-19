@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
  * nodes and edges. It assumes that all input nodes and edges are not null and
  * will throw exceptions otherwise. Graph is not thread safe.
  * 
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class Graph<N, E> {
     // The outgoing key set is used to represent the set of nodes in the graph,

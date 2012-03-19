@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * inherit from the default or null role.
  * 
  * @see InheritsRole
- * @author Michael Ludwig
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)

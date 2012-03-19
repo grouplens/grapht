@@ -19,6 +19,7 @@
 package org.grouplens.inject.resolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,18 +28,71 @@ import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Role;
 import org.grouplens.inject.spi.Satisfaction;
 
-// TODO document this class
+/**
+ * ContextChain represents a list of ContextMatchers. ContextMatchers can match
+ * a single node within a context, and a ContextChain can match an entire
+ * context. A ContextChain matches a context if its context matchers match a
+ * subsequence of the nodes within the context.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
 public class ContextChain {
     private final List<ContextMatcher> matchers;
+
+    /**
+     * Create a new ContextChain representing the empty context without any
+     * matchers.
+     */
+    public ContextChain() {
+        this(new ArrayList<ContextMatcher>());
+    }
+
+    /**
+     * Create a new ContextChain with the given context matchers. The var-args
+     * parameter forms a list in the order the arguments are passed in.
+     * Arguments should not be null.
+     * 
+     * @param contextMatchers The var-args of matchers to use in this chain
+     */
+    public ContextChain(ContextMatcher... contextMatchers) {
+        this(Arrays.asList(contextMatchers));
+    }
     
+    /**
+     * Create a new ContextChain that matches the given sequence of
+     * ContextMatchers. The list is copied so the created ContextChain is
+     * immutable. The list should not contain any null elements.
+     * 
+     * @param matchers The matcher list this chain represents
+     * @throws NullPointerException if matchers is null
+     */
     public ContextChain(List<? extends ContextMatcher> matchers) {
         this.matchers = new ArrayList<ContextMatcher>(matchers);
     }
     
+    /**
+     * @return An unmodifiable list of the context matchers in this chain
+     */
     public List<ContextMatcher> getContexts() {
         return Collections.unmodifiableList(matchers);
     }
-    
+
+    /**
+     * <p>
+     * Return whether or not this chain of ContextMatchers matches the actual
+     * context represented by the ordered list of Satisfaction and Roles. The
+     * start of the context represents the root of the dependency path.
+     * <p>
+     * This returns true if the sequence of context matchers is a subsequence of
+     * the contexts, with respect to the matcher's
+     * {@link ContextMatcher#matches(Pair) match()} method.
+     * <p>
+     * Given this definition, a ContextChain with no matchers will match every
+     * real context.
+     * 
+     * @param nodes The current context
+     * @return True if this chain matches
+     */
     public boolean matches(List<Pair<Satisfaction, Role>> nodes) {
         int i = 0;
         for (ContextMatcher cm: matchers) {
