@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.inject.types.Types;
 
@@ -49,7 +50,7 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
      *             not extend from sourceType
      */
     public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, 
-                                    @Nullable AnnotationQualifier qualifier, int weight) {
+                                    @Nullable Qualifier qualifier, int weight) {
         super(sourceType, qualifier, weight);
         if (provider == null) {
             throw new NullPointerException("Provider instance cannot be null");

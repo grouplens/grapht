@@ -35,6 +35,7 @@ import org.grouplens.inject.annotation.DefaultProvider;
 import org.grouplens.inject.annotation.DefaultString;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -184,7 +185,7 @@ public class ReflectionDesire implements Desire {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
+    public Qualifier getQualifier() {
         return injectPoint.getQualifier();
     }
 
@@ -205,41 +206,40 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
-        AnnotationQualifier qualifier = getQualifier();
+        Qualifier qualifier = getQualifier();
 
-            // Check the qualifier first, but only if the qualifier source hasn't been disabled
+        // Check the qualifier first, but only if the qualifier source hasn't been disabled
         if (dfltSource == DefaultSource.QUALIFIER || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
             while (qualifier != null) {
-                DefaultDouble dfltDouble = qualifier.getQualifierAnnotation().getAnnotation(DefaultDouble.class);
+                DefaultDouble dfltDouble = qualifier.getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
                     return new InstanceBindRule(dfltDouble.value(), Double.class, qualifier,
                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
-                DefaultInteger dfltInt = qualifier.getQualifierAnnotation().getAnnotation(DefaultInteger.class);
+                DefaultInteger dfltInt = qualifier.getAnnotation(DefaultInteger.class);
                 if (dfltInt != null) {
                     return new InstanceBindRule(dfltInt.value(), Integer.class, qualifier,
                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
-                DefaultBoolean dfltBool = qualifier.getQualifierAnnotation()
-                    .getAnnotation(DefaultBoolean.class);
+                DefaultBoolean dfltBool = qualifier.getAnnotation(DefaultBoolean.class);
                 if (dfltBool != null) {
                     return new InstanceBindRule(dfltBool.value(), Boolean.class, qualifier,
                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
-                DefaultString dfltStr = qualifier.getQualifierAnnotation().getAnnotation(DefaultString.class);
+                DefaultString dfltStr = qualifier.getAnnotation(DefaultString.class);
                 if (dfltStr != null) {
                     return new InstanceBindRule(dfltStr.value(), String.class, qualifier,
                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
                 }
-                DefaultImplementation impl = qualifier.getQualifierAnnotation().getAnnotation(DefaultImplementation.class);
+                DefaultImplementation impl = qualifier.getAnnotation(DefaultImplementation.class);
                 if (impl != null) {
                     return new ClassBindRule(impl.value(), getDesiredType(), qualifier,
                                              BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
                 }
-
+                
                 // there was no default binding on the qualifier, 
                 // so check its parent qualifier
-                qualifier = (qualifier.inheritsQualifier() ? qualifier.getParentQualifier() : null);
+                qualifier = qualifier.getParent();
             }
         }
         
@@ -287,10 +287,10 @@ public class ReflectionDesire implements Desire {
                 }
 
                 // #2 - select shorter qualifier distance
-                int d1 = AnnotationQualifier.getQualifierDistance(ReflectionDesire.this.getQualifier(),
-                                                                  b1.getQualifier());
-                int d2 = AnnotationQualifier.getQualifierDistance(ReflectionDesire.this.getQualifier(),
-                                                                  b2.getQualifier());
+                int d1 = Qualifiers.getQualifierDistance(ReflectionDesire.this.getQualifier(),
+                                                         b1.getQualifier());
+                int d2 = Qualifiers.getQualifierDistance(ReflectionDesire.this.getQualifier(),
+                                                         b2.getQualifier());
                 if (d1 != d2) {
                     return d1 - d2;
                 }

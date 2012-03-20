@@ -20,7 +20,6 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
-import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
 import org.grouplens.inject.annotation.InheritsDefaultQualifier;
@@ -46,132 +45,34 @@ public class AnnotationQualifier implements org.grouplens.inject.spi.Qualifier {
     public AnnotationQualifier(Class<? extends Annotation> qualifierType) {
         if (qualifierType == null)
             throw new NullPointerException("Qualifier type cannot be null");
-        if (!isQualifier(qualifierType))
+        if (!Qualifiers.isQualifier(qualifierType))
             throw new IllegalArgumentException("Annotation is not a Qualifier annotation");
         annot = qualifierType;
     }
-
-    /**
-     * Return true if <tt>child</tt> is a sub-qualifier of <tt>parent</tt>. Either
-     * Qualifier can be null to signify the default Qualifier. False is returned if the
-     * child Qualifier does not inherit from the parent Qualifier.
-     * 
-     * @param child The potential child Qualifier
-     * @param parent The parent Qualifier
-     * @return True or false if child inherits from parent
-     */
-    public static boolean inheritsQualifier(AnnotationQualifier child, AnnotationQualifier parent) {
-        return getQualifierDistance(child, parent) >= 0;
-    }
-
-    /**
-     * Return the distance between the two Qualifiers. 0 is returned if the two Qualifiers
-     * are equal. A negative number is returned if the child Qualifier does not
-     * inherit the parent Qualifier.
-     * 
-     * @param child The potential child Qualifier
-     * @param parent The parent Qualifier
-     * @return The distance between the two Qualifiers
-     */
-    public static int getQualifierDistance(@Nullable AnnotationQualifier child, 
-                                           @Nullable AnnotationQualifier parent) {
-        int distance = 0;
-        
-        if (parent != null) {
-            // make sure the child {@link Qualifier} inherits from the parent
-            while(child != null) {
-                if (child.equals(parent)) {
-                    // the original child eventually inherits from the parent
-                    return distance;
-                }
-                distance++;
-                child = (child.inheritsQualifier() ? child.getParentQualifier() : null);
-            }
-            
-            // at this point the child cannot extend from the parent
-            return -1;
-        } else {
-            // make sure the child {@link Qualifier} inherits from the default
-            while(child != null) {
-                if (!child.inheritsQualifier()) {
-                    // the {@link Qualifier} does not inherit the default {@link Qualifier}
-                    return -1;
-                }
-                distance++;
-                child = child.getParentQualifier();
-            }
-            
-            // at this point, the child {@link Qualifier} inherits the default
-            return distance;
-        }
-    }
     
     /**
-     * Return the AnnotationQualifier representing the {@link Qualifier} contained in the
-     * parameter annotations given. If the parameter annotations do not have any
-     * annotation that is a {@link Qualifier} or parameter, then null is returned.
-     * 
-     * @param parameterAnnots The parameter annotations on the setter or
-     *            constructor
-     * @return The AnnotationQualifier for the injection point, or null if there is
-     *         no {@link Qualifier}
+     * @return The annotation type wrapped by this qualifier
      */
-    public static AnnotationQualifier getQualifier(Annotation[] parameterAnnots) {
-        for (int i = 0; i < parameterAnnots.length; i++) {
-            if (AnnotationQualifier.isQualifier(parameterAnnots[i].annotationType())) {
-                return new AnnotationQualifier(parameterAnnots[i].annotationType());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Return true or false whether or not the annotation type represents a
-     * {@link Qualifier}
-     * 
-     * @param type The annotation type
-     * @return True if the annotation is a {@link Qualifier} or parameter
-     * @throws NullPointerException if the type is null
-     */
-    public static boolean isQualifier(Class<? extends Annotation> type) {
-        return type.getAnnotation(Qualifier.class) != null;
-    }
-    
-    /**
-     * @return The annotation type wrapped by this {@link Qualifier}
-     */
-    public Class<? extends Annotation> getQualifierAnnotation() {
+    public Class<? extends Annotation> getAnnotation() {
         return annot;
     }
 
-    /**
-     * Return true if this {@link Qualifier} inherits from a parent {@link Qualifier}. If this returns
-     * true, and {@link #getParentRole()} returns null it means that it inherits
-     * from the default {@link Qualifier}.
-     * 
-     * @return True if the {@link Qualifier} inherits
-     */
-    public boolean inheritsQualifier() {
-        return annot.getAnnotation(InheritsQualifier.class) != null || annot.getAnnotation(InheritsDefaultQualifier.class) != null;
+    @Override
+    public boolean inheritsDefault() {
+        // we add getParent() == null because this should only return true
+        // if there is no other parent
+        return annot.getAnnotation(InheritsDefaultQualifier.class) != null && getParent() == null;
     }
 
-    /**
-     * Return the parent Qualifier of this qualifier. This will return null if
-     * the Qualifier does not inherit, or if it inherits from the default
-     * Qualifier. These can be distinguished by checking
-     * {@link #inheritsQualifier()}. If a non-null Qualifier is returned, then
-     * inheritsQualifier() will return true.
-     * 
-     * @return The parent Qualifier this Qualifier inherits from
-     */
-    public AnnotationQualifier getParentQualifier() {
+    @Override
+    public AnnotationQualifier getParent() {
         InheritsQualifier parentRole = annot.getAnnotation(InheritsQualifier.class);
         if (parentRole != null) {
             return new AnnotationQualifier(parentRole.value());
         }
         
-        // The parent {@link Qualifier} is still null if InheritsDefaultQualifier is on the
-        // annotation, inheritsQualifier() distinguishes the cases.
+        // The parent qualifier is still null if InheritsDefaultQualifier 
+        // is applied to this annotaiton
         return null;
     }
 
@@ -191,5 +92,30 @@ public class AnnotationQualifier implements org.grouplens.inject.spi.Qualifier {
     @Override
     public String toString() {
         return "AnnotationQualifier(" + annot + ")";
+    }
+    
+    /*
+     * AnnotationQualifier delegates to the Annotation class type for its
+     * implementation of AnnotatedElement.
+     */
+
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return annot.getAnnotation(annotationClass);
+    }
+
+    @Override
+    public Annotation[] getAnnotations() {
+        return annot.getAnnotations();
+    }
+
+    @Override
+    public Annotation[] getDeclaredAnnotations() {
+        return annot.getDeclaredAnnotations();
+    }
+
+    @Override
+    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+        return annot.isAnnotationPresent(annotationClass);
     }
 }

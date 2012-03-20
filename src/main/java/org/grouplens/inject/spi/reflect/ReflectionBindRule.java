@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -35,7 +36,7 @@ import org.grouplens.inject.types.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public abstract class ReflectionBindRule implements BindRule {
-    private final AnnotationQualifier qualifier;
+    private final Qualifier qualifier;
     private final Class<?> sourceType;
     
     private final int weight;
@@ -51,7 +52,7 @@ public abstract class ReflectionBindRule implements BindRule {
      * @param weight The weight or precedence of the rule
      * @throws NullPointerException if sourceType is null
      */
-    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationQualifier qualifier, int weight) {
+    public ReflectionBindRule(Class<?> sourceType, @Nullable Qualifier qualifier, int weight) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
@@ -72,7 +73,7 @@ public abstract class ReflectionBindRule implements BindRule {
     /**
      * @return The annotation {@link Qualifier} matched by this bind rule
      */
-    public AnnotationQualifier getQualifier() {
+    public Qualifier getQualifier() {
         return qualifier;
     }
     
@@ -90,7 +91,7 @@ public abstract class ReflectionBindRule implements BindRule {
         if (rd.getDesiredType().equals(sourceType)) {
             // if the type is equal, then the qualifiers match if
             // the desire's qualifier is inherits from the bind rule's qualifier
-            return AnnotationQualifier.inheritsQualifier(rd.getQualifier(), qualifier);
+            return Qualifiers.inheritsQualifier(rd.getQualifier(), qualifier);
         }
         
         // the type and {@link Qualifier}s are not a match, so return false

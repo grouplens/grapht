@@ -33,7 +33,7 @@ public class AnnotationQualifierTest {
     @Test
     public void testGetAnnotationType() throws Exception {
         AnnotationQualifier qualifier = new AnnotationQualifier(RoleA.class);
-        Assert.assertEquals(RoleA.class, qualifier.getQualifierAnnotation());
+        Assert.assertEquals(RoleA.class, qualifier.getAnnotation());
     }
     
     @Test
@@ -53,19 +53,19 @@ public class AnnotationQualifierTest {
         
         AnnotationQualifier dflt = new AnnotationQualifier(RoleD.class);
         
-        Assert.assertEquals(parent, qualifier.getParentQualifier());
-        Assert.assertNull(parent.getParentQualifier());
-        Assert.assertFalse(parent.inheritsQualifier());
+        Assert.assertEquals(parent, qualifier.getParent());
+        Assert.assertNull(parent.getParent());
+        Assert.assertFalse(parent.inheritsDefault());
         
-        Assert.assertNull(dflt.getParentQualifier());
-        Assert.assertTrue(dflt.inheritsQualifier());
+        Assert.assertNull(dflt.getParent());
+        Assert.assertTrue(dflt.inheritsDefault());
     }
     
     @Test
     public void testStaticIsRole() throws Exception {
-        Assert.assertTrue(AnnotationQualifier.isQualifier(RoleA.class));
-        Assert.assertTrue(AnnotationQualifier.isQualifier(ParameterA.class));
-        Assert.assertFalse(AnnotationQualifier.isQualifier(Inherited.class));
+        Assert.assertTrue(Qualifiers.isQualifier(RoleA.class));
+        Assert.assertTrue(Qualifiers.isQualifier(ParameterA.class));
+        Assert.assertFalse(Qualifiers.isQualifier(Inherited.class));
     }
     
     @Test
@@ -86,7 +86,7 @@ public class AnnotationQualifierTest {
     private void doInheritsTest(Class<? extends Annotation> a, Class<? extends Annotation> b, boolean expected) {
         AnnotationQualifier ra = (a == null ? null : new AnnotationQualifier(a));
         AnnotationQualifier rb = (b == null ? null : new AnnotationQualifier(b));
-        Assert.assertEquals(expected, AnnotationQualifier.inheritsQualifier(ra, rb));
+        Assert.assertEquals(expected, Qualifiers.inheritsQualifier(ra, rb));
     }
     
     @Test
@@ -107,6 +107,6 @@ public class AnnotationQualifierTest {
     private void doRoleDistanceTest(Class<? extends Annotation> a, Class<? extends Annotation> b, int expected) {
         AnnotationQualifier ra = (a == null ? null : new AnnotationQualifier(a));
         AnnotationQualifier rb = (b == null ? null : new AnnotationQualifier(b));
-        Assert.assertEquals(expected, AnnotationQualifier.getQualifierDistance(ra, rb));
+        Assert.assertEquals(expected, Qualifiers.getQualifierDistance(ra, rb));
     }
 }

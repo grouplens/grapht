@@ -41,33 +41,24 @@ public class MockContextMatcher implements ContextMatcher {
         boolean typeMatch = type.isAssignableFrom(n.getLeft().getErasedType());
         boolean qualifierMatch = false;
         
-        if (qualifier != null) {
-            // this context matches a specific qualifier, so we accept any qualifier
-            // that matches it or is a sub-qualifier of it
-            MockRole c = (MockRole) n.getRight();
+        Qualifier c = n.getRight();
+        if (c == null && qualifier == null) {
+            qualifierMatch = true;
+        } else if (qualifier != null) {
             while(c != null) {
-                if (c == qualifier) {
-                    // found the match
+                if (c.equals(qualifier)) {
+                    // the original child eventually inherits from the parent
                     qualifierMatch = true;
-                    break;
-                }
-                
-                if (!c.isInheritenceEnabled()) {
-                    // qualifier has no parent
                     break;
                 }
                 c = c.getParent();
             }
         } else {
-            // this context matches the default qualifier, so we accept the qualifier
-            // if it is null, or eventually inherits the default
-            qualifierMatch = true;
-            MockRole c = (MockRole) n.getRight();
+            // make sure the child qualifier inherits from the default
             while(c != null) {
-                if (!c.isInheritenceEnabled()) {
-                    // does not extend from the default
-                    qualifierMatch = false;
-                    break;
+                if (c.inheritsDefault()) {
+                    // the child inherits the default
+                    qualifierMatch = true;
                 }
                 c = c.getParent();
             }

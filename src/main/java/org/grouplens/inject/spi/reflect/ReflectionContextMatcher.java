@@ -34,7 +34,7 @@ import org.grouplens.inject.spi.Satisfaction;
  */
 public class ReflectionContextMatcher implements ContextMatcher {
     private final Class<?> type;
-    private final AnnotationQualifier qualifier;
+    private final Qualifier qualifier;
 
     /**
      * Create a ReflectionContextMatcher that matches the given type and the
@@ -53,7 +53,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * @param type The type to match
      * @param {@link Qualifier} The {@link Qualifier} to match
      */
-    public ReflectionContextMatcher(Class<?> type, @Nullable AnnotationQualifier qualifier) {
+    public ReflectionContextMatcher(Class<?> type, @Nullable Qualifier qualifier) {
         this.type = type;
         this.qualifier = qualifier;
     }
@@ -68,7 +68,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
     /**
      * @return The {@link Qualifier} matched by this matcher
      */
-    public AnnotationQualifier getMatchedQualifier() {
+    public Qualifier getMatchedQualifier() {
         return qualifier;
     }
     
@@ -77,7 +77,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
         // we must check for nulls in case it is a synthetic satisfaction
         if (n.getLeft().getErasedType() != null && type.isAssignableFrom(n.getLeft().getErasedType())) {
             // type is a match, so check the {@link Qualifier}
-            return AnnotationQualifier.inheritsQualifier((AnnotationQualifier) n.getRight(), qualifier);
+            return Qualifiers.inheritsQualifier(n.getRight(), qualifier);
         }
         
         return false;

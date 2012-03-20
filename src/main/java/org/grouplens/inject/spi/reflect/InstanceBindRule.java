@@ -21,6 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.inject.types.Types;
 
@@ -46,7 +47,7 @@ public class InstanceBindRule extends ReflectionBindRule {
      *             source type
      */
     public InstanceBindRule(Object instance,  Class<?> sourceType, 
-                            @Nullable AnnotationQualifier qualifier, int weight) {
+                            @Nullable Qualifier qualifier, int weight) {
         super(sourceType, qualifier, weight);
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");

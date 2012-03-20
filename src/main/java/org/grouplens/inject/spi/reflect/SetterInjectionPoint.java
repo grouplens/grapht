@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.grouplens.inject.annotation.Transient;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -31,7 +32,7 @@ import org.grouplens.inject.types.Types;
  */
 public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
-    private final AnnotationQualifier qualifier;
+    private final Qualifier qualifier;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -47,7 +48,7 @@ public class SetterInjectionPoint implements InjectionPoint {
         }
         
         // FIXME: should we check the setter's method annotations as well?
-        this.qualifier = AnnotationQualifier.getQualifier(setter.getParameterAnnotations()[0]);
+        this.qualifier = Qualifiers.getQualifier(setter.getParameterAnnotations()[0]);
         this.setter = setter;
     }
     
@@ -80,7 +81,7 @@ public class SetterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
+    public Qualifier getQualifier() {
         return qualifier;
     }
     

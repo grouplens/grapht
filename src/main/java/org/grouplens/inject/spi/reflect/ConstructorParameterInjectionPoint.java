@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
 import org.grouplens.inject.annotation.Transient;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -31,7 +32,7 @@ import org.grouplens.inject.types.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ConstructorParameterInjectionPoint implements InjectionPoint {
-    private final AnnotationQualifier qualifier;
+    private final Qualifier qualifier;
     private final Constructor<?> ctor;
     private final int parameter;
 
@@ -56,7 +57,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
             throw new IndexOutOfBoundsException("Constructor parameter is invalid");
         }
         
-        this.qualifier = AnnotationQualifier.getQualifier(ctor.getParameterAnnotations()[parameter]);
+        this.qualifier = Qualifiers.getQualifier(ctor.getParameterAnnotations()[parameter]);
         this.ctor = ctor;
         this.parameter = parameter;
     }
@@ -96,7 +97,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
+    public Qualifier getQualifier() {
         return qualifier;
     }
     

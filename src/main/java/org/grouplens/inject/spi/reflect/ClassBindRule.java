@@ -21,6 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import javax.annotation.Nullable;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.inject.types.Types;
 
@@ -46,7 +47,7 @@ public class ClassBindRule extends ReflectionBindRule {
      * @throws NullPointerException if implType or sourceType are null
      * @throws IllegalArgumentException if implType does not extend sourceType
      */
-    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationQualifier qualifier,  
+    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable Qualifier qualifier,  
                          int weight, boolean terminate) {
         super(sourceType, qualifier, weight);
         if (implType == null) {

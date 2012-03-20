@@ -49,8 +49,8 @@ public abstract class ReflectionSatisfaction implements Satisfaction {
                 }
                 
                 // #2 - order by qualifier distance, select the matcher that is closest
-                int rd1 = AnnotationQualifier.getQualifierDistance(r, cm1.getMatchedQualifier());
-                int rd2 = AnnotationQualifier.getQualifierDistance(r, cm2.getMatchedQualifier());
+                int rd1 = Qualifiers.getQualifierDistance(r, cm1.getMatchedQualifier());
+                int rd2 = Qualifiers.getQualifierDistance(r, cm2.getMatchedQualifier());
                 return rd1 - rd2;
             }
         };

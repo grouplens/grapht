@@ -18,6 +18,8 @@
  */
 package org.grouplens.inject.spi;
 
+import java.lang.annotation.Annotation;
+
 import javax.annotation.Nullable;
 
 /**
@@ -40,11 +42,33 @@ public class MockRole implements Qualifier {
         enableInheritence = true;
     }
     
-    public boolean isInheritenceEnabled() {
-        return enableInheritence;
-    }
-    
+    @Override
     public MockRole getParent() {
         return parent;
+    }
+
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return null;
+    }
+
+    @Override
+    public Annotation[] getAnnotations() {
+        return new Annotation[0];
+    }
+
+    @Override
+    public Annotation[] getDeclaredAnnotations() {
+        return new Annotation[0];
+    }
+
+    @Override
+    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+        return false;
+    }
+
+    @Override
+    public boolean inheritsDefault() {
+        return parent != null && enableInheritence;
     }
 }

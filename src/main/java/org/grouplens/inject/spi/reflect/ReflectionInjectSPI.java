@@ -42,14 +42,14 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public <T> BindRule bindType(@Nullable Qualifier qualifier, Class<T> source,
                                  Class<? extends T> impl, int weight, boolean terminate) {
-        return new ClassBindRule(impl, source, (AnnotationQualifier) qualifier, weight, terminate);
+        return new ClassBindRule(impl, source, qualifier, weight, terminate);
     }
 
     @Override
     public <T> BindRule bindInstance(@Nullable Qualifier qualifier, Class<T> source, 
                                      T instance, int weight) {
         // ignore terminate, since instance bindings always terminate
-        return new InstanceBindRule(instance, source, (AnnotationQualifier) qualifier, weight);
+        return new InstanceBindRule(instance, source, qualifier, weight);
     }
 
     @Override
@@ -57,19 +57,19 @@ public class ReflectionInjectSPI implements InjectSPI {
                                      Class<? extends Provider<? extends T>> providerType,
                                      int weight) {
         // ignore terminate, since provider bindings always terminate
-        return new ProviderClassBindRule(providerType, source, (AnnotationQualifier) qualifier, weight);
+        return new ProviderClassBindRule(providerType, source, qualifier, weight);
     }
 
     @Override
     public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
                                      Provider<? extends T> provider, int weight) {
         // ignore terminate, since provider instance bindings always terminate
-        return new ProviderInstanceBindRule(provider, source, (AnnotationQualifier) qualifier, weight);
+        return new ProviderInstanceBindRule(provider, source, qualifier, weight);
     }
 
     @Override
     public ContextMatcher context(@Nullable Qualifier qualifier, Class<?> type) {
-        return new ReflectionContextMatcher(type, (AnnotationQualifier) qualifier);
+        return new ReflectionContextMatcher(type, qualifier);
     }
     
     @Override
