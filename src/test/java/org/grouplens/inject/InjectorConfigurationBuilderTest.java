@@ -138,7 +138,7 @@ public class InjectorConfigurationBuilderTest {
                      Arrays.asList(spi.bindType(null, InterfaceA.class, TypeA.class, 0, false)));
         expected.put(new ContextChain(Arrays.asList(spi.context(null, TypeC.class))),
                      Arrays.asList(spi.bindType(null, InterfaceA.class, TypeB.class, 0, false)));
-        expected.put(new ContextChain(Arrays.asList(spi.context(RoleE.class, TypeC.class))),
+        expected.put(new ContextChain(Arrays.asList(spi.context(spi.qualifier(RoleE.class), TypeC.class))),
                      Arrays.asList(spi.bindType(null, InterfaceB.class, TypeB.class, 0, false)));
         
         assertEqualBindings(expected, config.getBindRules());
@@ -171,7 +171,7 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindType(RoleE.class, InterfaceA.class, TypeA.class, 0, false)));
+                     Arrays.asList(spi.bindType(spi.qualifier(RoleE.class), InterfaceA.class, TypeA.class, 0, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }

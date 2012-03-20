@@ -29,6 +29,7 @@ import javax.inject.Provider;
 
 import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.types.Types;
 
 /**
@@ -96,15 +97,16 @@ class BindingImpl<T> implements Binding<T> {
     public void to(Class<? extends T> impl) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
-        
+        Qualifier q = config.getSPI().qualifier(qualifier);
+
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(impl);
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindType(qualifier, (Class) e.getKey(), impl, e.getValue(), terminate);
+                BindRule rule = config.getSPI().bindType(q, (Class) e.getKey(), impl, e.getValue(), terminate);
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindType(qualifier, sourceType, impl, BindRule.MANUAL_BIND_RULE, terminate));
+            config.addBindRule(chain, config.getSPI().bindType(q, sourceType, impl, BindRule.MANUAL_BIND_RULE, terminate));
         }
     }
 
@@ -113,15 +115,16 @@ class BindingImpl<T> implements Binding<T> {
     public void to(T instance) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
-        
+        Qualifier q = config.getSPI().qualifier(qualifier);
+
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(instance.getClass());
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindInstance(qualifier, (Class) e.getKey(), instance, e.getValue());
+                BindRule rule = config.getSPI().bindInstance(q, (Class) e.getKey(), instance, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindInstance(qualifier, sourceType, instance, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindInstance(q, sourceType, instance, BindRule.MANUAL_BIND_RULE));
         }
     }
 
@@ -130,15 +133,16 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(Class<? extends Provider<? extends T>> provider) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
-        
+        Qualifier q = config.getSPI().qualifier(qualifier);
+
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindProvider(qualifier, (Class) e.getKey(), provider, e.getValue());
+                BindRule rule = config.getSPI().bindProvider(q, (Class) e.getKey(), provider, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindProvider(qualifier, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindProvider(q, sourceType, provider, BindRule.MANUAL_BIND_RULE));
         }
     }
 
@@ -147,15 +151,16 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(Provider<? extends T> provider) {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
-        
+        Qualifier q = config.getSPI().qualifier(qualifier);
+
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindProvider(qualifier, (Class) e.getKey(), provider, e.getValue());
+                BindRule rule = config.getSPI().bindProvider(q, (Class) e.getKey(), provider, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindProvider(qualifier, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindProvider(q, sourceType, provider, BindRule.MANUAL_BIND_RULE));
         }
     }
     

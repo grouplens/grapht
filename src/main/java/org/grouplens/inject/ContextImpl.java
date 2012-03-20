@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 
 import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
+import org.grouplens.inject.spi.Qualifier;
 
 /**
  * ContextImpl is the basic implementation of Context.
@@ -75,7 +76,9 @@ class ContextImpl implements Context {
 
     @Override
     public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        ContextMatcher nextMatcher = config.getSPI().context(qualifier, type);
+        Qualifier q = config.getSPI().qualifier(qualifier);
+        ContextMatcher nextMatcher = config.getSPI().context(q, type);
+        
         List<ContextMatcher> nextChain = new ArrayList<ContextMatcher>(context.getContexts());
         nextChain.add(nextMatcher);
         return new ContextImpl(config, new ContextChain(nextChain));

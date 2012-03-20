@@ -28,6 +28,7 @@ import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.InjectSPI;
+import org.grouplens.inject.spi.Qualifier;
 
 /**
  * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It
@@ -39,41 +40,41 @@ import org.grouplens.inject.spi.InjectSPI;
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public <T> BindRule bindType(Class<? extends Annotation> qualifier, Class<T> source,
+    public <T> BindRule bindType(@Nullable Qualifier qualifier, Class<T> source,
                                  Class<? extends T> impl, int weight, boolean terminate) {
-        return new ClassBindRule(impl, source, qualifier(qualifier), weight, terminate);
+        return new ClassBindRule(impl, source, (AnnotationQualifier) qualifier, weight, terminate);
     }
 
     @Override
-    public <T> BindRule bindInstance(Class<? extends Annotation> qualifier, Class<T> source, 
+    public <T> BindRule bindInstance(@Nullable Qualifier qualifier, Class<T> source, 
                                      T instance, int weight) {
         // ignore terminate, since instance bindings always terminate
-        return new InstanceBindRule(instance, source, qualifier(qualifier), weight);
+        return new InstanceBindRule(instance, source, (AnnotationQualifier) qualifier, weight);
     }
 
     @Override
-    public <T> BindRule bindProvider(Class<? extends Annotation> qualifier, Class<T> source,
+    public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
                                      Class<? extends Provider<? extends T>> providerType,
                                      int weight) {
         // ignore terminate, since provider bindings always terminate
-        return new ProviderClassBindRule(providerType, source, qualifier(qualifier), weight);
+        return new ProviderClassBindRule(providerType, source, (AnnotationQualifier) qualifier, weight);
     }
 
     @Override
-    public <T> BindRule bindProvider(Class<? extends Annotation> qualifier, Class<T> source,
+    public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
                                      Provider<? extends T> provider, int weight) {
         // ignore terminate, since provider instance bindings always terminate
-        return new ProviderInstanceBindRule(provider, source, qualifier(qualifier), weight);
+        return new ProviderInstanceBindRule(provider, source, (AnnotationQualifier) qualifier, weight);
     }
 
     @Override
-    public ContextMatcher context(Class<? extends Annotation> qualifier, Class<?> type) {
-        return new ReflectionContextMatcher(type, qualifier(qualifier));
+    public ContextMatcher context(@Nullable Qualifier qualifier, Class<?> type) {
+        return new ReflectionContextMatcher(type, (AnnotationQualifier) qualifier);
     }
     
     @Override
-    public Desire desire(final @Nullable Class<? extends Annotation> qualifier, final Class<?> type) {
-        final AnnotationQualifier realQualifier = qualifier(qualifier);
+    public Desire desire(final @Nullable Qualifier qualifier, final Class<?> type) {
+        final AnnotationQualifier realQualifier = (AnnotationQualifier) qualifier;
         return new ReflectionDesire(new InjectionPoint() {
             @Override
             public boolean isTransient() {
@@ -91,8 +92,9 @@ public class ReflectionInjectSPI implements InjectSPI {
             }
         });
     }
-    
-    private AnnotationQualifier qualifier(Class<? extends Annotation> qualifier) {
+
+    @Override
+    public Qualifier qualifier(Class<? extends Annotation> qualifier) {
         return (qualifier == null ? null : new AnnotationQualifier(qualifier));
     }
 }

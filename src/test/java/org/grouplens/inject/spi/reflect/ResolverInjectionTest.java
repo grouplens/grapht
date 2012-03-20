@@ -139,9 +139,9 @@ public class ResolverInjectionTest {
         
         Map<ContextChain, Collection<? extends BindRule>> bindRules = new HashMap<ContextChain, Collection<? extends BindRule>>();
         bindRules.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                      Arrays.asList(spi.bindInstance(ParameterA.class, Integer.class, 10, 0),
-                                    spi.bindType(RoleA.class, InterfaceA.class, PrimeA.class, 0, false),
-                                    spi.bindType(RoleE.class, InterfaceB.class, PrimeB.class, 0, false),
+                      Arrays.asList(spi.bindInstance(spi.qualifier(ParameterA.class), Integer.class, 10, 0),
+                                    spi.bindType(spi.qualifier(RoleA.class), InterfaceA.class, PrimeA.class, 0, false),
+                                    spi.bindType(spi.qualifier(RoleE.class), InterfaceB.class, PrimeB.class, 0, false),
                                     spi.bindInstance(null, TypeA.class, a, 0),
                                     spi.bindInstance(null, TypeB.class, b, 0)));
         

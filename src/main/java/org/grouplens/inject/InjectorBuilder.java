@@ -28,6 +28,7 @@ import org.grouplens.inject.resolver.DefaultResolver;
 import org.grouplens.inject.resolver.Resolver;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.InjectSPI;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
 
 /**
@@ -115,7 +116,9 @@ public class InjectorBuilder implements Context, Builder<Injector> {
         
         @SuppressWarnings("unchecked")
         public <T> T getInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> type) {
-            Desire desire = spi.desire(qualifier, type);
+            Qualifier q = spi.qualifier(qualifier);
+            Desire desire = spi.desire(q, type);
+            
             Provider<?> provider = resolver.resolve(desire);
             return (T) provider.get();
         }

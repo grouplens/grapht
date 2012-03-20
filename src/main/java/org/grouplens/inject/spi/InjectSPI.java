@@ -41,14 +41,13 @@ import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
  */
 public interface InjectSPI {
     /**
-     * Create a BindRule that matches the {@link Qualifier} annotation and
-     * source pair, and binds to a target class type. The weight is a sorting
-     * weight used to break up ties between rules that match equally. See
-     * {@link BindRule} for more details.
+     * Create a BindRule that matches the Qualifier and source pair, and binds
+     * to a target class type. The weight is a sorting weight used to break up
+     * ties between rules that match equally. See {@link BindRule} for more
+     * details.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional {@link Qualifier} any injection point must
-     *            match
+     * @param qualifier An optional qualifier any injection point must match
      * @param source The type any injection point must match
      * @param impl The implementation to satisfy the source
      * @param weight The sorting weight of the bind rule
@@ -56,34 +55,33 @@ public interface InjectSPI {
      *            this is matched
      * @return The bind rule binding qualifier:source to impl
      */
-    <T> BindRule bindType(@Nullable Class<? extends Annotation> qualifier, Class<T> source,
+    <T> BindRule bindType(@Nullable Qualifier qualifier, Class<T> source,
                           Class<? extends T> impl, int weight, boolean terminate);
 
     /**
-     * Create a BindRule that matches the {@link Qualifier} annotaiton and
-     * source pair, and binds to an instance of the source type. See
-     * {@link BindRule} for more details about the weight parameter. The created
-     * bind rule should return false from {@link BindRule#terminatesChain()}.
+     * Create a BindRule that matches the Qualifier and source pair, and binds
+     * to an instance of the source type. See {@link BindRule} for more details
+     * about the weight parameter. The created bind rule should return false
+     * from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional {@link Qualifier} any injection point must
-     *            match
+     * @param qualifier An optional Qualifier any injection point must match
      * @param source The type any injection point must match
      * @param instance The instance used to satisfy injection points
      * @param weight The sorting weight for the bind rule
      * @return The bind rule binding qualifier:source to instance
      */
-    <T> BindRule bindInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> source,
+    <T> BindRule bindInstance(@Nullable Qualifier qualifier, Class<T> source,
                               T instance, int weight);
 
     /**
-     * Create a BindRule that matches the {@link Qualifier} annotation and
+     * Create a BindRule that matches the Qualifier and
      * source pair, and binds to a Provider class type. See {@link BindRule} for
      * more details about the weight parameter. The created bind rule should
      * return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional {@link Qualifier} any injection point must
+     * @param qualifier An optional qualifier any injection point must
      *            match
      * @param source The type any injection point must match
      * @param providerType The provider type that can create instances used to
@@ -91,17 +89,17 @@ public interface InjectSPI {
      * @param weight The sorting weight for the bind rule
      * @return The bind rule binding qualifier:source to providerType
      */
-    <T> BindRule bindProvider(@Nullable Class<? extends Annotation> qualifier, Class<T> source, 
+    <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source, 
                               Class<? extends Provider<? extends T>> providerType, int weight);
 
     /**
-     * Create a BindRule that matches the {@link Qualifier} annotation and
+     * Create a BindRule that matches the Qualifier and
      * source pair, and binds to a Provider instance. See {@link BindRule} for
      * more details about the weight parameter. The created bind rule should
      * return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional {@link Qualifier} any injection point must
+     * @param qualifier An optional qualifier any injection point must
      *            match
      * @param source The type any injection point must match
      * @param provider The provider that can create instances used to satisfy
@@ -109,31 +107,41 @@ public interface InjectSPI {
      * @param weight The sorting weight for the bind rule
      * @return The bind rule binding qualifier:source to provider
      */
-    <T> BindRule bindProvider(@Nullable Class<? extends Annotation> qualifier, Class<T> source, 
+    <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source, 
                               Provider<? extends T> provider, int weight);
 
     /**
      * Create a ContextMatcher that matches the given context formed by a
-     * {@link Qualifier} annotation and a type. If the qualifier is null, it is
+     * Qualifier and a type. If the qualifier is null, it is
      * the default qualifier. The created ContextMatcher must be
      * compatible with the BindRules, Desires, and Satisfactions created by this
      * InjectSPI.
      * 
-     * @param qualifier The optional {@link Qualifier} annotation
+     * @param qualifier The optional qualifier
      * @param type The type of the context
-     * @return A ContextMatcher representing the {@link Qualifier} and type
+     * @return A ContextMatcher representing the qualifier and type
      */
-    ContextMatcher context(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+    ContextMatcher context(@Nullable Qualifier qualifier, Class<?> type);
 
     /**
-     * Create a Desire that wraps the {@link Qualifier} annotation and type. If
+     * Create a Desire that wraps the Qualifier and type. If
      * the qualifier is null, the default qualifier is used. The created Desire
      * must be compatible with the BindRules, ContextMatchers, and Satisfactions
      * created by this InjectSPI.
      * 
-     * @param qualifier The optional {@link Qualifier} annotation
+     * @param qualifier The optional qualifier
      * @param type The desired type
-     * @return A Desire wrapping the {@link Qualifier} and type
+     * @return A Desire wrapping the qualifier and type
      */
-    Desire desire(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+    Desire desire(@Nullable Qualifier qualifier, Class<?> type);
+    
+    /**
+     * Create a Qualifier that wraps the given annotation. This annotation must
+     * be annotated with {@link javax.inject.Qualifier}. This should return null
+     * if the annotation is null.
+     * 
+     * @param qualifier The qualifier annotation
+     * @return A Qualifier wrapping the annotation
+     */
+    Qualifier qualifier(@Nullable Class<? extends Annotation> qualifier);
 }
