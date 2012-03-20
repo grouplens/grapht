@@ -45,9 +45,9 @@ public class InjectionPointTest {
         expected.add(p1);
         expected.add(p2);
         
-        // verify that the roles and types are identified properly
-        Assert.assertEquals(new AnnotationRole(RoleA.class), p1.getRole());
-        Assert.assertEquals(new AnnotationRole(RoleB.class), p2.getRole());
+        // verify that the qualifiers and types are identified properly
+        Assert.assertEquals(new AnnotationQualifier(RoleA.class), p1.getQualifier());
+        Assert.assertEquals(new AnnotationQualifier(RoleB.class), p2.getQualifier());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         
@@ -66,9 +66,9 @@ public class InjectionPointTest {
         expected.add(p1);
         expected.add(p2);
         
-        // verify that the roles and types are identified properly
-        Assert.assertEquals(new AnnotationRole(RoleA.class), p1.getRole());
-        Assert.assertEquals(new AnnotationRole(RoleB.class), p2.getRole());
+        // verify that the qualifiers and types are identified properly
+        Assert.assertEquals(new AnnotationQualifier(RoleA.class), p1.getQualifier());
+        Assert.assertEquals(new AnnotationQualifier(RoleB.class), p2.getQualifier());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         

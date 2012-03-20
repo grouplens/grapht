@@ -35,18 +35,19 @@ public class InstanceBindRule extends ReflectionBindRule {
 
     /**
      * Create an InstanceBindRule that binds the given instance to desires for
-     * the source type and role.
+     * the source type and qualifier.
      * 
      * @param instance The instance to bind
      * @param sourceType The source type matched by this bind rule
-     * @param role The role matched by this bind rule
+     * @param qualifier The qualifier matched by this bind rule
      * @param weight The weight of the rule
      * @throws NullPointerException if instance or sourceType are null
      * @throws IllegalArgumentException if instance is not an instance of the
      *             source type
      */
-    public InstanceBindRule(Object instance,  Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
-        super(sourceType, role, weight);
+    public InstanceBindRule(Object instance,  Class<?> sourceType, 
+                            @Nullable AnnotationQualifier qualifier, int weight) {
+        super(sourceType, qualifier, weight);
         if (instance == null) {
             throw new NullPointerException("Binding instance cannot be null");
         }
@@ -81,7 +82,7 @@ public class InstanceBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "InstanceBindRule(" + getWeight() + ", "  + getRole() + ":" + getSourceType() + " -> " + instance + ")";
+        return "InstanceBindRule(" + getWeight() + ", "  + getQualifier() + ":" + getSourceType() + " -> " + instance + ")";
     }
 
     @Override

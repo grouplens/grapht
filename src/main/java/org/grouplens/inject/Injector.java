@@ -21,9 +21,8 @@ package org.grouplens.inject;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
+import javax.inject.Qualifier;
 
-import org.grouplens.inject.annotation.Parameter;
-import org.grouplens.inject.annotation.Role;
 import org.grouplens.inject.resolver.Resolver;
 import org.grouplens.inject.spi.InjectSPI;
 
@@ -68,30 +67,12 @@ public interface Injector {
 
     /**
      * <p>
-     * Get an instance of T within the scope of the given role. The role must be
-     * annotated with {@link Role} or {@link Parameter}.
+     * Get an instance of T within the scope of the given {@link Qualifier} annotation. 
      * 
      * @param <T> The object type
-     * @param role The role of the returned instance
+     * @param qualifier The qualifier on of the returned instance
      * @param type The class type
      * @return An instance of type T
      */
-    public <T> T getInstance(@Nullable Class<? extends Annotation> role, Class<T> type);
-
-    /**
-     * <p>
-     * Get the value configured in this Injector for the given parameter. The
-     * annotation must be annotated with {@link Parameter}.
-     * <p>
-     * This is a convenience for:
-     * 
-     * <pre>
-     * getInstance(param, param.getAnnotation(Parameter.class).value());
-     * </pre>
-     * 
-     * @param <T> The parameter type, must be a boxed primitive or String
-     * @param param The parameter annotation
-     * @return The bound parameter value
-     */
-    public <T> T getParameter(Class<? extends Annotation> param);
+    public <T> T getInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> type);
 }

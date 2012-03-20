@@ -40,7 +40,7 @@ public interface InjectorConfiguration {
      * Get all bind rules in this configuration. The bind rules are organized
      * first by the context that they were declared in. Each possible context
      * can have multiple bind rules within it. These bind rules can be of any
-     * type, they are not restricted to being of the same type or role.
+     * type, they are not restricted to being of the same type or {@link Qualifier}.
      * 
      * @return All bind rules, in an unmodifiable map
      */

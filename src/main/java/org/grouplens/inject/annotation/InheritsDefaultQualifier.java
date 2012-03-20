@@ -24,13 +24,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
- * A default int value for a parameter.
- * @see Parameter
+ * InheritsDefaultQualifier is used to annotate {@link Qualifier} annotations to specify that they
+ * inherit from the default or null {@link Qualifier}.
+ * 
+ * @see InheritsQualifier
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-@Documented
-@Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultInt {
-    int value();
-}
+@Target(ElementType.ANNOTATION_TYPE)
+@Documented
+public @interface InheritsDefaultQualifier { }

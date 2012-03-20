@@ -25,13 +25,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A default implementation for a role.
- * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * A default int value for a parameter.
+ * @see Parameter
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.ANNOTATION_TYPE)
 @Documented
-public @interface DefaultType {
-    Class<?> value();
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DefaultInteger {
+    int value();
 }

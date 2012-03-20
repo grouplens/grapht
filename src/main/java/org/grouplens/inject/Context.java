@@ -21,16 +21,16 @@ package org.grouplens.inject;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
+import javax.inject.Qualifier;
 
-import org.grouplens.inject.annotation.Parameter;
-import org.grouplens.inject.annotation.Role;
 import org.grouplens.inject.resolver.ContextChain;
+import org.omg.Dynamic.Parameter;
 
 /**
  * <p>
  * Context is the main entry point for configuring bind rules using the fluent
  * API. The dependency injector uses the contexts to limit the scope of a
- * binding. Every time a dependency is satisfied, that type (and possibly role)
+ * binding. Every time a dependency is satisfied, that type (and possibly {@link Qualifier})
  * is pushed onto the context stack. Thus, if two different types each require a
  * Foo, there can be two different bindings activated depending on which first
  * type is in the context stack.
@@ -58,9 +58,7 @@ public interface Context {
      * <p>
      * Bind a parameter value. This is a convenience for creating a Binding
      * using the proper primitive class or String of the parameter, specifying
-     * the given annotation as its role, and binding it to the given instance.
-     * The role annotation provided should be annotated with {@link Parameter}
-     * instead of {@link Role}.
+     * the given annotation as its qualifier, and binding it to the given instance.
      * <p>
      * As an example:
      * 
@@ -82,7 +80,7 @@ public interface Context {
 
     /**
      * Create a new Context that extends the current context stack with the
-     * given class type. This matches with the default role. This is equivalent
+     * given class type. This matches with the default {@link Qualifier}. This is equivalent
      * to <code>in(null, type);</code>
      * 
      * @param type The type to extend this context by
@@ -92,10 +90,13 @@ public interface Context {
     
     /**
      * Create a new Context that extends the current context stack with the
-     * given class and role. If the role is null, the default role is used.
-     * @param role The role that must be matched along with the type
+     * given class and {@link Qualifier} annotation. If the qualifier is null,
+     * the default or null qualifier is used.
+     * 
+     * @param qualifier The {@link Qualifier} that must be matched along with
+     *            the type
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(@Nullable Class<? extends Annotation> role, Class<?> type);
+    Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
 }

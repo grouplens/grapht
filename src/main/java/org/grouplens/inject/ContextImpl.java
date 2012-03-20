@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.grouplens.inject.annotation.Parameter;
 import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
 
@@ -65,11 +64,7 @@ class ContextImpl implements Context {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void bind(Class<? extends Annotation> param, Object value) {
-        Parameter p = param.getAnnotation(Parameter.class);
-        if (p == null) {
-            throw new IllegalArgumentException("Annotation must be annotated with Parameter");
-        }
-        Binding raw = bind(p.value()).withRole(param);
+        Binding raw = bind(value.getClass()).withQualifier(param);
         raw.to(value);
     }
 
@@ -79,8 +74,8 @@ class ContextImpl implements Context {
     }
 
     @Override
-    public Context in(@Nullable Class<? extends Annotation> role, Class<?> type) {
-        ContextMatcher nextMatcher = config.getSPI().context(role, type);
+    public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
+        ContextMatcher nextMatcher = config.getSPI().context(qualifier, type);
         List<ContextMatcher> nextChain = new ArrayList<ContextMatcher>(context.getContexts());
         nextChain.add(nextMatcher);
         return new ContextImpl(config, new ContextChain(nextChain));

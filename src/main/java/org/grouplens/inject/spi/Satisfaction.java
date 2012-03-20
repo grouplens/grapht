@@ -76,12 +76,14 @@ public interface Satisfaction {
 
     /**
      * Create a Comparator that can be used to compare ContextMatchers that
-     * apply to this Node. The specified Role is the role of the desire that
-     * this satisfaction is intended to satisfy. The Role can be null to
-     * represent the default role.
+     * apply to this Node. The specified Qualifier is the qualifier of the
+     * desire that this satisfaction is intended to satisfy. The Qualifier can
+     * be null to represent the default qualifier.
      * 
-     * @param role The role of the desire that this satisfaction satisfies
-     * @return A comparator for context matchers for this satisfaction and role
+     * @param qualifier The Qualifier of the desire that this satisfaction
+     *            satisfies
+     * @return A comparator for context matchers for this satisfaction and
+     *         qualifier
      */
-    Comparator<ContextMatcher> contextComparator(@Nullable Role role);
+    Comparator<ContextMatcher> contextComparator(@Nullable Qualifier qualifier);
 }

@@ -23,7 +23,7 @@ import org.grouplens.inject.types.Types;
 import javax.annotation.Nullable;
 
 /**
- * MockInjectionPoint is a simple injection point that wraps a type, role, and a
+ * MockInjectionPoint is a simple injection point that wraps a type, qualifier, and a
  * transient state. It has no actual injectable point but can be used when
  * constructing ReflectionDesires on the fly for tests.
  * 
@@ -31,12 +31,12 @@ import javax.annotation.Nullable;
  */
 public class MockInjectionPoint implements InjectionPoint {
     private final Class<?> type;
-    private final AnnotationRole role;
+    private final AnnotationQualifier qualifier;
     private final boolean trans;
     
-    public MockInjectionPoint(Class<?> type, @Nullable AnnotationRole role, boolean trans) {
+    public MockInjectionPoint(Class<?> type, @Nullable AnnotationQualifier qualifier, boolean trans) {
         this.type = Types.box(type);
-        this.role = role;
+        this.qualifier = qualifier;
         this.trans = trans;
     }
     
@@ -47,8 +47,8 @@ public class MockInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationRole getRole() {
-        return role;
+    public AnnotationQualifier getQualifier() {
+        return qualifier;
     }
 
     @Override
@@ -62,11 +62,11 @@ public class MockInjectionPoint implements InjectionPoint {
             return false;
         }
         MockInjectionPoint m = (MockInjectionPoint) o;
-        return m.type.equals(type) && (m.role == null ? role == null : m.role.equals(role)) && m.trans == trans;
+        return m.type.equals(type) && (m.qualifier == null ? qualifier == null : m.qualifier.equals(qualifier)) && m.trans == trans;
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (role == null ? 0 : role.hashCode()) ^ (trans ? 1 : 0);
+        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ (trans ? 1 : 0);
     }
 }

@@ -143,14 +143,14 @@ public class DefaultResolverTest {
     
     @Test
     public void testContextRoleMatchSuccess() throws Exception {
-        // Test that a roles are properly remembered in the context
-        // - note that this is different than having a role-binding, that is
+        // Test that a qualifiers are properly remembered in the context
+        // - note that this is different than having a qualifier-binding, that is
         //   part of the bind rule's match implementation
-        MockRole role1 = new MockRole();
-        MockRole role2 = new MockRole();
+        MockRole qualifier1 = new MockRole();
+        MockRole qualifier2 = new MockRole();
         
-        Desire dr1 = new MockDesire(null, role1);
-        Desire dr2 = new MockDesire(null, role2);
+        Desire dr1 = new MockDesire(null, qualifier1);
+        Desire dr2 = new MockDesire(null, qualifier2);
         Desire d3 = new MockDesire();
         Satisfaction r1 = new MockSatisfaction(A.class, Arrays.asList(dr1, dr2));
         Satisfaction r2 = new MockSatisfaction(B.class, Arrays.asList(d3));
@@ -168,9 +168,9 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(dr1, br1),
                                    new MockBindRule(dr2, br2)));
-        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, role1))),
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, qualifier1))),
                      Arrays.asList(new MockBindRule(d3, b3))); 
-        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, role2))),
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, qualifier2))),
                      Arrays.asList(new MockBindRule(d3, ob3))); 
         
         Desire rootDesire = new MockDesire(r1);
@@ -484,7 +484,7 @@ public class DefaultResolverTest {
     @Test
     public void testComplexDependenciesSuccess() throws Exception {
         // Test a contrived example of a reasonably complex dependency scenario
-        // that tests contexts, roles, shared, and split nodes
+        // that tests contexts, qualifiers, shared, and split nodes
         MockRole r1 = new MockRole();
         MockRole r2 = new MockRole();
         MockRole r3 = new MockRole();

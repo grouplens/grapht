@@ -18,23 +18,24 @@
  */
 package org.grouplens.inject.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.inject.Provider;
-
 /**
- * ProvidedBy specifies a Provider implementation to act as a default binding
- * for types annotated with it.
+ * InheritsQualifier can be used to annotate an existing {@link Qualifier} annotation so that it
+ * inherits from another {@link Qualifier}. When a {@link Qualifier} inherits from another, it will match
+ * any context or {@link Qualifier} requirement that matches the parent {@link Qualifier}. Essentially, it
+ * is identical to inheriting from a class type.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-@Documented
-@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ProvidedBy {
-    Class<? extends Provider<?>> value();
+@Target(ElementType.ANNOTATION_TYPE)
+@Documented
+public @interface InheritsQualifier {
+    Class<? extends Annotation> value();
 }

@@ -39,9 +39,9 @@ public class InjectorBuilderTest {
         
         InjectorBuilder b = new InjectorBuilder();
         b.bind(TypeA.class).to(a1);
-        b.bind(InterfaceA.class).withRole(RoleA.class).to(a2);
+        b.bind(InterfaceA.class).withQualifier(RoleA.class).to(a2);
         b.bind(TypeB.class).to(b1);
-        b.bind(InterfaceB.class).withRole(RoleE.class).to(b2);
+        b.bind(InterfaceB.class).withQualifier(RoleE.class).to(b2);
         
         TypeC c = b.build().getInstance(TypeC.class);
         Assert.assertEquals(5, c.getIntValue());

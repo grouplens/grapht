@@ -29,52 +29,43 @@ import org.grouplens.inject.spi.reflect.types.RoleD;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AnnotationRoleTest {
+public class AnnotationQualifierTest {
     @Test
     public void testGetAnnotationType() throws Exception {
-        AnnotationRole role = new AnnotationRole(RoleA.class);
-        Assert.assertEquals(RoleA.class, role.getRoleType());
-    }
-    
-    @Test
-    public void testIsParameter() throws Exception {
-        AnnotationRole role1 = new AnnotationRole(ParameterA.class);
-        AnnotationRole role2 = new AnnotationRole(RoleA.class);
-
-        Assert.assertTrue(role1.isParameter());
-        Assert.assertFalse(role2.isParameter());
+        AnnotationQualifier qualifier = new AnnotationQualifier(RoleA.class);
+        Assert.assertEquals(RoleA.class, qualifier.getQualifierAnnotation());
     }
     
     @Test
     public void testEquals() throws Exception {
-        AnnotationRole role1 = new AnnotationRole(RoleA.class);
-        AnnotationRole role2 = new AnnotationRole(RoleA.class);
-        AnnotationRole role3 = new AnnotationRole(RoleB.class);
+        AnnotationQualifier qualifier1 = new AnnotationQualifier(RoleA.class);
+        AnnotationQualifier qualifier2 = new AnnotationQualifier(RoleA.class);
+        AnnotationQualifier qualifier3 = new AnnotationQualifier(RoleB.class);
         
-        Assert.assertEquals(role1, role2);
-        Assert.assertFalse(role1.equals(role3));
+        Assert.assertEquals(qualifier1, qualifier2);
+        Assert.assertFalse(qualifier1.equals(qualifier3));
     }
     
     @Test
     public void testParentRole() throws Exception {
-        AnnotationRole role = new AnnotationRole(RoleB.class);
-        AnnotationRole parent = new AnnotationRole(RoleA.class);
+        AnnotationQualifier qualifier = new AnnotationQualifier(RoleB.class);
+        AnnotationQualifier parent = new AnnotationQualifier(RoleA.class);
         
-        AnnotationRole dflt = new AnnotationRole(RoleD.class);
+        AnnotationQualifier dflt = new AnnotationQualifier(RoleD.class);
         
-        Assert.assertEquals(parent, role.getParentRole());
-        Assert.assertNull(parent.getParentRole());
-        Assert.assertFalse(parent.inheritsRole());
+        Assert.assertEquals(parent, qualifier.getParentQualifier());
+        Assert.assertNull(parent.getParentQualifier());
+        Assert.assertFalse(parent.inheritsQualifier());
         
-        Assert.assertNull(dflt.getParentRole());
-        Assert.assertTrue(dflt.inheritsRole());
+        Assert.assertNull(dflt.getParentQualifier());
+        Assert.assertTrue(dflt.inheritsQualifier());
     }
     
     @Test
     public void testStaticIsRole() throws Exception {
-        Assert.assertTrue(AnnotationRole.isRole(RoleA.class));
-        Assert.assertTrue(AnnotationRole.isRole(ParameterA.class));
-        Assert.assertFalse(AnnotationRole.isRole(Inherited.class));
+        Assert.assertTrue(AnnotationQualifier.isQualifier(RoleA.class));
+        Assert.assertTrue(AnnotationQualifier.isQualifier(ParameterA.class));
+        Assert.assertFalse(AnnotationQualifier.isQualifier(Inherited.class));
     }
     
     @Test
@@ -93,9 +84,9 @@ public class AnnotationRoleTest {
     }
     
     private void doInheritsTest(Class<? extends Annotation> a, Class<? extends Annotation> b, boolean expected) {
-        AnnotationRole ra = (a == null ? null : new AnnotationRole(a));
-        AnnotationRole rb = (b == null ? null : new AnnotationRole(b));
-        Assert.assertEquals(expected, AnnotationRole.inheritsRole(ra, rb));
+        AnnotationQualifier ra = (a == null ? null : new AnnotationQualifier(a));
+        AnnotationQualifier rb = (b == null ? null : new AnnotationQualifier(b));
+        Assert.assertEquals(expected, AnnotationQualifier.inheritsQualifier(ra, rb));
     }
     
     @Test
@@ -114,8 +105,8 @@ public class AnnotationRoleTest {
     }
     
     private void doRoleDistanceTest(Class<? extends Annotation> a, Class<? extends Annotation> b, int expected) {
-        AnnotationRole ra = (a == null ? null : new AnnotationRole(a));
-        AnnotationRole rb = (b == null ? null : new AnnotationRole(b));
-        Assert.assertEquals(expected, AnnotationRole.getRoleDistance(ra, rb));
+        AnnotationQualifier ra = (a == null ? null : new AnnotationQualifier(a));
+        AnnotationQualifier rb = (b == null ? null : new AnnotationQualifier(b));
+        Assert.assertEquals(expected, AnnotationQualifier.getQualifierDistance(ra, rb));
     }
 }

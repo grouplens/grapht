@@ -21,7 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import java.util.Comparator;
 
 import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 import org.grouplens.inject.types.Types;
 
@@ -33,8 +33,8 @@ import org.grouplens.inject.types.Types;
  */
 public abstract class ReflectionSatisfaction implements Satisfaction {
     @Override
-    public Comparator<ContextMatcher> contextComparator(Role role) {
-        final AnnotationRole r = (AnnotationRole) role;
+    public Comparator<ContextMatcher> contextComparator(Qualifier qualifier) {
+        final AnnotationQualifier r = (AnnotationQualifier) qualifier;
         return new Comparator<ContextMatcher>() {
             @Override
             public int compare(ContextMatcher o1, ContextMatcher o2) {
@@ -48,9 +48,9 @@ public abstract class ReflectionSatisfaction implements Satisfaction {
                     return td1 - td2;
                 }
                 
-                // #2 - order by role distance, select the matcher that is closest
-                int rd1 = AnnotationRole.getRoleDistance(r, cm1.getMatchedRole());
-                int rd2 = AnnotationRole.getRoleDistance(r, cm2.getMatchedRole());
+                // #2 - order by qualifier distance, select the matcher that is closest
+                int rd1 = AnnotationQualifier.getQualifierDistance(r, cm1.getMatchedQualifier());
+                int rd2 = AnnotationQualifier.getQualifierDistance(r, cm2.getMatchedQualifier());
                 return rd1 - rd2;
             }
         };

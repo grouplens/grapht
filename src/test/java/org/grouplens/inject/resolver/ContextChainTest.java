@@ -28,7 +28,7 @@ import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.MockContextMatcher;
 import org.grouplens.inject.spi.MockSatisfaction;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 import org.junit.Test;
 
@@ -127,9 +127,9 @@ public class ContextChainTest {
         }
         ContextChain chain = new ContextChain(matchers);
         
-        List<Pair<Satisfaction, Role>> context = new ArrayList<Pair<Satisfaction, Role>>();
+        List<Pair<Satisfaction, Qualifier>> context = new ArrayList<Pair<Satisfaction, Qualifier>>();
         for (Class<?> type: contextTypes) {
-            context.add(Pair.<Satisfaction, Role>of(new MockSatisfaction(type, new ArrayList<Desire>()), null));
+            context.add(Pair.<Satisfaction, Qualifier>of(new MockSatisfaction(type, new ArrayList<Desire>()), null));
         }
         
         Assert.assertEquals(expectedMatch, chain.matches(context));

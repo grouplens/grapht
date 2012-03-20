@@ -16,23 +16,15 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.annotation;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.grouplens.inject.spi;
 
 /**
- * ImplementedBy specifies an implementation to act as a default binding for
- * types annotated with it.
+ * Qualifier represents a scoping or limiting of a type binding. Roles can be
+ * inherited and extend other qualifiers. Implementations are responsible for
+ * implementing these details.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Documented
-public @interface ImplementedBy {
-    Class<?> value();
+public interface Qualifier {
+
 }

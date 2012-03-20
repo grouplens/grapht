@@ -24,23 +24,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.inject.Provider;
+
 /**
- * Marks an annotation as specifying a component parameter.  Parameters are
- * primitive or string values provided to components.
- *
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
- *
- * @review Do we want to keep types?
- *
+ * DefaultProvider specifies a Provider implementation to act as a default binding
+ * for types annotated with it.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 @Documented
-@Target(ElementType.ANNOTATION_TYPE)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Parameter {
-    /**
-     * The type of this parameter. Use the Java class type (e.g. {@link Integer}.class). Both
-     * primitive and object parameters can be annotated with the parameter interface.
-     * @return The type of acceptable values of this parameter.
-     */
-    Class<?> value();
+public @interface DefaultProvider {
+    Class<? extends Provider<?>> value();
 }

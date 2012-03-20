@@ -46,21 +46,19 @@ public class ReflectionDesireTest {
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false));
         Assert.assertEquals(A.class, desire.getDesiredType());
         Assert.assertFalse(desire.isTransient());
-        Assert.assertFalse(desire.isParameter());
-        Assert.assertNull(desire.getRole());
+        Assert.assertNull(desire.getQualifier());
         
-        desire = new ReflectionDesire(new MockInjectionPoint(A.class, new AnnotationRole(ParameterA.class), true));
+        desire = new ReflectionDesire(new MockInjectionPoint(A.class, new AnnotationQualifier(ParameterA.class), true));
         Assert.assertEquals(A.class, desire.getDesiredType());
         Assert.assertTrue(desire.isTransient());
-        Assert.assertTrue(desire.isParameter());
-        Assert.assertEquals(new AnnotationRole(ParameterA.class), desire.getRole());
+        Assert.assertEquals(new AnnotationQualifier(ParameterA.class), desire.getQualifier());
     }
     
     @Test
     public void testSubtypeInjectionPointSatisfactionConstructor() throws Exception {
         ClassSatisfaction satis = new ClassSatisfaction(B.class);
         InjectionPoint inject = new MockInjectionPoint(A.class, null, false);
-        ReflectionDesire desire = new ReflectionDesire(B.class, inject, satis, DefaultSource.ROLE_AND_TYPE);
+        ReflectionDesire desire = new ReflectionDesire(B.class, inject, satis, DefaultSource.QUALIFIER_AND_TYPE);
         
         Assert.assertEquals(B.class, desire.getDesiredType());
         Assert.assertEquals(satis, desire.getSatisfaction());
@@ -70,12 +68,12 @@ public class ReflectionDesireTest {
     @Test
     public void testInheritedRoleDefault() throws Exception {
         // Test that the default desire for the setRoleE injection point in TypeC
-        // defaults to TypeB.  This also tests role default inheritence
+        // defaults to TypeB.  This also tests qualifier default inheritence
         List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleE", InterfaceB.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
-        Assert.assertEquals(new AnnotationRole(RoleE.class), dflt.getRole());
+        Assert.assertEquals(new AnnotationQualifier(RoleE.class), dflt.getQualifier());
         Assert.assertEquals(TypeB.class, ((ClassSatisfaction) dflt.getSatisfaction()).getErasedType());
         Assert.assertEquals(TypeB.class, dflt.getDesiredType());
     }
@@ -88,7 +86,7 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(0, desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof InstanceSatisfaction);
-        Assert.assertEquals(new AnnotationRole(ParameterA.class), dflt.getRole());
+        Assert.assertEquals(new AnnotationQualifier(ParameterA.class), dflt.getQualifier());
         Assert.assertEquals(Integer.class, dflt.getDesiredType());
         Assert.assertEquals(5, ((InstanceSatisfaction) dflt.getSatisfaction()).getInstance());
     }
@@ -101,7 +99,7 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setTypeA", TypeA.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ProviderClassSatisfaction);
-        Assert.assertNull(dflt.getRole());
+        Assert.assertNull(dflt.getQualifier());
         Assert.assertEquals(TypeA.class, dflt.getDesiredType());
         Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) dflt.getSatisfaction()).getProviderType());
     }
@@ -114,7 +112,7 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleA", InterfaceA.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
-        Assert.assertEquals(new AnnotationRole(RoleA.class), dflt.getRole());
+        Assert.assertEquals(new AnnotationQualifier(RoleA.class), dflt.getQualifier());
         Assert.assertEquals(TypeA.class, ((ClassSatisfaction) dflt.getSatisfaction()).getErasedType());
         Assert.assertEquals(TypeA.class, dflt.getDesiredType());
     }
@@ -131,11 +129,11 @@ public class ReflectionDesireTest {
     
     @Test
     public void testBindRuleComparator() throws Exception {
-        BindRule b1 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleB.class), 0);
-        BindRule b2 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleA.class), 0);
-        BindRule b3 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationRole(RoleA.class), 1);
+        BindRule b1 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationQualifier(RoleB.class), 0);
+        BindRule b2 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationQualifier(RoleA.class), 0);
+        BindRule b3 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationQualifier(RoleA.class), 1);
         
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceB.class, new AnnotationRole(RoleB.class), false));
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceB.class, new AnnotationQualifier(RoleB.class), false));
         Comparator<BindRule> cmp = desire.ruleComparator();
         
         List<BindRule> brs = new ArrayList<BindRule>();

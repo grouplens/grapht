@@ -18,7 +18,7 @@
  */
 package org.grouplens.inject.spi.reflect.types;
 
-import org.grouplens.inject.annotation.ProvidedBy;
+import org.grouplens.inject.annotation.DefaultProvider;
 
-@ProvidedBy(ProviderA.class)
+@DefaultProvider(ProviderA.class)
 public class TypeA implements InterfaceA { }

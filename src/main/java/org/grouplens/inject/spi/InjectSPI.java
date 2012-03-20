@@ -31,7 +31,7 @@ import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
  * creating concrete instances of {@link BindRule BindRules},
  * {@link ContextMatcher ContextMatchers}, and {@link Desire Desires}. These
  * created instances will also likely create SPI-specific implementations of
- * {@link Satisfaction} and {@link Role}.
+ * {@link Satisfaction} and {@link Qualifier}.
  * <p>
  * The {@link ReflectionInjectSPI} provides a complete implementation of the SPI
  * using reflection to analyze types.
@@ -41,92 +41,99 @@ import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
  */
 public interface InjectSPI {
     /**
-     * Create a BindRule that matches the role and source pair, and binds to a
-     * target class type. The weight is a sorting weight used to break up ties
-     * between rules that match equally. See {@link BindRule} for more details.
+     * Create a BindRule that matches the {@link Qualifier} annotation and
+     * source pair, and binds to a target class type. The weight is a sorting
+     * weight used to break up ties between rules that match equally. See
+     * {@link BindRule} for more details.
      * 
      * @param <T> The matched type
-     * @param role An optional role any injection point must match
+     * @param qualifier An optional {@link Qualifier} any injection point must
+     *            match
      * @param source The type any injection point must match
      * @param impl The implementation to satisfy the source
      * @param weight The sorting weight of the bind rule
      * @param terminate True if no other bind rules should be followed after
      *            this is matched
-     * @return The bind rule binding role:source to impl
+     * @return The bind rule binding qualifier:source to impl
      */
-    <T> BindRule bindType(@Nullable Class<? extends Annotation> role, Class<T> source,
+    <T> BindRule bindType(@Nullable Class<? extends Annotation> qualifier, Class<T> source,
                           Class<? extends T> impl, int weight, boolean terminate);
 
     /**
-     * Create a BindRule that matches the role and source pair, and binds to an
-     * instance of the source type. See {@link BindRule} for more details about
-     * the weight parameter. The created bind rule should return false from
-     * {@link BindRule#terminatesChain()}.
+     * Create a BindRule that matches the {@link Qualifier} annotaiton and
+     * source pair, and binds to an instance of the source type. See
+     * {@link BindRule} for more details about the weight parameter. The created
+     * bind rule should return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param role An optional role any injection point must match
+     * @param qualifier An optional {@link Qualifier} any injection point must
+     *            match
      * @param source The type any injection point must match
      * @param instance The instance used to satisfy injection points
      * @param weight The sorting weight for the bind rule
-     * @return The bind rule binding role:source to instance
+     * @return The bind rule binding qualifier:source to instance
      */
-    <T> BindRule bindInstance(@Nullable Class<? extends Annotation> role, Class<T> source,
+    <T> BindRule bindInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> source,
                               T instance, int weight);
 
     /**
-     * Create a BindRule that matches the role and source pair, and binds to a
-     * Provider class type. See {@link BindRule} for more details about the
-     * weight parameter. The created bind rule should return false from
-     * {@link BindRule#terminatesChain()}.
+     * Create a BindRule that matches the {@link Qualifier} annotation and
+     * source pair, and binds to a Provider class type. See {@link BindRule} for
+     * more details about the weight parameter. The created bind rule should
+     * return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param role An optional role any injection point must match
+     * @param qualifier An optional {@link Qualifier} any injection point must
+     *            match
      * @param source The type any injection point must match
      * @param providerType The provider type that can create instances used to
      *            satisfy injection points
      * @param weight The sorting weight for the bind rule
-     * @return The bind rule binding role:source to providerType
+     * @return The bind rule binding qualifier:source to providerType
      */
-    <T> BindRule bindProvider(@Nullable Class<? extends Annotation> role, Class<T> source, 
+    <T> BindRule bindProvider(@Nullable Class<? extends Annotation> qualifier, Class<T> source, 
                               Class<? extends Provider<? extends T>> providerType, int weight);
 
     /**
-     * Create a BindRule that matches the role and source pair, and binds to a
-     * Provider instance. See {@link BindRule} for more details about the weight
-     * parameter. The created bind rule should return false from
-     * {@link BindRule#terminatesChain()}.
+     * Create a BindRule that matches the {@link Qualifier} annotation and
+     * source pair, and binds to a Provider instance. See {@link BindRule} for
+     * more details about the weight parameter. The created bind rule should
+     * return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param role An optional role any injection point must match
+     * @param qualifier An optional {@link Qualifier} any injection point must
+     *            match
      * @param source The type any injection point must match
      * @param provider The provider that can create instances used to satisfy
      *            injection points
      * @param weight The sorting weight for the bind rule
-     * @return The bind rule binding role:source to provider
+     * @return The bind rule binding qualifier:source to provider
      */
-    <T> BindRule bindProvider(@Nullable Class<? extends Annotation> role, Class<T> source, 
+    <T> BindRule bindProvider(@Nullable Class<? extends Annotation> qualifier, Class<T> source, 
                               Provider<? extends T> provider, int weight);
 
     /**
-     * Create a ContextMatcher that matches the given context formed by a role
-     * and type. If the role is null, it is the default role. The created
-     * ContextMatcher must be compatible with the BindRules, Desires, and
-     * Satisfactions created by this InjectSPI.
+     * Create a ContextMatcher that matches the given context formed by a
+     * {@link Qualifier} annotation and a type. If the qualifier is null, it is
+     * the default qualifier. The created ContextMatcher must be
+     * compatible with the BindRules, Desires, and Satisfactions created by this
+     * InjectSPI.
      * 
-     * @param role The optional role annotation
+     * @param qualifier The optional {@link Qualifier} annotation
      * @param type The type of the context
-     * @return A ContextMatcher representing the role and type
+     * @return A ContextMatcher representing the {@link Qualifier} and type
      */
-    ContextMatcher context(@Nullable Class<? extends Annotation> role, Class<?> type);
+    ContextMatcher context(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
 
     /**
-     * Create a Desire that wraps the role and type. If the role is null, the
-     * default role is used. The created Desire must be compatible with the
-     * BindRules, ContextMatchers, and Satisfactions created by this InjectSPI.
+     * Create a Desire that wraps the {@link Qualifier} annotation and type. If
+     * the qualifier is null, the default qualifier is used. The created Desire
+     * must be compatible with the BindRules, ContextMatchers, and Satisfactions
+     * created by this InjectSPI.
      * 
-     * @param role The optional role The optional role annotation
+     * @param qualifier The optional {@link Qualifier} annotation
      * @param type The desired type
-     * @return A Desire wrapping the role and type
+     * @return A Desire wrapping the {@link Qualifier} and type
      */
-    Desire desire(@Nullable Class<? extends Annotation> role, Class<?> type);
+    Desire desire(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
 }

@@ -21,12 +21,12 @@ package org.grouplens.inject.spi;
 import javax.annotation.Nullable;
 
 /**
- * MockRole is a simple Role implementation that represents roles as unique
- * objects. It can map a hierarchy by referring to other parent roles.
+ * MockRole is a simple Qualifier implementation that represents {@link Qualifier}s as unique
+ * objects. It can map a hierarchy by referring to other parent {@link Qualifier}s.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class MockRole implements Role {
+public class MockRole implements Qualifier {
     private final MockRole parent;
     private final boolean enableInheritence;
     

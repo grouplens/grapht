@@ -37,22 +37,12 @@ import java.util.Comparator;
  */
 public interface Desire {
     /**
-     * Query whether this desire is for a parameter (primitive or string with a
-     * parameter annotation).
-     *
-     * @deprecated Can this be removed and consumed by the Role interface?
-     * @return <tt>true</tt> if this desire is for a parameter, <tt>false</tt>
-     *         if it is for a component.
-     */
-    boolean isParameter();
-
-    /**
-     * Return the role that was declared with this desire. A desire without a
-     * role should return null. No role can also be considered the default role.
+     * Return the {@link Qualifier} that was declared with this desire. A desire without a
+     * {@link Qualifier} should return null. No {@link Qualifier} can also be considered the default {@link Qualifier}.
      * 
-     * @return The role applied to this desire
+     * @return The {@link Qualifier} applied to this desire
      */
-    Role getRole();
+    Qualifier getQualifier();
 
     /**
      * Query whether this desire is instantiable, that is, resolved to a
@@ -85,7 +75,7 @@ public interface Desire {
     /**
      * <p>
      * Get the default desire for this desire. If a desire or has been annotated
-     * with a default implementation, or the role has a default binding, then
+     * with a default implementation, or the {@link Qualifier} has a default binding, then
      * that is represented by the desire returned. If there is no default
      * desire, then null is returned.
      * <p>

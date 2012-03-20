@@ -44,7 +44,7 @@ class BindingImpl<T> implements Binding<T> {
     
     private final Set<Class<?>> excludeTypes;
     
-    private Class<? extends Annotation> role;
+    private Class<? extends Annotation> qualifier;
     private boolean terminate;
     
     private boolean bindingCompleted;
@@ -65,12 +65,12 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public Binding<T> withRole(Class<? extends Annotation> role) {
-        if (role == null) {
-            throw new NullPointerException("Role cannot be null");
+    public Binding<T> withQualifier(Class<? extends Annotation> qualifier) {
+        if (qualifier == null) {
+            throw new NullPointerException("Qualifier cannot be null");
         }
         validateState();
-        this.role = role;
+        this.qualifier = qualifier;
         return this;
     }
 
@@ -100,11 +100,11 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(impl);
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindType(role, (Class) e.getKey(), impl, e.getValue(), terminate);
+                BindRule rule = config.getSPI().bindType(qualifier, (Class) e.getKey(), impl, e.getValue(), terminate);
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindType(role, sourceType, impl, BindRule.MANUAL_BIND_RULE, terminate));
+            config.addBindRule(chain, config.getSPI().bindType(qualifier, sourceType, impl, BindRule.MANUAL_BIND_RULE, terminate));
         }
     }
 
@@ -117,11 +117,11 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(instance.getClass());
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindInstance(role, (Class) e.getKey(), instance, e.getValue());
+                BindRule rule = config.getSPI().bindInstance(qualifier, (Class) e.getKey(), instance, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindInstance(role, sourceType, instance, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindInstance(qualifier, sourceType, instance, BindRule.MANUAL_BIND_RULE));
         }
     }
 
@@ -134,11 +134,11 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindProvider(role, (Class) e.getKey(), provider, e.getValue());
+                BindRule rule = config.getSPI().bindProvider(qualifier, (Class) e.getKey(), provider, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindProvider(qualifier, sourceType, provider, BindRule.MANUAL_BIND_RULE));
         }
     }
 
@@ -151,11 +151,11 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindProvider(role, (Class) e.getKey(), provider, e.getValue());
+                BindRule rule = config.getSPI().bindProvider(qualifier, (Class) e.getKey(), provider, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindProvider(role, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindProvider(qualifier, sourceType, provider, BindRule.MANUAL_BIND_RULE));
         }
     }
     

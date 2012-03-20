@@ -163,7 +163,7 @@ public class ReflectionSatisfactionTest {
     @Test
     public void testContextMatcherComparator() throws Exception {
         ContextMatcher cm1 = new ReflectionContextMatcher(TypeB.class, null); // type dist = 0, annot dist = 0
-        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, new AnnotationRole(RoleD.class)); // type dist = 1, annot dist = 0
+        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, new AnnotationQualifier(RoleD.class)); // type dist = 1, annot dist = 0
         ContextMatcher cm3 = new ReflectionContextMatcher(TypeA.class, null); // type dist = 1, annot dist = 1
         
         List<ContextMatcher> cms = new ArrayList<ContextMatcher>();
@@ -171,7 +171,7 @@ public class ReflectionSatisfactionTest {
         cms.add(cm1);
         cms.add(cm2);
         
-        Collections.sort(cms, new ClassSatisfaction(TypeB.class).contextComparator(new AnnotationRole(RoleD.class)));
+        Collections.sort(cms, new ClassSatisfaction(TypeB.class).contextComparator(new AnnotationQualifier(RoleD.class)));
         Assert.assertEquals(cm1, cms.get(0));
         Assert.assertEquals(cm2, cms.get(1));
         Assert.assertEquals(cm3, cms.get(2));

@@ -41,14 +41,14 @@ public class ClassBindRule extends ReflectionBindRule {
      * 
      * @param implType The implementation type that satisfies the desire
      * @param sourceType The source type matched by this bind rule
-     * @param role The role matched by this desire
+     * @param qualifier The qualifier matched by this desire
      * @param weight The weight of the bind rule
      * @throws NullPointerException if implType or sourceType are null
      * @throws IllegalArgumentException if implType does not extend sourceType
      */
-    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationRole role,  
+    public ClassBindRule(Class<?> implType, Class<?> sourceType, @Nullable AnnotationQualifier qualifier,  
                          int weight, boolean terminate) {
-        super(sourceType, role, weight);
+        super(sourceType, qualifier, weight);
         if (implType == null) {
             throw new NullPointerException("Implementation type cannot be null");
         }
@@ -66,8 +66,8 @@ public class ClassBindRule extends ReflectionBindRule {
         ReflectionDesire rd = (ReflectionDesire) desire;
         // we can pass in null for the satisfaction here, because ReflectionDesire
         // will create a ClassSatisfaction for us if implType is instantiable
-        // - The default source is set to TYPE so that @ImplementedBy and @ProvidedBy
-        //   on the impl type can be followed, but any role defaults on the injection
+        // - The default source is set to TYPE so that @ImplementedBy and @DefaultProvider
+        //   on the impl type can be followed, but any {@link Qualifier} defaults on the injection
         //   point will be disabled.
         return new ReflectionDesire(implType, rd.getInjectionPoint(), null, DefaultSource.TYPE);
     }
@@ -88,7 +88,7 @@ public class ClassBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "ClassBindRule(" + getWeight() + ", " + getRole() + ":" + getSourceType() + " -> " + implType + ")";
+        return "ClassBindRule(" + getWeight() + ", " + getQualifier() + ":" + getSourceType() + " -> " + implType + ")";
     }
 
     @Override

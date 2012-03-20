@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.apache.commons.lang3.builder.Builder;
-import org.grouplens.inject.annotation.Parameter;
 import org.grouplens.inject.resolver.DefaultResolver;
 import org.grouplens.inject.resolver.Resolver;
 import org.grouplens.inject.spi.Desire;
@@ -79,8 +78,8 @@ public class InjectorBuilder implements Context, Builder<Injector> {
     }
 
     @Override
-    public Context in(Class<? extends Annotation> role, Class<?> type) {
-        return builder.getRootContext().in(role, type);
+    public Context in(Class<? extends Annotation> qualifier, Class<?> type) {
+        return builder.getRootContext().in(qualifier, type);
     }
 
     /**
@@ -115,16 +114,10 @@ public class InjectorBuilder implements Context, Builder<Injector> {
         }
         
         @SuppressWarnings("unchecked")
-        public <T> T getInstance(@Nullable Class<? extends Annotation> role, Class<T> type) {
-            Desire desire = spi.desire(role, type);
+        public <T> T getInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> type) {
+            Desire desire = spi.desire(qualifier, type);
             Provider<?> provider = resolver.resolve(desire);
             return (T) provider.get();
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T> T getParameter(Class<? extends Annotation> param) {
-            return (T) getInstance(param, param.getAnnotation(Parameter.class).value());
         }
     }
 }

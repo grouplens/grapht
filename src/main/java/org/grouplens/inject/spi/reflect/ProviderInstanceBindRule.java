@@ -36,20 +36,21 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
 
     /**
      * Create a ProviderInstanceBindRule that binds <tt>provider</tt> to the
-     * given source type and role. An exception is thrown if the provider does
+     * given source type and qualifier. An exception is thrown if the provider does
      * not provide instances of the source type.
      * 
      * @param provider The provider that will satisfy any desires matched by
      *            this bind rule
      * @param sourceType The source type this bind rule matches to
-     * @param role The role this bind rule matches to
+     * @param qualifier The qualifier this bind rule matches to
      * @param weight The weight of the rule
      * @throws NullPointerException if provider or sourceType are null
      * @throws IllegalArgumentException if the provider's created instances do
      *             not extend from sourceType
      */
-    public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
-        super(sourceType, role, weight);
+    public ProviderInstanceBindRule(Provider<?> provider, Class<?> sourceType, 
+                                    @Nullable AnnotationQualifier qualifier, int weight) {
+        super(sourceType, qualifier, weight);
         if (provider == null) {
             throw new NullPointerException("Provider instance cannot be null");
         }
@@ -86,7 +87,7 @@ public class ProviderInstanceBindRule extends ReflectionBindRule {
     
     @Override
     public String toString() {
-        return "ProviderInstanceBindRule(" + getWeight() + ", "  + getRole() + ":" + getSourceType() + " -> " + provider + ")";
+        return "ProviderInstanceBindRule(" + getWeight() + ", "  + getQualifier() + ":" + getSourceType() + " -> " + provider + ")";
     }
 
     @Override

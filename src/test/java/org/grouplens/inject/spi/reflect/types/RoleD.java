@@ -21,12 +21,13 @@ package org.grouplens.inject.spi.reflect.types;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.grouplens.inject.annotation.DefaultType;
-import org.grouplens.inject.annotation.InheritsDefaultRole;
-import org.grouplens.inject.annotation.Role;
+import javax.inject.Qualifier;
 
-@Role
-@DefaultType(TypeB.class)
-@InheritsDefaultRole
+import org.grouplens.inject.annotation.DefaultImplementation;
+import org.grouplens.inject.annotation.InheritsDefaultQualifier;
+
+@Qualifier
+@DefaultImplementation(TypeB.class)
+@InheritsDefaultQualifier
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RoleD { }

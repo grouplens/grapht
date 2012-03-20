@@ -24,55 +24,55 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
-    private final MockRole role;
+    private final MockRole qualifier;
     
     public MockContextMatcher(Class<?> type) {
         this(type, null);
     }
     
-    public MockContextMatcher(Class<?> type, @Nullable MockRole role) {
+    public MockContextMatcher(Class<?> type, @Nullable MockRole qualifier) {
         this.type = type;
-        this.role = role;
+        this.qualifier = qualifier;
 
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Role> n) {
+    public boolean matches(Pair<Satisfaction, Qualifier> n) {
         boolean typeMatch = type.isAssignableFrom(n.getLeft().getErasedType());
-        boolean roleMatch = false;
+        boolean qualifierMatch = false;
         
-        if (role != null) {
-            // this context matches a specific role, so we accept any role
-            // that matches it or is a sub-role of it
+        if (qualifier != null) {
+            // this context matches a specific qualifier, so we accept any qualifier
+            // that matches it or is a sub-qualifier of it
             MockRole c = (MockRole) n.getRight();
             while(c != null) {
-                if (c == role) {
+                if (c == qualifier) {
                     // found the match
-                    roleMatch = true;
+                    qualifierMatch = true;
                     break;
                 }
                 
                 if (!c.isInheritenceEnabled()) {
-                    // role has no parent
+                    // qualifier has no parent
                     break;
                 }
                 c = c.getParent();
             }
         } else {
-            // this context matches the default role, so we accept the role
+            // this context matches the default qualifier, so we accept the qualifier
             // if it is null, or eventually inherits the default
-            roleMatch = true;
+            qualifierMatch = true;
             MockRole c = (MockRole) n.getRight();
             while(c != null) {
                 if (!c.isInheritenceEnabled()) {
                     // does not extend from the default
-                    roleMatch = false;
+                    qualifierMatch = false;
                     break;
                 }
                 c = c.getParent();
             }
         }
         
-        return typeMatch && roleMatch;
+        return typeMatch && qualifierMatch;
     }
 }

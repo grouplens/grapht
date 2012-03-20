@@ -48,12 +48,12 @@ public class ReflectionBindRuleTest {
         // four variations of the arguments
         ClassBindRule rule1 = new ClassBindRule(A.class, A.class, null, 0, false);
         ClassBindRule rule2 = new ClassBindRule(B.class, A.class, null, 0, false);
-        ClassBindRule rule3 = new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), 0, false);
+        ClassBindRule rule3 = new ClassBindRule(A.class, A.class, new AnnotationQualifier(RoleA.class), 0, false);
         ClassBindRule rule4 = new ClassBindRule(A.class, A.class, null, 1, false);
         
         Assert.assertEquals(rule1, new ClassBindRule(A.class, A.class, null, 0, false));
         Assert.assertEquals(rule2, new ClassBindRule(B.class, A.class, null, 0, false));
-        Assert.assertEquals(rule3, new ClassBindRule(A.class, A.class, new AnnotationRole(RoleA.class), 0, false));
+        Assert.assertEquals(rule3, new ClassBindRule(A.class, A.class, new AnnotationQualifier(RoleA.class), 0, false));
         Assert.assertEquals(rule4, new ClassBindRule(A.class, A.class, null, 1, false));
         
         Assert.assertFalse(rule1.equals(rule2));
@@ -70,12 +70,12 @@ public class ReflectionBindRuleTest {
         
         InstanceBindRule rule1 = new InstanceBindRule(i1, A.class, null, 0);
         InstanceBindRule rule2 = new InstanceBindRule(i1, A.class, null, 1);
-        InstanceBindRule rule3 = new InstanceBindRule(i2, A.class, new AnnotationRole(RoleA.class), 0);
+        InstanceBindRule rule3 = new InstanceBindRule(i2, A.class, new AnnotationQualifier(RoleA.class), 0);
         InstanceBindRule rule4 = new InstanceBindRule(i2, A.class, null, 1);
         
         Assert.assertEquals(rule1, new InstanceBindRule(i1, A.class, null, 0));
         Assert.assertEquals(rule2, new InstanceBindRule(i1, A.class, null, 1));
-        Assert.assertEquals(rule3, new InstanceBindRule(i2, A.class, new AnnotationRole(RoleA.class), 0));
+        Assert.assertEquals(rule3, new InstanceBindRule(i2, A.class, new AnnotationQualifier(RoleA.class), 0));
         Assert.assertEquals(rule4, new InstanceBindRule(i2, A.class, null, 1));
         
         Assert.assertFalse(rule1.equals(new InstanceBindRule(i2, A.class, null, 0)));
@@ -91,11 +91,11 @@ public class ReflectionBindRuleTest {
         // four variations of the arguments
         ProviderClassBindRule rule1 = new ProviderClassBindRule(PA.class, A.class, null, 0);
         ProviderClassBindRule rule2 = new ProviderClassBindRule(PA.class, A.class, null, 1);
-        ProviderClassBindRule rule3 = new ProviderClassBindRule(PA.class, A.class, new AnnotationRole(RoleA.class), 0);
+        ProviderClassBindRule rule3 = new ProviderClassBindRule(PA.class, A.class, new AnnotationQualifier(RoleA.class), 0);
         
         Assert.assertEquals(rule1, new ProviderClassBindRule(PA.class, A.class, null, 0));
         Assert.assertEquals(rule2, new ProviderClassBindRule(PA.class, A.class, null, 1));
-        Assert.assertEquals(rule3, new ProviderClassBindRule(PA.class, A.class, new AnnotationRole(RoleA.class), 0));
+        Assert.assertEquals(rule3, new ProviderClassBindRule(PA.class, A.class, new AnnotationQualifier(RoleA.class), 0));
         
         Assert.assertFalse(rule1.equals(rule2));
         Assert.assertFalse(rule2.equals(rule3));
@@ -110,11 +110,11 @@ public class ReflectionBindRuleTest {
         
         ProviderInstanceBindRule rule1 = new ProviderInstanceBindRule(p1, A.class, null, 0);
         ProviderInstanceBindRule rule2 = new ProviderInstanceBindRule(p1, A.class, null, 1);
-        ProviderInstanceBindRule rule3 = new ProviderInstanceBindRule(p2, A.class, new AnnotationRole(RoleA.class), 0);
+        ProviderInstanceBindRule rule3 = new ProviderInstanceBindRule(p2, A.class, new AnnotationQualifier(RoleA.class), 0);
         
         Assert.assertEquals(rule1, new ProviderInstanceBindRule(p1, A.class, null, 0));
         Assert.assertEquals(rule2, new ProviderInstanceBindRule(p1, A.class, null, 1));
-        Assert.assertEquals(rule3, new ProviderInstanceBindRule(p2, A.class, new AnnotationRole(RoleA.class), 0));
+        Assert.assertEquals(rule3, new ProviderInstanceBindRule(p2, A.class, new AnnotationQualifier(RoleA.class), 0));
         
         Assert.assertFalse(rule1.equals(rule2));
         Assert.assertFalse(rule2.equals(rule3));
@@ -167,8 +167,8 @@ public class ReflectionBindRuleTest {
     private void doMatchTest(Class<?> desireType, Class<? extends Annotation> desireRole,
                              Class<?> bindType, Class<? extends Annotation> bindRole,
                              boolean expected) throws Exception {
-        AnnotationRole br = (bindRole == null ? null : new AnnotationRole(bindRole));
-        AnnotationRole dr = (desireRole == null ? null : new AnnotationRole(desireRole));
+        AnnotationQualifier br = (bindRole == null ? null : new AnnotationQualifier(bindRole));
+        AnnotationQualifier dr = (desireRole == null ? null : new AnnotationQualifier(desireRole));
         ClassBindRule rule = new ClassBindRule(bindType, bindType, br, 0, false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(desireType, dr, false));
         

@@ -22,8 +22,8 @@ import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import javax.inject.Qualifier;
 
-import org.grouplens.inject.annotation.Role;
 import org.grouplens.inject.spi.BindRule;
 
 /**
@@ -50,18 +50,19 @@ public interface Binding<T> {
 
     /**
      * <p>
-     * Configure the binding to match the given role annotation. The given
-     * annotation type must be annotated with {@link Role}. The created binding
-     * will match injection points only if the role is applied to the injection
-     * point, unless the role inherits from the default role.
+     * Configure the binding to match the given {@link Qualifier} annotation.
+     * The given annotation type must be annotated with {@link Qualifier}. The
+     * created binding will match injection points only if the qualifier is
+     * applied to the injection point, unless the annotation inherits from the
+     * default qualifier.
      * <p>
-     * If this is called multiple times, the last role is used. If null is
+     * If this is called multiple times, the last annotation is used. If null is
      * passed in, the default annotation is matched.
      * 
-     * @param role The role that must match, or null for the default
+     * @param qualifier The Qualifier that must match, or null for the default
      * @return This Binding
      */
-    Binding<T> withRole(@Nullable Class<? extends Annotation> role);
+    Binding<T> withQualifier(@Nullable Class<? extends Annotation> qualifier);
 
     /**
      * Exclude the provided type from being matched when examining injection

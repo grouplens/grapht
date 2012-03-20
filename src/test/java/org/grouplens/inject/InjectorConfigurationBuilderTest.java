@@ -162,10 +162,10 @@ public class InjectorConfigurationBuilderTest {
     
     @Test
     public void testInjectorRoleBindings() throws Exception {
-        // Test that bind rules properly record the role their bound with
+        // Test that bind rules properly record the {@link Qualifier} their bound with
         InjectorConfigurationBuilder builder = new InjectorConfigurationBuilder(spi, false);
 
-        builder.getRootContext().bind(InterfaceA.class).withRole(RoleE.class).to(TypeA.class);
+        builder.getRootContext().bind(InterfaceA.class).withQualifier(RoleE.class).to(TypeA.class);
         InjectorConfiguration config = builder.build();
         
         // expected

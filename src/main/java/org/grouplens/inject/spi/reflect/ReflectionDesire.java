@@ -25,18 +25,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.grouplens.inject.annotation.DefaultBoolean;
 import org.grouplens.inject.annotation.DefaultDouble;
-import org.grouplens.inject.annotation.DefaultInt;
+import org.grouplens.inject.annotation.DefaultImplementation;
+import org.grouplens.inject.annotation.DefaultInteger;
+import org.grouplens.inject.annotation.DefaultProvider;
 import org.grouplens.inject.annotation.DefaultString;
-import org.grouplens.inject.annotation.DefaultType;
-import org.grouplens.inject.annotation.ImplementedBy;
-import org.grouplens.inject.annotation.ProvidedBy;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.types.Types;
-
-import javax.inject.Inject;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary
@@ -90,7 +89,7 @@ public class ReflectionDesire implements Desire {
 
     public static enum DefaultSource {
         /**
-         * Neither type nor role will be examined for a default desire.
+         * Neither type nor qualifier will be examined for a default desire.
          */
         NONE,
         /**
@@ -98,15 +97,15 @@ public class ReflectionDesire implements Desire {
          */
         TYPE,
         /**
-         * Only the role of the desire (or its injection point) is examined for
+         * Only the qualifier of the desire (or its injection point) is examined for
          * a default desire.
          */
-        ROLE,
+        QUALIFIER,
         /**
-         * Both type and role are examined for defaults, prioritizing role over
+         * Both type and qualifier are examined for defaults, prioritizing qualifier over
          * type. This is the default.
          */
-        ROLE_AND_TYPE
+        QUALIFIER_AND_TYPE
     }
     
     private final Class<?> desiredType;
@@ -125,7 +124,7 @@ public class ReflectionDesire implements Desire {
      * @throws NullPointerException if injectPoint is null
      */
     public ReflectionDesire(InjectionPoint injectPoint) {
-        this(injectPoint.getType(), injectPoint, null, DefaultSource.ROLE_AND_TYPE);
+        this(injectPoint.getType(), injectPoint, null, DefaultSource.QUALIFIER_AND_TYPE);
     }
 
     /**
@@ -185,14 +184,8 @@ public class ReflectionDesire implements Desire {
     }
 
     @Override
-    public boolean isParameter() {
-        AnnotationRole role = getRole();
-        return (role != null ? role.isParameter() : false);
-    }
-
-    @Override
-    public AnnotationRole getRole() {
-        return injectPoint.getRole();
+    public AnnotationQualifier getQualifier() {
+        return injectPoint.getQualifier();
     }
 
     @Override
@@ -212,65 +205,61 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
-        AnnotationRole role = getRole();
+        AnnotationQualifier qualifier = getQualifier();
 
-            // Check the role first, but only if the role source hasn't been disabled
-        if (dfltSource == DefaultSource.ROLE || dfltSource == DefaultSource.ROLE_AND_TYPE) {
-            while (role != null) {
-                if (role.isParameter()) {
-                    DefaultDouble dfltDouble = role.getRoleType()
-                                                   .getAnnotation(DefaultDouble.class);
-                    if (dfltDouble != null) {
-                        return new InstanceBindRule(dfltDouble.value(), Double.class, role,
-                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                    }
-                    DefaultInt dfltInt = role.getRoleType().getAnnotation(DefaultInt.class);
-                    if (dfltInt != null) {
-                        return new InstanceBindRule(dfltInt.value(), Integer.class, role,
-                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                    }
-                    DefaultBoolean dfltBool = role.getRoleType()
-                                                  .getAnnotation(DefaultBoolean.class);
-                    if (dfltBool != null) {
-                        return new InstanceBindRule(dfltBool.value(), Boolean.class, role,
-                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                    }
-                    DefaultString dfltStr = role.getRoleType().getAnnotation(DefaultString.class);
-                    if (dfltStr != null) {
-                        return new InstanceBindRule(dfltStr.value(), String.class, role,
-                                                    BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
-                    }
-                } else {
-                    DefaultType impl = role.getRoleType().getAnnotation(DefaultType.class);
-                    if (impl != null) {
-                        return new ClassBindRule(impl.value(), getDesiredType(), role,
-                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
-                    }
+            // Check the qualifier first, but only if the qualifier source hasn't been disabled
+        if (dfltSource == DefaultSource.QUALIFIER || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
+            while (qualifier != null) {
+                DefaultDouble dfltDouble = qualifier.getQualifierAnnotation().getAnnotation(DefaultDouble.class);
+                if (dfltDouble != null) {
+                    return new InstanceBindRule(dfltDouble.value(), Double.class, qualifier,
+                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                }
+                DefaultInteger dfltInt = qualifier.getQualifierAnnotation().getAnnotation(DefaultInteger.class);
+                if (dfltInt != null) {
+                    return new InstanceBindRule(dfltInt.value(), Integer.class, qualifier,
+                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                }
+                DefaultBoolean dfltBool = qualifier.getQualifierAnnotation()
+                    .getAnnotation(DefaultBoolean.class);
+                if (dfltBool != null) {
+                    return new InstanceBindRule(dfltBool.value(), Boolean.class, qualifier,
+                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                }
+                DefaultString dfltStr = qualifier.getQualifierAnnotation().getAnnotation(DefaultString.class);
+                if (dfltStr != null) {
+                    return new InstanceBindRule(dfltStr.value(), String.class, qualifier,
+                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                }
+                DefaultImplementation impl = qualifier.getQualifierAnnotation().getAnnotation(DefaultImplementation.class);
+                if (impl != null) {
+                    return new ClassBindRule(impl.value(), getDesiredType(), qualifier,
+                                             BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
                 }
 
-                // there was no default binding on the role, so check its parent
-                // role
-                role = (role.inheritsRole() ? role.getParentRole() : null);
+                // there was no default binding on the qualifier, 
+                // so check its parent qualifier
+                qualifier = (qualifier.inheritsQualifier() ? qualifier.getParentQualifier() : null);
             }
         }
         
         
-        // Now check the desired type for @ImplementedBy or @ProvidedBy if the type
+        // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
         // source has not been disabled.
-        if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.ROLE_AND_TYPE) {
-            ProvidedBy provided = getDesiredType().getAnnotation(ProvidedBy.class);
+        if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
+            DefaultProvider provided = getDesiredType().getAnnotation(DefaultProvider.class);
             if (provided != null) {
-                return new ProviderClassBindRule(provided.value(), getDesiredType(), role,
+                return new ProviderClassBindRule(provided.value(), getDesiredType(), qualifier,
                                                  BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
             }
-            ImplementedBy impl = getDesiredType().getAnnotation(ImplementedBy.class);
+            DefaultImplementation impl = getDesiredType().getAnnotation(DefaultImplementation.class);
             if (impl != null) {
-                return new ClassBindRule(impl.value(), getDesiredType(), role,
+                return new ClassBindRule(impl.value(), getDesiredType(), qualifier,
                                          BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
             }
         }
 
-        // There are no annotations on the role or the type that indicate a
+        // There are no annotations on the {@link Qualifier} or the type that indicate a
         // default binding or value, or the defaults have been disabled,
         // so we return null
         return null;
@@ -280,8 +269,8 @@ public class ReflectionDesire implements Desire {
     public Comparator<BindRule> ruleComparator() {
         // 1st comparison is manual vs generated bind rules
         // - manual bind rules are preferred over any generated rules
-        // 2nd comparison is how close the desire's role is to the bind rules
-        // - we know that the desire's is a sub-role of any bind rules, so
+        // 2nd comparison is how close the desire's {@link Qualifier} is to the bind rules
+        // - we know that the desire's is a sub-{@link Qualifier} of any bind rules, so
         // choose
         // the bind rule with the closest distance
         // 3rd comparison is how well the generics match
@@ -297,11 +286,11 @@ public class ReflectionDesire implements Desire {
                     return b1.getWeight() - b2.getWeight();
                 }
 
-                // #2 - select shorter role distance
-                int d1 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(),
-                                                        b1.getRole());
-                int d2 = AnnotationRole.getRoleDistance(ReflectionDesire.this.getRole(),
-                                                        b2.getRole());
+                // #2 - select shorter qualifier distance
+                int d1 = AnnotationQualifier.getQualifierDistance(ReflectionDesire.this.getQualifier(),
+                                                                  b1.getQualifier());
+                int d2 = AnnotationQualifier.getQualifierDistance(ReflectionDesire.this.getQualifier(),
+                                                                  b2.getQualifier());
                 if (d1 != d2) {
                     return d1 - d2;
                 }

@@ -31,7 +31,7 @@ import org.grouplens.inject.types.Types;
  */
 public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
-    private final AnnotationRole role;
+    private final AnnotationQualifier qualifier;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -47,7 +47,7 @@ public class SetterInjectionPoint implements InjectionPoint {
         }
         
         // FIXME: should we check the setter's method annotations as well?
-        this.role = AnnotationRole.getRole(setter.getParameterAnnotations()[0]);
+        this.qualifier = AnnotationQualifier.getQualifier(setter.getParameterAnnotations()[0]);
         this.setter = setter;
     }
     
@@ -80,8 +80,8 @@ public class SetterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationRole getRole() {
-        return role;
+    public AnnotationQualifier getQualifier() {
+        return qualifier;
     }
     
     @Override

@@ -22,23 +22,23 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
- * type inherits from the matcher's type and if the node's role inherits from
- * the matcher's role.
+ * type inherits from the matcher's type and if the node's {@link Qualifier} inherits from
+ * the matcher's {@link Qualifier}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ReflectionContextMatcher implements ContextMatcher {
     private final Class<?> type;
-    private final AnnotationRole role;
+    private final AnnotationQualifier qualifier;
 
     /**
      * Create a ReflectionContextMatcher that matches the given type and the
-     * default role.
+     * default {@link Qualifier}.
      * 
      * @param type The type to match
      */
@@ -48,14 +48,14 @@ public class ReflectionContextMatcher implements ContextMatcher {
 
     /**
      * Create a ReflectionContextMatcher that matches the given type and the
-     * given role.
+     * given {@link Qualifier}.
      * 
      * @param type The type to match
-     * @param role The role to match
+     * @param {@link Qualifier} The {@link Qualifier} to match
      */
-    public ReflectionContextMatcher(Class<?> type, @Nullable AnnotationRole role) {
+    public ReflectionContextMatcher(Class<?> type, @Nullable AnnotationQualifier qualifier) {
         this.type = type;
-        this.role = role;
+        this.qualifier = qualifier;
     }
     
     /**
@@ -66,18 +66,18 @@ public class ReflectionContextMatcher implements ContextMatcher {
     }
     
     /**
-     * @return The role matched by this matcher
+     * @return The {@link Qualifier} matched by this matcher
      */
-    public AnnotationRole getMatchedRole() {
-        return role;
+    public AnnotationQualifier getMatchedQualifier() {
+        return qualifier;
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Role> n) {
+    public boolean matches(Pair<Satisfaction, Qualifier> n) {
         // we must check for nulls in case it is a synthetic satisfaction
         if (n.getLeft().getErasedType() != null && type.isAssignableFrom(n.getLeft().getErasedType())) {
-            // type is a match, so check the role
-            return AnnotationRole.inheritsRole((AnnotationRole) n.getRight(), role);
+            // type is a match, so check the {@link Qualifier}
+            return AnnotationQualifier.inheritsQualifier((AnnotationQualifier) n.getRight(), qualifier);
         }
         
         return false;
@@ -89,16 +89,16 @@ public class ReflectionContextMatcher implements ContextMatcher {
             return false;
         }
         ReflectionContextMatcher r = (ReflectionContextMatcher) o;
-        return r.type.equals(type) && (r.role == null ? role == null : r.role.equals(role));
+        return r.type.equals(type) && (r.qualifier == null ? qualifier == null : r.qualifier.equals(qualifier));
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (role == null ? 0 : role.hashCode());
+        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode());
     }
     
     @Override
     public String toString() {
-        return "ReflectionContextMatcher(" + role + ":" + type + ")";
+        return "ReflectionContextMatcher(" + qualifier + ":" + type + ")";
     }
 }

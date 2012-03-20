@@ -27,7 +27,7 @@ import java.util.Comparator;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockDesire implements Desire {
-    private final Role role;
+    private final Qualifier qualifier;
     private final Satisfaction satisfaction;
     
     private final Desire defaultDesire;
@@ -40,13 +40,13 @@ public class MockDesire implements Desire {
         this(satisfaction, null);
     }
     
-    public MockDesire(Satisfaction satisfaction, Role role) {
-        this(satisfaction, role, null);
+    public MockDesire(Satisfaction satisfaction, Qualifier qualifier) {
+        this(satisfaction, qualifier, null);
     }
     
-    public MockDesire(Satisfaction satisfaction, Role role, Desire dflt) {
+    public MockDesire(Satisfaction satisfaction, Qualifier qualifier, Desire dflt) {
         this.satisfaction = satisfaction;
-        this.role = role;
+        this.qualifier = qualifier;
         this.defaultDesire = dflt;
     }
     
@@ -71,13 +71,8 @@ public class MockDesire implements Desire {
     }
 
     @Override
-    public Role getRole() {
-        return role;
-    }
-
-    @Override
-    public boolean isParameter() {
-        return false;
+    public Qualifier getQualifier() {
+        return qualifier;
     }
 
     @Override

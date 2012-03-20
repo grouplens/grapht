@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 
 /**
@@ -93,7 +93,7 @@ public class ContextChain {
      * @param nodes The current context
      * @return True if this chain matches
      */
-    public boolean matches(List<Pair<Satisfaction, Role>> nodes) {
+    public boolean matches(List<Pair<Satisfaction, Qualifier>> nodes) {
         int i = 0;
         for (ContextMatcher cm: matchers) {
             boolean found = false;

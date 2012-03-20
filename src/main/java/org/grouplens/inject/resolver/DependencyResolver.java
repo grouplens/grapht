@@ -34,7 +34,7 @@ import org.grouplens.inject.graph.Node;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 
 import com.google.common.collect.Ordering;
@@ -60,12 +60,12 @@ class DependencyResolver {
     public Graph<Satisfaction, List<Desire>> resolve(Desire desire) {
         Graph<Satisfaction, List<Desire>> graph = new Graph<Satisfaction, List<Desire>>();
         Node<Satisfaction> root = new Node<Satisfaction>(null); // set label to null to identify it
-        resolveFully(desire, root, graph, new ArrayList<Pair<Satisfaction, Role>>());
+        resolveFully(desire, root, graph, new ArrayList<Pair<Satisfaction, Qualifier>>());
         return graph;
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
-                              List<Pair<Satisfaction, Role>> context) {
+                              List<Pair<Satisfaction, Qualifier>> context) {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
@@ -79,8 +79,8 @@ class DependencyResolver {
         graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.getRight()));
         
         // update the context
-        List<Pair<Satisfaction, Role>> newContext = new ArrayList<Pair<Satisfaction, Role>>(context);
-        newContext.add(Pair.of(resolved.getLeft(), desire.getRole()));
+        List<Pair<Satisfaction, Qualifier>> newContext = new ArrayList<Pair<Satisfaction, Qualifier>>(context);
+        newContext.add(Pair.of(resolved.getLeft(), desire.getQualifier()));
         
         List<? extends Desire> dependencies = resolved.getLeft().getDependencies();
         for (Desire d: dependencies) {
@@ -91,7 +91,7 @@ class DependencyResolver {
         }
     }
     
-    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<Pair<Satisfaction, Role>> context) {
+    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, Map<ContextChain, Collection<? extends BindRule>> bindRules, List<Pair<Satisfaction, Qualifier>> context) {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
@@ -190,9 +190,9 @@ class DependencyResolver {
      * and that they match the exact same nodes in the context.
      */
     private static class TypeDeltaComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final List<Pair<Satisfaction, Role>> context;
+        private final List<Pair<Satisfaction, Qualifier>> context;
         
-        public TypeDeltaComparator(List<Pair<Satisfaction, Role>> context) {
+        public TypeDeltaComparator(List<Pair<Satisfaction, Qualifier>> context) {
             this.context = context;
         }
         
@@ -208,7 +208,7 @@ class DependencyResolver {
                     break;
                 }
                 
-                Pair<Satisfaction, Role> currentNode = context.get(i);
+                Pair<Satisfaction, Qualifier> currentNode = context.get(i);
                 ContextMatcher m1 = o1.getLeft().getContexts().get(lastIndex1 - matcher);
                 ContextMatcher m2 = o2.getLeft().getContexts().get(lastIndex2 - matcher);
                 
@@ -257,9 +257,9 @@ class DependencyResolver {
      * end of the current context.
      */
     private static class ContextClosenessComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final List<Pair<Satisfaction, Role>> context;
+        private final List<Pair<Satisfaction, Qualifier>> context;
         
-        public ContextClosenessComparator(List<Pair<Satisfaction, Role>> context) {
+        public ContextClosenessComparator(List<Pair<Satisfaction, Qualifier>> context) {
             this.context = context;
         }
         

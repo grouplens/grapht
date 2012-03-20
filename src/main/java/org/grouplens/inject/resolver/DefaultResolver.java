@@ -32,7 +32,7 @@ import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.graph.Node;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 
 import com.google.common.base.Function;
@@ -41,7 +41,7 @@ import com.google.common.base.Function;
  * <p>
  * DefaultResolver is the default Resolver implementation. When resolving the
  * dependency graph for a desire, a "context" is built which consists of an
- * ordering of the nodes and their roles which satisfy each dependency. For more
+ * ordering of the nodes and their {@link Qualifier}s which satisfy each dependency. For more
  * details, see {@link ContextChain} and {@link ContextMatcher}. The
  * DefaultResolver uses the context to activate and select BindRules. A number
  * of rules are used to order applicable BindRules and choose the best. When any
@@ -58,7 +58,7 @@ import com.google.common.base.Function;
  * selected.</li>
  * <li>Context chain type delta - BindRules are ordered by how close their
  * context matching chain is to the current dependency context, as determined by
- * {@link Node#contextComparator(Role)}.</li>
+ * {@link Node#contextComparator(Qualifier)}.</li>
  * <li>Bind rule type delta - BindRules are lastly ordered by how well their
  * type matches a particular desire, as determined by
  * {@link Desire#ruleComparator()}.</li>

@@ -30,12 +30,12 @@ import org.grouplens.inject.resolver.ContextChain;
  * or first element within the dependency context. Later elements represent
  * dependencies or dependencies of dependencies of the root node.
  * <p>
- * ContextMatchers can match or apply to these nodes and roles within a
+ * ContextMatchers can match or apply to these nodes and {@link Qualifier}s within a
  * dependency context. As an example, the reflection based ContextMatcher
  * matches nodes that are sub-types of the type the matcher was configured with.
  * <p>
  * ContextMatchers are composed into a list with {@link ContextChain} to
- * parallel the composing of nodes and roles into the dependency context list.
+ * parallel the composing of nodes and {@link Qualifier}s into the dependency context list.
  * The ContextChain can then be used to determine if the list of ContextMatchers
  * applies to any given dependency context.
  * 
@@ -44,10 +44,10 @@ import org.grouplens.inject.resolver.ContextChain;
 public interface ContextMatcher {
     /**
      * Return true if this ContextMatcher matches or applies to the given Node
-     * and Role.
+     * and Qualifier.
      * 
-     * @param n The node and role in the current dependency context
-     * @return True if this matcher matches the node and role, false otherwise
+     * @param n The node and {@link Qualifier} in the current dependency context
+     * @return True if this matcher matches the node and {@link Qualifier}, false otherwise
      */
-    boolean matches(Pair<Satisfaction, Role> n);
+    boolean matches(Pair<Satisfaction, Qualifier> n);
 }

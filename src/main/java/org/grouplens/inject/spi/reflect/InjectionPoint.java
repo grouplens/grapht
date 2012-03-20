@@ -35,12 +35,12 @@ public interface InjectionPoint {
     Class<?> getType();
 
     /**
-     * Return any role on this injection point, or null if it is the default
-     * role.
+     * Return any Qualifier on this injection point, or null if it is the default
+     * qualifier.
      * 
-     * @return The role on the injection point
+     * @return The qualifier on the injection point
      */
-    AnnotationRole getRole();
+    AnnotationQualifier getQualifier();
 
     /**
      * Return whether or not this injection point is a transient, with the same

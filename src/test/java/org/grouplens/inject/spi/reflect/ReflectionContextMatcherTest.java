@@ -21,7 +21,7 @@ package org.grouplens.inject.spi.reflect;
 import java.lang.annotation.Annotation;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.inject.spi.Role;
+import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleB;
@@ -35,13 +35,13 @@ public class ReflectionContextMatcherTest {
     public void testEquals() {
         ReflectionContextMatcher m1 = new ReflectionContextMatcher(A.class);
         ReflectionContextMatcher m2 = new ReflectionContextMatcher(B.class);
-        ReflectionContextMatcher m3 = new ReflectionContextMatcher(A.class, new AnnotationRole(RoleA.class));
-        ReflectionContextMatcher m4 = new ReflectionContextMatcher(A.class, new AnnotationRole(RoleB.class));
+        ReflectionContextMatcher m3 = new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleA.class));
+        ReflectionContextMatcher m4 = new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleB.class));
         
         Assert.assertEquals(m1, new ReflectionContextMatcher(A.class));
         Assert.assertEquals(m2, new ReflectionContextMatcher(B.class));
-        Assert.assertEquals(m3, new ReflectionContextMatcher(A.class, new AnnotationRole(RoleA.class)));
-        Assert.assertEquals(m4, new ReflectionContextMatcher(A.class, new AnnotationRole(RoleB.class)));
+        Assert.assertEquals(m3, new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleA.class)));
+        Assert.assertEquals(m4, new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleB.class)));
         
         Assert.assertFalse(m1.equals(m2));
         Assert.assertFalse(m2.equals(m3));
@@ -85,9 +85,9 @@ public class ReflectionContextMatcherTest {
     private void doTestMatch(Class<?> matcherType, Class<? extends Annotation> matcherRole,
                              Class<?> satisfactionType, Class<? extends Annotation> satisfactionRole, 
                              boolean expected) {
-        AnnotationRole mr = (matcherRole == null ? null : new AnnotationRole(matcherRole));
-        AnnotationRole sr = (satisfactionRole == null ? null : new AnnotationRole(satisfactionRole));
-        Pair<Satisfaction, Role> node = Pair.<Satisfaction, Role>of(new ClassSatisfaction(satisfactionType), sr);
+        AnnotationQualifier mr = (matcherRole == null ? null : new AnnotationQualifier(matcherRole));
+        AnnotationQualifier sr = (satisfactionRole == null ? null : new AnnotationQualifier(satisfactionRole));
+        Pair<Satisfaction, Qualifier> node = Pair.<Satisfaction, Qualifier>of(new ClassSatisfaction(satisfactionType), sr);
         
         ReflectionContextMatcher cm = new ReflectionContextMatcher(matcherType, mr);
         Assert.assertEquals(expected, cm.matches(node));

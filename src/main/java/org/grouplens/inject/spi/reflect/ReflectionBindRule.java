@@ -27,36 +27,36 @@ import org.grouplens.inject.types.Types;
 /**
  * ReflectionBindRule is an abstract implementation of BindRule. It is a partial
  * function from desires to desires. Its matching logic only depends on the
- * source type and role of the rule, and not what the function produces. A
+ * source type and Qualifier of the rule, and not what the function produces. A
  * ReflectionBindRule will only match a desire if the desire's desired type
- * equals the source type, and only if the desire's role inherits from the role
- * of the bind rule.
+ * equals the source type, and only if the desire's Qualifier inherits from the
+ * Qualifier of the bind rule.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public abstract class ReflectionBindRule implements BindRule {
-    private final AnnotationRole role;
+    private final AnnotationQualifier qualifier;
     private final Class<?> sourceType;
     
     private final int weight;
 
     /**
      * Create a bind rule that matches a desire when the desired type equals
-     * <tt>sourceType</tt> and the desire's role inherits from <tt>role</tt>.
+     * <tt>sourceType</tt> and the desire's qualifier inherits from <tt>qualifier</tt>.
      * <tt>weight</tt> is an integer value that specifies the priority between
      * matching bind rules. Lower weights have a higher priority.
      * 
      * @param sourceType The source type this bind rule matches
-     * @param role The role the bind rule applies to
+     * @param qualifier The Qualifier the bind rule applies to
      * @param weight The weight or precedence of the rule
      * @throws NullPointerException if sourceType is null
      */
-    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationRole role, int weight) {
+    public ReflectionBindRule(Class<?> sourceType, @Nullable AnnotationQualifier qualifier, int weight) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
         
-        this.role = role;
+        this.qualifier = qualifier;
         this.sourceType = Types.box(sourceType);
         this.weight = weight;
     }
@@ -70,10 +70,10 @@ public abstract class ReflectionBindRule implements BindRule {
     }
     
     /**
-     * @return The annotation role matched by this bind rule
+     * @return The annotation {@link Qualifier} matched by this bind rule
      */
-    public AnnotationRole getRole() {
-        return role;
+    public AnnotationQualifier getQualifier() {
+        return qualifier;
     }
     
     /**
@@ -88,12 +88,12 @@ public abstract class ReflectionBindRule implements BindRule {
         ReflectionDesire rd = (ReflectionDesire) desire;
         // bind rules match type by equality
         if (rd.getDesiredType().equals(sourceType)) {
-            // if the type is equal, then the roles match if
-            // the desires role is a subtype of the bind rules role
-            return AnnotationRole.inheritsRole(rd.getRole(), role);
+            // if the type is equal, then the qualifiers match if
+            // the desire's qualifier is inherits from the bind rule's qualifier
+            return AnnotationQualifier.inheritsQualifier(rd.getQualifier(), qualifier);
         }
         
-        // the type and roles are not a match, so return false
+        // the type and {@link Qualifier}s are not a match, so return false
         return false;
     }
     
@@ -103,11 +103,11 @@ public abstract class ReflectionBindRule implements BindRule {
             return false;
         }
         ReflectionBindRule r = (ReflectionBindRule) o;
-        return r.weight == weight && (r.role == null ? role == null : r.role.equals(role)) && r.sourceType.equals(sourceType);
+        return r.weight == weight && (r.qualifier == null ? qualifier == null : r.qualifier.equals(qualifier)) && r.sourceType.equals(sourceType);
     }
     
     @Override
     public int hashCode() {
-        return sourceType.hashCode() ^ (role == null ? 0 : role.hashCode()) ^ weight;
+        return sourceType.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ weight;
     }
 }
