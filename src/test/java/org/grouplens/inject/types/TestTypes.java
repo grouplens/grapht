@@ -67,7 +67,7 @@ public class TestTypes {
         assertThat(Types.erase(ft), equalTo((Class) List.class));
         ParameterizedType pft = (ParameterizedType) ft;
         Type param = pft.getActualTypeArguments()[0];
-        assertThat(param, CoreMatchers.<Object>instanceOf(WildcardType.class));
+        assertThat(param, CoreMatchers.instanceOf(WildcardType.class));
         // finally, throw an illegal argument exception
         Types.erase(param);
     }
