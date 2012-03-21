@@ -71,12 +71,20 @@ class ContextImpl implements Context {
 
     @Override
     public Context in(Class<?> type) {
-        return in(null, type);
+        return in((Qualifier) null, type);
     }
 
     @Override
     public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        Qualifier q = config.getSPI().qualifier(qualifier);
+        return in(config.getSPI().qualifier(qualifier), type);
+    }
+    
+    @Override
+    public Context in(String name, Class<?> type) {
+        return in(config.getSPI().qualifier(name), type);
+    }
+    
+    private Context in(Qualifier q, Class<?> type) {
         ContextMatcher nextMatcher = config.getSPI().context(q, type);
         
         List<ContextMatcher> nextChain = new ArrayList<ContextMatcher>(context.getContexts());

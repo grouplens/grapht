@@ -93,10 +93,20 @@ public interface Context {
      * given class and {@link Qualifier} annotation. If the qualifier is null,
      * the default or null qualifier is used.
      * 
-     * @param qualifier The {@link Qualifier} that must be matched along with
-     *            the type
+     * @param qualifier The qualifier that must be matched along with the type
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
     Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+    
+    /**
+     * Create a new Context that extends the current context stack with the
+     * given class, qualified by the given String name. If the name is null, the
+     * default or null qualifier is used.
+     * 
+     * @param name The name that must be matched along with the type
+     * @param type The type to extend this context by
+     * @return A new Context with a longer context stack
+     */
+    Context in(String name, Class<?> type);
 }
