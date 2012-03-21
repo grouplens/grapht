@@ -22,7 +22,6 @@ import java.lang.annotation.Annotation;
 
 import javax.inject.Qualifier;
 
-import org.grouplens.inject.resolver.Resolver;
 import org.grouplens.inject.spi.InjectSPI;
 
 /**
@@ -40,8 +39,8 @@ import org.grouplens.inject.spi.InjectSPI;
  * assert (i.getInstance(Foo.class) instanceof Bar);
  * </pre>
  * <p>
- * Alternatively, {@link InjectorConfigurationBuilder}, {@link Resolver} and
- * {@link InjectSPI} can be used to create your own Injector implementations.
+ * Alternatively, {@link InjectorConfigurationBuilder}, and {@link InjectSPI}
+ * can be used to create your own Injector implementations.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */

@@ -36,7 +36,7 @@ import org.grouplens.inject.annotation.DefaultString;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.Qualifier;
-import org.grouplens.inject.types.Types;
+import org.grouplens.inject.util.Types;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary

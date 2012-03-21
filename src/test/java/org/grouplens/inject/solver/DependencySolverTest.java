@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.resolver;
+package org.grouplens.inject.solver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +34,7 @@ import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Graph;
 import org.grouplens.inject.graph.Node;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.MockBindRule;
@@ -44,15 +45,15 @@ import org.grouplens.inject.spi.MockSatisfaction;
 import org.grouplens.inject.spi.Satisfaction;
 import org.junit.Test;
 
-public class DefaultResolverTest {
-    private Resolver createResolver(Map<ContextChain, Collection<? extends BindRule>> rules) {
-        InjectorConfiguration config = new MockInjectorConfiguration(rules);
-        return new DefaultResolver(config);
+public class DependencySolverTest {
+    private DependencySolver createSolver(Map<ContextChain, Collection<? extends BindRule>> rules) {
+        InjectorConfiguration config = new MockInjectorConfiguration(null, rules);
+        return new DependencySolver(config, 100);
     }
     
     // bypass synthetic root and return node that resolves the desire 
-    private Node<Satisfaction> getRoot(Resolver r, Desire d) {
-        return r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), d).getTail();
+    private Node<Satisfaction> getRoot(DependencySolver r, Desire d) {
+        return r.getGraph().getOutgoingEdge(r.getRootNode(), d).getTail();
     }
     
     @Test
@@ -61,7 +62,7 @@ public class DefaultResolverTest {
         Satisfaction sat = new MockSatisfaction(A.class, new ArrayList<Desire>());
         Desire desire = new MockDesire(sat);
 
-        Resolver r = createResolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        DependencySolver r = createSolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
         r.resolve(desire);
         Assert.assertEquals(1 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         
@@ -79,7 +80,7 @@ public class DefaultResolverTest {
         Satisfaction rootSat = new MockSatisfaction(A.class, Arrays.asList(depDesire));
         Desire rootDesire = new MockDesire(rootSat);
         
-        Resolver r = createResolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        DependencySolver r = createSolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
         r.resolve(rootDesire);
         
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
@@ -103,7 +104,7 @@ public class DefaultResolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -131,7 +132,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d2, d3)));
         
         Desire rootDesire = new MockDesire(root);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
 
@@ -174,7 +175,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d3, ob3))); 
         
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -217,7 +218,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, ob1))); 
 
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
 
@@ -252,7 +253,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d2, b2)));
         
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
@@ -299,7 +300,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d2, b2)));
         
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
@@ -342,7 +343,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, b1)));
         
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         
         Node<Satisfaction> n1 = getNode(r.getGraph(), r1);
@@ -381,7 +382,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d3, b3)));
         
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -425,7 +426,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d3, b3)));
         
         Desire rootDesire = new MockDesire(r1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -463,7 +464,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d2, b2)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -528,7 +529,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d7, b6))); // r2s1,r4s2:d7 -> s7
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -612,7 +613,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, ob1)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
         
@@ -679,7 +680,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, ob1)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         
         Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
@@ -711,7 +712,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, d1)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
         
         Assert.assertEquals(2 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
@@ -748,7 +749,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d1, new MockDesire(sb)),
                                    new MockBindRule(d2, new MockDesire(sc))));
         
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(da);
         r.resolve(dap);
         
@@ -803,7 +804,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, new MockDesire(sbp)),
                                    new MockBindRule(d2, new MockDesire(scp))));
         
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(da);
         r.resolve(dap);
         
@@ -854,7 +855,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d1, new MockDesire(sb)),
                                    new MockBindRule(d2, new MockDesire(sc))));
         
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(da);
         r.resolve(dd);
         
@@ -898,7 +899,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, new MockDesire(sb)),
                                    new MockBindRule(d2, new MockDesire(sc))));
         
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(da);
         r.resolve(dd);
         
@@ -941,7 +942,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d1, d1)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
     }
     
@@ -964,7 +965,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d2, b2)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
     }
     
@@ -985,7 +986,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d1, ob1)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
     }
 
@@ -1003,7 +1004,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(d2, d3)));
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
     }
     
@@ -1021,7 +1022,7 @@ public class DefaultResolverTest {
                      Arrays.asList(new MockBindRule(d2, b2)));
 
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
     }
 
@@ -1042,7 +1043,7 @@ public class DefaultResolverTest {
                                    new MockBindRule(b1, b2))); 
         
         Desire rootDesire = new MockDesire(s1);
-        Resolver r = createResolver(bindings);
+        DependencySolver r = createSolver(bindings);
         r.resolve(rootDesire);
     }
     

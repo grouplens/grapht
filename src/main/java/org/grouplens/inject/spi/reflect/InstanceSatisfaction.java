@@ -25,6 +25,7 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.util.InstanceProvider;
 
 import com.google.common.base.Function;
 
@@ -74,13 +75,9 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
     }
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
-        return new Provider<Object>() {
-            @Override
-            public Object get() {
-                return instance;
-            }
-        };
+        return new InstanceProvider(instance);
     }
     
     @Override

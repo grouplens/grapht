@@ -26,7 +26,8 @@ import javax.inject.Provider;
 import org.grouplens.inject.spi.Desire;
 
 import com.google.common.base.Function;
-import org.grouplens.inject.types.Types;
+
+import org.grouplens.inject.util.Types;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a

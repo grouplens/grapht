@@ -30,8 +30,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.builder.Builder;
-import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.InjectSPI;
 import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
@@ -202,6 +202,11 @@ public class InjectorConfigurationBuilder implements Builder<InjectorConfigurati
             @Override
             public Map<ContextChain, Collection<? extends BindRule>> getBindRules() {
                 return Collections.unmodifiableMap(rules);
+            }
+
+            @Override
+            public InjectSPI getSPI() {
+                return spi;
             }
         };
     }

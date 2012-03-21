@@ -18,7 +18,7 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import org.grouplens.inject.types.Types;
+import org.grouplens.inject.util.Types;
 
 import javax.annotation.Nullable;
 

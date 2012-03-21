@@ -23,7 +23,7 @@ import java.lang.annotation.Annotation;
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
-import org.grouplens.inject.resolver.ContextChain;
+import org.grouplens.inject.spi.ContextChain;
 import org.omg.Dynamic.Parameter;
 
 /**

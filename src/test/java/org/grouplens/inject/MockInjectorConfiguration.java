@@ -22,8 +22,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextChain;
+import org.grouplens.inject.spi.InjectSPI;
 
 /**
  * MockInjectorConfiguration wraps an existing map of bind rules.
@@ -32,13 +33,20 @@ import org.grouplens.inject.spi.BindRule;
  */
 public class MockInjectorConfiguration implements InjectorConfiguration {
     private final Map<ContextChain, Collection<? extends BindRule>> rules;
+    private final InjectSPI spi;
     
-    public MockInjectorConfiguration(Map<ContextChain, Collection<? extends BindRule>> rules) {
+    public MockInjectorConfiguration(InjectSPI spi, Map<ContextChain, Collection<? extends BindRule>> rules) {
         this.rules = Collections.unmodifiableMap(rules);
+        this.spi = spi;
     }
     
     @Override
     public Map<ContextChain, Collection<? extends BindRule>> getBindRules() {
         return rules;
+    }
+
+    @Override
+    public InjectSPI getSPI() {
+        return spi;
     }
 }

@@ -27,10 +27,10 @@ import java.util.Set;
 
 import javax.inject.Provider;
 
-import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextChain;
 import org.grouplens.inject.spi.Qualifier;
-import org.grouplens.inject.types.Types;
+import org.grouplens.inject.util.Types;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by

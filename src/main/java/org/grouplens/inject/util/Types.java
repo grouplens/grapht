@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.types;
+package org.grouplens.inject.util;
 
 import javax.inject.Provider;
 import java.lang.reflect.*;
@@ -151,34 +151,5 @@ public final class Types {
      */
     public static boolean isInstantiable(Class<?> type) {
         return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
-    }
-
-    public static ParameterizedType parameterizedType(Class<?> cls, Type... args) {
-        TypeVariable<?>[] vars = cls.getTypeParameters();
-        if (args.length != vars.length) {
-            throw new IllegalArgumentException("wrong number of arguments");
-        }
-        return new ParameterizedTypeImpl(cls, args, null);
-    }
-
-    public static WildcardType wildcardExtends(Type... upperBounds) {
-        return wildcardType(upperBounds, null);
-    }
-
-    public static WildcardType wildcardSuper(Type... lowerBounds) {
-        return wildcardType(null, lowerBounds);
-    }
-
-    public static WildcardType wildcardType(Type[] upper, Type[] lower) {
-        if (upper == null || upper.length == 0) {
-            upper = new Type[]{Object.class};
-        }
-        if (lower == null) {
-            lower = new Type[0];
-        }
-        return new WildcardTypeImpl(upper, lower);
-    }
-    public static WildcardType wildcardType() {
-        return wildcardType(null, null);
     }
 }

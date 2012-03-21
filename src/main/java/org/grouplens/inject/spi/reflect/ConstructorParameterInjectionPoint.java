@@ -23,7 +23,7 @@ import java.lang.reflect.Constructor;
 
 import org.grouplens.inject.annotation.Transient;
 import org.grouplens.inject.spi.Qualifier;
-import org.grouplens.inject.types.Types;
+import org.grouplens.inject.util.Types;
 
 /**
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter
@@ -117,6 +117,6 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     
     @Override
     public String toString() {
-        return "ConstructorParameter(ctor=" + ctor + ", param=" + parameter + ")";
+        return "Constructor(ctor=" + ctor + ", param=" + parameter + ")";
     }
 }

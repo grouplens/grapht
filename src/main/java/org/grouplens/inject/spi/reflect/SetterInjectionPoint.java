@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 
 import org.grouplens.inject.annotation.Transient;
 import org.grouplens.inject.spi.Qualifier;
-import org.grouplens.inject.types.Types;
+import org.grouplens.inject.util.Types;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.

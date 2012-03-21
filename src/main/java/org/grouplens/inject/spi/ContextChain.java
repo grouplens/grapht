@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.resolver;
+package org.grouplens.inject.spi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.inject.spi.ContextMatcher;
-import org.grouplens.inject.spi.Qualifier;
-import org.grouplens.inject.spi.Satisfaction;
 
 /**
  * ContextChain represents a list of ContextMatchers. ContextMatchers can match

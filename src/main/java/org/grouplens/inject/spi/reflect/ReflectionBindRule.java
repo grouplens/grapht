@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.Qualifier;
-import org.grouplens.inject.types.Types;
+import org.grouplens.inject.util.Types;
 
 /**
  * ReflectionBindRule is an abstract implementation of BindRule. It is a partial

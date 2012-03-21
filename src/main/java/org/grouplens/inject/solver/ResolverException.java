@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.inject.resolver;
+package org.grouplens.inject.solver;
 
 /**
  * ResolverExceptions are thrown when a Resolver is unable to resolve a

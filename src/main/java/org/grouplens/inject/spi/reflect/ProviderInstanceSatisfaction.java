@@ -27,7 +27,8 @@ import javax.inject.Provider;
 import org.grouplens.inject.spi.Desire;
 
 import com.google.common.base.Function;
-import org.grouplens.inject.types.Types;
+
+import org.grouplens.inject.util.Types;
 
 /**
  * Satisfaction implementation wrapping an existing Provider instance. It has no

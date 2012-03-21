@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.grouplens.inject.resolver.ContextChain;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.InjectSPI;
 import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;

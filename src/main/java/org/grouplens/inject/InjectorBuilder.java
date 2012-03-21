@@ -20,15 +20,8 @@ package org.grouplens.inject;
 
 import java.lang.annotation.Annotation;
 
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-
 import org.apache.commons.lang3.builder.Builder;
-import org.grouplens.inject.resolver.DefaultResolver;
-import org.grouplens.inject.resolver.Resolver;
-import org.grouplens.inject.spi.Desire;
-import org.grouplens.inject.spi.InjectSPI;
-import org.grouplens.inject.spi.Qualifier;
+import org.grouplens.inject.solver.DefaultInjector;
 import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
 
 /**
@@ -40,7 +33,7 @@ import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
  * </p>
  * <p>
  * Internally, it uses an {@link InjectorConfigurationBuilder} to accumulate
- * bind rules, a {@link DefaultResolver} to resolve dependencies, and the
+ * bind rules, a {@link DefaultInjector} to resolve dependencies, and the
  * {@link ReflectionInjectSPI} to access dependency information.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
@@ -102,40 +95,6 @@ public class InjectorBuilder implements Context, Builder<Injector> {
 
     @Override
     public Injector build() {
-        Resolver resolver = new DefaultResolver(builder.build());
-        return new SimpleInjector(builder.getSPI(), resolver);
-    }
-    
-    private class SimpleInjector implements Injector {
-        private final InjectSPI spi;
-        private final Resolver resolver;
-        
-        public SimpleInjector(InjectSPI spi, Resolver resolver) {
-            this.resolver = resolver;
-            this.spi = spi;
-        }
-        
-        @Override
-        public <T> T getInstance(Class<T> type) {
-            return getInstance((Qualifier) null, type);
-        }
-        
-        @Override
-        public <T> T getInstance(Class<? extends Annotation> qualifier, Class<T> type) {
-            return getInstance(spi.qualifier(qualifier), type);
-        }
-        
-        @Override
-        public <T> T getInstance(String name, Class<T> type) {
-            return getInstance(spi.qualifier(name), type);
-        }
-        
-        @SuppressWarnings("unchecked")
-        private <T> T getInstance(@Nullable Qualifier q, Class<T> type) {
-            Desire desire = spi.desire(q, type);
-            
-            Provider<?> provider = resolver.resolve(desire);
-            return (T) provider.get();
-        }
+        return new DefaultInjector(builder.build());
     }
 }

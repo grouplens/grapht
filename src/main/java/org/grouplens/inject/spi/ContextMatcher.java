@@ -19,7 +19,6 @@
 package org.grouplens.inject.spi;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.inject.resolver.ContextChain;
 
 /**
  * <p>

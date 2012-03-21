@@ -74,22 +74,7 @@ public class ReflectionInjectSPI implements InjectSPI {
     
     @Override
     public Desire desire(final @Nullable Qualifier qualifier, final Class<?> type) {
-        return new ReflectionDesire(new InjectionPoint() {
-            @Override
-            public boolean isTransient() {
-                return false;
-            }
-            
-            @Override
-            public Class<?> getType() {
-                return type;
-            }
-            
-            @Override
-            public Qualifier getQualifier() {
-                return qualifier;
-            }
-        });
+        return new ReflectionDesire(new SimpleInjectionPoint(qualifier, type));
     }
 
     @Override

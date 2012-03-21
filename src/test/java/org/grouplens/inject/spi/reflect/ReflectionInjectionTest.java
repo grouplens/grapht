@@ -24,16 +24,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Provider;
-
 import org.grouplens.inject.InjectorConfiguration;
 import org.grouplens.inject.MockInjectorConfiguration;
 import org.grouplens.inject.graph.Edge;
 import org.grouplens.inject.graph.Node;
-import org.grouplens.inject.resolver.ContextChain;
-import org.grouplens.inject.resolver.DefaultResolver;
-import org.grouplens.inject.resolver.Resolver;
+import org.grouplens.inject.solver.DefaultInjector;
 import org.grouplens.inject.spi.BindRule;
+import org.grouplens.inject.spi.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.InjectSPI;
@@ -50,17 +47,17 @@ import org.grouplens.inject.spi.reflect.types.TypeC;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ResolverInjectionTest {
+public class ReflectionInjectionTest {
     @Test
     public void testTypeCInjectionWithDefaults() throws Exception {
         // Test that TypeC can be resolved successfully without any bind rules.
         // All of TypeC's dependencies have defaults or are satisfiable.
-        Desire rootDesire = new ReflectionInjectSPI().desire(null, TypeC.class);
-        InjectorConfiguration config = new MockInjectorConfiguration(new HashMap<ContextChain, Collection<? extends BindRule>>());
-        Resolver r = new DefaultResolver(config);
-        Provider<?> p = r.resolve(rootDesire);
+        InjectSPI spi = new ReflectionInjectSPI();
+        Desire rootDesire = spi.desire(null, TypeC.class);
+        InjectorConfiguration config = new MockInjectorConfiguration(spi, new HashMap<ContextChain, Collection<? extends BindRule>>());
+        DefaultInjector r = new DefaultInjector(config);
         
-        TypeC instance = (TypeC) p.get();
+        TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(5, instance.getIntValue());
         Assert.assertNotNull(instance.getInterfaceA());
         Assert.assertTrue(instance.getInterfaceA() instanceof TypeB); // ProviderA actually creates TypeB's
@@ -70,13 +67,13 @@ public class ResolverInjectionTest {
         Assert.assertSame(instance.getInterfaceB(), instance.getTypeB());
         
         // also verify memoization
-        Assert.assertSame(instance, p.get());
+        Assert.assertSame(instance, r.getInstance(TypeC.class));
         
-        Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
-        Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
+        Node<Satisfaction> resolvedRoot = r.getSolver().getGraph().getOutgoingEdge(r.getSolver().getRootNode(), rootDesire).getTail();
+        Assert.assertEquals(5, r.getSolver().getGraph().getOutgoingEdges(resolvedRoot).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
-        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(resolvedRoot)) {
+        for (Edge<Satisfaction, Desire> e: r.getSolver().getGraph().getOutgoingEdges(resolvedRoot)) {
             ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
@@ -145,10 +142,9 @@ public class ResolverInjectionTest {
                                     spi.bindInstance(null, TypeA.class, a, 0),
                                     spi.bindInstance(null, TypeB.class, b, 0)));
         
-        Resolver r = new DefaultResolver(new MockInjectorConfiguration(bindRules));
-        Provider<?> p = r.resolve(rootDesire);
+        DefaultInjector r = new DefaultInjector(new MockInjectorConfiguration(spi, bindRules));
 
-        TypeC instance = (TypeC) p.get();
+        TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(10, instance.getIntValue());
         Assert.assertNotNull(instance.getInterfaceA());
         Assert.assertTrue(instance.getInterfaceA() instanceof PrimeA);
@@ -158,13 +154,13 @@ public class ResolverInjectionTest {
         Assert.assertSame(b, instance.getTypeB());
         
         // also verify memoization
-        Assert.assertSame(instance, p.get());
+        Assert.assertSame(instance, r.getInstance(TypeC.class));
         
-        Node<Satisfaction> resolvedRoot = r.getGraph().getOutgoingEdge(r.getGraph().getNode(null), rootDesire).getTail();
-        Assert.assertEquals(5, r.getGraph().getOutgoingEdges(resolvedRoot).size());
+        Node<Satisfaction> resolvedRoot = r.getSolver().getGraph().getOutgoingEdge(r.getSolver().getRootNode(), rootDesire).getTail();
+        Assert.assertEquals(5, r.getSolver().getGraph().getOutgoingEdges(resolvedRoot).size());
         
         Map<InjectionPoint, Node<Satisfaction>> deps = new HashMap<InjectionPoint, Node<Satisfaction>>();
-        for (Edge<Satisfaction, Desire> e: r.getGraph().getOutgoingEdges(resolvedRoot)) {
+        for (Edge<Satisfaction, Desire> e: r.getSolver().getGraph().getOutgoingEdges(resolvedRoot)) {
             ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
