@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleB;
@@ -86,6 +87,25 @@ public class InjectionPointTest {
         // make sure that both injection points are normalized to boxed types
         Assert.assertEquals(Integer.class, p1.getType());
         Assert.assertEquals(Integer.class, p2.getType());
+    }
+    
+    @Test
+    public void testNamedQualifiers() throws Exception {
+        Constructor<NamedType> ctor = NamedType.class.getConstructor(String.class, Integer.class);
+        ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
+        ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
+        
+        Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
+        expected.add(p1);
+        expected.add(p2);
+        
+        // verify that the qualifiers and types are identified properly
+        Assert.assertEquals(new NamedQualifier("test1"), p1.getQualifier());
+        Assert.assertEquals(new NamedQualifier("test2"), p2.getQualifier());
+        Assert.assertEquals(String.class, p1.getType());
+        Assert.assertEquals(Integer.class, p2.getType());
+        
+        Assert.assertEquals(expected, getInjectionPoints(NamedType.class));
     }
     
     @Test
@@ -153,5 +173,10 @@ public class InjectionPointTest {
         
         @Inject
         public void setBoxed(Integer a) { }
+    }
+    
+    public static class NamedType {
+        @Inject
+        public NamedType(@Named("test1") String a, @Named("test2") Integer b) { }
     }
 }

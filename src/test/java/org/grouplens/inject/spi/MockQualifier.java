@@ -23,27 +23,27 @@ import java.lang.annotation.Annotation;
 import javax.annotation.Nullable;
 
 /**
- * MockRole is a simple Qualifier implementation that represents {@link Qualifier}s as unique
+ * MockQualifier is a simple Qualifier implementation that represents {@link Qualifier}s as unique
  * objects. It can map a hierarchy by referring to other parent {@link Qualifier}s.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class MockRole implements Qualifier {
-    private final MockRole parent;
+public class MockQualifier implements Qualifier {
+    private final MockQualifier parent;
     private final boolean enableInheritence;
     
-    public MockRole() {
+    public MockQualifier() {
         parent = null;
         enableInheritence = false;
     }
     
-    public MockRole(@Nullable MockRole parent) {
+    public MockQualifier(@Nullable MockQualifier parent) {
         this.parent = parent;
         enableInheritence = true;
     }
     
     @Override
-    public MockRole getParent() {
+    public MockQualifier getParent() {
         return parent;
     }
 

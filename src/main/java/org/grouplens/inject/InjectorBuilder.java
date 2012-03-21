@@ -110,13 +110,23 @@ public class InjectorBuilder implements Context, Builder<Injector> {
             this.spi = spi;
         }
         
+        @Override
         public <T> T getInstance(Class<T> type) {
-            return getInstance(null, type);
+            return getInstance((Qualifier) null, type);
+        }
+        
+        @Override
+        public <T> T getInstance(Class<? extends Annotation> qualifier, Class<T> type) {
+            return getInstance(spi.qualifier(qualifier), type);
+        }
+        
+        @Override
+        public <T> T getInstance(String name, Class<T> type) {
+            return getInstance(spi.qualifier(name), type);
         }
         
         @SuppressWarnings("unchecked")
-        public <T> T getInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> type) {
-            Qualifier q = spi.qualifier(qualifier);
+        private <T> T getInstance(@Nullable Qualifier q, Class<T> type) {
             Desire desire = spi.desire(q, type);
             
             Provider<?> provider = resolver.resolve(desire);

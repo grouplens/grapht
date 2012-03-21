@@ -161,8 +161,8 @@ public class InjectorConfigurationBuilderTest {
     }
     
     @Test
-    public void testInjectorRoleBindings() throws Exception {
-        // Test that bind rules properly record the {@link Qualifier} their bound with
+    public void testAnnotatedBindings() throws Exception {
+        // Test that bind rules properly record the qualifier they're bound with
         InjectorConfigurationBuilder builder = new InjectorConfigurationBuilder(spi, false);
 
         builder.getRootContext().bind(InterfaceA.class).withQualifier(RoleE.class).to(TypeA.class);
@@ -172,6 +172,22 @@ public class InjectorConfigurationBuilderTest {
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(spi.bindType(spi.qualifier(RoleE.class), InterfaceA.class, TypeA.class, 0, false)));
+        
+        assertEqualBindings(expected, config.getBindRules());
+    }
+    
+    @Test
+    public void testNamedBindings() throws Exception {
+        // Test that bind rules properly record the name they're bound with
+        InjectorConfigurationBuilder builder = new InjectorConfigurationBuilder(spi, false);
+
+        builder.getRootContext().bind(String.class).withName("test1").to("hello world");
+        InjectorConfiguration config = builder.build();
+        
+        // expected
+        Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(spi.bindInstance(spi.qualifier("test1"), String.class, "hello world", 0)));
         
         assertEqualBindings(expected, config.getBindRules());
     }

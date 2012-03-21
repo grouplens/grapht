@@ -39,7 +39,7 @@ import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.MockBindRule;
 import org.grouplens.inject.spi.MockContextMatcher;
 import org.grouplens.inject.spi.MockDesire;
-import org.grouplens.inject.spi.MockRole;
+import org.grouplens.inject.spi.MockQualifier;
 import org.grouplens.inject.spi.MockSatisfaction;
 import org.grouplens.inject.spi.Satisfaction;
 import org.junit.Test;
@@ -146,8 +146,8 @@ public class DefaultResolverTest {
         // Test that a qualifiers are properly remembered in the context
         // - note that this is different than having a qualifier-binding, that is
         //   part of the bind rule's match implementation
-        MockRole qualifier1 = new MockRole();
-        MockRole qualifier2 = new MockRole();
+        MockQualifier qualifier1 = new MockQualifier();
+        MockQualifier qualifier2 = new MockQualifier();
         
         Desire dr1 = new MockDesire(null, qualifier1);
         Desire dr2 = new MockDesire(null, qualifier2);
@@ -485,10 +485,10 @@ public class DefaultResolverTest {
     public void testComplexDependenciesSuccess() throws Exception {
         // Test a contrived example of a reasonably complex dependency scenario
         // that tests contexts, qualifiers, shared, and split nodes
-        MockRole r1 = new MockRole();
-        MockRole r2 = new MockRole();
-        MockRole r3 = new MockRole();
-        MockRole r4 = new MockRole();
+        MockQualifier r1 = new MockQualifier();
+        MockQualifier r2 = new MockQualifier();
+        MockQualifier r3 = new MockQualifier();
+        MockQualifier r4 = new MockQualifier();
         
         Desire d1 = new MockDesire(null, r1);
         Desire d2 = new MockDesire(null, r2);

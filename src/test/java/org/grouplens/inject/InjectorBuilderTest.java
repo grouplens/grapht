@@ -20,6 +20,7 @@ package org.grouplens.inject;
 
 import org.grouplens.inject.spi.reflect.types.InterfaceA;
 import org.grouplens.inject.spi.reflect.types.InterfaceB;
+import org.grouplens.inject.spi.reflect.types.NamedType;
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleE;
 import org.grouplens.inject.spi.reflect.types.TypeA;
@@ -30,7 +31,7 @@ import org.junit.Test;
 
 public class InjectorBuilderTest {
     @Test
-    public void testInjectorBuilder() throws Exception {
+    public void testInjectorBuilderWithAnnotatedBindings() throws Exception {
         // Test that injector building works as expected
         TypeA a1 = new TypeA();
         InterfaceA a2 = new TypeA();
@@ -42,12 +43,43 @@ public class InjectorBuilderTest {
         b.bind(InterfaceA.class).withQualifier(RoleA.class).to(a2);
         b.bind(TypeB.class).to(b1);
         b.bind(InterfaceB.class).withQualifier(RoleE.class).to(b2);
+        Injector i = b.build();
         
-        TypeC c = b.build().getInstance(TypeC.class);
+        TypeC c = i.getInstance(TypeC.class);
         Assert.assertEquals(5, c.getIntValue());
         Assert.assertSame(a1, c.getTypeA());
         Assert.assertSame(a2, c.getInterfaceA());
         Assert.assertSame(b1, c.getTypeB());
         Assert.assertSame(b2, c.getInterfaceB());
+        
+        // now assert that it memoizes instances and merges graphs properly
+        Assert.assertSame(a1, i.getInstance(TypeA.class));
+        Assert.assertSame(a2, i.getInstance(RoleA.class, InterfaceA.class));
+        Assert.assertSame(b1, i.getInstance(TypeB.class));
+        Assert.assertSame(b2, i.getInstance(RoleE.class, InterfaceB.class));
+    }
+    
+    @Test
+    public void testInjectorBuilderWithNamedBindings() throws Exception {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(String.class).withName("unused").to("shouldn't see this"); // extra binding to make sure it's skipped
+        b.bind(String.class).withName("test1").to("hello world");
+        Injector i = b.build();
+        
+        NamedType c = i.getInstance(NamedType.class);
+        Assert.assertEquals("hello world", c.getNamedString());
+        Assert.assertEquals("hello world", i.getInstance("test1", String.class));
+    }
+    
+    @Test
+    public void testInjectorMissingNamedBinding() throws Exception {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(String.class).withName("unused").to("shouldn't see this"); // extra binding to make sure it's skipped
+        Injector i = b.build();
+        
+        // since we don't have a 'test1' bound, the resolver falls back to the
+        // default String() constructor, which injects the empty string
+        NamedType c = i.getInstance(NamedType.class);
+        Assert.assertEquals("", c.getNamedString());
     }
 }

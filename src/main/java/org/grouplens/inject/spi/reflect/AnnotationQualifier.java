@@ -26,8 +26,8 @@ import org.grouplens.inject.annotation.InheritsDefaultQualifier;
 import org.grouplens.inject.annotation.InheritsQualifier;
 
 /**
- * AnnotationQualifier is a Qualifier implementation that wraps the
- * {@link Qualifier} annotation.
+ * AnnotationQualifier is a Qualifier implementation that wraps annotations
+ * that have been annotated with {@link Qualifier}
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */

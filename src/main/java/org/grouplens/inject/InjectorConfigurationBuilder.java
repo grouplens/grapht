@@ -18,6 +18,8 @@
  */
 package org.grouplens.inject;
 
+import java.io.Externalizable;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -103,6 +105,11 @@ public class InjectorConfigurationBuilder implements Builder<InjectorConfigurati
         
         defaultExcludes = new HashSet<Class<?>>();
         defaultExcludes.add(Object.class);
+        defaultExcludes.add(Comparable.class);
+        defaultExcludes.add(Serializable.class);
+        defaultExcludes.add(Externalizable.class);
+        defaultExcludes.add(Cloneable.class);
+        
         bindRules = new HashMap<ContextChain, Collection<BindRule>>();
         
         root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));

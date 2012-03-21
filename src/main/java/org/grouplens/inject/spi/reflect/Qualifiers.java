@@ -3,10 +3,18 @@ package org.grouplens.inject.spi.reflect;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
+import javax.inject.Named;
 
 import org.grouplens.inject.spi.Qualifier;
 
+/**
+ * Utilities related to Qualifier implementations.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
 public class Qualifiers {
+    private Qualifiers() { }
+    
     /**
      * Return true if <tt>child</tt> is a sub-qualifier of <tt>parent</tt>. Either
      * Qualifier can be null to signify the default Qualifier. False is returned if the
@@ -69,19 +77,27 @@ public class Qualifiers {
     }
     
     /**
-     * Return the AnnotationQualifier representing the {@link Qualifier} contained in the
-     * parameter annotations given. If the parameter annotations do not have any
-     * annotation that is a {@link Qualifier} or parameter, then null is returned.
+     * Return the Qualifier representing the {@link Qualifier} contained in the
+     * parameter annotations given. If the annotations do not have any
+     * annotation that is a {@link Qualifier}, then null is returned. If
+     * {@link Named} is encountered, a NamedQualifier is used, otherwise a
+     * {@link AnnotationQualifier} is used.
      * 
      * @param parameterAnnots The parameter annotations on the setter or
      *            constructor
-     * @return The AnnotationQualifier for the injection point, or null if there is
-     *         no {@link Qualifier}
+     * @return The Qualifier for the injection point, or null if there
+     *         is no {@link Qualifier}
      */
     public static Qualifier getQualifier(Annotation[] parameterAnnots) {
         for (int i = 0; i < parameterAnnots.length; i++) {
             if (Qualifiers.isQualifier(parameterAnnots[i].annotationType())) {
-                return new AnnotationQualifier(parameterAnnots[i].annotationType());
+                if (parameterAnnots[i] instanceof Named) {
+                    // special case to extract the annotated name
+                    return new NamedQualifier(((Named) parameterAnnots[i]).value());
+                } else {
+                    // wrap all other qualifier annotations with AnnotationQualifier
+                    return new AnnotationQualifier(parameterAnnots[i].annotationType());
+                }
             }
         }
         return null;

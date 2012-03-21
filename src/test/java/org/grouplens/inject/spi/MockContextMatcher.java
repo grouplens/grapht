@@ -24,13 +24,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
-    private final MockRole qualifier;
+    private final MockQualifier qualifier;
     
     public MockContextMatcher(Class<?> type) {
         this(type, null);
     }
     
-    public MockContextMatcher(Class<?> type, @Nullable MockRole qualifier) {
+    public MockContextMatcher(Class<?> type, @Nullable MockQualifier qualifier) {
         this.type = type;
         this.qualifier = qualifier;
 

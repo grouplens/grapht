@@ -74,7 +74,6 @@ public class ReflectionInjectSPI implements InjectSPI {
     
     @Override
     public Desire desire(final @Nullable Qualifier qualifier, final Class<?> type) {
-        final AnnotationQualifier realQualifier = (AnnotationQualifier) qualifier;
         return new ReflectionDesire(new InjectionPoint() {
             @Override
             public boolean isTransient() {
@@ -87,14 +86,19 @@ public class ReflectionInjectSPI implements InjectSPI {
             }
             
             @Override
-            public AnnotationQualifier getQualifier() {
-                return realQualifier;
+            public Qualifier getQualifier() {
+                return qualifier;
             }
         });
     }
 
     @Override
-    public Qualifier qualifier(Class<? extends Annotation> qualifier) {
+    public Qualifier qualifier(@Nullable Class<? extends Annotation> qualifier) {
         return (qualifier == null ? null : new AnnotationQualifier(qualifier));
+    }
+    
+    @Override
+    public Qualifier qualifier(@Nullable String name) {
+        return (name == null ? null : new NamedQualifier(name));
     }
 }

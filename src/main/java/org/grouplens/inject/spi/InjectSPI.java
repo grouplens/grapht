@@ -21,6 +21,7 @@ package org.grouplens.inject.spi;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
@@ -144,4 +145,15 @@ public interface InjectSPI {
      * @return A Qualifier wrapping the annotation
      */
     Qualifier qualifier(@Nullable Class<? extends Annotation> qualifier);
+    
+    /**
+     * Create a name-based qualifier. This can be used to support the
+     * {@link Named} annotation because {@link #qualifier(Class)} is not
+     * sufficient to capture the String values associated with the injection
+     * points. This should return null if the name is null.
+     * 
+     * @param name The name to match
+     * @return A Qualifier wrapping the string name
+     */
+    Qualifier qualifier(@Nullable String name);
 }

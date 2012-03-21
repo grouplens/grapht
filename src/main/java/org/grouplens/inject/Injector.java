@@ -20,7 +20,6 @@ package org.grouplens.inject;
 
 import java.lang.annotation.Annotation;
 
-import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
 import org.grouplens.inject.resolver.Resolver;
@@ -56,8 +55,6 @@ public interface Injector {
      * Injectors may memoize or cache previously created objects. As an example,
      * the Injector created by {@link InjectorBuilder} reuses instances where
      * possible.
-     * <p>
-     * This is equivalent to <code>getInstance(null, type);</code>
      * 
      * @param <T> The object type being created
      * @param type The class type
@@ -67,12 +64,23 @@ public interface Injector {
 
     /**
      * <p>
-     * Get an instance of T within the scope of the given {@link Qualifier} annotation. 
+     * Get an instance of T with the given {@link Qualifier} annotation. 
      * 
      * @param <T> The object type
      * @param qualifier The qualifier on of the returned instance
      * @param type The class type
      * @return An instance of type T
      */
-    public <T> T getInstance(@Nullable Class<? extends Annotation> qualifier, Class<T> type);
+    public <T> T getInstance(Class<? extends Annotation> qualifier, Class<T> type);
+    
+    /**
+     * <p>
+     * Get an instance of T with the given name.
+     * 
+     * @param <T> The object type
+     * @param name The name of the qualified object
+     * @param type The class type
+     * @return An instance of type T
+     */
+    public <T> T getInstance(String name, Class<T> type);
 }

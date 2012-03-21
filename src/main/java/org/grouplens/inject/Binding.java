@@ -20,7 +20,7 @@ package org.grouplens.inject;
 
 import java.lang.annotation.Annotation;
 
-import javax.annotation.Nullable;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 
@@ -56,13 +56,26 @@ public interface Binding<T> {
      * applied to the injection point, unless the annotation inherits from the
      * default qualifier.
      * <p>
-     * If this is called multiple times, the last annotation is used. If null is
-     * passed in, the default annotation is matched.
+     * This will override any previous name or qualifier annotation.
      * 
-     * @param qualifier The Qualifier that must match, or null for the default
+     * @param qualifier The Qualifier that must match
      * @return This Binding
+     * @throws NullPointerException if qualifier is null
      */
-    Binding<T> withQualifier(@Nullable Class<? extends Annotation> qualifier);
+    Binding<T> withQualifier(Class<? extends Annotation> qualifier);
+    
+    /**
+     * <p>
+     * Configure the binding to match injection points that have been annotated
+     * with the {@link Named} annotation and the specified <tt>name</tt>.
+     * <p>
+     * This will override any previous name or qualifier annotation.
+     * 
+     * @param name The name to match on
+     * @return This Binding
+     * @throws NullPointerException if name is null
+     */
+    Binding<T> withName(String name);
 
     /**
      * Exclude the provided type from being matched when examining injection
