@@ -125,16 +125,17 @@ public interface InjectSPI {
     ContextMatcher context(@Nullable Qualifier qualifier, Class<?> type);
 
     /**
-     * Create a Desire that wraps the Qualifier and type. If
-     * the qualifier is null, the default qualifier is used. The created Desire
-     * must be compatible with the BindRules, ContextMatchers, and Satisfactions
-     * created by this InjectSPI.
+     * Create a Desire that wraps the Qualifier and type. If the qualifier is
+     * null, the default qualifier is used. The created Desire must be
+     * compatible with the BindRules, ContextMatchers, and Satisfactions created
+     * by this InjectSPI.
      * 
      * @param qualifier The optional qualifier
      * @param type The desired type
+     * @param nullable Whether or not the desire can be nullable
      * @return A Desire wrapping the qualifier and type
      */
-    Desire desire(@Nullable Qualifier qualifier, Class<?> type);
+    Desire desire(@Nullable Qualifier qualifier, Class<?> type, boolean nullable);
     
     /**
      * Create a Qualifier that wraps the given annotation. This annotation must

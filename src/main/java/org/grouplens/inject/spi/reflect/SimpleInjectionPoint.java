@@ -7,18 +7,20 @@ import org.grouplens.inject.spi.Qualifier;
 class SimpleInjectionPoint implements InjectionPoint {
     private final Qualifier qualifier;
     private final Class<?> type;
+    private final boolean nullable;
     
-    public SimpleInjectionPoint(@Nullable Qualifier qualifier, Class<?> type) {
+    public SimpleInjectionPoint(@Nullable Qualifier qualifier, Class<?> type, boolean nullable) {
         if (type == null) {
             throw new NullPointerException("Class type cannot be null");
         }
         this.qualifier = qualifier;
         this.type = type;
+        this.nullable = nullable;
     }
     
     @Override
     public boolean isNullable() {
-        return false;
+        return nullable;
     }
     
     @Override
@@ -47,7 +49,7 @@ class SimpleInjectionPoint implements InjectionPoint {
             return false;
         }
         SimpleInjectionPoint p = (SimpleInjectionPoint) o;
-        return p.type.equals(type) && (p.qualifier == null ? qualifier == null : p.qualifier.equals(qualifier));
+        return p.type.equals(type) && (p.qualifier == null ? qualifier == null : p.qualifier.equals(qualifier)) && p.nullable == nullable;
     }
     
     @Override

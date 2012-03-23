@@ -149,8 +149,7 @@ public class ReflectionDesire implements Desire {
 
         desiredType = Types.box(desiredType);
         if (!injectPoint.getType().isAssignableFrom(desiredType) || (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType()))) {
-            throw new IllegalArgumentException(
-                                               "No type hierarchy between injection point, desired type, and satisfaction");
+            throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
         }
 
         if (satisfaction == null && Types.isInstantiable(desiredType)) {
@@ -236,7 +235,6 @@ public class ReflectionDesire implements Desire {
             }
         }
         
-        
         // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
         // source has not been disabled.
         if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
@@ -253,7 +251,7 @@ public class ReflectionDesire implements Desire {
         }
 
         // Last fall back is binding to null
-        if (injectPoint.isNullable()) {
+        if (satisfaction == null && injectPoint.isNullable()) {
             return new ReflectionDesire(desiredType, injectPoint, new NullSatisfaction(desiredType), dfltSource);
         }
         

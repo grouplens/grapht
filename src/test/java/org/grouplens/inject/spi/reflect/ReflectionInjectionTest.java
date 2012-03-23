@@ -53,7 +53,7 @@ public class ReflectionInjectionTest {
         // Test that TypeC can be resolved successfully without any bind rules.
         // All of TypeC's dependencies have defaults or are satisfiable.
         InjectSPI spi = new ReflectionInjectSPI();
-        Desire rootDesire = spi.desire(null, TypeC.class);
+        Desire rootDesire = spi.desire(null, TypeC.class, false);
         InjectorConfiguration config = new MockInjectorConfiguration(spi, new HashMap<ContextChain, Collection<? extends BindRule>>());
         DefaultInjector r = new DefaultInjector(config);
         
@@ -129,7 +129,7 @@ public class ReflectionInjectionTest {
         // the bind rule configuration does not need to be very complicated, since
         // the resolver and bind rules are already tested.
         InjectSPI spi = new ReflectionInjectSPI();
-        Desire rootDesire = spi.desire(null, TypeC.class);
+        Desire rootDesire = spi.desire(null, TypeC.class, false);
         
         TypeA a = new TypeA();
         TypeB b = new TypeB();

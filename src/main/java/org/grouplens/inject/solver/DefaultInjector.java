@@ -130,7 +130,7 @@ public class DefaultInjector implements Injector {
     
     @SuppressWarnings("unchecked")
     private <T> T getInstance(@Nullable Qualifier q, Class<T> type) {
-        Desire desire = config.getSPI().desire(q, type);
+        Desire desire = config.getSPI().desire(q, type, false);
         
         // check if the desire is already in the graph
         Edge<Satisfaction, Desire> resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
