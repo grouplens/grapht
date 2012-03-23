@@ -152,8 +152,13 @@ public class ReflectionDesire implements Desire {
             throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
         }
 
-        if (satisfaction == null && Types.isInstantiable(desiredType)) {
-            satisfaction = new ClassSatisfaction(desiredType);
+        // try and find a satisfaction
+        if (satisfaction == null) {
+            if (Types.isInstantiable(desiredType)) {
+                satisfaction = new ClassSatisfaction(desiredType);
+            } else if (injectPoint.isNullable()) {
+                satisfaction = new NullSatisfaction(desiredType);
+            }
         }
 
         this.desiredType = desiredType;
@@ -248,11 +253,6 @@ public class ReflectionDesire implements Desire {
                 // let the constructor create any satisfaction
                 return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);
             }
-        }
-
-        // Last fall back is binding to null
-        if (satisfaction == null && injectPoint.isNullable()) {
-            return new ReflectionDesire(desiredType, injectPoint, new NullSatisfaction(desiredType), dfltSource);
         }
         
         // There are no annotations on the {@link Qualifier} or the type that indicate a
