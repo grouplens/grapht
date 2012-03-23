@@ -18,9 +18,12 @@
  */
 package org.grouplens.inject.graph;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +51,48 @@ public class Graph<N, E> {
     public Graph() {
         outgoing = new HashMap<Node<N>, Set<Edge<N, E>>>();
         incoming = new HashMap<Node<N>, Set<Edge<N, E>>>();
+    }
+    
+    /**
+     * Sort all the current nodes of the given graph by descending depth from
+     * the given root node. If a node has multiple paths to a root, the longest
+     * path is used to determine its ordering.
+     * 
+     * @param graph The graph to sort
+     * @param root The designated root node (depth = 0)
+     * @return An ordered list with deeper nodes at the start of the list
+     */
+    public List<Node<N>> sort(Node<N> root) {
+        // Calculate every node's depth from the root
+        final Map<Node<N>, Integer> depths = new HashMap<Node<N>, Integer>();
+        computeDepths(root, 0, depths);
+        
+        // Sort all node's so that deeper nodes are at the beginning of the list
+        List<Node<N>> sorted = new ArrayList<Node<N>>(outgoing.keySet());
+        Collections.sort(sorted, new Comparator<Node<N>>() {
+            @Override
+            public int compare(Node<N> n1, Node<N> n2) {
+                int d1 = (depths.containsKey(n1) ? depths.get(n1) : Integer.MAX_VALUE);
+                int d2 = (depths.containsKey(n2) ? depths.get(n2) : Integer.MAX_VALUE);
+                return d2 - d1;
+            }
+        });
+        return sorted;
+    }
+    
+    private void computeDepths(Node<N> node, int depth, Map<Node<N>, Integer> depths) {
+        // store max depth to reach the node
+        Integer oldDepth = depths.get(node);
+        if (oldDepth == null || depth > oldDepth.intValue()) {
+            depths.put(node, depth);
+        }
+        
+        Set<Edge<N, E>> out = outgoing.get(node);
+        if (out != null) {
+            for (Edge<N, E> e: out) {
+                computeDepths(e.getTail(), depth + 1, depths);
+            }
+        }
     }
 
     /**

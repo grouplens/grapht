@@ -36,6 +36,7 @@ import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.ContextChain;
 import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.spi.InjectSPI;
 import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.spi.Satisfaction;
 
@@ -82,6 +83,13 @@ public class DependencySolver {
     }
     
     /**
+     * @return The InjectSPI used by this solver's configuration
+     */
+    public InjectSPI getSPI() {
+        return bindRules.getSPI();
+    }
+    
+    /**
      * @return The resolved dependency graph
      */
     public Graph<Satisfaction, Desire> getGraph() {
@@ -112,20 +120,7 @@ public class DependencySolver {
     }
     
     private void merge(Graph<Satisfaction, List<Desire>> fullTree, Node<Satisfaction> root) {
-        // Calculate every node's depth from the root
-        final Map<Node<Satisfaction>, Integer> depths = new HashMap<Node<Satisfaction>, Integer>();
-        computeDepths(root, 0, fullTree, depths);
-        
-        // Sort all node's so that deeper nodes are at the beginning of the list
-        List<Node<Satisfaction>> sorted = new ArrayList<Node<Satisfaction>>(fullTree.getNodes());
-        Collections.sort(sorted, new Comparator<Node<Satisfaction>>() {
-            @Override
-            public int compare(Node<Satisfaction> n1, Node<Satisfaction> n2) {
-                int d1 = depths.get(n1);
-                int d2 = depths.get(n2);
-                return d2 - d1;
-            }
-        });
+        List<Node<Satisfaction>> sorted = fullTree.sort(root);
         
         // Look up each node's dependencies in the merged graph, since we sorted
         // by reverse depth we can guarantee that dependencies have already
@@ -180,14 +175,6 @@ public class DependencySolver {
                 // update merge map so future nodes use this node as a dependency
                 mergedMap.put(toMerge, newNode);
             }
-        }
-    }
-    
-    private void computeDepths(Node<Satisfaction> node, int depth, Graph<Satisfaction, List<Desire>> tree, Map<Node<Satisfaction>, Integer> depths) {
-        // Since this is a tree, we can assume that we haven't encountered this node before 
-        depths.put(node, depth);
-        for (Edge<Satisfaction, List<Desire>> out: tree.getOutgoingEdges(node)) {
-            computeDepths(out.getTail(), depth + 1, tree, depths);
         }
     }
     
