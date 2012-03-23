@@ -77,6 +77,6 @@ public class NullSatisfaction extends ReflectionSatisfaction {
     
     @Override
     public String toString() {
-        return "NullSatisfaction(" + type + ")";
+        return "Null(" + type.getSimpleName() + ")";
     }
 }

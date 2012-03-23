@@ -107,6 +107,8 @@ public class SetterInjectionPoint implements InjectionPoint {
     
     @Override
     public String toString() {
-        return "Setter(method=" + setter + "param=" + parameter + ")";
+        String q = (qualifier == null ? "" : qualifier + ":");
+        String p = setter.getParameterTypes()[parameter].getSimpleName();
+        return setter.getName() + "(" + parameter + ", " + q + p + ")";
     }
 }

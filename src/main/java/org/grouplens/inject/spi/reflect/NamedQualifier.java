@@ -100,6 +100,6 @@ public class NamedQualifier implements Qualifier {
     
     @Override
     public String toString() {
-        return "NamedQualifier(" + name + ")";
+        return "@Named(\"" + name + "\"";
     }
 }

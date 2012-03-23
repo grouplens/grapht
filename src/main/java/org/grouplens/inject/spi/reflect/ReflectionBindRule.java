@@ -147,16 +147,6 @@ public class ReflectionBindRule implements BindRule {
     @Override
     public boolean matches(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
-        // check the nullability rules first
-        // 1. If desire is nullable, satisfaction can be produce null
-        // 2. If desire is not nullable, satisfaction cannot produce null
-        if (!rd.getInjectionPoint().isNullable()) {
-            if (satisfaction != null && satisfaction.canProduceNull()) {
-                // desire cannot be null but satisfaction might produce null,
-                // so we can't match this desire
-                return false;
-            }
-        }
         
         // bind rules match type by equality
         if (rd.getDesiredType().equals(sourceType)) {
@@ -199,5 +189,13 @@ public class ReflectionBindRule implements BindRule {
         }
         
         return result;
+    }
+    
+    @Override
+    public String toString() {
+        String q = (qualifier == null ? "" : qualifier + ":");
+        String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
+        
+        return "Bind(weight=" + weight + ", " + q + sourceType.getSimpleName() + " -> " + i + ")";
     }
 }

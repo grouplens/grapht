@@ -117,6 +117,6 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
     
     @Override
     public String toString() {
-        return "ProviderClassSatisfaction(" + getErasedType() + ", " + providerType + ")";
+        return "Provider(" + providerType.getSimpleName() + ")";
     }
 }

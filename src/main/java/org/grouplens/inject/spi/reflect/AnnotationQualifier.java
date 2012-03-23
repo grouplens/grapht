@@ -91,7 +91,7 @@ public class AnnotationQualifier implements org.grouplens.inject.spi.Qualifier {
     
     @Override
     public String toString() {
-        return "AnnotationQualifier(" + annot + ")";
+        return "@" + annot.getSimpleName();
     }
     
     /*

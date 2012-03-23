@@ -93,6 +93,6 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
     
     @Override
     public String toString() {
-        return "ClassSatisfaction(" + type + ")";
+        return "Class(" + type.getSimpleName() + ")";
     }
 }

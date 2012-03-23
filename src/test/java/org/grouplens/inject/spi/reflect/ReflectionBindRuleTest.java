@@ -134,7 +134,7 @@ public class ReflectionBindRuleTest {
     public void testNullable() throws Exception {
         doNullableTest(false, false, true);
         doNullableTest(true, false, true);
-        doNullableTest(false, true, false);
+        doNullableTest(false, true, true);
         doNullableTest(true, true, true);
     }
     

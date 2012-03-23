@@ -99,6 +99,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
     
     @Override
     public String toString() {
-        return "ReflectionContextMatcher(" + qualifier + ":" + type + ")";
+        String q = (qualifier == null ? "" : qualifier + ":");
+        return "ReflectionContextMatcher(" + q + type.getSimpleName() + ")";
     }
 }

@@ -111,6 +111,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     
     @Override
     public String toString() {
-        return "Constructor(ctor=" + ctor + ", param=" + parameter + ")";
+        String q = (qualifier == null ? "" : qualifier + ":");
+        String p = ctor.getParameterTypes()[parameter].getSimpleName();
+        return ctor.getDeclaringClass().getSimpleName() + "(" + parameter + ", " + q + p + ")";
     }
 }

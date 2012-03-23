@@ -70,6 +70,10 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                 Provider<?> provider = providers.apply(d);
                 ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                 ctorArgs[cd.getParameterIndex()] = provider.get();
+                
+                if (!cd.isNullable() && ctorArgs[cd.getParameterIndex()] == null) {
+                    throw new NullPointerException("Injection point is not nullable: " + cd);
+                }
             }
         }
         
@@ -96,6 +100,10 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                 
                 Provider<?> provider = providers.apply(d);
                 args[sd.getParameterIndex()] = provider.get();
+                
+                if (!sd.isNullable() && args[sd.getParameterIndex()] == null) {
+                    throw new NullPointerException("Injection point is not nullable: " + sd);
+                }
             }
         }
         

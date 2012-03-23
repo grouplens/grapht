@@ -316,6 +316,6 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public String toString() {
-        return "ReflectionDesire(type=" + desiredType + ", inject=" + injectPoint + ", satisfaction=" + satisfaction + ", source=" + dfltSource + ")";
+        return "Desire(" + desiredType.getSimpleName() + ", " + injectPoint + ")";
     }
 }

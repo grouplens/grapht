@@ -85,16 +85,16 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
         if (!(o instanceof InstanceSatisfaction)) {
             return false;
         }
-        return ((InstanceSatisfaction) o).instance == instance;
+        return ((InstanceSatisfaction) o).instance.equals(instance);
     }
     
     @Override
     public int hashCode() {
-        return System.identityHashCode(instance);
+        return instance.hashCode();
     }
     
     @Override
     public String toString() {
-        return "InstanceSatisfaction(" + instance + ")";
+        return "Instance(" + instance + ")";
     }
 }

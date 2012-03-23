@@ -97,16 +97,16 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
         if (!(o instanceof ProviderInstanceSatisfaction)) {
             return false;
         }
-        return ((ProviderInstanceSatisfaction) o).provider == provider;
+        return ((ProviderInstanceSatisfaction) o).provider.equals(provider);
     }
     
     @Override
     public int hashCode() {
-        return System.identityHashCode(provider);
+        return provider.hashCode();
     }
     
     @Override
     public String toString() {
-        return "ProviderInstanceSatisfaction(" + getErasedType() + ", " + provider + ")";
+        return "ProviderInstance(" + provider + ")";
     }
 }

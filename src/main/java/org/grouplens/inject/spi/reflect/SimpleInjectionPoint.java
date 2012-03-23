@@ -54,6 +54,7 @@ class SimpleInjectionPoint implements InjectionPoint {
     
     @Override
     public String toString() {
-        return "InjectionPoint(type=" + type + ", qualifier=" + qualifier + ")";
+        String q = (qualifier == null ? "" : qualifier + ":");
+        return q + type.getSimpleName();
     }
 }
