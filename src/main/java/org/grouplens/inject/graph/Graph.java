@@ -20,7 +20,6 @@ package org.grouplens.inject.graph;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,45 +53,43 @@ public class Graph<N, E> {
     }
     
     /**
-     * Sort all the current nodes of the given graph by descending depth from
-     * the given root node. If a node has multiple paths to a root, the longest
-     * path is used to determine its ordering.
+     * <p>
+     * Topographical sort all nodes reachable from the given root node. Nodes
+     * that are farther away, or more connected, are at the beginning of the
+     * list.
+     * <p>
+     * Nodes in the graph that are not connected to the root will not appear in
+     * the returned list.
      * 
      * @param graph The graph to sort
      * @param root The designated root node (depth = 0)
-     * @return An ordered list with deeper nodes at the start of the list
+     * @return An ordered list, topographically sorted
      */
     public List<Node<N>> sort(Node<N> root) {
-        // Calculate every node's depth from the root
-        final Map<Node<N>, Integer> depths = new HashMap<Node<N>, Integer>();
-        computeDepths(root, 0, depths);
-        
-        // Sort all node's so that deeper nodes are at the beginning of the list
-        List<Node<N>> sorted = new ArrayList<Node<N>>(outgoing.keySet());
-        Collections.sort(sorted, new Comparator<Node<N>>() {
-            @Override
-            public int compare(Node<N> n1, Node<N> n2) {
-                int d1 = (depths.containsKey(n1) ? depths.get(n1) : Integer.MAX_VALUE);
-                int d2 = (depths.containsKey(n2) ? depths.get(n2) : Integer.MAX_VALUE);
-                return d2 - d1;
-            }
-        });
+        List<Node<N>> sorted = new ArrayList<Node<N>>();
+        topographicalSort(root, new HashSet<Node<N>>(), sorted);
         return sorted;
     }
     
-    private void computeDepths(Node<N> node, int depth, Map<Node<N>, Integer> depths) {
-        // store max depth to reach the node
-        Integer oldDepth = depths.get(node);
-        if (oldDepth == null || depth > oldDepth.intValue()) {
-            depths.put(node, depth);
+    private void topographicalSort(Node<N> n, Set<Node<N>> visited, List<Node<N>> sortedResult) {
+        if (visited.contains(n)) {
+            // we've already visited this node, no need to walk it again
+            return;
         }
         
-        Set<Edge<N, E>> out = outgoing.get(node);
+        // record that we've visited the node
+        visited.add(n);
+        
+        // visit each node on its outgoing edges
+        Set<Edge<N, E>> out = outgoing.get(n);
         if (out != null) {
             for (Edge<N, E> e: out) {
-                computeDepths(e.getTail(), depth + 1, depths);
+                topographicalSort(e.getTail(), visited, sortedResult);
             }
         }
+        
+        // record this node in the list as we exit it
+        sortedResult.add(n);
     }
 
     /**
