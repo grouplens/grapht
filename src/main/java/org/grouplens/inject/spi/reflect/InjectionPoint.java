@@ -50,4 +50,9 @@ public interface InjectionPoint {
      * @return True if the injection point is for a transient desire
      */
     boolean isTransient();
+    
+    /**
+     * @return True if this injection point accepts null values
+     */
+    boolean isNullable();
 }

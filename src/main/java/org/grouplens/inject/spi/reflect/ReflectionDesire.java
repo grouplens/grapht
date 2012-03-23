@@ -75,19 +75,16 @@ public class ReflectionDesire implements Desire {
 
         for (Method m: type.getMethods()) {
             if (m.getAnnotation(Inject.class) != null) {
-                if (m.getParameterTypes().length != 1 || !m.getReturnType().equals(void.class)) {
-                    // invalid setter injection point
-                    // FIXME: better exception as above
-                    throw new RuntimeException("Invalid setter injection method");
+                for (int i = 0; i < m.getParameterTypes().length; i++) {
+                    desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
                 }
-
-                desires.add(new ReflectionDesire(new SetterInjectionPoint(m)));
             }
         }
 
         return Collections.unmodifiableList(desires);
     }
 
+    // FIXME: review the requirements for this
     public static enum DefaultSource {
         /**
          * Neither type nor qualifier will be examined for a default desire.
@@ -213,28 +210,24 @@ public class ReflectionDesire implements Desire {
             while (qualifier != null) {
                 DefaultDouble dfltDouble = qualifier.getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
-                    return new InstanceBindRule(dfltDouble.value(), Double.class, qualifier,
-                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    return new ReflectionDesire(Double.class, injectPoint, new InstanceSatisfaction(dfltDouble.value()), DefaultSource.TYPE);
                 }
                 DefaultInteger dfltInt = qualifier.getAnnotation(DefaultInteger.class);
                 if (dfltInt != null) {
-                    return new InstanceBindRule(dfltInt.value(), Integer.class, qualifier,
-                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    return new ReflectionDesire(Integer.class, injectPoint, new InstanceSatisfaction(dfltInt.value()), DefaultSource.TYPE);
                 }
                 DefaultBoolean dfltBool = qualifier.getAnnotation(DefaultBoolean.class);
                 if (dfltBool != null) {
-                    return new InstanceBindRule(dfltBool.value(), Boolean.class, qualifier,
-                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    return new ReflectionDesire(Boolean.class, injectPoint, new InstanceSatisfaction(dfltBool.value()), DefaultSource.TYPE);
                 }
                 DefaultString dfltStr = qualifier.getAnnotation(DefaultString.class);
                 if (dfltStr != null) {
-                    return new InstanceBindRule(dfltStr.value(), String.class, qualifier,
-                                                BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                    return new ReflectionDesire(String.class, injectPoint, new InstanceSatisfaction(dfltStr.value()), DefaultSource.TYPE);
                 }
                 DefaultImplementation impl = qualifier.getAnnotation(DefaultImplementation.class);
                 if (impl != null) {
-                    return new ClassBindRule(impl.value(), getDesiredType(), qualifier,
-                                             BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
+                    // let the constructor create any satisfaction
+                    return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);
                 }
                 
                 // there was no default binding on the qualifier, 
@@ -249,16 +242,21 @@ public class ReflectionDesire implements Desire {
         if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
             DefaultProvider provided = getDesiredType().getAnnotation(DefaultProvider.class);
             if (provided != null) {
-                return new ProviderClassBindRule(provided.value(), getDesiredType(), qualifier,
-                                                 BindRule.SECOND_TIER_GENERATED_BIND_RULE).apply(this);
+                return new ReflectionDesire(Types.getProvidedType(provided.value()), injectPoint, 
+                                            new ProviderClassSatisfaction(provided.value()), DefaultSource.TYPE);
             }
             DefaultImplementation impl = getDesiredType().getAnnotation(DefaultImplementation.class);
             if (impl != null) {
-                return new ClassBindRule(impl.value(), getDesiredType(), qualifier,
-                                         BindRule.SECOND_TIER_GENERATED_BIND_RULE, false).apply(this);
+                // let the constructor create any satisfaction
+                return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);
             }
         }
 
+        // Last fall back is binding to null
+        if (injectPoint.isNullable()) {
+            return new ReflectionDesire(desiredType, injectPoint, new NullSatisfaction(desiredType), dfltSource);
+        }
+        
         // There are no annotations on the {@link Qualifier} or the type that indicate a
         // default binding or value, or the defaults have been disabled,
         // so we return null

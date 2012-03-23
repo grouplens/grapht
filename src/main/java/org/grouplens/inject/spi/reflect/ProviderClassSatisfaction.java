@@ -18,16 +18,16 @@
  */
 package org.grouplens.inject.spi.reflect;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.Desire;
+import org.grouplens.inject.util.Types;
 
 import com.google.common.base.Function;
-
-import org.grouplens.inject.util.Types;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -65,6 +65,17 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
      */
     public Class<? extends Provider<?>> getProviderType() {
         return providerType;
+    }
+    
+    @Override
+    public boolean canProduceNull() {
+        try {
+            Method get = providerType.getMethod("get");
+            return Types.hasNullableAnnotation(get.getAnnotations());
+        } catch (Exception e) {
+            // shouldn't happen, we know get() exists on a provider
+            throw new RuntimeException(e);
+        }
     }
     
     @Override

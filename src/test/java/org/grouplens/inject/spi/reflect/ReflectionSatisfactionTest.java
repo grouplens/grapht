@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.inject.spi.ContextMatcher;
@@ -67,6 +68,18 @@ public class ReflectionSatisfactionTest {
             detected.add(((ReflectionDesire) d).getInjectionPoint());
         }
         return detected;
+    }
+    
+    @Test
+    public void testCanProduceNull() throws Exception {
+        Assert.assertTrue(new NullSatisfaction(A.class).canProduceNull());
+        Assert.assertTrue(new ProviderClassSatisfaction(PB.class).canProduceNull());
+        Assert.assertTrue(new ProviderInstanceSatisfaction(new PB()).canProduceNull());
+        
+        Assert.assertFalse(new ClassSatisfaction(A.class).canProduceNull());
+        Assert.assertFalse(new InstanceSatisfaction(new A()).canProduceNull());
+        Assert.assertFalse(new ProviderClassSatisfaction(PA.class).canProduceNull());
+        Assert.assertFalse(new ProviderInstanceSatisfaction(new PA()).canProduceNull());
     }
     
     @Test
@@ -177,6 +190,103 @@ public class ReflectionSatisfactionTest {
         Assert.assertEquals(cm3, cms.get(2));
     }
     
+    @Test
+    public void testClassSatisfactionEquals() throws Exception {
+        // two variations of the arguments
+        ClassSatisfaction s1 = new ClassSatisfaction(A.class);
+        ClassSatisfaction s2 = new ClassSatisfaction(B.class);
+        
+        Assert.assertEquals(s1, new ClassSatisfaction(A.class));
+        Assert.assertEquals(s2, new ClassSatisfaction(B.class));
+        Assert.assertEquals(s1, s1);
+        Assert.assertEquals(s2, s2);
+        
+        Assert.assertFalse(s1.equals(s2));
+        Assert.assertFalse(s2.equals(s1));
+        Assert.assertFalse(s1.equals(new Object()));
+        
+    }
+    
+    @Test
+    public void testNullSatisfactionEquals() throws Exception {
+        // two variations of the arguments
+        NullSatisfaction s1 = new NullSatisfaction(A.class);
+        NullSatisfaction s2 = new NullSatisfaction(B.class);
+        
+        Assert.assertEquals(s1, new NullSatisfaction(A.class));
+        Assert.assertEquals(s2, new NullSatisfaction(B.class));
+        Assert.assertEquals(s1, s1);
+        Assert.assertEquals(s2, s2);
+        
+        Assert.assertFalse(s1.equals(s2));
+        Assert.assertFalse(s2.equals(s1));
+        Assert.assertFalse(s1.equals(new Object()));
+    }
+    
+    @Test
+    public void testInstanceSEquals() throws Exception {
+        // three variations of the arguments
+        A a1 = new A();
+        A a2 = new A();
+        B b1 = new B();
+        
+        InstanceSatisfaction s1 = new InstanceSatisfaction(a1);
+        InstanceSatisfaction s2 = new InstanceSatisfaction(a2);
+        InstanceSatisfaction s3 = new InstanceSatisfaction(b1);
+        
+        Assert.assertEquals(s1, new InstanceSatisfaction(a1));
+        Assert.assertEquals(s2, new InstanceSatisfaction(a2));
+        Assert.assertEquals(s3, new InstanceSatisfaction(b1));
+        Assert.assertEquals(s1, s1);
+        Assert.assertEquals(s2, s2);
+        Assert.assertEquals(s3, s3);
+        
+        Assert.assertFalse(s1.equals(s2));
+        Assert.assertFalse(s2.equals(s3));
+        Assert.assertFalse(s3.equals(s1));
+        Assert.assertFalse(s1.equals(new Object()));
+    }
+    
+    @Test
+    public void testProviderClassSatisfactionEquals() throws Exception {
+        // two variations of the arguments
+        ProviderClassSatisfaction s1 = new ProviderClassSatisfaction(PA.class);
+        ProviderClassSatisfaction s2 = new ProviderClassSatisfaction(PB.class);
+        
+        Assert.assertEquals(s1, new ProviderClassSatisfaction(PA.class));
+        Assert.assertEquals(s2, new ProviderClassSatisfaction(PB.class));
+        Assert.assertEquals(s1, s1);
+        Assert.assertEquals(s2, s2);
+        
+        Assert.assertFalse(s1.equals(s2));
+        Assert.assertFalse(s2.equals(s1));
+        Assert.assertFalse(s1.equals(new Object()));
+    }
+    
+    @Test
+    public void testProviderInstanceSatisfactionEquals() throws Exception {
+     // three variations of the arguments
+        PA a1 = new PA();
+        PA a2 = new PA();
+        PB b1 = new PB();
+        
+        ProviderInstanceSatisfaction s1 = new ProviderInstanceSatisfaction(a1);
+        ProviderInstanceSatisfaction s2 = new ProviderInstanceSatisfaction(a2);
+        ProviderInstanceSatisfaction s3 = new ProviderInstanceSatisfaction(b1);
+        
+        Assert.assertEquals(s1, new ProviderInstanceSatisfaction(a1));
+        Assert.assertEquals(s2, new ProviderInstanceSatisfaction(a2));
+        Assert.assertEquals(s3, new ProviderInstanceSatisfaction(b1));
+        Assert.assertEquals(s1, s1);
+        Assert.assertEquals(s2, s2);
+        Assert.assertEquals(s3, s3);
+        
+        Assert.assertFalse(s1.equals(s2));
+        Assert.assertFalse(s2.equals(s3));
+        Assert.assertFalse(s3.equals(s1));
+        Assert.assertFalse(s1.equals(new Object()));
+    }
+    
     private static class InstanceProvider<T> implements Provider<T> {
         private T instance;
         
@@ -187,6 +297,28 @@ public class ReflectionSatisfactionTest {
         @Override
         public T get() {
             return instance;
+        }
+    }
+    
+    public static class A { }
+    
+    public static class B extends A { }
+    
+    public static abstract class C { }
+    
+    public static class D extends C { }
+    
+    public static class PA implements Provider<A> {
+        @Override
+        public A get() {
+            return new B();
+        }
+    }
+    
+    public static class PB implements Provider<B> {
+        @Override
+        public @Nullable B get() {
+            return null;
         }
     }
 }

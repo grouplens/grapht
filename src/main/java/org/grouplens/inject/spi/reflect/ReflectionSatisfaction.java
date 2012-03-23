@@ -32,6 +32,13 @@ import org.grouplens.inject.util.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public abstract class ReflectionSatisfaction implements Satisfaction {
+    /**
+     * @return Return whether or not this satisfaction can produce null values.
+     */
+    public boolean canProduceNull() {
+        return false;
+    }
+    
     @Override
     public Comparator<ContextMatcher> contextComparator(Qualifier qualifier) {
         final AnnotationQualifier r = (AnnotationQualifier) qualifier;

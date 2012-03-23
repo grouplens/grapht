@@ -20,105 +20,59 @@ package org.grouplens.inject.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Provider;
-
+import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.reflect.types.InterfaceA;
 import org.grouplens.inject.spi.reflect.types.ProviderA;
 import org.grouplens.inject.spi.reflect.types.RoleA;
 import org.grouplens.inject.spi.reflect.types.RoleB;
 import org.grouplens.inject.spi.reflect.types.RoleD;
+import org.grouplens.inject.spi.reflect.types.RoleE;
 import org.grouplens.inject.spi.reflect.types.TypeA;
+import org.grouplens.inject.spi.reflect.types.TypeB;
+import org.grouplens.inject.spi.reflect.types.TypeC;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class ReflectionBindRuleTest {
+    private ReflectionInjectSPI spi;
+    
+    @Before
+    public void setup() {
+        spi = new ReflectionInjectSPI();
+    }
+    
     @Test
     public void testTerminatesChain() {
-        Assert.assertTrue(new InstanceBindRule(new Object(), Object.class, null, 0).terminatesChain());
-        Assert.assertTrue(new ProviderInstanceBindRule(new ProviderA(), InterfaceA.class, null, 0).terminatesChain());
-        Assert.assertTrue(new ProviderClassBindRule(ProviderA.class, InterfaceA.class, null, 0).terminatesChain());
-        
-        Assert.assertFalse(new ClassBindRule(TypeA.class, InterfaceA.class, null, 0, false).terminatesChain());
-        Assert.assertTrue(new ClassBindRule(TypeA.class, InterfaceA.class, null, 0, true).terminatesChain());
+        Assert.assertTrue(spi.bindInstance(null, Object.class, new Object(), 0).terminatesChain());
+        Assert.assertTrue(spi.bindProvider(null, InterfaceA.class, new ProviderA(), 0).terminatesChain());
+        Assert.assertTrue(spi.bindProvider(null, InterfaceA.class, ProviderA.class, 0).terminatesChain());
+
+        Assert.assertTrue(spi.bindType(null, InterfaceA.class, TypeA.class, 0, true).terminatesChain());
+        Assert.assertFalse(spi.bindType(null, InterfaceA.class, TypeA.class, 0, false).terminatesChain());
     }
     
     @Test
-    public void testClassBindRuleEquals() throws Exception {
-        // four variations of the arguments
-        ClassBindRule rule1 = new ClassBindRule(A.class, A.class, null, 0, false);
-        ClassBindRule rule2 = new ClassBindRule(B.class, A.class, null, 0, false);
-        ClassBindRule rule3 = new ClassBindRule(A.class, A.class, new AnnotationQualifier(RoleA.class), 0, false);
-        ClassBindRule rule4 = new ClassBindRule(A.class, A.class, null, 1, false);
+    public void testEquals() {
+        // test various permutations of bind rule configurations
+        TypeA instance = new TypeA();
         
-        Assert.assertEquals(rule1, new ClassBindRule(A.class, A.class, null, 0, false));
-        Assert.assertEquals(rule2, new ClassBindRule(B.class, A.class, null, 0, false));
-        Assert.assertEquals(rule3, new ClassBindRule(A.class, A.class, new AnnotationQualifier(RoleA.class), 0, false));
-        Assert.assertEquals(rule4, new ClassBindRule(A.class, A.class, null, 1, false));
+        ReflectionBindRule b1 = new ReflectionBindRule(TypeA.class, TypeA.class, null, 0, false);
+        ReflectionBindRule b2 = new ReflectionBindRule(TypeA.class, new InstanceSatisfaction(instance), null, 0, false);
+        ReflectionBindRule b3 = new ReflectionBindRule(TypeA.class, TypeA.class, new AnnotationQualifier(RoleA.class), 0, false);
         
-        Assert.assertFalse(rule1.equals(rule2));
-        Assert.assertFalse(rule2.equals(rule3));
-        Assert.assertFalse(rule3.equals(rule4));
-        Assert.assertFalse(rule1.equals(rule4));
-    }
-    
-    @Test
-    public void testInstanceBindRuleEquals() throws Exception {
-        // four variations of the arguments
-        A i1 = new A();
-        A i2 = new A();
+        Assert.assertEquals(b1, new ReflectionBindRule(TypeA.class, TypeA.class, null, 0, false));
+        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeB.class, TypeA.class, null, 0, false)));
+        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeB.class, null, 0, false)));
+        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeA.class, null, 1, false)));
+        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeA.class, null, 0, true)));
         
-        InstanceBindRule rule1 = new InstanceBindRule(i1, A.class, null, 0);
-        InstanceBindRule rule2 = new InstanceBindRule(i1, A.class, null, 1);
-        InstanceBindRule rule3 = new InstanceBindRule(i2, A.class, new AnnotationQualifier(RoleA.class), 0);
-        InstanceBindRule rule4 = new InstanceBindRule(i2, A.class, null, 1);
+        Assert.assertEquals(b2, new ReflectionBindRule(TypeA.class, new InstanceSatisfaction(instance), null, 0, false));
+        Assert.assertFalse(b2.equals(new ReflectionBindRule(TypeA.class, new ProviderClassSatisfaction(ProviderA.class), null, 0, false)));
         
-        Assert.assertEquals(rule1, new InstanceBindRule(i1, A.class, null, 0));
-        Assert.assertEquals(rule2, new InstanceBindRule(i1, A.class, null, 1));
-        Assert.assertEquals(rule3, new InstanceBindRule(i2, A.class, new AnnotationQualifier(RoleA.class), 0));
-        Assert.assertEquals(rule4, new InstanceBindRule(i2, A.class, null, 1));
-        
-        Assert.assertFalse(rule1.equals(new InstanceBindRule(i2, A.class, null, 0)));
-        
-        Assert.assertFalse(rule1.equals(rule2));
-        Assert.assertFalse(rule2.equals(rule3));
-        Assert.assertFalse(rule3.equals(rule4));
-        Assert.assertFalse(rule1.equals(rule4));
-    }
-    
-    @Test
-    public void testProviderBindRuleEquals() throws Exception {
-        // four variations of the arguments
-        ProviderClassBindRule rule1 = new ProviderClassBindRule(PA.class, A.class, null, 0);
-        ProviderClassBindRule rule2 = new ProviderClassBindRule(PA.class, A.class, null, 1);
-        ProviderClassBindRule rule3 = new ProviderClassBindRule(PA.class, A.class, new AnnotationQualifier(RoleA.class), 0);
-        
-        Assert.assertEquals(rule1, new ProviderClassBindRule(PA.class, A.class, null, 0));
-        Assert.assertEquals(rule2, new ProviderClassBindRule(PA.class, A.class, null, 1));
-        Assert.assertEquals(rule3, new ProviderClassBindRule(PA.class, A.class, new AnnotationQualifier(RoleA.class), 0));
-        
-        Assert.assertFalse(rule1.equals(rule2));
-        Assert.assertFalse(rule2.equals(rule3));
-        Assert.assertFalse(rule1.equals(rule3));
-    }
-    
-    @Test
-    public void testProviderInstanceBindRuleEquals() throws Exception {
-        // four variations of the arguments
-        PA p1 = new PA();
-        PA p2 = new PA();
-        
-        ProviderInstanceBindRule rule1 = new ProviderInstanceBindRule(p1, A.class, null, 0);
-        ProviderInstanceBindRule rule2 = new ProviderInstanceBindRule(p1, A.class, null, 1);
-        ProviderInstanceBindRule rule3 = new ProviderInstanceBindRule(p2, A.class, new AnnotationQualifier(RoleA.class), 0);
-        
-        Assert.assertEquals(rule1, new ProviderInstanceBindRule(p1, A.class, null, 0));
-        Assert.assertEquals(rule2, new ProviderInstanceBindRule(p1, A.class, null, 1));
-        Assert.assertEquals(rule3, new ProviderInstanceBindRule(p2, A.class, new AnnotationQualifier(RoleA.class), 0));
-        
-        Assert.assertFalse(rule1.equals(rule2));
-        Assert.assertFalse(rule2.equals(rule3));
-        Assert.assertFalse(rule1.equals(rule3));
+        Assert.assertEquals(b3, new ReflectionBindRule(TypeA.class, TypeA.class, new AnnotationQualifier(RoleA.class), 0, false));
+        Assert.assertFalse(b3.equals(new ReflectionBindRule(TypeA.class, TypeA.class, new AnnotationQualifier(RoleE.class), 0, false)));
     }
     
     @Test
@@ -130,77 +84,104 @@ public class ReflectionBindRuleTest {
     
     @Test
     public void testExactClassNoRoleMatch() throws Exception {
-        doMatchTest(A.class, null, A.class, null, true);
+        doMatchTest(TypeA.class, null, TypeA.class, null, true);
     }
     
     @Test
     public void testExactClassExactRoleMatch() throws Exception {
-        doMatchTest(A.class, RoleA.class, A.class, RoleA.class, true);
+        doMatchTest(TypeA.class, RoleA.class, TypeA.class, RoleA.class, true);
     }
     
     @Test
     public void testExactClassSubRoleMatch() throws Exception {
-        doMatchTest(A.class, RoleB.class, A.class, RoleA.class, true);
+        doMatchTest(TypeA.class, RoleB.class, TypeA.class, RoleA.class, true);
     }
     
     @Test
     public void testSubclassNoMatch() throws Exception {
-        doMatchTest(B.class, null, A.class, null, false);
+        doMatchTest(TypeB.class, null, TypeA.class, null, false);
     }
     
     @Test
     public void testNoInheritenceNoMatch() throws Exception {
-        doMatchTest(C.class, null, A.class, null, false);
-        doMatchTest(A.class, null, B.class, null, false);
+        doMatchTest(TypeC.class, null, TypeA.class, null, false);
+        doMatchTest(TypeA.class, null, TypeB.class, null, false);
     }
     
     @Test
     public void testNoRoleInheritenceNoMatch() throws Exception {
-        doMatchTest(A.class, RoleA.class, A.class, RoleD.class, false);
+        doMatchTest(TypeA.class, RoleA.class, TypeA.class, RoleD.class, false);
     }
     
     @Test
     public void testSuperRoleNoMatch() throws Exception {
-        doMatchTest(A.class, RoleA.class, A.class, RoleB.class, false);
+        doMatchTest(TypeA.class, RoleA.class, TypeA.class, RoleB.class, false);
     }
     
-    private void doMatchTest(Class<?> desireType, Class<? extends Annotation> desireRole,
-                             Class<?> bindType, Class<? extends Annotation> bindRole,
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void doMatchTest(Class desireType, Class<? extends Annotation> desireRole,
+                             Class bindType, Class<? extends Annotation> bindRole,
                              boolean expected) throws Exception {
         AnnotationQualifier br = (bindRole == null ? null : new AnnotationQualifier(bindRole));
         AnnotationQualifier dr = (desireRole == null ? null : new AnnotationQualifier(desireRole));
-        ClassBindRule rule = new ClassBindRule(bindType, bindType, br, 0, false);
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(desireType, dr, false));
+        BindRule rule = spi.bindType(br, bindType, bindType, 0, false);
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(desireType, dr, false, false));
+        
+        Assert.assertEquals(expected, rule.matches(desire));
+    }
+    
+    @Test
+    public void testNullable() throws Exception {
+        doNullableTest(false, false, true);
+        doNullableTest(true, false, true);
+        doNullableTest(false, true, false);
+        doNullableTest(true, true, true);
+    }
+    
+    private void doNullableTest(boolean nullableDesire, boolean nullableSatisfaction, boolean expected) throws Exception {
+        InjectionPoint injectPoint = new MockInjectionPoint(TypeA.class, null, false, nullableDesire);
+        ReflectionSatisfaction satisfaction = (nullableSatisfaction ? new NullSatisfaction(TypeA.class) 
+                                                                    : new ClassSatisfaction(TypeA.class));
+        
+        ReflectionBindRule rule = new ReflectionBindRule(TypeA.class, satisfaction, null, 0, true);
+        ReflectionDesire desire = new ReflectionDesire(injectPoint);
         
         Assert.assertEquals(expected, rule.matches(desire));
     }
     
     @Test
     public void testSatisfiableClassBindRuleSuccess() throws Exception {
-        ClassBindRule rule = new ClassBindRule(B.class, A.class, null, 0, false);
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false));
+        BindRule rule = spi.bindType(null, TypeA.class, TypeB.class, 0, false);
+        
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, null, false, false));
+        
+        Assert.assertTrue(rule.matches(desire));
         
         ReflectionDesire applied = (ReflectionDesire) rule.apply(desire);
         Assert.assertNotNull(applied.getSatisfaction());
         Assert.assertEquals(ClassSatisfaction.class, applied.getSatisfaction().getClass());
-        Assert.assertEquals(B.class, ((ClassSatisfaction) applied.getSatisfaction()).getErasedType());
+        Assert.assertEquals(TypeB.class, ((ClassSatisfaction) applied.getSatisfaction()).getErasedType());
     }
     
     @Test
     public void testUnsatisfiableClassBindRuleSuccess() throws Exception {
-        ClassBindRule rule = new ClassBindRule(C.class, C.class, null, 0, false);
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(C.class, null, false));
+        BindRule rule = spi.bindType(null, InterfaceA.class, InterfaceA.class, 0, false);
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceA.class, null, false, false));
+        
+        Assert.assertTrue(rule.matches(desire));
         
         ReflectionDesire applied = (ReflectionDesire) rule.apply(desire);
         Assert.assertNull(applied.getSatisfaction());
-        Assert.assertEquals(C.class, applied.getDesiredType());
+        Assert.assertEquals(InterfaceA.class, applied.getDesiredType());
     }
     
     @Test
     public void testInstanceBindRuleSuccess() throws Exception {
-        C instance = new D();
-        InstanceBindRule rule = new InstanceBindRule(instance, C.class, null, 0);
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(C.class, null, false));
+        TypeA instance = new TypeB();
+        BindRule rule = spi.bindInstance(null, TypeA.class, instance, 0);
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, null, false, false));
+        
+        Assert.assertTrue(rule.matches(desire));
         
         Desire applied = rule.apply(desire);
         Assert.assertNotNull(applied.getSatisfaction());
@@ -209,40 +190,39 @@ public class ReflectionBindRuleTest {
     }
     
     @Test
-    public void testProviderClassBindRuleSuccess() throws Exception {
-        ProviderClassBindRule rule = new ProviderClassBindRule(PA.class, A.class, null, 0);
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false));
+    public void testNullInstanceBindRuleSuccess() throws Exception {
+        BindRule rule = spi.bindInstance(null, TypeA.class, null, 0);
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, null, false, true));
+        
+        Assert.assertTrue(rule.matches(desire));
         
         Desire applied = rule.apply(desire);
         Assert.assertNotNull(applied.getSatisfaction());
+        Assert.assertEquals(NullSatisfaction.class, applied.getSatisfaction().getClass());
+    }
+    
+    @Test
+    public void testProviderClassBindRuleSuccess() throws Exception {
+        BindRule rule = spi.bindProvider(null, TypeA.class, ProviderA.class, 0);
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, null, false, false));
+        
+        Assert.assertTrue(rule.matches(desire));
+
+        Desire applied = rule.apply(desire);
+        Assert.assertNotNull(applied.getSatisfaction());
         Assert.assertEquals(ProviderClassSatisfaction.class, applied.getSatisfaction().getClass());
-        Assert.assertEquals(PA.class, ((ProviderClassSatisfaction) applied.getSatisfaction()).getProviderType());
+        Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) applied.getSatisfaction()).getProviderType());
     }
     
     @Test
     public void testProviderInstanceBindRuleSuccess() throws Exception {
-        PA instance = new PA();
-        ProviderInstanceBindRule rule = new ProviderInstanceBindRule(instance, A.class, null, 0);
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false));
+        ProviderA instance = new ProviderA();
+        BindRule rule = spi.bindProvider(null, TypeA.class, instance, 0);
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, null, false, false));
         
         Desire applied = rule.apply(desire);
         Assert.assertNotNull(applied.getSatisfaction());
         Assert.assertEquals(ProviderInstanceSatisfaction.class, applied.getSatisfaction().getClass());
         Assert.assertEquals(instance, ((ProviderInstanceSatisfaction) applied.getSatisfaction()).getProvider());
-    }
-    
-    public static class A { }
-    
-    public static class B extends A { }
-    
-    public static abstract class C { }
-    
-    public static class D extends C { }
-    
-    public static class PA implements Provider<A> {
-        @Override
-        public A get() {
-            return new B();
-        }
     }
 }

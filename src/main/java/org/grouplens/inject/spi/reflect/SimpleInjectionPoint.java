@@ -17,6 +17,11 @@ class SimpleInjectionPoint implements InjectionPoint {
     }
     
     @Override
+    public boolean isNullable() {
+        return false;
+    }
+    
+    @Override
     public Class<?> getType() {
         return type;
     }

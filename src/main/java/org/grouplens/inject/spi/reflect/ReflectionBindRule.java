@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import org.grouplens.inject.spi.BindRule;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.Qualifier;
+import org.grouplens.inject.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.inject.util.Types;
 
 /**
@@ -35,31 +36,74 @@ import org.grouplens.inject.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public abstract class ReflectionBindRule implements BindRule {
+public class ReflectionBindRule implements BindRule {
+    private final ReflectionSatisfaction satisfaction;
+    private final boolean terminateChain;
+    
     private final Qualifier qualifier;
     private final Class<?> sourceType;
+    private final Class<?> implType;
     
     private final int weight;
 
     /**
      * Create a bind rule that matches a desire when the desired type equals
-     * <tt>sourceType</tt> and the desire's qualifier inherits from <tt>qualifier</tt>.
-     * <tt>weight</tt> is an integer value that specifies the priority between
-     * matching bind rules. Lower weights have a higher priority.
+     * <tt>sourceType</tt> and the desire's qualifier inherits from
+     * <tt>qualifier</tt>. <tt>weight</tt> is an integer value that specifies
+     * the priority between matching bind rules. Lower weights have a higher
+     * priority.
      * 
      * @param sourceType The source type this bind rule matches
+     * @param satisfaction The Satisfaction used by applied desires
      * @param qualifier The Qualifier the bind rule applies to
      * @param weight The weight or precedence of the rule
-     * @throws NullPointerException if sourceType is null
+     * @param terminateChain True if the bind rule is a terminating rule
+     * @throws NullPointerException if sourceType or satisfaction is null
      */
-    public ReflectionBindRule(Class<?> sourceType, @Nullable Qualifier qualifier, int weight) {
+    public ReflectionBindRule(Class<?> sourceType, ReflectionSatisfaction satisfaction,
+                              @Nullable Qualifier qualifier, int weight, boolean terminateChain) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
+        if (satisfaction == null) {
+            throw new NullPointerException("Satisfaction cannot be null");
+        }
         
         this.qualifier = qualifier;
+        this.satisfaction = satisfaction;
+        this.implType = satisfaction.getErasedType();
         this.sourceType = Types.box(sourceType);
         this.weight = weight;
+        this.terminateChain = terminateChain;
+    }
+    
+    /**
+     * As the other constructor, but this is used for type to type bindings
+     * where the implementation type is not yet instantiable, so there is no
+     * satisfaction for the applied desires.
+     * 
+     * @param sourceType The source type this bind rule matches
+     * @param implType The implementation type that is bound
+     * @param qualifier The Qualifier the bind rule applies to
+     * @param weight The weight or precedence of the rule
+     * @param terminateChain True if the bind rule is a terminating rule
+     * @throws NullPointerException if sourceType or implType is null
+     */
+    public ReflectionBindRule(Class<?> sourceType, Class<?> implType,
+                              @Nullable Qualifier qualifier, int weight, boolean terminateChain) {
+        if (sourceType == null) {
+            throw new NullPointerException("Source type cannot be null");
+        }
+        if (implType == null) {
+            throw new NullPointerException("Impl type cannot be null");
+        }
+        
+        this.qualifier = qualifier;
+        this.satisfaction = null;
+        this.implType = implType;
+        this.sourceType = Types.box(sourceType);
+        this.weight = weight;
+        this.terminateChain = terminateChain;
     }
 
     /**
@@ -84,9 +128,36 @@ public abstract class ReflectionBindRule implements BindRule {
         return sourceType;
     }
     
+    public ReflectionSatisfaction getSatisfaction() {
+        return satisfaction;
+    }
+    
+    @Override
+    public Desire apply(Desire desire) {
+        ReflectionDesire input = (ReflectionDesire) desire;
+        return new ReflectionDesire(implType, input.getInjectionPoint(), 
+                                    satisfaction, DefaultSource.TYPE);
+    }
+
+    @Override
+    public boolean terminatesChain() {
+        return terminateChain;
+    }
+    
     @Override
     public boolean matches(Desire desire) {
         ReflectionDesire rd = (ReflectionDesire) desire;
+        // check the nullability rules first
+        // 1. If desire is nullable, satisfaction can be produce null
+        // 2. If desire is not nullable, satisfaction cannot produce null
+        if (!rd.getInjectionPoint().isNullable()) {
+            if (satisfaction != null && satisfaction.canProduceNull()) {
+                // desire cannot be null but satisfaction might produce null,
+                // so we can't match this desire
+                return false;
+            }
+        }
+        
         // bind rules match type by equality
         if (rd.getDesiredType().equals(sourceType)) {
             // if the type is equal, then the qualifiers match if
@@ -104,11 +175,29 @@ public abstract class ReflectionBindRule implements BindRule {
             return false;
         }
         ReflectionBindRule r = (ReflectionBindRule) o;
-        return r.weight == weight && (r.qualifier == null ? qualifier == null : r.qualifier.equals(qualifier)) && r.sourceType.equals(sourceType);
+        return r.weight == weight && 
+               r.sourceType.equals(sourceType) &&
+               r.implType.equals(implType) &&
+               r.terminateChain == terminateChain &&
+               (r.qualifier == null ? qualifier == null : r.qualifier.equals(qualifier)) &&
+               (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction));
     }
     
     @Override
     public int hashCode() {
-        return sourceType.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ weight;
+        int result = 17;
+
+        result += 31 * result + weight;
+        result += 31 * result + (terminateChain ? 1 : 0);
+        result += 31 * result + sourceType.hashCode();
+        result += 31 * result + implType.hashCode();
+        if (satisfaction != null) {
+            result += 31 * result + satisfaction.hashCode(); 
+        }
+        if (qualifier != null) {
+            result += 31 * result + qualifier.hashCode();
+        }
+        
+        return result;
     }
 }

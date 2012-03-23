@@ -29,6 +29,7 @@ import org.grouplens.inject.spi.ContextMatcher;
 import org.grouplens.inject.spi.Desire;
 import org.grouplens.inject.spi.InjectSPI;
 import org.grouplens.inject.spi.Qualifier;
+import org.grouplens.inject.util.Types;
 
 /**
  * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It
@@ -42,29 +43,34 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public <T> BindRule bindType(@Nullable Qualifier qualifier, Class<T> source,
                                  Class<? extends T> impl, int weight, boolean terminate) {
-        return new ClassBindRule(impl, source, qualifier, weight, terminate);
+        if (Types.isInstantiable(Types.box(impl))) {
+            return new ReflectionBindRule(source, new ClassSatisfaction(impl), qualifier, weight, terminate);
+        } else {
+            return new ReflectionBindRule(source, impl, qualifier, weight, terminate);
+        }
     }
 
     @Override
     public <T> BindRule bindInstance(@Nullable Qualifier qualifier, Class<T> source, 
                                      T instance, int weight) {
-        // ignore terminate, since instance bindings always terminate
-        return new InstanceBindRule(instance, source, qualifier, weight);
+        if (instance != null) {
+            return new ReflectionBindRule(source, new InstanceSatisfaction(instance), qualifier, weight, true);
+        } else {
+            return new ReflectionBindRule(source, new NullSatisfaction(source), qualifier, weight, true);
+        }
     }
 
     @Override
     public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
                                      Class<? extends Provider<? extends T>> providerType,
                                      int weight) {
-        // ignore terminate, since provider bindings always terminate
-        return new ProviderClassBindRule(providerType, source, qualifier, weight);
+        return new ReflectionBindRule(source, new ProviderClassSatisfaction(providerType), qualifier, weight, true);
     }
 
     @Override
     public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
                                      Provider<? extends T> provider, int weight) {
-        // ignore terminate, since provider instance bindings always terminate
-        return new ProviderInstanceBindRule(provider, source, qualifier, weight);
+        return new ReflectionBindRule(source, new ProviderInstanceSatisfaction(provider), qualifier, weight, true);
     }
 
     @Override

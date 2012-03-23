@@ -19,6 +19,10 @@
 package org.grouplens.inject.util;
 
 import javax.inject.Provider;
+
+import org.grouplens.inject.annotation.Transient;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 
 /**
@@ -151,5 +155,40 @@ public final class Types {
      */
     public static boolean isInstantiable(Class<?> type) {
         return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
+    }
+    
+    /**
+     * Return true if the array of Annotations contains an Annotation with a
+     * simple name of 'Nullable'. It does not matter which actual Nullable
+     * annotation is present.
+     * 
+     * @param annotations Array of annotations, e.g. from a setter or
+     *            constructor
+     * @return True if there exists a Nullable annotation in the array
+     */
+    public static boolean hasNullableAnnotation(Annotation[] annotations) {
+        for (Annotation a: annotations) {
+            if (a.annotationType().getSimpleName().equals("Nullable")) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Return true if the array of Annotations contains a {@link Transient}
+     * annotation.
+     * 
+     * @param annotations Array of annotations, e.g. from a setter or
+     *            constructor
+     * @return True if there exists a Transient annotation in the array
+     */
+    public static boolean hasTransientAnnotation(Annotation[] annotations) {
+        for (Annotation a: annotations) {
+            if (a instanceof Transient) {
+                return true;
+            }
+        }
+        return false;
     }
 }

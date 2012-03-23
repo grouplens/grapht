@@ -43,12 +43,12 @@ import org.junit.Test;
 public class ReflectionDesireTest {
     @Test
     public void testInjectionPointConstructor() throws Exception {
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false));
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false, false));
         Assert.assertEquals(A.class, desire.getDesiredType());
         Assert.assertFalse(desire.isTransient());
         Assert.assertNull(desire.getQualifier());
         
-        desire = new ReflectionDesire(new MockInjectionPoint(A.class, new AnnotationQualifier(ParameterA.class), true));
+        desire = new ReflectionDesire(new MockInjectionPoint(A.class, new AnnotationQualifier(ParameterA.class), true, false));
         Assert.assertEquals(A.class, desire.getDesiredType());
         Assert.assertTrue(desire.isTransient());
         Assert.assertEquals(new AnnotationQualifier(ParameterA.class), desire.getQualifier());
@@ -57,7 +57,7 @@ public class ReflectionDesireTest {
     @Test
     public void testSubtypeInjectionPointSatisfactionConstructor() throws Exception {
         ClassSatisfaction satis = new ClassSatisfaction(B.class);
-        InjectionPoint inject = new MockInjectionPoint(A.class, null, false);
+        InjectionPoint inject = new MockInjectionPoint(A.class, null, false, false);
         ReflectionDesire desire = new ReflectionDesire(B.class, inject, satis, DefaultSource.QUALIFIER_AND_TYPE);
         
         Assert.assertEquals(B.class, desire.getDesiredType());
@@ -129,11 +129,11 @@ public class ReflectionDesireTest {
     
     @Test
     public void testBindRuleComparator() throws Exception {
-        BindRule b1 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationQualifier(RoleB.class), 0);
-        BindRule b2 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationQualifier(RoleA.class), 0);
-        BindRule b3 = new InstanceBindRule(new TypeB(), InterfaceB.class, new AnnotationQualifier(RoleA.class), 1);
+        BindRule b1 = new ReflectionBindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), new AnnotationQualifier(RoleB.class), 0, true);
+        BindRule b2 = new ReflectionBindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), new AnnotationQualifier(RoleA.class), 0, true);
+        BindRule b3 = new ReflectionBindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), new AnnotationQualifier(RoleA.class), 1, true);
         
-        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceB.class, new AnnotationQualifier(RoleB.class), false));
+        ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceB.class, new AnnotationQualifier(RoleB.class), false, false));
         Comparator<BindRule> cmp = desire.ruleComparator();
         
         List<BindRule> brs = new ArrayList<BindRule>();
@@ -159,7 +159,7 @@ public class ReflectionDesireTest {
             } else { // assume its an Integer
                 if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                     ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) (d.getInjectionPoint());
-                    if (((Integer) methodOrCtorParam).intValue() == cp.getConstructorParameter()) {
+                    if (((Integer) methodOrCtorParam).intValue() == cp.getParameterIndex()) {
                         return (ReflectionDesire) d.getDefaultDesire();
                     }
                 }

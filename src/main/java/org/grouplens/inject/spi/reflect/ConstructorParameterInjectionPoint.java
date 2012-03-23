@@ -18,10 +18,8 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
-import org.grouplens.inject.annotation.Transient;
 import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.util.Types;
 
@@ -73,22 +71,18 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
      * @return The parameter index of this injection point within the
      *         constructor's parameters
      */
-    public int getConstructorParameter() {
+    public int getParameterIndex() {
         return parameter;
     }
     
     @Override
+    public boolean isNullable() {
+        return Types.hasNullableAnnotation(ctor.getParameterAnnotations()[parameter]);
+    }
+    
+    @Override
     public boolean isTransient() {
-        // we only check parameter annotations for the constructor
-        // injection point
-        Annotation[] annots = ctor.getParameterAnnotations()[parameter];
-        for (int i = 0; i < annots.length; i++) {
-            if (annots[i] instanceof Transient) {
-                return true;
-            }
-        }
-        
-        return false;
+        return Types.hasTransientAnnotation(ctor.getParameterAnnotations()[parameter]);
     }
 
     @Override
@@ -112,7 +106,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     
     @Override
     public int hashCode() {
-        return ctor.hashCode() ^ parameter;
+        return ctor.hashCode() ^ (37 * 17 * parameter);
     }
     
     @Override

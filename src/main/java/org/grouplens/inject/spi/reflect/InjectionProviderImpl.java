@@ -19,7 +19,10 @@
 package org.grouplens.inject.spi.reflect;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Provider;
 
@@ -60,42 +63,48 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     public T get() {
         // find constructor and build up necessary constructor arguments
         Constructor<T> ctor = getConstructor();
-        Object[] args = new Object[ctor.getParameterTypes().length];
+        Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
         for (ReflectionDesire d: desires) {
             if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                 // this desire is a constructor argument so create it now
                 Provider<?> provider = providers.apply(d);
-                if (provider == null) {
-                    throw new RuntimeException("Unable to satisfy dependency");
-                }
-                
                 ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
-                args[cd.getConstructorParameter()] = provider.get();
+                ctorArgs[cd.getParameterIndex()] = provider.get();
             }
         }
         
         // create the instance that we are injecting
         T instance;
         try {
-            instance = ctor.newInstance(args);
+            instance = ctor.newInstance(ctorArgs);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create instance", e);
         }
         
         // complete injection by satisfying any setter method dependencies
+        Map<Method, Object[]> settersAndArguments = new HashMap<Method, Object[]>();
         for (ReflectionDesire d: desires) {
             if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
-                Provider<?> provider = providers.apply(d);
-                if (provider == null) {
-                    throw new RuntimeException("Unable to satisfy dependency");
+                SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
+                Object[] args = settersAndArguments.get(sd.getSetterMethod());
+                
+                if (args == null) {
+                    // first encounter of this method
+                    args = new Object[sd.getSetterMethod().getParameterTypes().length];
+                    settersAndArguments.put(sd.getSetterMethod(), args);
                 }
                 
-                try {
-                    SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
-                    sd.getSetterMethod().invoke(instance, provider.get());
-                } catch (Exception e) {
-                    throw new RuntimeException("Unable to inject setter dependency", e);
-                }
+                Provider<?> provider = providers.apply(d);
+                args[sd.getParameterIndex()] = provider.get();
+            }
+        }
+        
+        // invoke all completed setter methods
+        for (Method setter: settersAndArguments.keySet()) {
+            try {
+                setter.invoke(instance, settersAndArguments.get(setter));
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to inject setter dependency", e);
             }
         }
         

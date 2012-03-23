@@ -18,10 +18,8 @@
  */
 package org.grouplens.inject.spi.reflect;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import org.grouplens.inject.annotation.Transient;
 import org.grouplens.inject.spi.Qualifier;
 import org.grouplens.inject.util.Types;
 
@@ -32,6 +30,7 @@ import org.grouplens.inject.util.Types;
  */
 public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
+    private final int parameter;
     private final Qualifier qualifier;
 
     /**
@@ -39,17 +38,19 @@ public class SetterInjectionPoint implements InjectionPoint {
      * 
      * @param setter The setter method
      */
-    public SetterInjectionPoint(Method setter) {
+    public SetterInjectionPoint(Method setter, int parameter) {
         if (setter == null) {
             throw new NullPointerException("Setter method cannot null");
         }
-        if (setter.getParameterTypes().length != 1) {
-            throw new IllegalArgumentException("Setter must have a single parameter");
+        
+        int numArgs = setter.getParameterTypes().length;
+        if (parameter < 0 || parameter >= numArgs) {
+            throw new IndexOutOfBoundsException("Setter parameter is invalid");
         }
         
-        // FIXME: should we check the setter's method annotations as well?
-        this.qualifier = Qualifiers.getQualifier(setter.getParameterAnnotations()[0]);
+        this.qualifier = Qualifiers.getQualifier(setter.getParameterAnnotations()[parameter]);
         this.setter = setter;
+        this.parameter = parameter;
     }
     
     /**
@@ -59,25 +60,30 @@ public class SetterInjectionPoint implements InjectionPoint {
         return setter;
     }
     
+    /**
+     * @return The parameter index of this injection point within the
+     *         setter's parameters
+     */
+    public int getParameterIndex() {
+        return parameter;
+    }
+    
+    @Override
+    public boolean isNullable() {
+        // we'll check both setter and parameter annotations
+        return Types.hasNullableAnnotation(setter.getAnnotations()) || 
+               Types.hasNullableAnnotation(setter.getParameterAnnotations()[parameter]);
+    }
+    
     @Override
     public boolean isTransient() {
-        // we'll check both setter and parameter annotations
-        if (setter.getAnnotation(Transient.class) != null) {
-            return true;
-        }
-        
-        for (Annotation a: setter.getParameterAnnotations()[0]) {
-            if (a instanceof Transient) {
-                return true;
-            }
-        }
-        
-        return false;
+        return Types.hasTransientAnnotation(setter.getAnnotations()) ||
+               Types.hasTransientAnnotation(setter.getParameterAnnotations()[parameter]);
     }
 
     @Override
     public Class<?> getType() {
-        return Types.box(setter.getParameterTypes()[0]);
+        return Types.box(setter.getParameterTypes()[parameter]);
     }
 
     @Override
@@ -90,16 +96,17 @@ public class SetterInjectionPoint implements InjectionPoint {
         if (!(o instanceof SetterInjectionPoint)) {
             return false;
         }
-        return ((SetterInjectionPoint) o).setter.equals(setter);
+        SetterInjectionPoint p = (SetterInjectionPoint) o;
+        return p.setter.equals(setter) && p.parameter == parameter;
     }
     
     @Override
     public int hashCode() {
-        return setter.hashCode();
+        return setter.hashCode() ^ (37 * 17 * parameter);
     }
     
     @Override
     public String toString() {
-        return "Setter(method=" + setter + ")";
+        return "Setter(method=" + setter + "param=" + parameter + ")";
     }
 }

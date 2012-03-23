@@ -33,11 +33,13 @@ public class MockInjectionPoint implements InjectionPoint {
     private final Class<?> type;
     private final AnnotationQualifier qualifier;
     private final boolean trans;
+    private final boolean nullable;
     
-    public MockInjectionPoint(Class<?> type, @Nullable AnnotationQualifier qualifier, boolean trans) {
+    public MockInjectionPoint(Class<?> type, @Nullable AnnotationQualifier qualifier, boolean trans, boolean nullable) {
         this.type = Types.box(type);
         this.qualifier = qualifier;
         this.trans = trans;
+        this.nullable = nullable;
     }
     
     
@@ -57,16 +59,24 @@ public class MockInjectionPoint implements InjectionPoint {
     }
     
     @Override
+    public boolean isNullable() {
+        return nullable;
+    }
+    
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof MockInjectionPoint)) {
             return false;
         }
         MockInjectionPoint m = (MockInjectionPoint) o;
-        return m.type.equals(type) && (m.qualifier == null ? qualifier == null : m.qualifier.equals(qualifier)) && m.trans == trans;
+        return m.type.equals(type) && 
+               m.trans == trans &&
+               m.nullable == nullable && 
+               (m.qualifier == null ? qualifier == null : m.qualifier.equals(qualifier));
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ (trans ? 1 : 0);
+        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ (trans ? 1 : 0) ^ (nullable ? 2 : 4);
     }
 }
