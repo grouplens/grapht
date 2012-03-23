@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.Builder;
 import org.grouplens.inject.spi.BindRule;
@@ -57,7 +57,7 @@ import org.grouplens.inject.spi.reflect.ReflectionInjectSPI;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InjectorConfigurationBuilder implements Builder<InjectorConfiguration> {
+public class InjectorConfigurationBuilder implements Builder<InjectorConfiguration>, Cloneable {
     private final InjectSPI spi;
     private final Context root;
     
@@ -113,6 +113,19 @@ public class InjectorConfigurationBuilder implements Builder<InjectorConfigurati
         bindRules = new HashMap<ContextChain, Collection<BindRule>>();
         
         root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
+    }
+    
+    private InjectorConfigurationBuilder(InjectorConfigurationBuilder clone) {
+        spi = clone.spi;
+        generateRules = clone.generateRules;
+        defaultExcludes = new HashSet<Class<?>>(clone.defaultExcludes);
+        bindRules = clone.getBindRulesDeepClone();
+        root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
+    }
+    
+    @Override
+    public InjectorConfigurationBuilder clone() {
+        return new InjectorConfigurationBuilder(this);
     }
     
     /**
@@ -189,17 +202,24 @@ public class InjectorConfigurationBuilder implements Builder<InjectorConfigurati
         return Collections.unmodifiableSet(defaultExcludes);
     }
     
-    @Override
-    public InjectorConfiguration build() {
-        // make a deep copy of the bind rules, since the map's key set can change
-        // and the collection of bind rules can change
-        final Map<ContextChain, Collection<? extends BindRule>> rules = new HashMap<ContextChain, Collection<? extends BindRule>>();
+    private Map<ContextChain, Collection<BindRule>> getBindRulesDeepClone() {
+        Map<ContextChain, Collection<BindRule>> rules = new HashMap<ContextChain, Collection<BindRule>>();
         for (Entry<ContextChain, Collection<BindRule>> e: bindRules.entrySet()) {
             rules.put(e.getKey(), new ArrayList<BindRule>(e.getValue()));
         }
+        return rules;
+    }
+    
+    @Override
+    @SuppressWarnings("rawtypes")
+    public InjectorConfiguration build() {
+        // make a deep copy of the bind rules, since the map's key set can change
+        // and the collection of bind rules can change
+        final Map rules = getBindRulesDeepClone();
         
         return new InjectorConfiguration() {
             @Override
+            @SuppressWarnings("unchecked")
             public Map<ContextChain, Collection<? extends BindRule>> getBindRules() {
                 return Collections.unmodifiableMap(rules);
             }

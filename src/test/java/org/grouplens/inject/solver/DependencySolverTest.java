@@ -143,6 +143,49 @@ public class DependencySolverTest {
     }
     
     @Test
+    public void testParentReferencesGrandChildSuccess() throws Exception {
+        // Test that when a desire references a child that child's desire (2 desires total),
+        // the parent desire is resolved properly (note that a solution by walking
+        // up leaf nodes doesn't work in this case since it will encounter the parent
+        // and child at the same time).
+        Desire d1 = new MockDesire();
+        Desire d2 = new MockDesire();
+        
+        Satisfaction s3 = new MockSatisfaction(C.class); // leaf/grandchild
+        Satisfaction s2 = new MockSatisfaction(B.class, Arrays.asList(d2)); // child
+        Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1, d2));
+        
+        Desire b1 = new MockDesire(s2);
+        Desire b2 = new MockDesire(s3);
+        
+        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(new MockBindRule(d1, b1),
+                                   new MockBindRule(d2, b2)));
+        
+        Desire rootDesire = new MockDesire(s1);
+        DependencySolver r = createSolver(bindings);
+        r.resolve(rootDesire);
+        Node<Satisfaction> rootNode = getRoot(r, rootDesire);
+        
+        Assert.assertEquals(3 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
+        Assert.assertEquals(s1, rootNode.getLabel());
+        
+        Node<Satisfaction> n1 = getNode(r.getGraph(), s1);
+        Node<Satisfaction> n2 = getNode(r.getGraph(), s2);
+        Node<Satisfaction> n3 = getNode(r.getGraph(), s3);
+        
+        Assert.assertEquals(1, r.getGraph().getEdges(n1, n2).size());
+        Assert.assertEquals(d1, r.getGraph().getEdges(n1, n2).iterator().next().getLabel());
+        
+        Assert.assertEquals(1, r.getGraph().getEdges(n1, n3).size());
+        Assert.assertEquals(d2, r.getGraph().getEdges(n1, n3).iterator().next().getLabel());
+        
+        Assert.assertEquals(1, r.getGraph().getEdges(n2, n3).size());
+        Assert.assertEquals(d2, r.getGraph().getEdges(n2, n3).iterator().next().getLabel());
+    }
+    
+    @Test
     public void testContextRoleMatchSuccess() throws Exception {
         // Test that a qualifiers are properly remembered in the context
         // - note that this is different than having a qualifier-binding, that is

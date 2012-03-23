@@ -108,24 +108,87 @@ public class DependencySolver {
         tree.addNode(treeRoot);
         
         resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Qualifier>>());
-        merge(tree);
+        merge(tree, treeRoot);
     }
     
-    private void merge(Graph<Satisfaction, List<Desire>> fullTree) {
-        // accumulate all leaf nodes for the initial merge set
-        Set<Node<Satisfaction>> leafNodes = new HashSet<Node<Satisfaction>>();
-        for (Node<Satisfaction> n: fullTree.getNodes()) {
-            // no outgoing edges implies no dependencies so it's a leaf
-            if (fullTree.getOutgoingEdges(n).isEmpty()) {
-                leafNodes.add(n);
+    private void merge(Graph<Satisfaction, List<Desire>> fullTree, Node<Satisfaction> root) {
+        // Calculate every node's depth from the root
+        final Map<Node<Satisfaction>, Integer> depths = new HashMap<Node<Satisfaction>, Integer>();
+        computeDepths(root, 0, fullTree, depths);
+        
+        // Sort all node's so that deeper nodes are at the beginning of the list
+        List<Node<Satisfaction>> sorted = new ArrayList<Node<Satisfaction>>(fullTree.getNodes());
+        Collections.sort(sorted, new Comparator<Node<Satisfaction>>() {
+            @Override
+            public int compare(Node<Satisfaction> n1, Node<Satisfaction> n2) {
+                int d1 = depths.get(n1);
+                int d2 = depths.get(n2);
+                return d2 - d1;
+            }
+        });
+        
+        // Look up each node's dependencies in the merged graph, since we sorted
+        // by reverse depth we can guarantee that dependencies have already
+        // been merged
+        Map<Node<Satisfaction>, Node<Satisfaction>> mergedMap = new HashMap<Node<Satisfaction>, Node<Satisfaction>>();
+        for (Node<Satisfaction> toMerge: sorted) {
+            if (toMerge == root) {
+                // This is the synthetic root of the tree.
+                // We replace the root node of the tree with the root in the merged graph.
+                for (Edge<Satisfaction, List<Desire>> oldEdge: fullTree.getOutgoingEdges(root)) {
+                    Desire label = oldEdge.getLabel().get(0);
+                    Node<Satisfaction> newTail = mergedMap.get(oldEdge.getTail());
+                    assert newTail != null; // like below, it must have been merged previously
+                    
+                    // there can be at most one edge with this label in the merged
+                    // graph because this is at the root context, and there is no
+                    // way to cause their configurations to diverge
+                    if (graph.getOutgoingEdge(this.root, label) ==  null) {
+                        // this desire is not in the merged graph
+                        graph.addEdge(new Edge<Satisfaction, Desire>(this.root, newTail, label));
+                    }
+                }
+            } else {
+                // Get all previously seen dependency configurations for this satisfaction
+                Map<Set<Node<Satisfaction>>, Node<Satisfaction>> dependencyOptions = getDependencyOptions(toMerge.getLabel());
+                
+                // Accumulate the set of dependencies for this node, filtering
+                // them through the previous level map
+                Set<Node<Satisfaction>> dependencies = new HashSet<Node<Satisfaction>>();
+                for (Edge<Satisfaction, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
+                    // levelMap converts from the tree to the merged graph
+                    Node<Satisfaction> filtered = mergedMap.get(dep.getTail());
+                    assert filtered != null; // all dependencies should have been merged previously
+                    dependencies.add(filtered);
+                }
+                
+                Node<Satisfaction> newNode = dependencyOptions.get(dependencies);
+                if (newNode == null) {
+                    // this configuration for the satisfaction has not been seen before
+                    // - add it to merged graph, and connect to its dependencies
+                    newNode = new Node<Satisfaction>(toMerge.getLabel());
+                    graph.addNode(newNode);
+                    
+                    for (Edge<Satisfaction, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
+                        // add the edge with the new head and the previously merged tail
+                        // List<Desire> is downsized to the first Desire, too
+                        Node<Satisfaction> filtered = mergedMap.get(dep.getTail());
+                        graph.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getLabel().get(0)));
+                    }
+                }
+
+                // update merge map so future nodes use this node as a dependency
+                mergedMap.put(toMerge, newNode);
             }
         }
-        
-        // merge all nodes with equivalent configurations, 
-        // it is safe to pass null in for the levelMap because the first iteration
-        // is only leaf nodes (so they have no outgoing edges and will not need
-        // to query the level map).
-        deduplicate(leafNodes, null, fullTree);
+    }
+    
+    private void computeDepths(Node<Satisfaction> node, int depth, Graph<Satisfaction, List<Desire>> tree, Map<Node<Satisfaction>, Integer> depths) {
+        // Since this is a tree, we can assume that we haven't encountered this node before 
+        depths.put(node, depth);
+        for (Edge<Satisfaction, List<Desire>> out: tree.getOutgoingEdges(node)) {
+            computeDepths(out.getTail(), depth + 1, tree, depths);
+        }
     }
     
     private Map<Set<Node<Satisfaction>>, Node<Satisfaction>> getDependencyOptions(Satisfaction satisfaction) {
@@ -143,101 +206,6 @@ public class DependencySolver {
             }
         }
         return options;
-    }
-    
-    private void deduplicate(Set<Node<Satisfaction>> toMerge, Map<Node<Satisfaction>, Node<Satisfaction>> levelMap, 
-                              Graph<Satisfaction, List<Desire>> tree) {
-        // check the termination condition - toMerge contains a single node with
-        // a null satisfaction
-        if (toMerge.size() == 1) {
-            Node<Satisfaction> root = toMerge.iterator().next();
-            if (root.getLabel() == null) {
-                // we replace the root node of the tree with the root in the merged graph.
-                for (Edge<Satisfaction, List<Desire>> oldEdge: tree.getOutgoingEdges(root)) {
-                    Desire label = oldEdge.getLabel().get(0);
-                    Node<Satisfaction> newTail = levelMap.get(oldEdge.getTail());
-                    assert newTail != null; // like below, it must have been merged previously
-                    
-                    // there can be at most one edge with this label in the merged
-                    // graph because this is at the root context, and there is no
-                    // way to cause their configurations to diverge
-                    if (graph.getOutgoingEdge(this.root, label) ==  null) {
-                        // this desire is not in the merged graph
-                        graph.addEdge(new Edge<Satisfaction, Desire>(this.root, newTail, label));
-                    }
-                }
-                return;
-            } // else it wasn't actually the root so keep going below
-        } else {
-            // if we don't have exactly 1 node left, there should be > 1,
-            // otherwise the tree is in an inconsistent state
-            assert !toMerge.isEmpty();
-        }
-        
-        // map from nodes in toMerge to their potentially merged new nodes in the merged graph
-        //  - key nodes are in tree, value nodes are in merged graph
-        Map<Node<Satisfaction>, Node<Satisfaction>> currentLevelMap = new HashMap<Node<Satisfaction>, Node<Satisfaction>>();
-        
-        // accumulated set of all incoming edges to nodes in toMerge
-        //  - nodes are in tree graph
-        Set<Node<Satisfaction>> nextMerge = new HashSet<Node<Satisfaction>>();
-
-        // this is a map from satisfactions to a map of its possible dependency
-        // configurations to the new node in the merged graph
-        //  - all nodes are in the merged graph
-        Map<Satisfaction, Map<Set<Node<Satisfaction>>, Node<Satisfaction>>> mergeMap = new HashMap<Satisfaction, Map<Set<Node<Satisfaction>>,Node<Satisfaction>>>();
-        
-        for (Node<Satisfaction> oldNode: toMerge) {
-            // lookup map of all node's dependency possibilities
-            Map<Set<Node<Satisfaction>>, Node<Satisfaction>> depOptions = mergeMap.get(oldNode.getLabel());
-            if (depOptions == null) {
-                // get the dependency options based on the previously accumulated
-                // graph state (this is responsible for integrating the new graph
-                // into the old graph)
-                depOptions = getDependencyOptions(oldNode.getLabel());
-                mergeMap.put(oldNode.getLabel(), depOptions);
-            }
-            
-            // accumulate the set of dependencies for this node, filtering
-            // them through the previous level map
-            Set<Node<Satisfaction>> dependencies = new HashSet<Node<Satisfaction>>();
-            for (Edge<Satisfaction, List<Desire>> dep: tree.getOutgoingEdges(oldNode)) {
-                // levelMap converts from the tree to the merged graph
-                Node<Satisfaction> filtered = levelMap.get(dep.getTail());
-                assert filtered != null; // all dependencies should have been merged previously
-                dependencies.add(filtered);
-            }
-            
-            Node<Satisfaction> newNode = depOptions.get(dependencies);
-            if (newNode == null) {
-                // this configuration for the satisfaction has not been seen before
-                // - add it to merged graph, and connect to its dependencies
-                newNode = new Node<Satisfaction>(oldNode.getLabel());
-                graph.addNode(newNode);
-                
-                for (Edge<Satisfaction, List<Desire>> dep: tree.getOutgoingEdges(oldNode)) {
-                    // add the edge with the new head and the previously merged tail
-                    // List<Desire> is downsized to the first Desire, too
-                    Node<Satisfaction> filtered = levelMap.get(dep.getTail());
-                    graph.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getLabel().get(0)));
-                }
-                
-                // update merge map so subsequent appearances of this configuration reuse this node,
-                //  - since newNode is now in the merged graph, future calls to getDependencyOptions()
-                //    will be able to rebuild this key-value pair
-                depOptions.put(dependencies, newNode);
-            }
-            
-            // we have the merged node, record it in the level map for the next iteration,
-            // and accumulate all incoming nodes (which will have to be merged next)
-            currentLevelMap.put(oldNode, newNode);
-            for (Edge<Satisfaction, List<Desire>> parent: tree.getIncomingEdges(oldNode)) {
-                nextMerge.add(parent.getHead());
-            }
-        }
-        
-        // recurse to the next level in the dependency hierarchy
-        deduplicate(nextMerge, currentLevelMap, tree);
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
