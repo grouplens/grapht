@@ -1,5 +1,5 @@
 /*
- * LensKit, an open source recommender systems toolkit.
+ * Grapht, an open source dependency injector.
  * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
  * This program is free software; you can redistribute it and/or modify
