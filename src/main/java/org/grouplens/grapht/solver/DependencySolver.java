@@ -256,10 +256,18 @@ public class DependencySolver {
                 Collections.sort(validRules, ordering);
 
                 if (validRules.size() > 1) {
-                    // must check if the 2nd bind rule is equivalent in order to the first
-                    if (ordering.compare(validRules.get(0), validRules.get(1)) == 0) {
-                        // TODO REVIEW: return more information in the message?
-                        throw new ResolverException("Too many choices for desire: " + currentDesire);
+                    // must check if other rules are equal to the first
+                    List<BindRule> topRules = new ArrayList<BindRule>();
+                    topRules.add(validRules.get(0).getRight());
+                    for (int i = 1; i < validRules.size(); i++) {
+                        if (ordering.compare(validRules.get(0), validRules.get(i)) == 0) {
+                            topRules.add(validRules.get(i).getRight());
+                        }
+                    }
+                    
+                    if (topRules.size() > 1) {
+                        // additional rules match just as well as the first, so fail
+                        throw new ResolverException("Too many choices for desire: " + currentDesire + ", matched rules: " + topRules);
                     }
                 }
 
@@ -285,7 +293,8 @@ public class DependencySolver {
                         return Pair.of(currentDesire.getSatisfaction(), desireChain);
                     } else {
                         // no more rules and we can't make a node
-                        throw new ResolverException("Unable to satisfy desire: " + currentDesire + ", root desire: " + desire);
+                        Satisfaction last = context.get(context.size() - 1).getLeft();
+                        throw new ResolverException("Unable to satisfy desire: " + currentDesire + "(root: " + desire + ") for: " + last);
                     }
                 } else {
                     // continue with the default desire
