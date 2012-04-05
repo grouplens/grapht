@@ -25,10 +25,9 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.Function;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Types;
-
-import com.google.common.base.Function;
 
 /**
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the

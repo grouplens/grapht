@@ -16,33 +16,40 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
-
-public class MockProviderFunction implements Function<Desire, Provider<?>> {
-    private final Map<ReflectionDesire, Provider<?>> providers;
+public class Ordering<T> implements Comparator<T> {
+    private final List<Comparator<T>> comparators;
     
-    public MockProviderFunction() {
-        providers = new HashMap<ReflectionDesire, Provider<?>>();
+    private Ordering() {
+        comparators = new ArrayList<Comparator<T>>();
     }
     
-    public void add(ReflectionDesire desire, Provider<?> provider) {
-        providers.put(desire, provider);
+    public static <T> Ordering<T> from(Comparator<T> c) {
+        Ordering<T> o = new Ordering<T>();
+        o.comparators.add(c);
+        return o;
     }
     
-    public void add(InjectionPoint injectPoint, Provider<?> provider) {
-        providers.put(new ReflectionDesire(injectPoint), provider);
+    public Ordering<T> compound(Comparator<T> c) {
+        Ordering<T> no = new Ordering<T>();
+        no.comparators.addAll(comparators);
+        no.comparators.add(c);
+        return no;
     }
     
     @Override
-    public Provider<?> apply(Desire desire) {
-        return providers.get(desire);
+    public int compare(T o1, T o2) {
+        for (Comparator<T> c: comparators) {
+            int result = c.compare(o1, o2);
+            if (result != 0) {
+                return result;
+            }
+        }
+        return 0;
     }
 }

@@ -20,10 +20,7 @@ package org.grouplens.grapht.spi;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Qualifier;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;

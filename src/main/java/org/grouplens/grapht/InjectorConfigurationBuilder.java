@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.Builder;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -57,7 +56,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InjectorConfigurationBuilder implements Builder<InjectorConfiguration>, Cloneable {
+public class InjectorConfigurationBuilder implements Cloneable {
     private final InjectSPI spi;
     private final Context root;
     
@@ -210,7 +209,6 @@ public class InjectorConfigurationBuilder implements Builder<InjectorConfigurati
         return rules;
     }
     
-    @Override
     @SuppressWarnings("rawtypes")
     public InjectorConfiguration build() {
         // make a deep copy of the bind rules, since the map's key set can change

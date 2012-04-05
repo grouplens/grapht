@@ -20,16 +20,13 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.AnnotationQualifier;
-import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionContextMatcher;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleC;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
+import org.grouplens.grapht.util.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -20,7 +20,6 @@ package org.grouplens.grapht;
 
 import java.lang.annotation.Annotation;
 
-import org.apache.commons.lang3.builder.Builder;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
@@ -38,7 +37,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InjectorBuilder implements Context, Builder<Injector> {
+public class InjectorBuilder implements Context {
     private final InjectorConfigurationBuilder builder;
 
     /**
@@ -93,7 +92,6 @@ public class InjectorBuilder implements Context, Builder<Injector> {
         return this;
     }
 
-    @Override
     public Injector build() {
         return new DefaultInjector(builder.build());
     }

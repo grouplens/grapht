@@ -25,8 +25,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 
-
-import com.google.common.base.Function;
+import org.grouplens.grapht.util.Function;
 
 /**
  * A concrete type. It has a set of dependencies which must be satisfied in

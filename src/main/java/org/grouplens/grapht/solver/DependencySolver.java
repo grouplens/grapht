@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.InjectorConfiguration;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
@@ -39,8 +38,8 @@ import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
-
-import com.google.common.collect.Ordering;
+import org.grouplens.grapht.util.Ordering;
+import org.grouplens.grapht.util.Pair;
 
 /**
  * DependencySolver is a utility for resolving Desires into a dependency graph,

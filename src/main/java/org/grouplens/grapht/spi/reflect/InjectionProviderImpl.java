@@ -27,8 +27,7 @@ import java.util.Map;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
-
-import com.google.common.base.Function;
+import org.grouplens.grapht.util.Function;
 
 /**
  * InjectionProviderImpl is a Provider implementation capable of creating any

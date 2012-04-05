@@ -16,33 +16,34 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
-
-public class MockProviderFunction implements Function<Desire, Provider<?>> {
-    private final Map<ReflectionDesire, Provider<?>> providers;
+public class Pair<L, R> {
+    private final L left;
+    private final R right;
     
-    public MockProviderFunction() {
-        providers = new HashMap<ReflectionDesire, Provider<?>>();
+    public Pair(L left, R right) {
+        this.left = left;
+        this.right = right;
     }
     
-    public void add(ReflectionDesire desire, Provider<?> provider) {
-        providers.put(desire, provider);
+    public L getLeft() {
+        return left;
     }
     
-    public void add(InjectionPoint injectPoint, Provider<?> provider) {
-        providers.put(new ReflectionDesire(injectPoint), provider);
+    public L getKey() {
+        return left;
     }
     
-    @Override
-    public Provider<?> apply(Desire desire) {
-        return providers.get(desire);
+    public R getRight() {
+        return right;
+    }
+    
+    public R getValue() {
+        return right;
+    }
+    
+    public static <L, R> Pair<L, R> of(L left, R right) {
+        return new Pair<L, R>(left, right);
     }
 }

@@ -25,9 +25,8 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.Function;
 import org.grouplens.grapht.util.InstanceProvider;
-
-import com.google.common.base.Function;
 
 /**
  * Satisfaction implementation wrapping an instance. It has no dependencies, and

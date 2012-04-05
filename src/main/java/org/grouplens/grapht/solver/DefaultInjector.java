@@ -34,8 +34,7 @@ import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
-
-import com.google.common.base.Function;
+import org.grouplens.grapht.util.Function;
 
 /**
  * <p>

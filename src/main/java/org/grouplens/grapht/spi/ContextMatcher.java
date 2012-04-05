@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.util.Pair;
 
 /**
  * <p>

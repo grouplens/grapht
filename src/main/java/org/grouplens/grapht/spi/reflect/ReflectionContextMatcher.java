@@ -20,10 +20,10 @@ package org.grouplens.grapht.spi.reflect;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Pair;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
