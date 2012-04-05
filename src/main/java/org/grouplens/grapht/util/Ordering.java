@@ -22,6 +22,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Ordering is a utility Comparator implementation that creates compound
+ * orderings from multiple Comparators.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @param <T> The compared type
+ */
 public class Ordering<T> implements Comparator<T> {
     private final List<Comparator<T>> comparators;
     
@@ -29,13 +36,37 @@ public class Ordering<T> implements Comparator<T> {
         comparators = new ArrayList<Comparator<T>>();
     }
     
+    /**
+     * Create a new Ordering that wraps the given Comparator. The returned
+     * ordering will compare objects equivalently to <tt>c</tt>.
+     * 
+     * @param c The base comparator
+     * @return A new ordering wrapping the comparator
+     * @throws NullPointerException if c is null
+     */
     public static <T> Ordering<T> from(Comparator<T> c) {
+        if (c == null) {
+            throw new NullPointerException("Comparator cannot be null");
+        }
         Ordering<T> o = new Ordering<T>();
         o.comparators.add(c);
         return o;
     }
     
+    /**
+     * Create a new Ordering that is the compound of this Ordering and the given
+     * Comparator. The new Ordering will compare objects equivalently to this
+     * Ordering, except that it uses <tt>c</tt> to determine equality in the
+     * case where this Ordering returns 0.
+     * 
+     * @param c The Comparator to compound with
+     * @return A new compounded ordering
+     * @throws NullPointerException if c is null
+     */
     public Ordering<T> compound(Comparator<T> c) {
+        if (c == null) {
+            throw new NullPointerException("Comparator cannot be null");
+        }
         Ordering<T> no = new Ordering<T>();
         no.comparators.addAll(comparators);
         no.comparators.add(c);

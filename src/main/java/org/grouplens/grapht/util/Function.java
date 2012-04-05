@@ -18,6 +18,20 @@
  */
 package org.grouplens.grapht.util;
 
+/**
+ * Function represents a mathematical function that operates on an input domain
+ * and returns results in an output range. These can be of separate types.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @param <I> The type of the input
+ * @param <O> The type of the output
+ */
 public interface Function<I, O> {
+    /**
+     * Apply this function to the input and return the computed output.
+     * 
+     * @param input The input arguments to the function
+     * @return The output of running the function
+     */
     O apply(I input);
 }
