@@ -72,18 +72,6 @@ public class NamedQualifier implements Qualifier {
     public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
         return false;
     }
-
-    @Override
-    public Qualifier getParent() {
-        // NamedQualifier has no parent
-        return null;
-    }
-
-    @Override
-    public boolean inheritsDefault() {
-        // NamedQualifier has no inheritence, not even the default
-        return false;
-    }
     
     @Override
     public boolean equals(Object o) {

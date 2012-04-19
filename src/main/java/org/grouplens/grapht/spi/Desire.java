@@ -26,19 +26,14 @@ import java.util.Comparator;
  * iteratively resolved and narrowed until they finally correspond to
  * {@link Satisfaction}s.
  *
- * <p>
- * There are two types of desires: parameter desires and component desires. They
- * are distinguished by the {@link #isParameter()} method. Parameter desires are
- * for primitive or string parameters; component desires are for objects and
- * have more complex resolution rules.
- *
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
  */
 public interface Desire {
     /**
-     * Return the {@link Qualifier} that was declared with this desire. A desire without a
-     * {@link Qualifier} should return null. No {@link Qualifier} can also be considered the default {@link Qualifier}.
+     * Return the {@link Qualifier} that was declared with this desire. A desire
+     * without a {@link Qualifier} should return null. No {@link Qualifier} can
+     * also be considered the default {@link Qualifier}.
      * 
      * @return The {@link Qualifier} applied to this desire
      */

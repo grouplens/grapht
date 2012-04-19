@@ -21,7 +21,6 @@ package org.grouplens.grapht.spi;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
-import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
@@ -30,9 +29,9 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  * InjectSPI is a service provider interface for accessing and creating the
  * types needed to use graph-based injections. InjectSPIs are responsible for
  * creating concrete instances of {@link BindRule BindRules},
- * {@link ContextMatcher ContextMatchers}, and {@link Desire Desires}. These
- * created instances will also likely create SPI-specific implementations of
- * {@link Satisfaction} and {@link Qualifier}.
+ * {@link ContextMatcher ContextMatchers}, {@link Desire Desires},
+ * {@link Qualifier}. These created instances will also likely create
+ * SPI-specific implementations of {@link Satisfaction}.
  * <p>
  * The {@link ReflectionInjectSPI} provides a complete implementation of the SPI
  * using reflection to analyze types.
@@ -48,7 +47,7 @@ public interface InjectSPI {
      * details.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional qualifier any injection point must match
+     * @param qualifier The qualifier matcher
      * @param source The type any injection point must match
      * @param impl The implementation to satisfy the source
      * @param weight The sorting weight of the bind rule
@@ -56,7 +55,7 @@ public interface InjectSPI {
      *            this is matched
      * @return The bind rule binding qualifier:source to impl
      */
-    <T> BindRule bindType(@Nullable Qualifier qualifier, Class<T> source,
+    <T> BindRule bindType(QualifierMatcher qualifier, Class<T> source,
                           Class<? extends T> impl, int weight, boolean terminate);
 
     /**
@@ -66,13 +65,13 @@ public interface InjectSPI {
      * from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional Qualifier any injection point must match
+     * @param qualifier The qualifier matcher
      * @param source The type any injection point must match
      * @param instance The instance used to satisfy injection points
      * @param weight The sorting weight for the bind rule
      * @return The bind rule binding qualifier:source to instance
      */
-    <T> BindRule bindInstance(@Nullable Qualifier qualifier, Class<T> source,
+    <T> BindRule bindInstance(QualifierMatcher qualifier, Class<T> source,
                               T instance, int weight);
 
     /**
@@ -82,15 +81,14 @@ public interface InjectSPI {
      * return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional qualifier any injection point must
-     *            match
+     * @param qualifier The qualifier matcher
      * @param source The type any injection point must match
      * @param providerType The provider type that can create instances used to
      *            satisfy injection points
      * @param weight The sorting weight for the bind rule
      * @return The bind rule binding qualifier:source to providerType
      */
-    <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source, 
+    <T> BindRule bindProvider(QualifierMatcher qualifier, Class<T> source, 
                               Class<? extends Provider<? extends T>> providerType, int weight);
 
     /**
@@ -100,33 +98,31 @@ public interface InjectSPI {
      * return false from {@link BindRule#terminatesChain()}.
      * 
      * @param <T> The matched type
-     * @param qualifier An optional qualifier any injection point must
-     *            match
+     * @param qualifier The qualifier matcher
      * @param source The type any injection point must match
      * @param provider The provider that can create instances used to satisfy
      *            injection points
      * @param weight The sorting weight for the bind rule
      * @return The bind rule binding qualifier:source to provider
      */
-    <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source, 
+    <T> BindRule bindProvider(QualifierMatcher qualifier, Class<T> source, 
                               Provider<? extends T> provider, int weight);
 
     /**
      * Create a ContextMatcher that matches the given context formed by a
-     * Qualifier and a type. If the qualifier is null, it is
-     * the default qualifier. The created ContextMatcher must be
+     * Qualifier and a type. The created ContextMatcher must be
      * compatible with the BindRules, Desires, and Satisfactions created by this
      * InjectSPI.
      * 
-     * @param qualifier The optional qualifier
+     * @param qualifier The qualifier matcher
      * @param type The type of the context
      * @return A ContextMatcher representing the qualifier and type
      */
-    ContextMatcher context(@Nullable Qualifier qualifier, Class<?> type);
+    ContextMatcher context(QualifierMatcher qualifier, Class<?> type);
 
     /**
      * Create a Desire that wraps the Qualifier and type. If the qualifier is
-     * null, the default qualifier is used. The created Desire must be
+     * null, the no qualifier is used. The created Desire must be
      * compatible with the BindRules, ContextMatchers, and Satisfactions created
      * by this InjectSPI.
      * 
@@ -138,23 +134,39 @@ public interface InjectSPI {
     Desire desire(@Nullable Qualifier qualifier, Class<?> type, boolean nullable);
     
     /**
-     * Create a Qualifier that wraps the given annotation. This annotation must
-     * be annotated with {@link javax.inject.Qualifier}. This should return null
-     * if the annotation is null.
+     * Create a QualifierMatcher that matches the given annotation type. This annotation must
+     * be annotated with {@link javax.inject.Qualifier}.
      * 
-     * @param qualifier The qualifier annotation
-     * @return A Qualifier wrapping the annotation
+     * @param qualifier The qualifier annotation type
+     * @return A QualifierMatcher matching the qualifier type
      */
-    Qualifier qualifier(@Nullable Class<? extends Annotation> qualifier);
+    QualifierMatcher match(Class<? extends Annotation> qualifier);
     
     /**
-     * Create a name-based qualifier. This can be used to support the
-     * {@link Named} annotation because {@link #qualifier(Class)} is not
-     * sufficient to capture the String values associated with the injection
-     * points. This should return null if the name is null.
-     * 
-     * @param name The name to match
-     * @return A Qualifier wrapping the string name
+     * Create a QualifierMatcher that matches annotation instances equal to 
+     * the given instance.
+     * @param annot The annotation instance to equal to
+     * @return A QualifierMatcher matching the given annotation instance
      */
-    Qualifier qualifier(@Nullable String name);
+    QualifierMatcher match(Annotation annot);
+    
+    /**
+     * @return A QualifierMatcher that matches any Qualifier, including the null
+     *         qualifier
+     */
+    QualifierMatcher matchAny();
+    
+    /**
+     * @return A QualifierMatcher that matches only the null qualifier
+     */
+    QualifierMatcher matchNone();
+
+    /**
+     * Create a Qualifier wrapping the given Annotation instance. This returns
+     * null if the annotation is null.
+     * 
+     * @param annot The qualifier annotation
+     * @return A Qualifier wrapping the given instance
+     */
+    Qualifier qualifier(@Nullable Annotation annot);
 }
