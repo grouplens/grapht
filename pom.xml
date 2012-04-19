@@ -109,4 +109,23 @@
         </dependency>
     </dependencies>
     <version>0.1.0-SNAPSHOT</version>
+
+  <profiles>
+    <profile>
+      <id>lint</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <compilerArguments>
+                <Xlint />
+              </compilerArguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
