@@ -9,87 +9,293 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Named;
+
+/**
+ * <p>
+ * AnnotationBuilder is a "builder" for creating proxy Annotation instances.
+ * This is useful when configuring dependency injection to match a qualifier
+ * annotation that defines attributes, such as the {@link Named} qualifier. As
+ * an example, AnnotationBuilder can be used to construct a Named instance that
+ * matches particular applications of that annotation:
+ * 
+ * <pre>
+ * Named proxy = new AnnotationBuilder&lt;Named&gt;(Named.class)
+ *      .set(&quot;value&quot;, &quot;name&quot;)
+ *      .build();
+ * </pre>
+ * <p>
+ * The above snippet creates an instance of Named that returns the String,
+ * "name", from its value() method. All other methods declared by
+ * {@link Annotation} are implemented correctly given the values configured by
+ * the builder, or the defaults declared in the annotation definition.
+ * <p>
+ * This lets developers define attribute-based qualifiers easily without being
+ * forced to provide an actual annotation implementation that can be used to
+ * create instances.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @param <T> The annotation type created
+ */
 public final class AnnotationBuilder<T extends Annotation> {
     private final Map<String, Object> attributes;
     private final Class<T> type;
     
+    /**
+     * Create a new AnnotationBuilder without any assigned values, that will
+     * create annotations of the given class type.
+     * 
+     * @param annotType The annotation class type
+     * @throws NullPointerException if annotType is null
+     * @throws IllegalArgumentException if annotType is not an Annotation class
+     */
     public AnnotationBuilder(Class<T> annotType) {
         if (annotType == null) {
             throw new NullPointerException("Annotation type cannot be null");
+        }
+        if (!annotType.isAnnotation()) {
+            throw new IllegalArgumentException("Class type is not an Annotation: " + annotType);
         }
         
         type = annotType;
         attributes = new HashMap<String, Object>();
     }
     
+    /**
+     * Set the annotation defined member given by <tt>name</tt> to the boolean
+     * <tt>value</tt>.
+     * 
+     * @param name The name of the annotation attribute or member to assign
+     * @param value The value to assign to the specified member
+     * @return This builder
+     * @throws NullPointerException if name is null
+     * @throws IllegalArgumentException if name is not a defined member in the
+     *             annotation type for this builder, or if the type is not
+     *             boolean
+     */
     public AnnotationBuilder<T> set(String name, boolean value) {
         return set(name, Boolean.valueOf(value), boolean.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a byte value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, byte value) {
         return set(name, Byte.valueOf(value), byte.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a short value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> set(String name, short value) {
+        return set(name, Short.valueOf(value), short.class);
+    }
+    
+    /**
+     * As {@link #set(String, boolean)} but assigns an int value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, int value) {
         return set(name, Integer.valueOf(value), int.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a long value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, long value) {
         return set(name, Long.valueOf(value), long.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a char value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, char value) {
         return set(name, Character.valueOf(value), char.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a float value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, float value) {
         return set(name, Float.valueOf(value), float.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a double value.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, double value) {
         return set(name, Double.valueOf(value), double.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a String value. Throws a
+     * NullPointerException if value is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, String value) {
         return set(name, value, String.class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns an Annotation instance to
+     * the value. A NullPointerException is thrown if value is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, Annotation value) {
         return set(name, value, value.getClass());
     }
-    
+
+    /**
+     * As {@link #set(String, boolean)} but assigns a boolean[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, boolean[] value) {
         return set(name, value, boolean[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a byte[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, byte[] value) {
         return set(name, value, byte[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a short[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> set(String name, short[] value) {
+        return set(name, value, short[].class);
+    }
+    
+    /**
+     * As {@link #set(String, boolean)} but assigns a int[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, int[] value) {
         return set(name, value, int[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a long[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, long[] value) {
         return set(name, value, long[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a char[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, char[] value) {
         return set(name, value, char[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a float[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, float[] value) {
         return set(name, value, float[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a double[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, double[] value) {
         return set(name, value, double[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns a String[] value. A
+     * NullPointerException is thrown if the array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public AnnotationBuilder<T> set(String name, String[] value) {
         return set(name, value, String[].class);
     }
     
+    /**
+     * As {@link #set(String, boolean)} but assigns an Annotation array to the
+     * value. The array must be a proper array over the parameterized type, and
+     * not a cast of Object[], etc. A NullPointerException is thrown if the
+     * array is null.
+     * 
+     * @param name
+     * @param value
+     * @return This builder
+     */
     public <A extends Annotation> AnnotationBuilder<T> set(String name, A[] value) {
         return set(name, value, value.getClass());
     }
@@ -97,12 +303,12 @@ public final class AnnotationBuilder<T extends Annotation> {
     private AnnotationBuilder<T> set(String name, Object value, Class<?> type) {
         try {
             Method attr = this.type.getMethod(name);
-            if (!attr.getReturnType().equals(type)) {
+            if (!attr.getReturnType().isAssignableFrom(type)) {
                 throw new IllegalArgumentException("Attribute named: " + name + " expects a type of " + attr.getReturnType() + ", but got " + type);
             }
             
             // if valid, save for later
-            attributes.put(name, value);
+            attributes.put(name, clone(value));
             return this;
         } catch (SecurityException e) {
             throw new RuntimeException(e);
@@ -111,11 +317,77 @@ public final class AnnotationBuilder<T extends Annotation> {
         }
     }
     
+    /**
+     * Build an Annotation instance of type T that is configured to return the
+     * values assigned by the various set() methods for its defined attributes.
+     * If attributes have a default value and the value was not overridden by
+     * the builder's configuration, then the default will be returned by the
+     * annotation instance.
+     * 
+     * @return An instance of T with the attribute values specified on this
+     *         builder
+     * @throws IllegalStateException if there are attributes with no default
+     *             that have not been assigned explicit values
+     */
     public T build() {
+        for (Method attr: type.getDeclaredMethods()) {
+            if (attr.getDefaultValue() == null) {
+                // this is a required value, so we have to 
+                // verify that its been assigned
+                if (!attributes.containsKey(attr.getName())) {
+                    throw new IllegalStateException("No value assigned to required attribute: " + attr.getName());
+                }
+            }
+        }
         return type.cast(Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { type }, 
                                                 new AnnotationProxy<T>(type, attributes)));
     }
     
+    @SuppressWarnings("unchecked")
+    private static Object clone(Object o) {
+        if (o.getClass().isArray()) {
+            // make a shallow copy of the array
+            if (o instanceof boolean[]) {
+                boolean[] a = (boolean[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof byte[]) {
+                byte[] a = (byte[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof short[]) {
+                short[] a = (short[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof int[]) {
+                int[] a = (int[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof long[]) {
+                long[] a = (long[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof char[]) {
+                char[] a = (char[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof float[]) {
+                float[] a = (float[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof double[]) {
+                double[] a = (double[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else {
+                Object[] a = (Object[]) o;
+                return Arrays.copyOf(a, a.length, (Class<? extends Object[]>) o.getClass());
+            }
+        } else {
+            // object must be an annotation, primitive, or string
+            // so it is immutable and a clone is not necessary
+            return o;
+        }
+    }
+    
+    /*
+     * AnnotationProxy is an InvocationHandler for implementing the Annotation
+     * contract, and delegates to a Map of named attribute values for attributes
+     * defined in the annotation definition. A new AnnotationProxy instance
+     * should be created for each proxy annotation.
+     */
     private static class AnnotationProxy<T extends Annotation> implements InvocationHandler {
         private final Class<T> annotType;
         private final Map<String, Object> attributes;
@@ -136,10 +408,10 @@ public final class AnnotationBuilder<T extends Annotation> {
             } else if (isToString(method)) {
                 return proxyToString(proxy);
             } else if (attributes.containsKey(method.getName()) && method.getParameterTypes().length == 0) {
-                return attributes.get(method.getName());
+                return AnnotationBuilder.clone(attributes.get(method.getName()));
             } else {
                 // fall back to the default
-                return method.getDefaultValue();
+                return AnnotationBuilder.clone(method.getDefaultValue());
             }
             // wait() and other Object methods do not get sent to the InvocationHandler
             // so we don't have any other cases
