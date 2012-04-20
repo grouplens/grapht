@@ -20,7 +20,6 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.reflect.Constructor;
 
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -30,7 +29,7 @@ import org.grouplens.grapht.util.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class ConstructorParameterInjectionPoint implements InjectionPoint {
-    private final Qualifier qualifier;
+    private final AnnotationQualifier qualifier;
     private final Constructor<?> ctor;
     private final int parameter;
 
@@ -91,7 +90,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public Qualifier getQualifier() {
+    public AnnotationQualifier getQualifier() {
         return qualifier;
     }
     

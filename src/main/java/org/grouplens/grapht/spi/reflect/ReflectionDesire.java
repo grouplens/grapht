@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.annotation.DefaultString;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -186,7 +186,7 @@ public class ReflectionDesire implements Desire {
     }
 
     @Override
-    public Qualifier getQualifier() {
+    public AnnotationQualifier getQualifier() {
         return injectPoint.getQualifier();
     }
 
@@ -207,36 +207,33 @@ public class ReflectionDesire implements Desire {
 
     @Override
     public Desire getDefaultDesire() {
-        Qualifier qualifier = getQualifier();
+        AnnotationQualifier qualifier = getQualifier();
 
         // Check the qualifier first, but only if the qualifier source hasn't been disabled
         if (dfltSource == DefaultSource.QUALIFIER || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
-            while (qualifier != null) {
-                DefaultDouble dfltDouble = qualifier.getAnnotation(DefaultDouble.class);
+            if (qualifier != null) {
+                Class<? extends Annotation> annotType = qualifier.getAnnotation().annotationType();
+                DefaultDouble dfltDouble = annotType.getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
                     return new ReflectionDesire(Double.class, injectPoint, new InstanceSatisfaction(dfltDouble.value()), DefaultSource.TYPE);
                 }
-                DefaultInteger dfltInt = qualifier.getAnnotation(DefaultInteger.class);
+                DefaultInteger dfltInt = annotType.getAnnotation(DefaultInteger.class);
                 if (dfltInt != null) {
                     return new ReflectionDesire(Integer.class, injectPoint, new InstanceSatisfaction(dfltInt.value()), DefaultSource.TYPE);
                 }
-                DefaultBoolean dfltBool = qualifier.getAnnotation(DefaultBoolean.class);
+                DefaultBoolean dfltBool = annotType.getAnnotation(DefaultBoolean.class);
                 if (dfltBool != null) {
                     return new ReflectionDesire(Boolean.class, injectPoint, new InstanceSatisfaction(dfltBool.value()), DefaultSource.TYPE);
                 }
-                DefaultString dfltStr = qualifier.getAnnotation(DefaultString.class);
+                DefaultString dfltStr = annotType.getAnnotation(DefaultString.class);
                 if (dfltStr != null) {
                     return new ReflectionDesire(String.class, injectPoint, new InstanceSatisfaction(dfltStr.value()), DefaultSource.TYPE);
                 }
-                DefaultImplementation impl = qualifier.getAnnotation(DefaultImplementation.class);
+                DefaultImplementation impl = annotType.getAnnotation(DefaultImplementation.class);
                 if (impl != null) {
                     // let the constructor create any satisfaction
                     return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);
                 }
-                
-                // there was no default binding on the qualifier, 
-                // so check its parent qualifier
-                qualifier = qualifier.getParent();
             }
         }
         
@@ -265,12 +262,8 @@ public class ReflectionDesire implements Desire {
     public Comparator<BindRule> ruleComparator() {
         // 1st comparison is manual vs generated bind rules
         // - manual bind rules are preferred over any generated rules
-        // 2nd comparison is how close the desire's {@link Qualifier} is to the bind rules
-        // - we know that the desire's is a sub-{@link Qualifier} of any bind rules, so
-        // choose
-        // the bind rule with the closest distance
-        // 3rd comparison is how well the generics match
-        // - for now, we don't track generic types so it is ignored
+        // 2nd comparison is the priority of the qualifier matcher, e.g:
+        // - match a specific instance/none > match class type > match any
         return new Comparator<BindRule>() {
             @Override
             public int compare(BindRule o1, BindRule o2) {
@@ -282,17 +275,8 @@ public class ReflectionDesire implements Desire {
                     return b1.getWeight() - b2.getWeight();
                 }
 
-                // #2 - select shorter qualifier distance
-                int d1 = Qualifiers.getQualifierDistance(ReflectionDesire.this.getQualifier(),
-                                                         b1.getQualifier());
-                int d2 = Qualifiers.getQualifierDistance(ReflectionDesire.this.getQualifier(),
-                                                         b2.getQualifier());
-                if (d1 != d2) {
-                    return d1 - d2;
-                }
-
-                // #3 - generics specificity TODO
-                return 0;
+                // #2 - select the higher priority qualifier matcher
+                return b1.getQualifier().compareTo(b2.getQualifier());
             }
         };
     }

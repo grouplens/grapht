@@ -118,13 +118,8 @@ public class DefaultInjector implements Injector {
     }
     
     @Override
-    public <T> T getInstance(Class<? extends Annotation> qualifier, Class<T> type) {
+    public <T> T getInstance(Annotation qualifier, Class<T> type) {
         return getInstance(config.getSPI().qualifier(qualifier), type);
-    }
-    
-    @Override
-    public <T> T getInstance(String name, Class<T> type) {
-        return getInstance(config.getSPI().qualifier(name), type);
     }
     
     @SuppressWarnings("unchecked")

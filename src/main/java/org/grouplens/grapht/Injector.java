@@ -63,23 +63,12 @@ public interface Injector {
 
     /**
      * <p>
-     * Get an instance of T with the given {@link Qualifier} annotation. 
+     * Get an instance of T with the given {@link Qualifier} annotation.
      * 
      * @param <T> The object type
      * @param qualifier The qualifier on of the returned instance
      * @param type The class type
      * @return An instance of type T
      */
-    public <T> T getInstance(Class<? extends Annotation> qualifier, Class<T> type);
-    
-    /**
-     * <p>
-     * Get an instance of T with the given name.
-     * 
-     * @param <T> The object type
-     * @param name The name of the qualified object
-     * @param type The class type
-     * @return An instance of type T
-     */
-    public <T> T getInstance(String name, Class<T> type);
+    public <T> T getInstance(Annotation qualifier, Class<T> type);
 }

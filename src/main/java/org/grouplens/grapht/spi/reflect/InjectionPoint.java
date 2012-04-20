@@ -19,7 +19,6 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -41,7 +40,7 @@ public interface InjectionPoint {
      * 
      * @return The qualifier on the injection point
      */
-    Qualifier getQualifier();
+    AnnotationQualifier getQualifier();
 
     /**
      * Return whether or not this injection point is a transient, with the same

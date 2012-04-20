@@ -18,11 +18,9 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.grapht.util.Types;
 
@@ -40,7 +38,7 @@ public class ReflectionBindRule implements BindRule {
     private final ReflectionSatisfaction satisfaction;
     private final boolean terminateChain;
     
-    private final Qualifier qualifier;
+    private final QualifierMatcher qualifier;
     private final Class<?> sourceType;
     private final Class<?> implType;
     
@@ -61,12 +59,15 @@ public class ReflectionBindRule implements BindRule {
      * @throws NullPointerException if sourceType or satisfaction is null
      */
     public ReflectionBindRule(Class<?> sourceType, ReflectionSatisfaction satisfaction,
-                              @Nullable Qualifier qualifier, int weight, boolean terminateChain) {
+                              QualifierMatcher qualifier, int weight, boolean terminateChain) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
         if (satisfaction == null) {
             throw new NullPointerException("Satisfaction cannot be null");
+        }
+        if (qualifier == null) {
+            throw new NullPointerException("QualifierMatcher cannot be null");
         }
         
         this.qualifier = qualifier;
@@ -90,12 +91,15 @@ public class ReflectionBindRule implements BindRule {
      * @throws NullPointerException if sourceType or implType is null
      */
     public ReflectionBindRule(Class<?> sourceType, Class<?> implType,
-                              @Nullable Qualifier qualifier, int weight, boolean terminateChain) {
+                              QualifierMatcher qualifier, int weight, boolean terminateChain) {
         if (sourceType == null) {
             throw new NullPointerException("Source type cannot be null");
         }
         if (implType == null) {
             throw new NullPointerException("Impl type cannot be null");
+        }
+        if (qualifier == null) {
+            throw new NullPointerException("QualifierMatcher cannot be null");
         }
         
         this.qualifier = qualifier;
@@ -115,9 +119,9 @@ public class ReflectionBindRule implements BindRule {
     }
     
     /**
-     * @return The annotation {@link Qualifier} matched by this bind rule
+     * @return The annotation {@link QualifierMatcher} matched by this bind rule
      */
-    public Qualifier getQualifier() {
+    public QualifierMatcher getQualifier() {
         return qualifier;
     }
     
@@ -150,9 +154,8 @@ public class ReflectionBindRule implements BindRule {
         
         // bind rules match type by equality
         if (rd.getDesiredType().equals(sourceType)) {
-            // if the type is equal, then the qualifiers match if
-            // the desire's qualifier is inherits from the bind rule's qualifier
-            return Qualifiers.inheritsQualifier(rd.getQualifier(), qualifier);
+            // if the type is equal, then rely on the qualifier matcher
+            return qualifier.matches(rd.getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false

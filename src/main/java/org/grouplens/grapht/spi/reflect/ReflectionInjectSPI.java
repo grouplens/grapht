@@ -29,6 +29,7 @@ import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -41,7 +42,7 @@ import org.grouplens.grapht.util.Types;
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public <T> BindRule bindType(@Nullable Qualifier qualifier, Class<T> source,
+    public <T> BindRule bindType(QualifierMatcher qualifier, Class<T> source,
                                  Class<? extends T> impl, int weight, boolean terminate) {
         if (Types.isInstantiable(Types.box(impl))) {
             return new ReflectionBindRule(source, new ClassSatisfaction(impl), qualifier, weight, terminate);
@@ -51,7 +52,7 @@ public class ReflectionInjectSPI implements InjectSPI {
     }
 
     @Override
-    public <T> BindRule bindInstance(@Nullable Qualifier qualifier, Class<T> source, 
+    public <T> BindRule bindInstance(QualifierMatcher qualifier, Class<T> source, 
                                      T instance, int weight) {
         if (instance != null) {
             return new ReflectionBindRule(source, new InstanceSatisfaction(instance), qualifier, weight, true);
@@ -61,35 +62,50 @@ public class ReflectionInjectSPI implements InjectSPI {
     }
 
     @Override
-    public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
+    public <T> BindRule bindProvider(QualifierMatcher qualifier, Class<T> source,
                                      Class<? extends Provider<? extends T>> providerType,
                                      int weight) {
         return new ReflectionBindRule(source, new ProviderClassSatisfaction(providerType), qualifier, weight, true);
     }
 
     @Override
-    public <T> BindRule bindProvider(@Nullable Qualifier qualifier, Class<T> source,
+    public <T> BindRule bindProvider(QualifierMatcher qualifier, Class<T> source,
                                      Provider<? extends T> provider, int weight) {
         return new ReflectionBindRule(source, new ProviderInstanceSatisfaction(provider), qualifier, weight, true);
     }
 
     @Override
-    public ContextMatcher context(@Nullable Qualifier qualifier, Class<?> type) {
+    public ContextMatcher context(QualifierMatcher qualifier, Class<?> type) {
         return new ReflectionContextMatcher(type, qualifier);
     }
     
     @Override
     public Desire desire(final @Nullable Qualifier qualifier, final Class<?> type, boolean nullable) {
-        return new ReflectionDesire(new SimpleInjectionPoint(qualifier, type, nullable));
+        return new ReflectionDesire(new SimpleInjectionPoint((AnnotationQualifier) qualifier, type, nullable));
     }
 
     @Override
-    public Qualifier qualifier(@Nullable Class<? extends Annotation> qualifier) {
-        return (qualifier == null ? null : new AnnotationQualifier(qualifier));
+    public QualifierMatcher match(Class<? extends Annotation> qualifier) {
+        return Qualifiers.match(qualifier);
     }
-    
+
     @Override
-    public Qualifier qualifier(@Nullable String name) {
-        return (name == null ? null : new NamedQualifier(name));
+    public QualifierMatcher match(Annotation annot) {
+        return Qualifiers.match(annot);
+    }
+
+    @Override
+    public QualifierMatcher matchAny() {
+        return Qualifiers.matchAny();
+    }
+
+    @Override
+    public QualifierMatcher matchNone() {
+        return Qualifiers.matchNone();
+    }
+
+    @Override
+    public Qualifier qualifier(Annotation annot) {
+        return new AnnotationQualifier(annot);
     }
 }

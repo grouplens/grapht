@@ -360,7 +360,7 @@ public class DependencySolver {
                 
                 if (match1 && match2) {
                     // the chains apply to this node so we need to compare them
-                    int cmp = currentNode.getLeft().contextComparator(currentNode.getRight()).compare(m1, m2);
+                    int cmp = currentNode.getLeft().contextComparator().compare(m1, m2);
                     if (cmp != 0) {
                         // one chain finally has a type delta difference, so the
                         // comparison of the chain equals the matcher comparison

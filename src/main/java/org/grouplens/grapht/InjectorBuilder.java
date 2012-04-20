@@ -76,8 +76,8 @@ public class InjectorBuilder implements Context {
     }
     
     @Override
-    public Context in(String name, Class<?> type) {
-        return builder.getRootContext().in(name, type);
+    public Context in(Annotation annot, Class<?> type) {
+        return builder.getRootContext().in(annot, type);
     }
 
     /**

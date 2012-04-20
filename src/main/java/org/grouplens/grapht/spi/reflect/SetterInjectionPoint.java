@@ -20,7 +20,6 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.reflect.Method;
 
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -31,7 +30,7 @@ import org.grouplens.grapht.util.Types;
 public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
     private final int parameter;
-    private final Qualifier qualifier;
+    private final AnnotationQualifier qualifier;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -87,7 +86,7 @@ public class SetterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public Qualifier getQualifier() {
+    public AnnotationQualifier getQualifier() {
         return qualifier;
     }
     

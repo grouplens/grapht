@@ -22,9 +22,6 @@ import java.lang.annotation.Annotation;
 
 import javax.inject.Qualifier;
 
-import org.grouplens.grapht.annotation.InheritsDefaultQualifier;
-import org.grouplens.grapht.annotation.InheritsQualifier;
-
 /**
  * AnnotationQualifier is a Qualifier implementation that wraps annotations
  * that have been annotated with {@link Qualifier}
@@ -32,48 +29,29 @@ import org.grouplens.grapht.annotation.InheritsQualifier;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class AnnotationQualifier implements org.grouplens.grapht.spi.Qualifier {
-    private final Class<? extends Annotation> annot;
+    private final Annotation annot;
 
     /**
-     * Create an AnnotationQualifier that wraps the given {@link Qualifier} annotation type.
+     * Create an AnnotationQualifier that wraps the given {@link Qualifier} annotation.
      * 
-     * @param qualifierType The annotation {@link Qualifier} type
-     * @throws NullPointerException if {@link Qualifier}Type is null
+     * @param annot The annotation to wrap
+     * @throws NullPointerException if annot is null
      * @throws IllegalArgumentException if the annotation type is not a {@link Qualifier}
      *             annotation
      */
-    public AnnotationQualifier(Class<? extends Annotation> qualifierType) {
-        if (qualifierType == null)
-            throw new NullPointerException("Qualifier type cannot be null");
-        if (!Qualifiers.isQualifier(qualifierType))
+    public AnnotationQualifier(Annotation annot) {
+        if (annot == null)
+            throw new NullPointerException("Qualifier annotation cannot be null");
+        if (!Qualifiers.isQualifier(annot.annotationType()))
             throw new IllegalArgumentException("Annotation is not a Qualifier annotation");
-        annot = qualifierType;
+        this.annot = annot;
     }
     
     /**
-     * @return The annotation type wrapped by this qualifier
+     * @return The annotation wrapped by this qualifier
      */
-    public Class<? extends Annotation> getAnnotation() {
+    public Annotation getAnnotation() {
         return annot;
-    }
-
-    @Override
-    public boolean inheritsDefault() {
-        // we add getParent() == null because this should only return true
-        // if there is no other parent
-        return annot.getAnnotation(InheritsDefaultQualifier.class) != null && getParent() == null;
-    }
-
-    @Override
-    public AnnotationQualifier getParent() {
-        InheritsQualifier parentRole = annot.getAnnotation(InheritsQualifier.class);
-        if (parentRole != null) {
-            return new AnnotationQualifier(parentRole.value());
-        }
-        
-        // The parent qualifier is still null if InheritsDefaultQualifier 
-        // is applied to this annotaiton
-        return null;
     }
 
     @Override
@@ -91,31 +69,6 @@ public class AnnotationQualifier implements org.grouplens.grapht.spi.Qualifier {
     
     @Override
     public String toString() {
-        return "@" + annot.getSimpleName();
-    }
-    
-    /*
-     * AnnotationQualifier delegates to the Annotation class type for its
-     * implementation of AnnotatedElement.
-     */
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return annot.getAnnotation(annotationClass);
-    }
-
-    @Override
-    public Annotation[] getAnnotations() {
-        return annot.getAnnotations();
-    }
-
-    @Override
-    public Annotation[] getDeclaredAnnotations() {
-        return annot.getDeclaredAnnotations();
-    }
-
-    @Override
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-        return annot.isAnnotationPresent(annotationClass);
+        return annot.toString();
     }
 }

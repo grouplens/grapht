@@ -19,10 +19,14 @@
 package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Named;
 
 import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
  * Utilities related to Qualifier implementations.
@@ -44,16 +48,10 @@ public final class Qualifiers {
      * @return The Qualifier for the injection point, or null if there
      *         is no {@link Qualifier}
      */
-    public static Qualifier getQualifier(Annotation[] parameterAnnots) {
+    public static AnnotationQualifier getQualifier(Annotation[] parameterAnnots) {
         for (int i = 0; i < parameterAnnots.length; i++) {
             if (Qualifiers.isQualifier(parameterAnnots[i].annotationType())) {
-                if (parameterAnnots[i] instanceof Named) {
-                    // special case to extract the annotated name
-                    return new NamedQualifier(((Named) parameterAnnots[i]).value());
-                } else {
-                    // wrap all other qualifier annotations with AnnotationQualifier
-                    return new AnnotationQualifier(parameterAnnots[i].annotationType());
-                }
+                return new AnnotationQualifier(parameterAnnots[i]);
             }
         }
         return null;
@@ -69,5 +67,172 @@ public final class Qualifiers {
      */
     public static boolean isQualifier(Class<? extends Annotation> type) {
         return type.getAnnotation(javax.inject.Qualifier.class) != null;
+    }
+    
+    /**
+     * @return A QualifierMatcher that matches any qualifier
+     */
+    public static QualifierMatcher matchAny() {
+        return new AnyMatcher();
+    }
+    
+    /**
+     * @return A QualifierMatcher that matches only the null qualifier
+     */
+    public static QualifierMatcher matchNone() {
+        return new NullMatcher();
+    }
+    
+    /**
+     * @param annotType Annotation type class to match
+     * @return A QualifierMatcher that matches any annotation of the given class
+     *         type
+     */
+    public static QualifierMatcher match(Class<? extends Annotation> annotType) {
+        return new AnnotationClassMatcher(annotType);
+    }
+    
+    /**
+     * @param annot Annotation instance to match
+     * @return A QualifierMatcher that matches annotations equaling annot
+     */
+    public static QualifierMatcher match(Annotation annot) {
+        return new AnnotationMatcher(annot);
+    }
+    
+    // These priorities specify that:
+    // AnyMatcher < AnnotationClassMatcher < NullMatcher == AnnotationMatcher
+    private static final Map<Class<? extends QualifierMatcher>, Integer> TYPE_PRIORITIES;
+    static {
+        Map<Class<? extends QualifierMatcher>, Integer> tp = new HashMap<Class<? extends QualifierMatcher>, Integer>();
+        tp.put(AnyMatcher.class, 0);
+        tp.put(AnnotationClassMatcher.class, 1);
+        tp.put(NullMatcher.class, 2);
+        tp.put(AnnotationMatcher.class, 2);
+        
+        TYPE_PRIORITIES = Collections.unmodifiableMap(tp);
+    }
+    
+    private static abstract class AbstractMatcher implements QualifierMatcher {
+        @Override
+        public int compareTo(QualifierMatcher o) {
+            Integer p1 = TYPE_PRIORITIES.get(getClass());
+            Integer p2 = TYPE_PRIORITIES.get(o.getClass());
+            
+            if (p2 == null) {
+                // other type is unknown, so push it to the front
+                return 1;
+            }
+            
+            // otherwise compare based on priorities, where a higher priority
+            // puts the matcher near the front
+            return p2 - p1;
+        }
+    }
+    
+    private static class AnyMatcher extends AbstractMatcher {
+        @Override
+        public boolean matches(Qualifier q) {
+            return true;
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof AnyMatcher)) {
+                return false;
+            }
+            return true;
+        }
+        
+        @Override
+        public int hashCode() {
+            return AnyMatcher.class.hashCode();
+        }
+    }
+    
+    private static class NullMatcher extends AbstractMatcher {
+        @Override
+        public boolean matches(Qualifier q) {
+            return q == null;
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof NullMatcher)) {
+                return false;
+            }
+            return true;
+        }
+        
+        @Override
+        public int hashCode() {
+            return NullMatcher.class.hashCode();
+        }
+    }
+    
+    private static class AnnotationClassMatcher extends AbstractMatcher {
+        private final Class<? extends Annotation> type;
+        
+        public AnnotationClassMatcher(Class<? extends Annotation> type) {
+            if (type == null) {
+                throw new NullPointerException("Annotation type cannot be null");
+            }
+            if (!Qualifiers.isQualifier(type)) {
+                throw new IllegalArgumentException("Annotation is not a Qualifier annotation");
+            }
+            this.type = type;
+        }
+        
+        @Override
+        public boolean matches(Qualifier q) {
+            Class<? extends Annotation> qtype = (q == null ? null : ((AnnotationQualifier) q).getAnnotation().annotationType());
+            return type.equals(qtype);
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof AnnotationClassMatcher)) {
+                return false;
+            }
+            return ((AnnotationClassMatcher) o).type.equals(type);
+        }
+        
+        @Override
+        public int hashCode() {
+            return type.hashCode();
+        }
+    }
+    
+    private static class AnnotationMatcher extends AbstractMatcher {
+        private final Annotation annot;
+        
+        public AnnotationMatcher(Annotation annot) {
+            if (annot == null) {
+                throw new NullPointerException("Annotationcannot be null");
+            }
+            if (!Qualifiers.isQualifier(annot.annotationType())) {
+                throw new IllegalArgumentException("Annotation is not a Qualifier annotation");
+            }
+            this.annot = annot;
+        }
+        
+        @Override
+        public boolean matches(Qualifier q) {
+            Annotation qa = (q == null ? null : ((AnnotationQualifier) q).getAnnotation());
+            return annot.equals(qa);
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof AnnotationMatcher)) {
+                return false;
+            }
+            return ((AnnotationMatcher) o).annot.equals(annot);
+        }
+        
+        @Override
+        public int hashCode() {
+            return annot.hashCode();
+        }
     }
 }

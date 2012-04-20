@@ -29,7 +29,7 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -45,7 +45,7 @@ class BindingImpl<T> implements Binding<T> {
     
     private final Set<Class<?>> excludeTypes;
     
-    private Qualifier qualifier;
+    private QualifierMatcher qualifier;
     private boolean terminate;
     
     private boolean bindingCompleted;
@@ -54,7 +54,7 @@ class BindingImpl<T> implements Binding<T> {
         this.context = context;
         sourceType = type;
         excludeTypes = new HashSet<Class<?>>(context.getBuilder().getDefaultExclusions());
-        qualifier = null;
+        qualifier = context.getBuilder().getSPI().matchAny();
         
         bindingCompleted = false;
         terminate = false;
@@ -72,17 +72,24 @@ class BindingImpl<T> implements Binding<T> {
             throw new NullPointerException("Qualifier cannot be null");
         }
         validateState();
-        this.qualifier = context.getBuilder().getSPI().qualifier(qualifier);
+        this.qualifier = context.getBuilder().getSPI().match(qualifier);
         return this;
     }
     
     @Override
-    public Binding<T> withName(String name) {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
+    public Binding<T> withQualifier(Annotation annot) {
+        if (annot == null) {
+            throw new NullPointerException("Annotation cannot be null");
         }
         validateState();
-        qualifier = context.getBuilder().getSPI().qualifier(name);
+        qualifier = context.getBuilder().getSPI().match(annot);
+        return this;
+    }
+    
+    @Override
+    public Binding<T> unqualified() {
+        validateState();
+        qualifier = context.getBuilder().getSPI().matchNone();
         return this;
     }
 

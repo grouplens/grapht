@@ -20,14 +20,12 @@ package org.grouplens.grapht.spi.reflect;
 
 import javax.annotation.Nullable;
 
-import org.grouplens.grapht.spi.Qualifier;
-
 class SimpleInjectionPoint implements InjectionPoint {
-    private final Qualifier qualifier;
+    private final AnnotationQualifier qualifier;
     private final Class<?> type;
     private final boolean nullable;
     
-    public SimpleInjectionPoint(@Nullable Qualifier qualifier, Class<?> type, boolean nullable) {
+    public SimpleInjectionPoint(@Nullable AnnotationQualifier qualifier, Class<?> type, boolean nullable) {
         if (type == null) {
             throw new NullPointerException("Class type cannot be null");
         }
@@ -47,7 +45,7 @@ class SimpleInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public Qualifier getQualifier() {
+    public AnnotationQualifier getQualifier() {
         return qualifier;
     }
 

@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.util.Function;
@@ -75,14 +74,9 @@ public interface Satisfaction {
 
     /**
      * Create a Comparator that can be used to compare ContextMatchers that
-     * apply to this Node. The specified Qualifier is the qualifier of the
-     * desire that this satisfaction is intended to satisfy. The Qualifier can
-     * be null to represent the default qualifier.
+     * apply to this Satisfaction.
      * 
-     * @param qualifier The Qualifier of the desire that this satisfaction
-     *            satisfies
-     * @return A comparator for context matchers for this satisfaction and
-     *         qualifier
+     * @return A comparator for context matchers for this satisfaction
      */
-    Comparator<ContextMatcher> contextComparator(@Nullable Qualifier qualifier);
+    Comparator<ContextMatcher> contextComparator();
 }

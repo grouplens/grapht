@@ -1,5 +1,6 @@
 package org.grouplens.grapht.spi;
 
+
 /**
  * <p>
  * QualifierMatcher encapsulates the logic used to determine if a BindRule or
@@ -14,7 +15,7 @@ package org.grouplens.grapht.spi;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public interface QualifierMatcher {
+public interface QualifierMatcher extends Comparable<QualifierMatcher> {
     /**
      * Return true if this matcher matches the given Qualifier. It can be
      * assumed that the qualifier is not null and was created by the same SPI

@@ -21,7 +21,6 @@ package org.grouplens.grapht.spi.reflect;
 import java.util.Comparator;
 
 import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Types;
 
@@ -40,8 +39,7 @@ public abstract class ReflectionSatisfaction implements Satisfaction {
     }
     
     @Override
-    public Comparator<ContextMatcher> contextComparator(Qualifier qualifier) {
-        final AnnotationQualifier r = (AnnotationQualifier) qualifier;
+    public Comparator<ContextMatcher> contextComparator() {
         return new Comparator<ContextMatcher>() {
             @Override
             public int compare(ContextMatcher o1, ContextMatcher o2) {
@@ -55,10 +53,8 @@ public abstract class ReflectionSatisfaction implements Satisfaction {
                     return td1 - td2;
                 }
                 
-                // #2 - order by qualifier distance, select the matcher that is closest
-                int rd1 = Qualifiers.getQualifierDistance(r, cm1.getMatchedQualifier());
-                int rd2 = Qualifiers.getQualifierDistance(r, cm2.getMatchedQualifier());
-                return rd1 - rd2;
+                // #2 - order by qualifier priority
+                return cm1.getMatchedQualifier().compareTo(cm2.getMatchedQualifier());
             }
         };
     }

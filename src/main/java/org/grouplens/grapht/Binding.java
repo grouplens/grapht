@@ -20,7 +20,6 @@ package org.grouplens.grapht;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 
@@ -67,15 +66,27 @@ public interface Binding<T> {
     /**
      * <p>
      * Configure the binding to match injection points that have been annotated
-     * with the {@link Named} annotation and the specified <tt>name</tt>.
+     * with the exact annotation instance.
      * <p>
      * This will override any previous name or qualifier annotation.
      * 
-     * @param name The name to match on
+     * @param annot The annotation instance to match
      * @return This Binding
-     * @throws NullPointerException if name is null
+     * @throws NullPointerException if annot is null
      */
-    Binding<T> withName(String name);
+    Binding<T> withQualifier(Annotation annot);
+    
+    /**
+     * <p>
+     * Configure the binding to only match injection points that have no
+     * qualifier. By default, the binding matches any injection point with the
+     * given type, whether or not its been qualified. A qualified binding to the
+     * same type will still be preferred first when resolving a qualified
+     * injection point.
+     * 
+     * @return This binding
+     */
+    Binding<T> unqualified();
 
     /**
      * Exclude the provided type from being matched when examining injection

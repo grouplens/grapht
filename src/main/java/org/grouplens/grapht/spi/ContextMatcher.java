@@ -42,11 +42,11 @@ import org.grouplens.grapht.util.Pair;
  */
 public interface ContextMatcher {
     /**
-     * Return true if this ContextMatcher matches or applies to the given Node
+     * Return true if this ContextMatcher matches or applies to the given Satisfaction
      * and Qualifier.
      * 
      * @param n The node and {@link Qualifier} in the current dependency context
-     * @return True if this matcher matches the node and {@link Qualifier}, false otherwise
+     * @return True if this matcher matches the node and annotation, false otherwise
      */
     boolean matches(Pair<Satisfaction, Qualifier> n);
 }
