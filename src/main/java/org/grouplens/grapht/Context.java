@@ -23,8 +23,8 @@ import java.lang.annotation.Annotation;
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
+import org.grouplens.grapht.annotation.Parameter;
 import org.grouplens.grapht.spi.ContextChain;
-import org.omg.Dynamic.Parameter;
 
 /**
  * <p>
@@ -69,7 +69,7 @@ public interface Context {
      * is equivalent to:
      * 
      * <pre>
-     * context.bind(Integer.class).withRole(IntFoo.class).to(5);
+     * context.bind(Integer.class).withQualifier(IntFoo.class).to(5);
      * </pre>
      * 
      * @see Parameter

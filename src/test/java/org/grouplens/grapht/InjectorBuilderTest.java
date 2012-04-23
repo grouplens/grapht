@@ -82,6 +82,7 @@ public class InjectorBuilderTest {
         
         // since we don't have a 'test1' bound, the resolver falls back to the
         // default String() constructor, which injects the empty string
+        // FIXME: This is not the correct behavior after issue 8 is resolved
         NamedType c = i.getInstance(NamedType.class);
         Assert.assertEquals("", c.getNamedString());
     }

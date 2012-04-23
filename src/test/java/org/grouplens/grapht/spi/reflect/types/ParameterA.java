@@ -24,8 +24,11 @@ import java.lang.annotation.RetentionPolicy;
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.annotation.DefaultInteger;
+import org.grouplens.grapht.annotation.Parameter;
+import org.grouplens.grapht.annotation.Parameter.PrimitiveType;
 
 @Qualifier
+@Parameter(PrimitiveType.INT)
 @DefaultInteger(5)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ParameterA { }

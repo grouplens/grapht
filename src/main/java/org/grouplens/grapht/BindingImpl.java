@@ -181,11 +181,11 @@ class BindingImpl<T> implements Binding<T> {
     private Map<Class<?>, Integer> generateBindPoints(Class<?> target) {
         Map<Class<?>, Integer> bindPoints = new HashMap<Class<?>, Integer>();
         // start the recursion up the type hierarchy, starting at the target type
-        recordTypes(target, bindPoints);
+        recordTypes(Types.box(sourceType), target, bindPoints);
         return bindPoints;
     }
     
-    private void recordTypes(Class<?> type, Map<Class<?>, Integer> bindPoints) {
+    private void recordTypes(Class<?> src, Class<?> type, Map<Class<?>, Integer> bindPoints) {
         // check exclusions
         if (type == null || excludeTypes.contains(type)) {
             // the type is excluded, terminate recursion (this relies on Object
@@ -194,14 +194,14 @@ class BindingImpl<T> implements Binding<T> {
         }
         
         int weight;
-        if (type.equals(sourceType)) {
+        if (type.equals(src)) {
             // type is the source type, so this is the manual rule
             weight = BindRule.MANUAL_BIND_RULE;
-        } else if (sourceType.isAssignableFrom(type)) {
+        } else if (src.isAssignableFrom(type)) {
             // type is a subclass of the source type, and a superclass
             // of the target type
             weight = BindRule.FIRST_TIER_GENERATED_BIND_RULE;
-        } else if (type.isAssignableFrom(sourceType)) {
+        } else if (type.isAssignableFrom(src)) {
             // type is a superclass of the source type, so it is also a superclass
             // of the target type
             weight = BindRule.SECOND_TIER_GENERATED_BIND_RULE;
@@ -218,9 +218,9 @@ class BindingImpl<T> implements Binding<T> {
         // - superclass is null for Object, interfaces, and primitives
         // - interfaces holds implemented or extended interfaces depending on
         //   if the type is a class or interface
-        recordTypes(type.getSuperclass(), bindPoints);
+        recordTypes(src, type.getSuperclass(), bindPoints);
         for (Class<?> i: type.getInterfaces()) {
-            recordTypes(i, bindPoints);
+            recordTypes(src, i, bindPoints);
         }
     }
 }

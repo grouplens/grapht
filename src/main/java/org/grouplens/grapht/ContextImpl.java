@@ -24,6 +24,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.grouplens.grapht.annotation.Parameter;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
@@ -65,7 +66,12 @@ class ContextImpl implements Context {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void bind(Class<? extends Annotation> param, Object value) {
-        Binding raw = bind(value.getClass()).withQualifier(param);
+        Class type = value.getClass();
+        Parameter pType = param.getAnnotation(Parameter.class);
+        if (pType != null) {
+            type = pType.value().getType();
+        }
+        Binding raw = bind(type).withQualifier(param);
         raw.to(value);
     }
 
