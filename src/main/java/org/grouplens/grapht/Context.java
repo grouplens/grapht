@@ -58,7 +58,8 @@ public interface Context {
      * <p>
      * Bind a parameter value. This is a convenience for creating a Binding
      * using the proper primitive class or String of the parameter, specifying
-     * the given annotation as its qualifier, and binding it to the given instance.
+     * the given annotation as its qualifier, and binding it to the given
+     * instance.
      * <p>
      * As an example:
      * 
@@ -71,6 +72,9 @@ public interface Context {
      * <pre>
      * context.bind(Integer.class).withQualifier(IntFoo.class).to(5);
      * </pre>
+     * <p>
+     * If the qualifier annotation is annotated with {@link Parameter}, the
+     * parameter type is used in lieu of <code>value.getClass()</code>
      * 
      * @see Parameter
      * @param param The parameter annotation
