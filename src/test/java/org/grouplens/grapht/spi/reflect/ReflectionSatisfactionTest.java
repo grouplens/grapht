@@ -29,17 +29,7 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.reflect.AnnotationQualifier;
-import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ConstructorParameterInjectionPoint;
-import org.grouplens.grapht.spi.reflect.InjectionPoint;
-import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.NullSatisfaction;
-import org.grouplens.grapht.spi.reflect.ProviderClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ProviderInstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionContextMatcher;
-import org.grouplens.grapht.spi.reflect.ReflectionDesire;
-import org.grouplens.grapht.spi.reflect.ReflectionSatisfaction;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.ProviderC;
@@ -186,16 +176,17 @@ public class ReflectionSatisfactionTest {
     
     @Test
     public void testContextMatcherComparator() throws Exception {
-        ContextMatcher cm1 = new ReflectionContextMatcher(TypeB.class, null); // type dist = 0, annot dist = 0
-        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, new AnnotationQualifier(RoleD.class)); // type dist = 1, annot dist = 0
-        ContextMatcher cm3 = new ReflectionContextMatcher(TypeA.class, null); // type dist = 1, annot dist = 1
+        InjectSPI spi = new ReflectionInjectSPI();
+        ContextMatcher cm1 = new ReflectionContextMatcher(TypeB.class, spi.matchAny()); // type dist = 0, annot dist = 0
+        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, spi.match(RoleD.class)); // type dist = 1, annot dist = 0
+        ContextMatcher cm3 = new ReflectionContextMatcher(TypeA.class, spi.matchAny()); // type dist = 1, annot dist = 1
         
         List<ContextMatcher> cms = new ArrayList<ContextMatcher>();
         cms.add(cm3);
         cms.add(cm1);
         cms.add(cm2);
         
-        Collections.sort(cms, new ClassSatisfaction(TypeB.class).contextComparator(new AnnotationQualifier(RoleD.class)));
+        Collections.sort(cms, new ClassSatisfaction(TypeB.class).contextComparator());
         Assert.assertEquals(cm1, cms.get(0));
         Assert.assertEquals(cm2, cms.get(1));
         Assert.assertEquals(cm3, cms.get(2));

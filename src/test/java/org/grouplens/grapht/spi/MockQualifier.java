@@ -18,59 +18,14 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.lang.annotation.Annotation;
-
-import javax.annotation.Nullable;
-
-import org.grouplens.grapht.spi.Qualifier;
 
 /**
- * MockQualifier is a simple Qualifier implementation that represents {@link Qualifier}s as unique
- * objects. It can map a hierarchy by referring to other parent {@link Qualifier}s.
+ * MockQualifier is a simple Qualifier implementation that represents
+ * {@link Qualifier}s as unique objects.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockQualifier implements Qualifier {
-    private final MockQualifier parent;
-    private final boolean enableInheritence;
     
-    public MockQualifier() {
-        parent = null;
-        enableInheritence = false;
-    }
-    
-    public MockQualifier(@Nullable MockQualifier parent) {
-        this.parent = parent;
-        enableInheritence = true;
-    }
-    
-    @Override
-    public MockQualifier getParent() {
-        return parent;
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return null;
-    }
-
-    @Override
-    public Annotation[] getAnnotations() {
-        return new Annotation[0];
-    }
-
-    @Override
-    public Annotation[] getDeclaredAnnotations() {
-        return new Annotation[0];
-    }
-
-    @Override
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-        return false;
-    }
-
-    @Override
-    public boolean inheritsDefault() {
-        return parent != null && enableInheritence;
-    }
+    public MockQualifier() { }
 }

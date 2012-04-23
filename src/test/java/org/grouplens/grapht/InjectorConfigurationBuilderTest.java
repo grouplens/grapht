@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.grouplens.grapht.InjectorConfiguration;
-import org.grouplens.grapht.InjectorConfigurationBuilder;
+import javax.inject.Named;
+
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -37,10 +37,11 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.ProviderA;
-import org.grouplens.grapht.spi.reflect.types.RoleE;
+import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
+import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindType(null, InterfaceA.class, TypeA.class, 0, false)));
+                     Arrays.asList(spi.bindType(spi.matchAny(), InterfaceA.class, TypeA.class, 0, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -83,7 +84,7 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindInstance(null, InterfaceA.class, a, 0)));
+                     Arrays.asList(spi.bindInstance(spi.matchAny(), InterfaceA.class, a, 0)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -100,7 +101,7 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindProvider(null, InterfaceA.class, ProviderA.class, 0)));
+                     Arrays.asList(spi.bindProvider(spi.matchAny(), InterfaceA.class, ProviderA.class, 0)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -118,7 +119,7 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindProvider(null, InterfaceA.class, pa, 0)));
+                     Arrays.asList(spi.bindProvider(spi.matchAny(), InterfaceA.class, pa, 0)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -131,17 +132,17 @@ public class InjectorConfigurationBuilderTest {
 
         builder.getRootContext().bind(InterfaceA.class).to(TypeA.class);
         builder.getRootContext().in(TypeC.class).bind(InterfaceA.class).to(TypeB.class);
-        builder.getRootContext().in(RoleE.class, TypeC.class).bind(InterfaceB.class).to(TypeB.class);
+        builder.getRootContext().in(RoleD.class, TypeC.class).bind(InterfaceB.class).to(TypeB.class);
         InjectorConfiguration config = builder.build();
         
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindType(null, InterfaceA.class, TypeA.class, 0, false)));
-        expected.put(new ContextChain(Arrays.asList(spi.context(null, TypeC.class))),
-                     Arrays.asList(spi.bindType(null, InterfaceA.class, TypeB.class, 0, false)));
-        expected.put(new ContextChain(Arrays.asList(spi.context(spi.qualifier(RoleE.class), TypeC.class))),
-                     Arrays.asList(spi.bindType(null, InterfaceB.class, TypeB.class, 0, false)));
+                     Arrays.asList(spi.bindType(spi.matchAny(), InterfaceA.class, TypeA.class, 0, false)));
+        expected.put(new ContextChain(Arrays.asList(spi.context(spi.matchAny(), TypeC.class))),
+                     Arrays.asList(spi.bindType(spi.matchAny(), InterfaceA.class, TypeB.class, 0, false)));
+        expected.put(new ContextChain(Arrays.asList(spi.context(spi.match(RoleD.class), TypeC.class))),
+                     Arrays.asList(spi.bindType(spi.matchAny(), InterfaceB.class, TypeB.class, 0, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -157,7 +158,7 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindType(null, InterfaceA.class, TypeA.class, 0, true)));
+                     Arrays.asList(spi.bindType(spi.matchAny(), InterfaceA.class, TypeA.class, 0, true)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -167,13 +168,13 @@ public class InjectorConfigurationBuilderTest {
         // Test that bind rules properly record the qualifier they're bound with
         InjectorConfigurationBuilder builder = new InjectorConfigurationBuilder(spi, false);
 
-        builder.getRootContext().bind(InterfaceA.class).withQualifier(RoleE.class).to(TypeA.class);
+        builder.getRootContext().bind(InterfaceA.class).withQualifier(RoleD.class).to(TypeA.class);
         InjectorConfiguration config = builder.build();
         
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindType(spi.qualifier(RoleE.class), InterfaceA.class, TypeA.class, 0, false)));
+                     Arrays.asList(spi.bindType(spi.match(RoleD.class), InterfaceA.class, TypeA.class, 0, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -183,13 +184,13 @@ public class InjectorConfigurationBuilderTest {
         // Test that bind rules properly record the name they're bound with
         InjectorConfigurationBuilder builder = new InjectorConfigurationBuilder(spi, false);
 
-        builder.getRootContext().bind(String.class).withName("test1").to("hello world");
+        builder.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build()).to("hello world");
         InjectorConfiguration config = builder.build();
         
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(spi.bindInstance(spi.qualifier("test1"), String.class, "hello world", 0)));
+                     Arrays.asList(spi.bindInstance(spi.match(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build()), String.class, "hello world", 0)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -205,10 +206,10 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                     Arrays.asList(spi.bindType(null, TypeA.class, TypeBp.class, BindRule.MANUAL_BIND_RULE, false),
-                                   spi.bindType(null, InterfaceA.class, TypeBp.class, BindRule.SECOND_TIER_GENERATED_BIND_RULE, false),
-                                   spi.bindType(null, TypeB.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false),
-                                   spi.bindType(null, TypeBp.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false)));
+                     Arrays.asList(spi.bindType(spi.matchAny(), TypeA.class, TypeBp.class, BindRule.MANUAL_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), InterfaceA.class, TypeBp.class, BindRule.SECOND_TIER_GENERATED_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), TypeB.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), TypeBp.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -226,9 +227,9 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                     Arrays.asList(spi.bindType(null, TypeB.class, TypeBp.class, BindRule.MANUAL_BIND_RULE, false),
-                                   spi.bindType(null, TypeBp.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false),
-                                   spi.bindType(null, InterfaceB.class, TypeBp.class, BindRule.SECOND_TIER_GENERATED_BIND_RULE, false)));
+                     Arrays.asList(spi.bindType(spi.matchAny(), TypeB.class, TypeBp.class, BindRule.MANUAL_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), TypeBp.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), InterfaceB.class, TypeBp.class, BindRule.SECOND_TIER_GENERATED_BIND_RULE, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }
@@ -245,9 +246,9 @@ public class InjectorConfigurationBuilderTest {
         // expected
         Map<ContextChain, Collection<? extends BindRule>> expected = new HashMap<ContextChain, Collection<? extends BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                     Arrays.asList(spi.bindType(null, TypeB.class, TypeBp.class, BindRule.MANUAL_BIND_RULE, false),
-                                   spi.bindType(null, TypeBp.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false),
-                                   spi.bindType(null, InterfaceB.class, TypeBp.class, BindRule.SECOND_TIER_GENERATED_BIND_RULE, false)));
+                     Arrays.asList(spi.bindType(spi.matchAny(), TypeB.class, TypeBp.class, BindRule.MANUAL_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), TypeBp.class, TypeBp.class, BindRule.FIRST_TIER_GENERATED_BIND_RULE, false),
+                                   spi.bindType(spi.matchAny(), InterfaceB.class, TypeBp.class, BindRule.SECOND_TIER_GENERATED_BIND_RULE, false)));
         
         assertEqualBindings(expected, config.getBindRules());
     }

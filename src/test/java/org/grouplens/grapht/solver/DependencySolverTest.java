@@ -43,6 +43,7 @@ import org.grouplens.grapht.spi.MockBindRule;
 import org.grouplens.grapht.spi.MockContextMatcher;
 import org.grouplens.grapht.spi.MockDesire;
 import org.grouplens.grapht.spi.MockQualifier;
+import org.grouplens.grapht.spi.MockQualifierMatcher;
 import org.grouplens.grapht.spi.MockSatisfaction;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.junit.Test;
@@ -214,9 +215,9 @@ public class DependencySolverTest {
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(dr1, br1),
                                    new MockBindRule(dr2, br2)));
-        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, qualifier1))),
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, MockQualifierMatcher.match(qualifier1)))),
                      Arrays.asList(new MockBindRule(d3, b3))); 
-        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, qualifier2))),
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Object.class, MockQualifierMatcher.match(qualifier2)))),
                      Arrays.asList(new MockBindRule(d3, ob3))); 
         
         Desire rootDesire = new MockDesire(r1);
@@ -568,9 +569,10 @@ public class DependencySolverTest {
                                    new MockBindRule(d5, b4), // d5 -> s5
                                    new MockBindRule(d6, b4), // d6 -> s5
                                    new MockBindRule(d7, b5))); // d7 -> s6
-        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class, r1))), 
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class, MockQualifierMatcher.match(r1)))), 
                      Arrays.asList(new MockBindRule(d3, b2))); // r1s1:d3 -> s3
-        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class, r2), new MockContextMatcher(D.class, r4))),
+        bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class, MockQualifierMatcher.match(r2)), 
+                                                    new MockContextMatcher(D.class, MockQualifierMatcher.match(r4)))),
                      Arrays.asList(new MockBindRule(d7, b6))); // r2s1,r4s2:d7 -> s7
         
         Desire rootDesire = new MockDesire(s1);

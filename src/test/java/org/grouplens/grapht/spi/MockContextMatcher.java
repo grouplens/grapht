@@ -18,19 +18,17 @@
  */
 package org.grouplens.grapht.spi;
 
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.util.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
     private final Class<?> type;
-    private final MockQualifier qualifier;
+    private final MockQualifierMatcher qualifier;
     
     public MockContextMatcher(Class<?> type) {
-        this(type, null);
+        this(type, MockQualifierMatcher.any());
     }
     
-    public MockContextMatcher(Class<?> type, @Nullable MockQualifier qualifier) {
+    public MockContextMatcher(Class<?> type, MockQualifierMatcher qualifier) {
         this.type = type;
         this.qualifier = qualifier;
 
@@ -38,32 +36,6 @@ public class MockContextMatcher implements ContextMatcher {
     
     @Override
     public boolean matches(Pair<Satisfaction, Qualifier> n) {
-        boolean typeMatch = type.isAssignableFrom(n.getLeft().getErasedType());
-        boolean qualifierMatch = false;
-        
-        Qualifier c = n.getRight();
-        if (c == null && qualifier == null) {
-            qualifierMatch = true;
-        } else if (qualifier != null) {
-            while(c != null) {
-                if (c.equals(qualifier)) {
-                    // the original child eventually inherits from the parent
-                    qualifierMatch = true;
-                    break;
-                }
-                c = c.getParent();
-            }
-        } else {
-            // make sure the child qualifier inherits from the default
-            while(c != null) {
-                if (c.inheritsDefault()) {
-                    // the child inherits the default
-                    qualifierMatch = true;
-                }
-                c = c.getParent();
-            }
-        }
-        
-        return typeMatch && qualifierMatch;
+        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight());
     }
 }

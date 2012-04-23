@@ -20,12 +20,14 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
-import org.grouplens.grapht.spi.reflect.types.RoleC;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
+import org.grouplens.grapht.util.AnnotationBuilder;
 import org.grouplens.grapht.util.Pair;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,15 +35,17 @@ import org.junit.Test;
 public class ReflectionContextMatcherTest {
     @Test
     public void testEquals() {
+        InjectSPI spi = new ReflectionInjectSPI();
+        
         ReflectionContextMatcher m1 = new ReflectionContextMatcher(A.class);
         ReflectionContextMatcher m2 = new ReflectionContextMatcher(B.class);
-        ReflectionContextMatcher m3 = new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleA.class));
-        ReflectionContextMatcher m4 = new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleB.class));
+        ReflectionContextMatcher m3 = new ReflectionContextMatcher(A.class, spi.match(RoleA.class));
+        ReflectionContextMatcher m4 = new ReflectionContextMatcher(A.class, spi.match(RoleB.class));
         
         Assert.assertEquals(m1, new ReflectionContextMatcher(A.class));
         Assert.assertEquals(m2, new ReflectionContextMatcher(B.class));
-        Assert.assertEquals(m3, new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleA.class)));
-        Assert.assertEquals(m4, new ReflectionContextMatcher(A.class, new AnnotationQualifier(RoleB.class)));
+        Assert.assertEquals(m3, new ReflectionContextMatcher(A.class, spi.match(RoleA.class)));
+        Assert.assertEquals(m4, new ReflectionContextMatcher(A.class, spi.match(RoleB.class)));
         
         Assert.assertFalse(m1.equals(m2));
         Assert.assertFalse(m2.equals(m3));
@@ -66,12 +70,6 @@ public class ReflectionContextMatcherTest {
     }
     
     @Test
-    public void testSubclassSubRoleMatch() {
-        doTestMatch(A.class, RoleA.class, B.class, RoleB.class, true);
-        doTestMatch(A.class, RoleA.class, A.class, RoleC.class, true);
-    }
-    
-    @Test
     public void testNoClassInheritenceSubRoleNoMatch() {
         doTestMatch(C.class, RoleA.class, A.class, RoleB.class, false);
         doTestMatch(B.class, RoleA.class, A.class, RoleB.class, false);
@@ -82,11 +80,12 @@ public class ReflectionContextMatcherTest {
         doTestMatch(A.class, RoleA.class, B.class, RoleD.class, false);
     }
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void doTestMatch(Class<?> matcherType, Class<? extends Annotation> matcherRole,
                              Class<?> satisfactionType, Class<? extends Annotation> satisfactionRole, 
                              boolean expected) {
-        AnnotationQualifier mr = (matcherRole == null ? null : new AnnotationQualifier(matcherRole));
-        AnnotationQualifier sr = (satisfactionRole == null ? null : new AnnotationQualifier(satisfactionRole));
+        QualifierMatcher mr = (matcherRole == null ? new ReflectionInjectSPI().matchAny() : new ReflectionInjectSPI().match(matcherRole));
+        AnnotationQualifier sr = (satisfactionRole == null ? null : new AnnotationQualifier(new AnnotationBuilder(satisfactionRole).build()));
         Pair<Satisfaction, Qualifier> node = Pair.<Satisfaction, Qualifier>of(new ClassSatisfaction(satisfactionType), sr);
         
         ReflectionContextMatcher cm = new ReflectionContextMatcher(matcherType, mr);

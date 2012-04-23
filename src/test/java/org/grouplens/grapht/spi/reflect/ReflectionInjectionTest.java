@@ -35,18 +35,12 @@ import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.InjectionPoint;
-import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.ProviderClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionDesire;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.ParameterA;
 import org.grouplens.grapht.spi.reflect.types.ProviderA;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
-import org.grouplens.grapht.spi.reflect.types.RoleE;
+import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
@@ -142,11 +136,11 @@ public class ReflectionInjectionTest {
         
         Map<ContextChain, Collection<? extends BindRule>> bindRules = new HashMap<ContextChain, Collection<? extends BindRule>>();
         bindRules.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                      Arrays.asList(spi.bindInstance(spi.qualifier(ParameterA.class), Integer.class, 10, 0),
-                                    spi.bindType(spi.qualifier(RoleA.class), InterfaceA.class, PrimeA.class, 0, false),
-                                    spi.bindType(spi.qualifier(RoleE.class), InterfaceB.class, PrimeB.class, 0, false),
-                                    spi.bindInstance(null, TypeA.class, a, 0),
-                                    spi.bindInstance(null, TypeB.class, b, 0)));
+                      Arrays.asList(spi.bindInstance(spi.match(ParameterA.class), Integer.class, 10, 0),
+                                    spi.bindType(spi.match(RoleA.class), InterfaceA.class, PrimeA.class, 0, false),
+                                    spi.bindType(spi.match(RoleD.class), InterfaceB.class, PrimeB.class, 0, false),
+                                    spi.bindInstance(spi.matchAny(), TypeA.class, a, 0),
+                                    spi.bindInstance(spi.matchAny(), TypeB.class, b, 0)));
         
         DefaultInjector r = new DefaultInjector(new MockInjectorConfiguration(spi, bindRules));
 

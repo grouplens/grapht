@@ -23,9 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Qualifier;
 
-import org.grouplens.grapht.annotation.InheritsQualifier;
-
 @Qualifier
-@InheritsQualifier(RoleA.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RoleB { }

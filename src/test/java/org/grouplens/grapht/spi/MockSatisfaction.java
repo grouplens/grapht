@@ -83,7 +83,7 @@ public class MockSatisfaction implements Satisfaction {
     }
     
     @Override
-    public Comparator<ContextMatcher> contextComparator(Qualifier qualifier) {
+    public Comparator<ContextMatcher> contextComparator() {
         return new Comparator<ContextMatcher>() {
             @Override
             public int compare(ContextMatcher arg0, ContextMatcher arg1) {

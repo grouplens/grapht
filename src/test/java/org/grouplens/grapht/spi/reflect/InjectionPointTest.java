@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -29,21 +30,22 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.grouplens.grapht.annotation.Transient;
-import org.grouplens.grapht.spi.reflect.AnnotationQualifier;
-import org.grouplens.grapht.spi.reflect.ConstructorParameterInjectionPoint;
-import org.grouplens.grapht.spi.reflect.InjectionPoint;
-import org.grouplens.grapht.spi.reflect.NamedQualifier;
-import org.grouplens.grapht.spi.reflect.ReflectionDesire;
-import org.grouplens.grapht.spi.reflect.SetterInjectionPoint;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
-import org.grouplens.grapht.spi.reflect.types.RoleC;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.spi.reflect.types.RoleE;
+import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class InjectionPointTest {
+    private static <T extends Annotation> AnnotationQualifier qualifier(Class<T> qtype) {
+        return new AnnotationQualifier(new AnnotationBuilder<T>(qtype).build());
+    }
+    
+    private static <T extends Annotation> AnnotationQualifier named(String name) {
+        return new AnnotationQualifier(new AnnotationBuilder<Named>(Named.class).set("value", name).build());
+    }
+    
     @Test
     public void testConstructorParameterInjectionPoint() throws Exception {
         // created expected injection points
@@ -56,8 +58,8 @@ public class InjectionPointTest {
         expected.add(p2);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(new AnnotationQualifier(RoleA.class), p1.getQualifier());
-        Assert.assertEquals(new AnnotationQualifier(RoleB.class), p2.getQualifier());
+        Assert.assertEquals(qualifier(RoleA.class), p1.getQualifier());
+        Assert.assertEquals(qualifier(RoleB.class), p2.getQualifier());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         
@@ -88,10 +90,10 @@ public class InjectionPointTest {
         expected.add(p4);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(new AnnotationQualifier(RoleA.class), p1.getQualifier());
-        Assert.assertEquals(new AnnotationQualifier(RoleB.class), p2.getQualifier());
-        Assert.assertEquals(new AnnotationQualifier(RoleE.class), p3.getQualifier());
-        Assert.assertEquals(new AnnotationQualifier(RoleD.class), p4.getQualifier());
+        Assert.assertEquals(qualifier(RoleA.class), p1.getQualifier());
+        Assert.assertEquals(qualifier(RoleB.class), p2.getQualifier());
+        Assert.assertNull(p3.getQualifier());
+        Assert.assertEquals(qualifier(RoleD.class), p4.getQualifier());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         Assert.assertEquals(Object.class, p3.getType());
@@ -134,8 +136,8 @@ public class InjectionPointTest {
         expected.add(p2);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(new NamedQualifier("test1"), p1.getQualifier());
-        Assert.assertEquals(new NamedQualifier("test2"), p2.getQualifier());
+        Assert.assertEquals(named("test1"), p1.getQualifier());
+        Assert.assertEquals(named("test2"), p2.getQualifier());
         Assert.assertEquals(String.class, p1.getType());
         Assert.assertEquals(Integer.class, p2.getType());
         
@@ -188,7 +190,7 @@ public class InjectionPointTest {
         public void setB(@RoleB String b) { }
         
         @Inject
-        public boolean setMulti(@RoleE Object a, @Nullable @RoleD String c) {
+        public boolean setMulti(Object a, @Nullable @RoleD String c) {
             return false;
         }
         
@@ -201,7 +203,7 @@ public class InjectionPointTest {
         public BothTypes(@RoleA Object a, @RoleB String b) { }
         
         @Inject
-        public void setC(@RoleC Object c) { }
+        public void setC(Object c) { }
         
         @Inject
         public void setD(@RoleD String d) { }

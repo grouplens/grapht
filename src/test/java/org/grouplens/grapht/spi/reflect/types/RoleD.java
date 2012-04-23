@@ -24,10 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.annotation.DefaultImplementation;
-import org.grouplens.grapht.annotation.InheritsDefaultQualifier;
 
 @Qualifier
 @DefaultImplementation(TypeB.class)
-@InheritsDefaultQualifier
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RoleD { }
