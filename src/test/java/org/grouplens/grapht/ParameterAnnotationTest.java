@@ -125,6 +125,15 @@ public class ParameterAnnotationTest {
         
         Assert.assertEquals(50, t.a);
     }
+    
+    @Test
+    public void testDiscreteToFloatCoercion() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(DoubleParameter.class, Integer.valueOf(50));
+        Type t = b.build().getInstance(Type.class);
+        
+        Assert.assertEquals(50.0, t.b, 0.00001);
+    }
 
     @Parameter(PrimitiveType.INT)
     @DefaultInteger(0)
