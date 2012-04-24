@@ -25,7 +25,7 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
+import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -94,7 +94,7 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
+    public Provider<?> makeProvider(ProviderSource dependencies) {
         // we have to use the raw type because we don't have enough information,
         // but we can assume correctly that it will build a provider
         Provider<Provider<?>> providerBuilder = new InjectionProviderImpl(providerType, getDependencies(), dependencies);

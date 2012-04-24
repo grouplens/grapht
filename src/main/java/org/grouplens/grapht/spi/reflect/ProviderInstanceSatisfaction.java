@@ -26,14 +26,14 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
+import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.util.Types;
 
 
 /**
  * Satisfaction implementation wrapping an existing Provider instance. It has no
  * dependencies and it always returns the same Provider when
- * {@link #makeProvider(Function)} is invoked.
+ * {@link #makeProvider(ProviderSource)} is invoked.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
@@ -54,7 +54,7 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     }
     
     /**
-     * @return The provider instance returned by {@link #makeProvider(Function)}
+     * @return The provider instance returned by {@link #makeProvider(ProviderSource)}
      */
     public Provider<?> getProvider() {
         return provider;
@@ -87,7 +87,7 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     }
 
     @Override
-    public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
+    public Provider<?> makeProvider(ProviderSource dependencies) {
         return provider;
     }
     

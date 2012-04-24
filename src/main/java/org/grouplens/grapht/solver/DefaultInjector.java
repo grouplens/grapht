@@ -32,9 +32,9 @@ import org.grouplens.grapht.graph.Node;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Function;
 
 /**
  * <p>
@@ -170,7 +170,7 @@ public class DefaultInjector implements Injector {
         }
     }
     
-    private class DesireProviderMapper implements Function<Desire, Provider<?>> {
+    private class DesireProviderMapper implements ProviderSource {
         private final Node<Satisfaction> forNode;
         
         public DesireProviderMapper(Node<Satisfaction> forNode) {

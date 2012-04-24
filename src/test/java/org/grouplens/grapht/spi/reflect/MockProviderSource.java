@@ -16,22 +16,33 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.util;
+package org.grouplens.grapht.spi.reflect;
 
-/**
- * Function represents a mathematical function that operates on an input domain
- * and returns results in an output range. These can be of separate types.
- * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
- * @param <I> The type of the input
- * @param <O> The type of the output
- */
-public interface Function<I, O> {
-    /**
-     * Apply this function to the input and return the computed output.
-     * 
-     * @param input The input arguments to the function
-     * @return The output of running the function
-     */
-    O apply(I input);
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Provider;
+
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.ProviderSource;
+
+public class MockProviderSource implements ProviderSource {
+    private final Map<ReflectionDesire, Provider<?>> providers;
+    
+    public MockProviderSource() {
+        providers = new HashMap<ReflectionDesire, Provider<?>>();
+    }
+    
+    public void add(ReflectionDesire desire, Provider<?> provider) {
+        providers.put(desire, provider);
+    }
+    
+    public void add(InjectionPoint injectPoint, Provider<?> provider) {
+        providers.put(new ReflectionDesire(injectPoint), provider);
+    }
+    
+    @Override
+    public Provider<?> apply(Desire desire) {
+        return providers.get(desire);
+    }
 }

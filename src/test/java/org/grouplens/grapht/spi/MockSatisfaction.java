@@ -25,12 +25,11 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.grapht.util.Function;
 
 /**
  * MockSatisfaction is a simple implementation of Satisfactions for certain
  * types of test cases. It can be configured by its constructors, although
- * {@link #makeProvider(Function)} always returns the same provider.
+ * {@link #makeProvider(ProviderSource)} always returns the same provider.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
@@ -73,12 +72,11 @@ public class MockSatisfaction implements Satisfaction {
 
     @Override
     public Class<?> getErasedType() {
-        // FIXME: is this correct?
         return type;
     }
 
     @Override
-    public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
+    public Provider<?> makeProvider(ProviderSource dependencies) {
         return provider;
     }
     

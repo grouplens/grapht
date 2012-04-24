@@ -98,7 +98,7 @@ public class ReflectionSatisfactionTest {
         InterfaceB b1 = new TypeB();
         TypeB b2 = new TypeB();
         
-        MockProviderFunction providers = new MockProviderFunction();
+        MockProviderSource providers = new MockProviderSource();
         providers.add(TypeC.CONSTRUCTOR, new InstanceProvider<Integer>(10));
         providers.add(TypeC.INTERFACE_A, new InstanceProvider<InterfaceA>(a1));
         providers.add(TypeC.TYPE_A, new InstanceProvider<TypeA>(a2));
@@ -130,7 +130,7 @@ public class ReflectionSatisfactionTest {
     @Test
     public void testInstanceSatisfactionProvider() throws Exception {
         TypeC c = new TypeC(4);
-        Provider<?> p = new InstanceSatisfaction(c).makeProvider(new MockProviderFunction());
+        Provider<?> p = new InstanceSatisfaction(c).makeProvider(new MockProviderSource());
         Assert.assertSame(c, p.get());
     }
     
@@ -144,7 +144,7 @@ public class ReflectionSatisfactionTest {
     
     @Test
     public void testProviderClassSatisfactionProvider() throws Exception {
-        MockProviderFunction providers = new MockProviderFunction();
+        MockProviderSource providers = new MockProviderSource();
         providers.add(ctorProviderCIP, new InstanceProvider<Integer>(10));
         
         Provider<?> provider = new ProviderClassSatisfaction(ProviderC.class).makeProvider(providers);
@@ -170,7 +170,7 @@ public class ReflectionSatisfactionTest {
     @Test
     public void testProviderInstanceSatisfactionProvider() throws Exception {
         ProviderC instance = new ProviderC(10);
-        Provider<?> provider = new ProviderInstanceSatisfaction(instance).makeProvider(new MockProviderFunction());
+        Provider<?> provider = new ProviderInstanceSatisfaction(instance).makeProvider(new MockProviderSource());
         Assert.assertSame(instance, provider);
     }
     

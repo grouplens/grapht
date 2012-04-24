@@ -25,7 +25,7 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
+import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.util.InstanceProvider;
 
 /**
@@ -75,7 +75,7 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
+    public Provider<?> makeProvider(ProviderSource dependencies) {
         return new InstanceProvider(instance);
     }
     

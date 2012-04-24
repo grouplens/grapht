@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.grapht.util.Function;
 
 /**
  * A concrete type. It has a set of dependencies which must be satisfied in
@@ -70,7 +69,7 @@ public interface Satisfaction {
      * @return A provider of new instances of the type specified by this satisfaction,
      *         instantiated using the specified dependency mapping.
      */
-    Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies);
+    Provider<?> makeProvider(ProviderSource dependencies);
 
     /**
      * Create a Comparator that can be used to compare ContextMatchers that

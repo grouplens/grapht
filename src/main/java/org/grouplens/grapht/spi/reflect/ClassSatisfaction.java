@@ -24,7 +24,7 @@ import java.util.List;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
+import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.util.Types;
 
 
@@ -73,7 +73,7 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Provider<?> makeProvider(Function<? super Desire, ? extends Provider<?>> dependencies) {
+    public Provider<?> makeProvider(ProviderSource dependencies) {
         return new InjectionProviderImpl(type, getDependencies(), dependencies);
     }
     

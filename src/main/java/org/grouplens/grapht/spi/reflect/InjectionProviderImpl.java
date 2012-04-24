@@ -26,8 +26,7 @@ import java.util.Map;
 
 import javax.inject.Provider;
 
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Function;
+import org.grouplens.grapht.spi.ProviderSource;
 
 /**
  * InjectionProviderImpl is a Provider implementation capable of creating any
@@ -41,7 +40,7 @@ import org.grouplens.grapht.util.Function;
 public class InjectionProviderImpl<T> implements Provider<T> {
     private final Class<T> type;
     private final List<ReflectionDesire> desires;
-    private final Function<? super Desire, ? extends Provider<?>> providers;
+    private final ProviderSource providers;
 
     /**
      * Create an InjectionProviderImpl that will provide instances of the given
@@ -52,7 +51,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
      * @param desires The dependency desires for the instance
      * @param providers The providers that satisfy the desires of the type
      */
-    public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, Function<? super Desire, ? extends Provider<?>> providers) {
+    public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, ProviderSource providers) {
         this.type = type;
         this.desires = desires;
         this.providers = providers;
