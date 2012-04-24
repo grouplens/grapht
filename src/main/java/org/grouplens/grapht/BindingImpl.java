@@ -19,6 +19,8 @@
 package org.grouplens.grapht;
 
 import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -133,15 +135,63 @@ class BindingImpl<T> implements Binding<T> {
         ContextChain chain = context.getContextChain();
         InjectorConfigurationBuilder config = context.getBuilder();
 
+        // Apply some type coercing if we're dealing with primitive types
+        Object coerced = coerce(instance);
+        
         if (config.getGenerateRules()) {
-            Map<Class<?>, Integer> bindPoints = generateBindPoints(instance.getClass());
+            Map<Class<?>, Integer> bindPoints = generateBindPoints(coerced.getClass());
             for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindInstance(qualifier, (Class) e.getKey(), instance, e.getValue());
+                BindRule rule = config.getSPI().bindInstance(qualifier, (Class) e.getKey(), coerced, e.getValue());
                 config.addBindRule(chain, rule);
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindInstance(qualifier, sourceType, instance, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(chain, config.getSPI().bindInstance(qualifier, (Class) sourceType, coerced, BindRule.MANUAL_BIND_RULE));
         }
+    }
+    
+    private Object coerce(Object in) {
+        Class<?> boxedSource = Types.box(sourceType);
+        if (Integer.class.equals(boxedSource)) {
+            // normalize to BigInteger and then cast to int
+            return Integer.valueOf(toBigInteger(in).intValue());
+        } else if (Short.class.equals(boxedSource)) {
+            // normalize to BigInteger and then cast to short
+            return Short.valueOf(toBigInteger(in).shortValue());
+        } else if (Byte.class.equals(boxedSource)) {
+            // normalize to BigInteger and then cast to byte
+            return Byte.valueOf(toBigInteger(in).byteValue());
+        } else if (Long.class.equals(boxedSource)) {
+            // normalize to BigInteger and then cast to long
+            return Long.valueOf(toBigInteger(in).longValue());
+        } else if (Float.class.equals(boxedSource)) {
+            // normalize to BigDecimal and then cast to float
+            return Float.valueOf(toBigDecimal(in).floatValue());
+        } else if (Double.class.equals(boxedSource)) {
+            // normalize to BigDecimal and then cast to double
+            return Double.valueOf(toBigDecimal(in).doubleValue());
+        } else if (BigDecimal.class.equals(boxedSource)) {
+            // normalize to BigDecimal
+            return toBigDecimal(in);
+        } else if (BigInteger.class.equals(boxedSource)) {
+            // normalize to BigInteger
+            return toBigInteger(in);
+        } else {
+            // don't perform any type coercion
+            return in;
+        }
+    }
+    
+    private BigDecimal toBigDecimal(Object in) {
+        // We assume in is a floating primitive boxed type, so its toString()
+        // converts its value to a form parsed by BigDecimal's constructor
+        return new BigDecimal(in.toString());
+    }
+    
+    private BigInteger toBigInteger(Object in) {
+        // We assume in is a discrete primitive boxed type, so its toString()
+        // converts its value to a textual form that can be parsed by 
+        // BigInteger's constructor
+        return new BigInteger(in.toString());
     }
 
     @Override

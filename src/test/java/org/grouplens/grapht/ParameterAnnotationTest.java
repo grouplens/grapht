@@ -20,6 +20,8 @@ package org.grouplens.grapht;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import javax.inject.Inject;
 import javax.inject.Qualifier;
@@ -77,6 +79,51 @@ public class ParameterAnnotationTest {
         
         Assert.assertEquals(50, t.a);
         Assert.assertEquals(50.0, t.b, 0.00001);
+    }
+    
+    @Test
+    public void testFromBigIntegerCoercion() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(IntParameter.class, BigInteger.valueOf(50));
+        Type t = b.build().getInstance(Type.class);
+        
+        Assert.assertEquals(50, t.a);
+    }
+    
+    @Test
+    public void testFromBigDecimalCoercion() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(DoubleParameter.class, new BigDecimal(50.34));
+        Type t = b.build().getInstance(Type.class);
+        
+        Assert.assertEquals(50.34, t.b, 0.00001);
+    }
+    
+    @Test
+    public void testFromLongCoercion() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(IntParameter.class, Long.valueOf(50));
+        Type t = b.build().getInstance(Type.class);
+        
+        Assert.assertEquals(50, t.a);
+    }
+    
+    @Test
+    public void testFromFloatCoercion() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(DoubleParameter.class, Float.valueOf(50f));
+        Type t = b.build().getInstance(Type.class);
+        
+        Assert.assertEquals(50.0, t.b, 0.00001);
+    }
+    
+    @Test
+    public void testFromByteCoercion() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(IntParameter.class, Byte.valueOf((byte) 50));
+        Type t = b.build().getInstance(Type.class);
+        
+        Assert.assertEquals(50, t.a);
     }
 
     @Parameter(PrimitiveType.INT)
