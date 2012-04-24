@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.util;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.annotation.Transient;
@@ -148,13 +149,33 @@ public final class Types {
     }
     
     /**
-     * Return true if the type is not abstract and not an interface.
+     * Return true if the type is not abstract and not an interface, and has
+     * a constructor annotated with {@link Inject}, or its only constructor
+     * is the default constructor.
      * 
      * @param type A class type
      * @return True if the class type is instantiable
      */
     public static boolean isInstantiable(Class<?> type) {
-        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
+        if (!Modifier.isAbstract(type.getModifiers()) && !type.isInterface()) {
+            // first check for a constructor annotated with @Inject, 
+            //  - this doesn't care how many we'll let the injector complain
+            //    if there are more than one
+            for (Constructor<?> c: type.getConstructors()) {
+                if (c.getAnnotation(Inject.class) != null) {
+                    return true;
+                }
+            }
+            
+            // check if we only have the default constructor
+            if (type.getConstructors().length == 1 
+                && type.getConstructors()[0].getParameterTypes().length == 0) {
+                return true;
+            }
+        }
+        
+        // no constructor available
+        return false;
     }
     
     /**

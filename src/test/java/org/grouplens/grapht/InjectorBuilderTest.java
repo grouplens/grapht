@@ -20,6 +20,7 @@ package org.grouplens.grapht;
 
 import javax.inject.Named;
 
+import org.grouplens.grapht.solver.ResolverException;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
@@ -74,16 +75,15 @@ public class InjectorBuilderTest {
         Assert.assertEquals("hello world", i.getInstance(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build(), String.class));
     }
     
-    @Test
+    @Test(expected=ResolverException.class)
     public void testInjectorMissingNamedBinding() throws Exception {
         InjectorBuilder b = new InjectorBuilder();
         b.bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
         Injector i = b.build();
         
-        // since we don't have a 'test1' bound, the resolver falls back to the
-        // default String() constructor, which injects the empty string
-        // FIXME: This is not the correct behavior after issue 8 is resolved
-        NamedType c = i.getInstance(NamedType.class);
-        Assert.assertEquals("", c.getNamedString());
+        // since we don't have a 'test1' bound, the resolver cannot find 
+        // a usable constructor for String (although it has the default constructor,
+        // it defines others that are not injectable).
+        i.getInstance(NamedType.class);
     }
 }
