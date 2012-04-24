@@ -38,7 +38,6 @@ import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Ordering;
 import org.grouplens.grapht.util.Pair;
 
 /**
@@ -432,6 +431,44 @@ public class DependencySolver {
             // if we've made it here, both chains were equal up to the shortest chain,
             // or at least one of the chains was empty (that part is a little strange,
             // but we'll get correct results when we sort by context chain length next).
+            return 0;
+        }
+    }
+    
+    private static class Ordering<T> implements Comparator<T> {
+        private final List<Comparator<T>> comparators;
+        
+        private Ordering() {
+            comparators = new ArrayList<Comparator<T>>();
+        }
+        
+        public static <T> Ordering<T> from(Comparator<T> c) {
+            if (c == null) {
+                throw new NullPointerException("Comparator cannot be null");
+            }
+            Ordering<T> o = new Ordering<T>();
+            o.comparators.add(c);
+            return o;
+        }
+        
+        public Ordering<T> compound(Comparator<T> c) {
+            if (c == null) {
+                throw new NullPointerException("Comparator cannot be null");
+            }
+            Ordering<T> no = new Ordering<T>();
+            no.comparators.addAll(comparators);
+            no.comparators.add(c);
+            return no;
+        }
+        
+        @Override
+        public int compare(T o1, T o2) {
+            for (Comparator<T> c: comparators) {
+                int result = c.compare(o1, o2);
+                if (result != 0) {
+                    return result;
+                }
+            }
             return 0;
         }
     }
