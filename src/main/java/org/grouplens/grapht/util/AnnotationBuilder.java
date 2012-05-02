@@ -78,6 +78,16 @@ public final class AnnotationBuilder<T extends Annotation> {
         type = annotType;
         attributes = new HashMap<String, Object>();
     }
+
+    /**
+     * Constructor method to allow the builder type to be inferred.
+     * @param annotType The annotation type to build.
+     * @param <T> The type of annotation to build (type parameter).
+     * @return An annotation builder to create an implementation of the annotation.
+     */
+    public static <T extends Annotation> AnnotationBuilder<T> of(Class<T> annotType) {
+        return new AnnotationBuilder<T>(annotType);
+    }
     
     /**
      * Set the annotation defined member given by <tt>name</tt> to the boolean
