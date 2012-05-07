@@ -172,7 +172,7 @@ public class ReflectionBindRule implements BindRule {
                r.sourceType.equals(sourceType) &&
                r.implType.equals(implType) &&
                r.terminateChain == terminateChain &&
-               (r.qualifier == null ? qualifier == null : r.qualifier.equals(qualifier)) &&
+               r.qualifier.equals(qualifier) &&
                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction));
     }
     
@@ -184,11 +184,10 @@ public class ReflectionBindRule implements BindRule {
         result += 31 * result + (terminateChain ? 1 : 0);
         result += 31 * result + sourceType.hashCode();
         result += 31 * result + implType.hashCode();
+        result += 31 * result + qualifier.hashCode();
+
         if (satisfaction != null) {
             result += 31 * result + satisfaction.hashCode(); 
-        }
-        if (qualifier != null) {
-            result += 31 * result + qualifier.hashCode();
         }
         
         return result;
@@ -196,9 +195,7 @@ public class ReflectionBindRule implements BindRule {
     
     @Override
     public String toString() {
-        String q = (qualifier == null ? "" : qualifier + ":");
         String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
-        
-        return "Bind(weight=" + weight + ", " + q + sourceType.getSimpleName() + " -> " + i + ")";
+        return "Bind(weight=" + weight + ", " + qualifier + ":" + sourceType.getSimpleName() + " -> " + i + ")";
     }
 }

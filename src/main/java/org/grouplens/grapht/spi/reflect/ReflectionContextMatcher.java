@@ -53,6 +53,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * @param {@link Qualifier} The {@link Qualifier} to match
      */
     public ReflectionContextMatcher(Class<?> type, QualifierMatcher qualifier) {
+        // FIXME add checks here
         this.type = type;
         this.qualifier = qualifier;
     }
@@ -88,7 +89,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
             return false;
         }
         ReflectionContextMatcher r = (ReflectionContextMatcher) o;
-        return r.type.equals(type) && (r.qualifier == null ? qualifier == null : r.qualifier.equals(qualifier));
+        return r.type.equals(type) && r.qualifier.equals(qualifier);
     }
     
     @Override
@@ -98,7 +99,6 @@ public class ReflectionContextMatcher implements ContextMatcher {
     
     @Override
     public String toString() {
-        String q = (qualifier == null ? "" : qualifier + ":");
-        return "ReflectionContextMatcher(" + q + type.getSimpleName() + ")";
+        return "ReflectionContextMatcher(" + qualifier + ":" + type.getSimpleName() + ")";
     }
 }

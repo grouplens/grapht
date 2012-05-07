@@ -148,6 +148,11 @@ public final class Qualifiers {
         public int hashCode() {
             return AnyMatcher.class.hashCode();
         }
+        
+        @Override
+        public String toString() {
+            return "*";
+        }
     }
     
     private static class NullMatcher extends AbstractMatcher {
@@ -167,6 +172,11 @@ public final class Qualifiers {
         @Override
         public int hashCode() {
             return NullMatcher.class.hashCode();
+        }
+        
+        @Override
+        public String toString() {
+            return "-";
         }
     }
     
@@ -201,6 +211,11 @@ public final class Qualifiers {
         public int hashCode() {
             return type.hashCode();
         }
+        
+        @Override
+        public String toString() {
+            return type.toString();
+        }
     }
     
     private static class AnnotationMatcher extends AbstractMatcher {
@@ -233,6 +248,11 @@ public final class Qualifiers {
         @Override
         public int hashCode() {
             return annot.hashCode();
+        }
+        
+        @Override
+        public String toString() {
+            return annot.toString();
         }
     }
 }
