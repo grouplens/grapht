@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -58,17 +57,6 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
      */
     public Provider<?> getProvider() {
         return provider;
-    }
-    
-    @Override
-    public boolean canProduceNull() {
-        try {
-            Method get = provider.getClass().getMethod("get");
-            return Types.hasNullableAnnotation(get.getAnnotations());
-        } catch (Exception e) {
-            // shouldn't happen, we know get() exists on a provider
-            throw new RuntimeException(e);
-        }   
     }
     
     @Override

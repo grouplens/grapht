@@ -53,12 +53,6 @@ public class NullSatisfaction extends ReflectionSatisfaction {
     }
     
     @Override
-    public boolean canProduceNull() {
-        // NullSatisfaction always produces a null value
-        return true;
-    }
-    
-    @Override
     public List<? extends Desire> getDependencies() {
         return Collections.emptyList();
     }

@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -52,6 +51,7 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
             throw new IllegalArgumentException("Class type is not a Provider implementation");
         }
         if (!Types.isInstantiable(providerType)) {
+            // FIXME improve
             throw new IllegalArgumentException("Provider class cannot be instntiated");
         }
         
@@ -64,17 +64,6 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
      */
     public Class<? extends Provider<?>> getProviderType() {
         return providerType;
-    }
-    
-    @Override
-    public boolean canProduceNull() {
-        try {
-            Method get = providerType.getMethod("get");
-            return Types.hasNullableAnnotation(get.getAnnotations());
-        } catch (Exception e) {
-            // shouldn't happen, we know get() exists on a provider
-            throw new RuntimeException(e);
-        }
     }
     
     @Override

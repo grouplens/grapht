@@ -72,18 +72,6 @@ public class ReflectionSatisfactionTest {
     }
     
     @Test
-    public void testCanProduceNull() throws Exception {
-        Assert.assertTrue(new NullSatisfaction(A.class).canProduceNull());
-        Assert.assertTrue(new ProviderClassSatisfaction(PB.class).canProduceNull());
-        Assert.assertTrue(new ProviderInstanceSatisfaction(new PB()).canProduceNull());
-        
-        Assert.assertFalse(new ClassSatisfaction(A.class).canProduceNull());
-        Assert.assertFalse(new InstanceSatisfaction(new A()).canProduceNull());
-        Assert.assertFalse(new ProviderClassSatisfaction(PA.class).canProduceNull());
-        Assert.assertFalse(new ProviderInstanceSatisfaction(new PA()).canProduceNull());
-    }
-    
-    @Test
     public void testClassSatisfactionDesires() throws Exception {
         ClassSatisfaction s = new ClassSatisfaction(TypeC.class);
         Set<InjectionPoint> d = getInjectionPoints(s);
