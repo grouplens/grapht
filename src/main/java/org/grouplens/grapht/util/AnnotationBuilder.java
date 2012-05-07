@@ -328,6 +328,206 @@ public final class AnnotationBuilder<T extends Annotation> {
         return set(name, value, value.getClass());
     }
     
+    /**
+     * Set the 'value' attribute to the given boolean value.
+     * 
+     * @param value The boolean value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(boolean value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given byte value.
+     * 
+     * @param value The byte value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(byte value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given short value.
+     * 
+     * @param value The short value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(short value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given int value.
+     * 
+     * @param value The int value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(int value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given long value.
+     * 
+     * @param value The long value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(long value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given double value.
+     * 
+     * @param value The double value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(double value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given float value.
+     * 
+     * @param value The float value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(float value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given char value.
+     * 
+     * @param value The char value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(char value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given String value.
+     * 
+     * @param value The String value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(String value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given annotation.
+     * 
+     * @param value The annotation value
+     * @return This builder
+     */
+    public <A extends Annotation> AnnotationBuilder<T> setValue(A value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given boolean array.
+     * 
+     * @param value The boolean array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(boolean[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given byte array.
+     * 
+     * @param value The byte array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(byte[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given short array.
+     * 
+     * @param value The short array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(short[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given int array.
+     * 
+     * @param value The int array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(int[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given long array.
+     * 
+     * @param value The long array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(long[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given double array.
+     * 
+     * @param value The double array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(double[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given float array.
+     * 
+     * @param value The float array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(float[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given char array.
+     * 
+     * @param value The char array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(char[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given String array.
+     * 
+     * @param value The String array
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(String[] value) {
+        return set("value", value);
+    }
+    
+    /**
+     * Set the 'value' attribute to the given annotation array.
+     * 
+     * @param value The annotation array
+     * @return This builder
+     */
+    public <A extends Annotation> AnnotationBuilder<T> setValue(A[] value) {
+        return set("value", value);
+    }
+    
     private AnnotationBuilder<T> set(String name, Object value, Class<?> type) {
         try {
             Method attr = this.type.getMethod(name);

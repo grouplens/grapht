@@ -40,7 +40,7 @@ public class Names {
      */
     public static Named named(String name) {
         return new AnnotationBuilder<Named>(Named.class)
-            .set("value", name)
+            .setValue(name)
             .build();
     }
 }
