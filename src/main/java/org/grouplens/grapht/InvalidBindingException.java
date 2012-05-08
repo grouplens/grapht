@@ -28,24 +28,24 @@ import javax.inject.Qualifier;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ConfigurationException extends RuntimeException {
+public class InvalidBindingException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     private final Class<?> type;
     
-    public ConfigurationException(Class<?> type) {
+    public InvalidBindingException(Class<?> type) {
         this(type, "");
     }
     
-    public ConfigurationException(Class<?> type, String message) {
+    public InvalidBindingException(Class<?> type, String message) {
         this(type, message, null);
     }
     
-    public ConfigurationException(Class<?> type, Throwable t) {
+    public InvalidBindingException(Class<?> type, Throwable t) {
         this(type, "", t);
     }
     
-    public ConfigurationException(Class<?> type, String message, Throwable t) {
+    public InvalidBindingException(Class<?> type, String message, Throwable t) {
         super(message, t);
         this.type = type;
     }

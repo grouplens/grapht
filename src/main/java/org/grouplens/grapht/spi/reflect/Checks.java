@@ -21,7 +21,7 @@ package org.grouplens.grapht.spi.reflect;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 
-import org.grouplens.grapht.ConfigurationException;
+import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.util.Types;
 
@@ -37,16 +37,16 @@ final class Checks {
     @SuppressWarnings("unchecked")
     public static void isQualifier(Class<?> type) {
         if (!Annotation.class.isAssignableFrom(type)) {
-            throw new ConfigurationException(type, "Type is not an Annotation");
+            throw new InvalidBindingException(type, "Type is not an Annotation");
         }
         if (!Qualifiers.isQualifier((Class<? extends Annotation>) type)) {
-            throw new ConfigurationException(type, "Annotation is not annotated with @Qualifier");
+            throw new InvalidBindingException(type, "Annotation is not annotated with @Qualifier");
         }
     }
     
     public static void isAssignable(Class<?> source, Class<?> impl) {
         if (!source.isAssignableFrom(impl)) {
-            throw new ConfigurationException(impl, "Type is not assignable to " + source);
+            throw new InvalidBindingException(impl, "Type is not assignable to " + source);
         }
     }
     

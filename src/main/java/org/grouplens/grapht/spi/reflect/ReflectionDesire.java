@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.grouplens.grapht.ConfigurationException;
+import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.annotation.DefaultBoolean;
 import org.grouplens.grapht.annotation.DefaultDouble;
 import org.grouplens.grapht.annotation.DefaultImplementation;
@@ -68,7 +68,7 @@ public class ReflectionDesire implements Desire {
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
-                    throw new ConfigurationException(type, "More than one constructor with @Inject is not allowed");
+                    throw new InvalidBindingException(type, "More than one constructor with @Inject is not allowed");
                 }
             }
         }
