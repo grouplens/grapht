@@ -993,7 +993,7 @@ public class DependencySolverTest {
         r.resolve(rootDesire);
     }
     
-    @Test(expected=ResolverException.class)
+    @Test(expected=CyclicDependencyException.class)
     public void testCyclicDependenciesFail() throws Exception {
         // Test that a cyclic dependency is properly caught and resolving
         // fails before a stack overflow
@@ -1016,7 +1016,7 @@ public class DependencySolverTest {
         r.resolve(rootDesire);
     }
     
-    @Test(expected=ResolverException.class)
+    @Test(expected=MultipleBindingsException.class)
     public void testTooManyBindRulesFail() throws Exception {
         // Test that providing too many choices for bind rules throws an exception
         Desire d1 = new MockDesire();
@@ -1037,7 +1037,7 @@ public class DependencySolverTest {
         r.resolve(rootDesire);
     }
 
-    @Test(expected=ResolverException.class)
+    @Test(expected=UnresolvableDependencyException.class)
     public void testUnsatisfiableDesireFail() throws Exception {
         // Test that a chain of desires that cannot be satisfied throws an exception
         Desire d1 = new MockDesire();
@@ -1055,7 +1055,7 @@ public class DependencySolverTest {
         r.resolve(rootDesire);
     }
     
-    @Test(expected=ResolverException.class)
+    @Test(expected=UnresolvableDependencyException.class)
     public void testNoBindRulesFail() throws Exception {
         // Test that not providing applicable bind rules will throw an exception,
         // even if other bind rules are given
@@ -1073,7 +1073,7 @@ public class DependencySolverTest {
         r.resolve(rootDesire);
     }
 
-    @Test(expected=ResolverException.class)
+    @Test(expected=UnresolvableDependencyException.class)
     public void testNonLeafSatisfiableDesireFail() throws Exception {
         // Test that a chain of desires, where an intermediate desire is
         // satisfiable but the leaf node is not, still throws an exception
