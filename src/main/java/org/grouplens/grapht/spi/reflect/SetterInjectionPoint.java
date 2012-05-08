@@ -38,14 +38,8 @@ public class SetterInjectionPoint implements InjectionPoint {
      * @param setter The setter method
      */
     public SetterInjectionPoint(Method setter, int parameter) {
-        if (setter == null) {
-            throw new NullPointerException("Setter method cannot null");
-        }
-        
-        int numArgs = setter.getParameterTypes().length;
-        if (parameter < 0 || parameter >= numArgs) {
-            throw new IndexOutOfBoundsException("Setter parameter is invalid");
-        }
+        Checks.notNull("setter method", setter);
+        Checks.inRange(parameter, 0, setter.getParameterTypes().length);
         
         this.qualifier = Qualifiers.getQualifier(setter.getParameterAnnotations()[parameter]);
         this.setter = setter;
@@ -55,7 +49,8 @@ public class SetterInjectionPoint implements InjectionPoint {
     /**
      * @return The setter method wrapped by this injection point
      */
-    public Method getSetterMethod() {
+    @Override
+    public Method getMember() {
         return setter;
     }
     

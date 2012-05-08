@@ -40,10 +40,8 @@ public class AnnotationQualifier implements org.grouplens.grapht.spi.Qualifier {
      *             annotation
      */
     public AnnotationQualifier(Annotation annot) {
-        if (annot == null)
-            throw new NullPointerException("Qualifier annotation cannot be null");
-        if (!Qualifiers.isQualifier(annot.annotationType()))
-            throw Errors.notQualifier(annot.annotationType());
+        Checks.notNull("annot", annot);
+        Checks.isQualifier(annot.annotationType());
         this.annot = annot;
     }
     

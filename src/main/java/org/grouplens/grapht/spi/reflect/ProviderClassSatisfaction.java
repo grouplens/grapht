@@ -23,7 +23,6 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.grapht.ConfigurationException;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.util.Types;
@@ -45,15 +44,9 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
      * @throws IllegalArgumentException if the class is not a Provider, or is not instantiable
      */
     public ProviderClassSatisfaction(Class<? extends Provider<?>> providerType) {
-        if (providerType == null) {
-            throw new NullPointerException("Provider class cannot be null");
-        }
-        if (!Provider.class.isAssignableFrom(providerType)) {
-            throw new ConfigurationException(providerType, "Class type does not implement Provider");
-        }
-        if (!Types.isInstantiable(providerType)) {
-            throw Errors.notInstantiable(providerType);
-        }
+        Checks.notNull("provider type", providerType);
+        Checks.isAssignable(Provider.class, providerType);
+        Checks.isInstantiable(providerType);
         
         this.providerType = providerType;
     }

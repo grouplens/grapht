@@ -46,9 +46,7 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
      * @throws NullPointerException if provider is null
      */
     public ProviderInstanceSatisfaction(Provider<?> provider) {
-        if (provider == null) {
-            throw new NullPointerException("Provider cannot be null");
-        }
+        Checks.notNull("provider", provider);
         this.provider = provider;
     }
     

@@ -60,20 +60,9 @@ public class ReflectionBindRule implements BindRule {
      */
     public ReflectionBindRule(Class<?> sourceType, ReflectionSatisfaction satisfaction,
                               QualifierMatcher qualifier, int weight, boolean terminateChain) {
-        if (sourceType == null) {
-            throw new NullPointerException("Source type cannot be null");
-        }
-        if (satisfaction == null) {
-            throw new NullPointerException("Satisfaction cannot be null");
-        }
-        if (qualifier == null) {
-            throw new NullPointerException("QualifierMatcher cannot be null");
-        }
-        
-        // verify that the satisfaction produces proper types
-        if (!sourceType.isAssignableFrom(satisfaction.getErasedType())) {
-            throw Errors.invalidHierarchy(sourceType, satisfaction.getErasedType());
-        }
+        Checks.notNull("source type", sourceType);
+        Checks.notNull("satisfaction", satisfaction);
+        Checks.notNull("qualifier matcher", qualifier);
         
         this.qualifier = qualifier;
         this.satisfaction = satisfaction;
@@ -81,6 +70,9 @@ public class ReflectionBindRule implements BindRule {
         this.sourceType = Types.box(sourceType);
         this.weight = weight;
         this.terminateChain = terminateChain;
+        
+        // verify that the satisfaction produces proper types
+        Checks.isAssignable(this.sourceType, this.implType);
     }
     
     /**
@@ -97,27 +89,19 @@ public class ReflectionBindRule implements BindRule {
      */
     public ReflectionBindRule(Class<?> sourceType, Class<?> implType,
                               QualifierMatcher qualifier, int weight, boolean terminateChain) {
-        if (sourceType == null) {
-            throw new NullPointerException("Source type cannot be null");
-        }
-        if (implType == null) {
-            throw new NullPointerException("Impl type cannot be null");
-        }
-        if (qualifier == null) {
-            throw new NullPointerException("QualifierMatcher cannot be null");
-        }
-        
-        // verify that implType extends sourceType
-        if (!sourceType.isAssignableFrom(sourceType)) {
-            throw Errors.invalidHierarchy(sourceType, implType);
-        }
+        Checks.notNull("source type", sourceType);
+        Checks.notNull("implementation type", implType);
+        Checks.notNull("qualifier matcher", qualifier);
         
         this.qualifier = qualifier;
         this.satisfaction = null;
-        this.implType = implType;
+        this.implType = Types.box(implType);
         this.sourceType = Types.box(sourceType);
         this.weight = weight;
         this.terminateChain = terminateChain;
+        
+        // verify that implType extends sourceType
+        Checks.isAssignable(this.sourceType, this.implType);
     }
 
     /**

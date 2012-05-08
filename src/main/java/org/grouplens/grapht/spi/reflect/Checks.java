@@ -1,0 +1,76 @@
+/*
+ * Grapht, an open source dependency injector.
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+package org.grouplens.grapht.spi.reflect;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
+
+import org.grouplens.grapht.ConfigurationException;
+import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.util.Types;
+
+/**
+ * Utility to organize checks for common insertions, and to throw
+ * appropriately worded exceptions on failure.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+final class Checks {
+    private Checks() { }
+
+    @SuppressWarnings("unchecked")
+    public static void isQualifier(Class<?> type) {
+        if (!Annotation.class.isAssignableFrom(type)) {
+            throw new ConfigurationException(type, "Type is not an Annotation");
+        }
+        if (!Qualifiers.isQualifier((Class<? extends Annotation>) type)) {
+            throw new ConfigurationException(type, "Annotation is not annotated with @Qualifier");
+        }
+    }
+    
+    public static void isAssignable(Class<?> source, Class<?> impl) {
+        if (!source.isAssignableFrom(impl)) {
+            throw new ConfigurationException(impl, "Type is not assignable to " + source);
+        }
+    }
+    
+    public static void notNull(String name, Object value) {
+        if (value == null) {
+            throw new NullPointerException(name + " cannot be null");
+        }
+    }
+    
+    public static void inRange(int value, int min, int max) {
+        if (value < min || value >= max) {
+            throw new IndexOutOfBoundsException(value + " must be in [" + min + ", " + max + ")");
+        }
+    }
+    
+    public static void isInstantiable(Class<?> type) {
+        if (!Types.isInstantiable(type)) {
+            // either no injectable constructor or it's not a concrete class
+            int mods = type.getModifiers();
+            if (Modifier.isAbstract(mods) || Modifier.isInterface(mods)) {
+                throw new InjectionException(type, null, "Type is not concrete and cannot be instantiated");
+            } else {
+                throw new InjectionException(type, null, "No public default constructor or constructor annotated with @Inject");
+            }
+        }
+    }
+}

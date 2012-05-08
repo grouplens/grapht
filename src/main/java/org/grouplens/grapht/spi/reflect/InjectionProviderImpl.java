@@ -52,6 +52,10 @@ public class InjectionProviderImpl<T> implements Provider<T> {
      * @param providers The providers that satisfy the desires of the type
      */
     public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, ProviderSource providers) {
+        Checks.notNull("type", type);
+        Checks.notNull("desires", desires);
+        Checks.notNull("providers", providers);
+        
         this.type = type;
         this.desires = desires;
         this.providers = providers;
@@ -67,11 +71,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                 // this desire is a constructor argument so create it now
                 Provider<?> provider = providers.apply(d);
                 ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
-                ctorArgs[cd.getParameterIndex()] = provider.get();
-                
-                if (!cd.isNullable() && ctorArgs[cd.getParameterIndex()] == null) {
-                    throw Errors.unexpectedNullValue(cd.getConstructor());
-                }
+                ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.get());
             }
         }
         
@@ -88,20 +88,16 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         for (ReflectionDesire d: desires) {
             if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                 SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
-                Object[] args = settersAndArguments.get(sd.getSetterMethod());
+                Object[] args = settersAndArguments.get(sd.getMember());
                 
                 if (args == null) {
                     // first encounter of this method
-                    args = new Object[sd.getSetterMethod().getParameterTypes().length];
-                    settersAndArguments.put(sd.getSetterMethod(), args);
+                    args = new Object[sd.getMember().getParameterTypes().length];
+                    settersAndArguments.put(sd.getMember(), args);
                 }
                 
                 Provider<?> provider = providers.apply(d);
-                args[sd.getParameterIndex()] = provider.get();
-                
-                if (!sd.isNullable() && args[sd.getParameterIndex()] == null) {
-                    throw Errors.unexpectedNullValue(sd.getSetterMethod());
-                }
+                args[sd.getParameterIndex()] = checkNull(sd, provider.get());
             }
         }
         
@@ -124,14 +120,27 @@ public class InjectionProviderImpl<T> implements Provider<T> {
             if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                 // since we only allow one injectable constructor, any ConstructorParameterInjectionPoint
                 // will have the same constructor as all other constructor parameter injection points
-                return (Constructor<T>) ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getConstructor();
+                return (Constructor<T>) ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getMember();
             }
         }
         
         try {
             return type.getConstructor();
         } catch (NoSuchMethodException e) {
-            throw Errors.notInstantiable(type);
+            // this constructor is being invoked for a ClassSatisfaction or a 
+            // ProviderClassSatisfaction, both of which assert that the type is
+            // instantiable, so this should never happen
+            throw new RuntimeException("Unexpected exception", e);
+        }
+    }
+    
+    private static Object checkNull(InjectionPoint injectPoint, Object value) {
+        if (value == null && !injectPoint.isNullable()) {
+            throw new InjectionException(injectPoint.getMember().getDeclaringClass(),
+                                         injectPoint.getMember(), 
+                                         "Injection point is not annotated with @Nullable, but binding configuration provided a null value");
+        } else {
+            return value;
         }
     }
 }

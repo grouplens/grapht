@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.lang.reflect.Member;
+
 import javax.annotation.Nullable;
 
 class SimpleInjectionPoint implements InjectionPoint {
@@ -26,12 +28,36 @@ class SimpleInjectionPoint implements InjectionPoint {
     private final boolean nullable;
     
     public SimpleInjectionPoint(@Nullable AnnotationQualifier qualifier, Class<?> type, boolean nullable) {
-        if (type == null) {
-            throw new NullPointerException("Class type cannot be null");
-        }
+        Checks.notNull("type", type);
+
         this.qualifier = qualifier;
         this.type = type;
         this.nullable = nullable;
+    }
+    
+    @Override
+    public Member getMember() {
+        return new Member() {
+            @Override
+            public Class<?> getDeclaringClass() {
+                return Void.class;
+            }
+
+            @Override
+            public String getName() {
+                return "synthetic";
+            }
+
+            @Override
+            public int getModifiers() {
+                return 0;
+            }
+
+            @Override
+            public boolean isSynthetic() {
+                return true;
+            }
+        };
     }
     
     @Override

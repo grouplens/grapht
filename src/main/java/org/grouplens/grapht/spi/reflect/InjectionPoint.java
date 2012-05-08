@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.lang.reflect.Member;
+
 import org.grouplens.grapht.spi.Desire;
 
 /**
@@ -41,6 +43,11 @@ public interface InjectionPoint {
      * @return The qualifier on the injection point
      */
     AnnotationQualifier getQualifier();
+    
+    /**
+     * @return The Member that produces this injection point
+     */
+    Member getMember();
 
     /**
      * Return whether or not this injection point is a transient, with the same

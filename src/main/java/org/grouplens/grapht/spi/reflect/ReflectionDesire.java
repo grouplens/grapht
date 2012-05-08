@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.grouplens.grapht.ConfigurationException;
 import org.grouplens.grapht.annotation.DefaultBoolean;
 import org.grouplens.grapht.annotation.DefaultDouble;
 import org.grouplens.grapht.annotation.DefaultImplementation;
@@ -67,7 +68,7 @@ public class ReflectionDesire implements Desire {
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
-                    throw Errors.tooManyConstructors(type);
+                    throw new ConfigurationException(type, "More than one constructor with @Inject is not allowed");
                 }
             }
         }
@@ -142,16 +143,14 @@ public class ReflectionDesire implements Desire {
      */
     public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint,
                             ReflectionSatisfaction satisfaction, DefaultSource dfltSource) {
-        if (desiredType == null || injectPoint == null || dfltSource == null) {
-            throw new NullPointerException("Desired type, injection point, and default source cannot be null");
-        }
+        Checks.notNull("desired type", desiredType);
+        Checks.notNull("injection point", injectPoint);
+        Checks.notNull("default source", dfltSource);
 
         desiredType = Types.box(desiredType);
-        if (!injectPoint.getType().isAssignableFrom(desiredType)) {
-            throw Errors.invalidHierarchy(injectPoint.getType(), desiredType);
-        }
-        if (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType())) {
-            throw Errors.invalidHierarchy(desiredType, satisfaction.getErasedType());
+        Checks.isAssignable(injectPoint.getType(), desiredType);
+        if (satisfaction != null) {
+            Checks.isAssignable(desiredType, satisfaction.getErasedType());
         }
 
         // try and find a satisfaction

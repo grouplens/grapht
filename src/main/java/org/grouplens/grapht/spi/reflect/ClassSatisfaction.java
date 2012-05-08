@@ -45,15 +45,10 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
      * @throws IllegalArgumentException if the type cannot be instantiated
      */
     public ClassSatisfaction(Class<?> type) {
-        if (type == null) {
-            throw new NullPointerException("Class type cannot be null");
-        }
-        
-        type = Types.box(type);
-        if (!Types.isInstantiable(type)) {
-            throw Errors.notInstantiable(type);
-        }
-        this.type = type;
+        Checks.notNull("type", type);
+
+        this.type = Types.box(type);
+        Checks.isInstantiable(this.type);
     }
     
     @Override

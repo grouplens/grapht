@@ -18,11 +18,11 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.grouplens.grapht.spi.reflect.AnnotationQualifier;
-import org.grouplens.grapht.spi.reflect.InjectionPoint;
-import org.grouplens.grapht.util.Types;
+import java.lang.reflect.Member;
 
 import javax.annotation.Nullable;
+
+import org.grouplens.grapht.util.Types;
 
 /**
  * MockInjectionPoint is a simple injection point that wraps a type, qualifier, and a
@@ -44,6 +44,30 @@ public class MockInjectionPoint implements InjectionPoint {
         this.nullable = nullable;
     }
     
+    @Override
+    public Member getMember() {
+        return new Member() {
+            @Override
+            public Class<?> getDeclaringClass() {
+                return Void.class;
+            }
+
+            @Override
+            public String getName() {
+                return "synthetic";
+            }
+
+            @Override
+            public int getModifiers() {
+                return 0;
+            }
+
+            @Override
+            public boolean isSynthetic() {
+                return true;
+            }
+        };
+    }
     
     @Override
     public Class<?> getType() {

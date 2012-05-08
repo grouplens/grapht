@@ -46,9 +46,7 @@ public class NullSatisfaction extends ReflectionSatisfaction {
      * @throws NullPointerException if type is null
      */
     public NullSatisfaction(Class<?> type) {
-        if (type == null) {
-            throw new NullPointerException("Type cannot be null");
-        }
+        Checks.notNull("type", type);
         this.type = Types.box(type);
     }
     

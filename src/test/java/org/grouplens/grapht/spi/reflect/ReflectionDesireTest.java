@@ -160,7 +160,7 @@ public class ReflectionDesireTest {
             if (methodOrCtorParam instanceof Method) {
                 if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                     SetterInjectionPoint sp = (SetterInjectionPoint) (d.getInjectionPoint());
-                    if (sp.getSetterMethod().equals(methodOrCtorParam)) {
+                    if (sp.getMember().equals(methodOrCtorParam)) {
                         return (ReflectionDesire) d.getDefaultDesire();
                     }
                 }

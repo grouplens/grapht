@@ -45,9 +45,7 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
      * @throws NullPointerException if obj is null
      */
     public InstanceSatisfaction(Object obj) {
-        if (obj == null) {
-            throw new NullPointerException("Instance cannot be null");
-        }
+        Checks.notNull("instance", obj);
         instance = obj;
     }
     

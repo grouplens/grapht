@@ -184,12 +184,8 @@ public final class Qualifiers {
         private final Class<? extends Annotation> type;
         
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
-            if (type == null) {
-                throw new NullPointerException("Annotation type cannot be null");
-            }
-            if (!Qualifiers.isQualifier(type)) {
-                throw Errors.notQualifier(type);
-            }
+            Checks.notNull("type", type);
+            Checks.isQualifier(type);
             this.type = type;
         }
         
@@ -222,12 +218,8 @@ public final class Qualifiers {
         private final Annotation annot;
         
         public AnnotationMatcher(Annotation annot) {
-            if (annot == null) {
-                throw new NullPointerException("Annotationcannot be null");
-            }
-            if (!Qualifiers.isQualifier(annot.annotationType())) {
-                throw Errors.notQualifier(annot.annotationType());
-            }
+            Checks.notNull("annotation", annot);
+            Checks.isQualifier(annot.annotationType());
             this.annot = annot;
         }
         

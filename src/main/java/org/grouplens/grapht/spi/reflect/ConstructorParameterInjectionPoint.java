@@ -45,14 +45,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
      *             the constructor's parameters
      */
     public ConstructorParameterInjectionPoint(Constructor<?> ctor, int parameter) {
-        if (ctor == null) {
-            throw new NullPointerException("Constructor cannot be null");
-        }
-        
-        int numArgs = ctor.getParameterTypes().length;
-        if (parameter < 0 || parameter >= numArgs) {
-            throw new IndexOutOfBoundsException("Constructor parameter is invalid");
-        }
+        Checks.notNull("constructor", ctor);
+        Checks.inRange(parameter, 0, ctor.getParameterTypes().length);
         
         this.qualifier = Qualifiers.getQualifier(ctor.getParameterAnnotations()[parameter]);
         this.ctor = ctor;
@@ -62,7 +56,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     /**
      * @return The constructor wrapped by this injection point
      */
-    public Constructor<?> getConstructor() {
+    @Override
+    public Constructor<?> getMember() {
         return ctor;
     }
     

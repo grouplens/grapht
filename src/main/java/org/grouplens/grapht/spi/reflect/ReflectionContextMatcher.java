@@ -56,12 +56,8 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * @throws NullPointerException if type or qualifier is null
      */
     public ReflectionContextMatcher(Class<?> type, QualifierMatcher qualifier) {
-        if (type == null) {
-            throw new NullPointerException("Class cannot be null");
-        }
-        if (qualifier == null) {
-            throw new NullPointerException("QualifierMatcher cannot be null");
-        }
+        Checks.notNull("type", type);
+        Checks.notNull("qualifier matcher", qualifier);
 
         this.type = type;
         this.qualifier = qualifier;

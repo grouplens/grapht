@@ -64,7 +64,6 @@ public class ReflectionBindRuleTest {
         ReflectionBindRule b3 = new ReflectionBindRule(TypeA.class, TypeA.class, spi.match(RoleA.class), 0, false);
         
         Assert.assertEquals(b1, new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, false));
-        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeB.class, TypeA.class, spi.matchAny(), 0, false)));
         Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeB.class, spi.matchAny(), 0, false)));
         Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 1, false)));
         Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, true)));
