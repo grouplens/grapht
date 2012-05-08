@@ -169,21 +169,17 @@ public class ReflectionDesire implements Desire {
     }
 
     /**
-     * Return the type that is desired by this desire.
-     * 
-     * @return The desired type
-     */
-    public Class<?> getDesiredType() {
-        return desiredType;
-    }
-
-    /**
      * Return the injection point used to inject whatever satisfies this desire.
      * 
      * @return The inject point for the desire
      */
     public InjectionPoint getInjectionPoint() {
         return injectPoint;
+    }
+    
+    @Override
+    public Class<?> getType() {
+        return desiredType;
     }
 
     @Override
@@ -241,12 +237,12 @@ public class ReflectionDesire implements Desire {
         // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
         // source has not been disabled.
         if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
-            DefaultProvider provided = getDesiredType().getAnnotation(DefaultProvider.class);
+            DefaultProvider provided = getType().getAnnotation(DefaultProvider.class);
             if (provided != null) {
                 return new ReflectionDesire(Types.getProvidedType(provided.value()), injectPoint, 
                                             new ProviderClassSatisfaction(provided.value()), DefaultSource.TYPE);
             }
-            DefaultImplementation impl = getDesiredType().getAnnotation(DefaultImplementation.class);
+            DefaultImplementation impl = getType().getAnnotation(DefaultImplementation.class);
             if (impl != null) {
                 // let the constructor create any satisfaction
                 return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);

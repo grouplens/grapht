@@ -20,7 +20,6 @@ package org.grouplens.grapht;
 
 import javax.inject.Named;
 
-import org.grouplens.grapht.solver.ResolverException;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.NamedType;

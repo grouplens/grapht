@@ -1,7 +1,6 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
 
 /**
  * Thrown by when a cyclic dependency is detected and could not be broken or
@@ -12,20 +11,11 @@ import org.grouplens.grapht.spi.Satisfaction;
 public class CyclicDependencyException extends ResolverException {
     private static final long serialVersionUID = 1L;
 
-    private final Satisfaction parent;
     private final Desire desire;
     
-    public CyclicDependencyException(Satisfaction parent, Desire desire, String msg) {
+    public CyclicDependencyException(Desire desire, String msg) {
         super(msg);
-        this.parent = parent;
         this.desire = desire;
-    }
-    
-    /**
-     * @return The last resolved satisfaction before the cycle was detected
-     */
-    public Satisfaction getParentSatisfaction() {
-        return parent;
     }
     
     /**
@@ -38,21 +28,13 @@ public class CyclicDependencyException extends ResolverException {
     @Override
     public String getMessage() {
         // header
-        StringBuilder sb = new StringBuilder("Cycle detected: ")
-            .append(super.getMessage())
+        StringBuilder sb = new StringBuilder(super.getMessage())
             .append('\n');
-        
-        // last satisfaction
-        sb.append("Last resolved element:\n")
-          .append('\t')
-          .append(parent)
-          .append('\n')
-          .append('\n');
         
         // current desire
         sb.append("Unsatisfiable desire:\n")
           .append('\t')
-          .append(desire)
+          .append(formatDesire(desire))
           .append('\n');
         
         return sb.toString();

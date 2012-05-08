@@ -147,7 +147,7 @@ public class ReflectionBindRule implements BindRule {
         ReflectionDesire rd = (ReflectionDesire) desire;
         
         // bind rules match type by equality
-        if (rd.getDesiredType().equals(sourceType)) {
+        if (rd.getType().equals(sourceType)) {
             // if the type is equal, then rely on the qualifier matcher
             return qualifier.matches(rd.getQualifier());
         }

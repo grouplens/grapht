@@ -51,24 +51,20 @@ public class UnresolvableDependencyException extends ResolverException {
     public String getMessage() {
         // header
         StringBuilder sb = new StringBuilder("Unable to satisfy desire: ")
-            .append(desireChain.get(desireChain.size() - 1))
+            .append(formatDesire(desireChain.get(desireChain.size() - 1)))
             .append('\n');
         
         // context
         sb.append("Current context:\n");
         for (Pair<Satisfaction, Qualifier> ctx: context) {
-            sb.append('\t');
-            if (ctx.getRight() != null) {
-                sb.append(ctx.getRight()).append(':');
-            }
-            sb.append(ctx.getLeft()).append('\n');
+            sb.append('\t').append(formatContext(ctx)).append('\n');
         }
         sb.append('\n');
         
         // desire chain
         sb.append("Desire resolution:\n");
         for (Desire desire: desireChain) {
-            sb.append('\t').append(desire).append('\n');
+            sb.append('\t').append(formatDesire(desire)).append('\n');
         }
         
         return sb.toString();

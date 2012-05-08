@@ -68,6 +68,12 @@ public interface Desire {
     Satisfaction getSatisfaction();
 
     /**
+     * @return The desired type, which may be an interface, abstract class, or
+     *         concrete class
+     */
+    Class<?> getType();
+    
+    /**
      * <p>
      * Get the default desire for this desire. If a desire or has been annotated
      * with a default implementation, or the {@link Qualifier} has a default binding, then

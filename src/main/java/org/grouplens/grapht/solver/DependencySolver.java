@@ -197,7 +197,7 @@ public class DependencySolver {
                               List<Pair<Satisfaction, Qualifier>> context) throws ResolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
-            throw new CyclicDependencyException(parent.getLabel(), desire, "Maximum context depth of " + maxDepth + " was reached");
+            throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
         
         // resolve the current node
         Pair<Satisfaction, List<Desire>> resolved = resolve(desire, context);

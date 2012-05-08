@@ -89,4 +89,9 @@ public class MockDesire implements Desire {
     public boolean isTransient() {
         return false;
     }
+
+    @Override
+    public Class<?> getType() {
+        return (satisfaction != null ? satisfaction.getErasedType() : Void.class);
+    }
 }

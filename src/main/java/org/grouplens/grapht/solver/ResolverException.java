@@ -18,6 +18,12 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.spi.BindRule;
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Pair;
+
 /**
  * Thrown by {@link DependencySolver} when it cannot resolve the dependency
  * graph for a requested type (and possibly qualifier).
@@ -41,5 +47,22 @@ public class ResolverException extends Exception {
 
     public ResolverException(String msg, Throwable throwable) {
         super(msg, throwable);
+    }
+    
+    protected String formatDesire(Desire desire) {
+        return format(desire.getQualifier(), desire.getType());
+    }
+    
+    protected String formatContext(Pair<Satisfaction, Qualifier> ctx) {
+        return format(ctx.getRight(), ctx.getLeft().getErasedType());
+    }
+    
+    protected String formatBindRule(BindRule rule) {
+        return rule.toString();
+    }
+    
+    private String format(Qualifier q, Class<?> type) {
+        String base = (q != null ? q + ":" : "");
+        return base + type.getName();
     }
 }

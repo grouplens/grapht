@@ -51,12 +51,12 @@ public class ReflectionDesireTest {
     @Test
     public void testInjectionPointConstructor() throws Exception {
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(A.class, null, false, false));
-        Assert.assertEquals(A.class, desire.getDesiredType());
+        Assert.assertEquals(A.class, desire.getType());
         Assert.assertFalse(desire.isTransient());
         Assert.assertNull(desire.getQualifier());
         
         desire = new ReflectionDesire(new MockInjectionPoint(A.class, qualifier(ParameterA.class), true, false));
-        Assert.assertEquals(A.class, desire.getDesiredType());
+        Assert.assertEquals(A.class, desire.getType());
         Assert.assertTrue(desire.isTransient());
         Assert.assertEquals(qualifier(ParameterA.class), desire.getQualifier());
     }
@@ -67,7 +67,7 @@ public class ReflectionDesireTest {
         InjectionPoint inject = new MockInjectionPoint(A.class, null, false, false);
         ReflectionDesire desire = new ReflectionDesire(B.class, inject, satis, DefaultSource.QUALIFIER_AND_TYPE);
         
-        Assert.assertEquals(B.class, desire.getDesiredType());
+        Assert.assertEquals(B.class, desire.getType());
         Assert.assertEquals(satis, desire.getSatisfaction());
         Assert.assertEquals(inject, desire.getInjectionPoint());
     }
@@ -82,7 +82,7 @@ public class ReflectionDesireTest {
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
         Assert.assertEquals(qualifier(RoleD.class), dflt.getQualifier());
         Assert.assertEquals(TypeB.class, ((ClassSatisfaction) dflt.getSatisfaction()).getErasedType());
-        Assert.assertEquals(TypeB.class, dflt.getDesiredType());
+        Assert.assertEquals(TypeB.class, dflt.getType());
     }
     
     @Test
@@ -94,7 +94,7 @@ public class ReflectionDesireTest {
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof InstanceSatisfaction);
         Assert.assertEquals(qualifier(ParameterA.class), dflt.getQualifier());
-        Assert.assertEquals(Integer.class, dflt.getDesiredType());
+        Assert.assertEquals(Integer.class, dflt.getType());
         Assert.assertEquals(5, ((InstanceSatisfaction) dflt.getSatisfaction()).getInstance());
     }
     
@@ -107,7 +107,7 @@ public class ReflectionDesireTest {
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ProviderClassSatisfaction);
         Assert.assertNull(dflt.getQualifier());
-        Assert.assertEquals(TypeA.class, dflt.getDesiredType());
+        Assert.assertEquals(TypeA.class, dflt.getType());
         Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) dflt.getSatisfaction()).getProviderType());
     }
     
@@ -121,7 +121,7 @@ public class ReflectionDesireTest {
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
         Assert.assertEquals(qualifier(RoleA.class), dflt.getQualifier());
         Assert.assertEquals(TypeA.class, ((ClassSatisfaction) dflt.getSatisfaction()).getErasedType());
-        Assert.assertEquals(TypeA.class, dflt.getDesiredType());
+        Assert.assertEquals(TypeA.class, dflt.getType());
     }
     
     @Test

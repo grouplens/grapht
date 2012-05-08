@@ -33,8 +33,6 @@ import org.grouplens.grapht.MockInjectorConfiguration;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
-import org.grouplens.grapht.solver.DependencySolver;
-import org.grouplens.grapht.solver.ResolverException;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -976,7 +974,7 @@ public class DependencySolverTest {
         Assert.assertSame(scp, r.getGraph().getOutgoingEdge(nd, d2).getTail().getLabel());
     }
 
-    @Test(expected=ResolverException.class)
+    @Test(expected=UnresolvableDependencyException.class)
     public void testLimitedBindRuleApplicationsFail() throws Exception {
         // Test that a bind-rule is properly excluded form subsequent desires
         // but that leaves no applicable bindings so resolving fails

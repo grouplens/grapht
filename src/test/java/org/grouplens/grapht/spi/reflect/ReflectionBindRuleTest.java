@@ -167,7 +167,7 @@ public class ReflectionBindRuleTest {
         
         ReflectionDesire applied = (ReflectionDesire) rule.apply(desire);
         Assert.assertNull(applied.getSatisfaction());
-        Assert.assertEquals(InterfaceA.class, applied.getDesiredType());
+        Assert.assertEquals(InterfaceA.class, applied.getType());
     }
     
     @Test
