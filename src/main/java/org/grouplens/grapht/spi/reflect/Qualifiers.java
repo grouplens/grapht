@@ -188,7 +188,7 @@ public final class Qualifiers {
                 throw new NullPointerException("Annotation type cannot be null");
             }
             if (!Qualifiers.isQualifier(type)) {
-                throw new IllegalArgumentException("Annotation is not a Qualifier annotation");
+                throw Errors.notQualifier(type);
             }
             this.type = type;
         }
@@ -226,7 +226,7 @@ public final class Qualifiers {
                 throw new NullPointerException("Annotationcannot be null");
             }
             if (!Qualifiers.isQualifier(annot.annotationType())) {
-                throw new IllegalArgumentException("Annotation is not a Qualifier annotation");
+                throw Errors.notQualifier(annot.annotationType());
             }
             this.annot = annot;
         }

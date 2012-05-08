@@ -88,7 +88,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     public Class<?> getType() {
         return Types.box(ctor.getParameterTypes()[parameter]);
     }
-
+    
     @Override
     public AnnotationQualifier getQualifier() {
         return qualifier;

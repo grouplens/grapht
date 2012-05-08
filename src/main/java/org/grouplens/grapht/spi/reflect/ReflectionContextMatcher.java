@@ -40,6 +40,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * and any qualifier.
      * 
      * @param type The type to match
+     * @throws NullPointerException if type is null
      */
     public ReflectionContextMatcher(Class<?> type) {
         this(type, Qualifiers.matchAny());
@@ -50,10 +51,18 @@ public class ReflectionContextMatcher implements ContextMatcher {
      * given {@link Qualifier}.
      * 
      * @param type The type to match
-     * @param {@link Qualifier} The {@link Qualifier} to match
+     * @param qualifier The QualifierMatcher that determines how qualifiers are
+     *            matched
+     * @throws NullPointerException if type or qualifier is null
      */
     public ReflectionContextMatcher(Class<?> type, QualifierMatcher qualifier) {
-        // FIXME add checks here
+        if (type == null) {
+            throw new NullPointerException("Class cannot be null");
+        }
+        if (qualifier == null) {
+            throw new NullPointerException("QualifierMatcher cannot be null");
+        }
+
         this.type = type;
         this.qualifier = qualifier;
     }
@@ -94,7 +103,7 @@ public class ReflectionContextMatcher implements ContextMatcher {
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode());
+        return type.hashCode() ^ qualifier.hashCode();
     }
     
     @Override

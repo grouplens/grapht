@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.inject.Provider;
 
+import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.spi.ProviderSource;
 
 /**
@@ -36,7 +37,6 @@ import org.grouplens.grapht.spi.ProviderSource;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  * @param <T> The object type that is provided
  */
-// FIXME: we need better exceptions for dependency failures
 public class InjectionProviderImpl<T> implements Provider<T> {
     private final Class<T> type;
     private final List<ReflectionDesire> desires;
@@ -70,7 +70,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                 ctorArgs[cd.getParameterIndex()] = provider.get();
                 
                 if (!cd.isNullable() && ctorArgs[cd.getParameterIndex()] == null) {
-                    throw new NullPointerException("Injection point is not nullable: " + cd);
+                    throw Errors.unexpectedNullValue(cd.getConstructor());
                 }
             }
         }
@@ -80,7 +80,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         try {
             instance = ctor.newInstance(ctorArgs);
         } catch (Exception e) {
-            throw new RuntimeException("Unable to create instance", e);
+            throw new InjectionException(type, ctor, e);
         }
         
         // complete injection by satisfying any setter method dependencies
@@ -100,7 +100,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                 args[sd.getParameterIndex()] = provider.get();
                 
                 if (!sd.isNullable() && args[sd.getParameterIndex()] == null) {
-                    throw new NullPointerException("Injection point is not nullable: " + sd);
+                    throw Errors.unexpectedNullValue(sd.getSetterMethod());
                 }
             }
         }
@@ -110,7 +110,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
             try {
                 setter.invoke(instance, settersAndArguments.get(setter));
             } catch (Exception e) {
-                throw new RuntimeException("Unable to inject setter dependency", e);
+                throw new InjectionException(type, setter, e);
             }
         }
         
@@ -130,10 +130,8 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         
         try {
             return type.getConstructor();
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException("No default constructor for type: " + type, e);
+            throw Errors.notInstantiable(type);
         }
     }
 }

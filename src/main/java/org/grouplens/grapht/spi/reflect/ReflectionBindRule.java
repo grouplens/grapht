@@ -70,6 +70,11 @@ public class ReflectionBindRule implements BindRule {
             throw new NullPointerException("QualifierMatcher cannot be null");
         }
         
+        // verify that the satisfaction produces proper types
+        if (!sourceType.isAssignableFrom(satisfaction.getErasedType())) {
+            throw Errors.invalidHierarchy(sourceType, satisfaction.getErasedType());
+        }
+        
         this.qualifier = qualifier;
         this.satisfaction = satisfaction;
         this.implType = satisfaction.getErasedType();
@@ -100,6 +105,11 @@ public class ReflectionBindRule implements BindRule {
         }
         if (qualifier == null) {
             throw new NullPointerException("QualifierMatcher cannot be null");
+        }
+        
+        // verify that implType extends sourceType
+        if (!sourceType.isAssignableFrom(sourceType)) {
+            throw Errors.invalidHierarchy(sourceType, implType);
         }
         
         this.qualifier = qualifier;

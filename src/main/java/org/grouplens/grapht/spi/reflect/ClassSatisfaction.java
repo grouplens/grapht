@@ -51,7 +51,7 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
         
         type = Types.box(type);
         if (!Types.isInstantiable(type)) {
-            throw new IllegalArgumentException("Type cannot be instantiated");
+            throw Errors.notInstantiable(type);
         }
         this.type = type;
     }

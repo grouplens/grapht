@@ -67,8 +67,7 @@ public class ReflectionDesire implements Desire {
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
-                    // FIXME: return a better exception with more information
-                    throw new RuntimeException("Too many injectable constructors");
+                    throw Errors.tooManyConstructors(type);
                 }
             }
         }
@@ -148,8 +147,11 @@ public class ReflectionDesire implements Desire {
         }
 
         desiredType = Types.box(desiredType);
-        if (!injectPoint.getType().isAssignableFrom(desiredType) || (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType()))) {
-            throw new IllegalArgumentException("No type hierarchy between injection point, desired type, and satisfaction");
+        if (!injectPoint.getType().isAssignableFrom(desiredType)) {
+            throw Errors.invalidHierarchy(injectPoint.getType(), desiredType);
+        }
+        if (satisfaction != null && !desiredType.isAssignableFrom(satisfaction.getErasedType())) {
+            throw Errors.invalidHierarchy(desiredType, satisfaction.getErasedType());
         }
 
         // try and find a satisfaction
