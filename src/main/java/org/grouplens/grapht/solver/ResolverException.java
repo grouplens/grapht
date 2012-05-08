@@ -24,7 +24,7 @@ package org.grouplens.grapht.solver;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ResolverException extends RuntimeException {
+public class ResolverException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public ResolverException() {

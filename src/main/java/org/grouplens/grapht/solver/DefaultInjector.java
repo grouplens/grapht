@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 
+import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorConfiguration;
 import org.grouplens.grapht.graph.Edge;
@@ -133,7 +134,11 @@ public class DefaultInjector implements Injector {
         // it may be present in the graph at a deeper node. If that's the case
         // it will be properly merged after regenerating the graph at the root context.
         if (resolved == null) {
-            solver.resolve(desire);
+            try {
+                solver.resolve(desire);
+            } catch(ResolverException e) {
+                throw new InjectionException(type, null, e);
+            }
             resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
         }
         

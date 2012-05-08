@@ -108,7 +108,7 @@ public class DependencySolver {
      * 
      * @param desire The desire to include in the graph
      */
-    public void resolve(Desire desire) {
+    public void resolve(Desire desire) throws ResolverException {
         Graph<Satisfaction, List<Desire>> tree = new Graph<Satisfaction, List<Desire>>();
         Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
         tree.addNode(treeRoot);
@@ -194,7 +194,7 @@ public class DependencySolver {
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
-                              List<Pair<Satisfaction, Qualifier>> context) {
+                              List<Pair<Satisfaction, Qualifier>> context) throws ResolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
@@ -220,7 +220,7 @@ public class DependencySolver {
         }
     }
     
-    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Qualifier>> context) {
+    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Qualifier>> context) throws ResolverException {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
