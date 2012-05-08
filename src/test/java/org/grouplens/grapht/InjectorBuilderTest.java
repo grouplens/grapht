@@ -75,7 +75,7 @@ public class InjectorBuilderTest {
         Assert.assertEquals("hello world", i.getInstance(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build(), String.class));
     }
     
-    @Test(expected=ResolverException.class)
+    @Test(expected=InjectionException.class)
     public void testInjectorMissingNamedBinding() throws Exception {
         InjectorBuilder b = new InjectorBuilder();
         b.bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped

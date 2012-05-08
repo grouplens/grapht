@@ -197,7 +197,7 @@ public class DependencySolver {
                               List<Pair<Satisfaction, Qualifier>> context) throws ResolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
-            throw new ResolverException("Dependencies reached max depth of " + maxDepth + ", there is likely a dependency cycle");
+            throw new CyclicDependencyException(parent.getLabel(), desire, "Maximum context depth of " + maxDepth + " was reached");
         
         // resolve the current node
         Pair<Satisfaction, List<Desire>> resolved = resolve(desire, context);
@@ -265,7 +265,7 @@ public class DependencySolver {
                     
                     if (topRules.size() > 1) {
                         // additional rules match just as well as the first, so fail
-                        throw new ResolverException("Too many choices for desire: " + currentDesire + ", matched rules: " + topRules);
+                        throw new MultipleBindingsException(context, desireChain, topRules);
                     }
                 }
 
@@ -291,8 +291,7 @@ public class DependencySolver {
                         return Pair.of(currentDesire.getSatisfaction(), desireChain);
                     } else {
                         // no more rules and we can't make a node
-                        Satisfaction last = context.get(context.size() - 1).getLeft();
-                        throw new ResolverException("Unable to satisfy desire: " + currentDesire + "(root: " + desire + ") for: " + last);
+                        throw new UnresolvableDependencyException(context, desireChain);
                     }
                 } else {
                     // continue with the default desire
