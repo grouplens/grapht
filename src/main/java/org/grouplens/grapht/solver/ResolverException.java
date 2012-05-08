@@ -19,8 +19,8 @@
 package org.grouplens.grapht.solver;
 
 /**
- * ResolverExceptions are thrown when a Resolver is unable to resolve a
- * dependency graph completely.
+ * Thrown by {@link DependencySolver} when it cannot resolve the dependency
+ * graph for a requested type (and possibly qualifier).
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
