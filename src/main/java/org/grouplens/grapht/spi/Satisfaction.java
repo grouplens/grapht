@@ -31,7 +31,7 @@ import javax.inject.Provider;
  * of {@link Type}.
  * <p>
  * Satisfactions are expected to provide a reasonable implementation of
- * {@link #equals(Object)} and {@link #hashCode()} so that they can be
+ * {@link Object#equals(Object)} and {@link Object#hashCode()} so that they can be
  * de-duplicated, etc.
  *
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>

@@ -37,8 +37,6 @@ public @interface Parameter {
      * Primitive type of the parameter.
      * 
      * @author Michael Ludwig
-     * @review Should we use an enum to represent type, or have the annotation
-     *         take a class?
      */
     public static enum PrimitiveType {
         BOOLEAN(boolean.class), BYTE(byte.class), SHORT(short.class), 

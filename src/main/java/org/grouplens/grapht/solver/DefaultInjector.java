@@ -30,8 +30,6 @@ import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorConfiguration;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Node;
-import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Qualifier;
@@ -41,32 +39,9 @@ import org.grouplens.grapht.spi.Satisfaction;
  * <p>
  * DefaultInjector is the default Injector implementation. When resolving the
  * dependency graph for a desire, a "context" is built which consists of an
- * ordering of the nodes and their {@link Qualifier}s which satisfy each dependency. For more
- * details, see {@link ContextChain} and {@link ContextMatcher}. The
- * DefaultInjector uses the context to activate and select BindRules. A number
- * of rules are used to order applicable BindRules and choose the best. When any
- * of these rules rely on the current dependency context, the deepest node in
- * the context has the most influence. Put another way, if contexts were
- * strings, they could be ordered lexicographically from the right to the left.
- * <p>
- * When selecting BindRules to apply to a Desire, BindRules are ordered by the
- * following rules:
- * <ol>
- * <li>Context closeness - BindRules with a context matching chain closer to the
- * leaf nodes of the current dependency context are selected.</li>
- * <li>Context chain length - BindRules with a longer context chain are
- * selected.</li>
- * <li>Context chain type delta - BindRules are ordered by how close their
- * context matching chain is to the current dependency context, as determined by
- * {@link Node#contextComparator(Qualifier)}.</li>
- * <li>Bind rule type delta - BindRules are lastly ordered by how well their
- * type matches a particular desire, as determined by
- * {@link Desire#ruleComparator()}.</li>
- * </ol>
- * <p>
- * A summary of these rules is that the best specified BindRule is applied,
- * where the context that the BindRule is activated in has more priority than
- * the type of the BindRule.
+ * ordering of qualified types that satisfy each dependency. The DefaultInjector
+ * uses the {@link DependencySolver} to manage dependency resolution. New
+ * injectors can easily be built to also use this solver.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */

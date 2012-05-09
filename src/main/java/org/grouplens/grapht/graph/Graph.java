@@ -61,7 +61,6 @@ public class Graph<N, E> {
      * Nodes in the graph that are not connected to the root will not appear in
      * the returned list.
      * 
-     * @param graph The graph to sort
      * @param root The designated root node (depth = 0)
      * @return An ordered list, topographically sorted
      */

@@ -32,7 +32,7 @@ public interface ProviderSource {
      * Apply this function to the Desire and return a Provider that will create
      * instances compatible with the desire.
      * 
-     * @param input The input Desire to the function
+     * @param desire The input Desire to the function
      * @return The output Provider
      */
     Provider<?> apply(Desire desire);

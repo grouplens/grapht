@@ -37,13 +37,48 @@ import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Qualifier;
+import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
 
 /**
+ * <p>
  * DependencySolver is a utility for resolving Desires into a dependency graph,
  * where nodes are shared when permitted by a Satisfaction's dependency
- * configuration.
+ * configuration. It supports qualified and context-aware injection, and
+ * just-in-time injection if the type has an injectable constructor.
+ * <p>
+ * For more details on context management, see {@link ContextChain},
+ * {@link ContextMatcher}, and {@link QualifierMatcher}. The DependencySolver
+ * uses the context to activate and select BindRules. A number of rules are used
+ * to order applicable BindRules and choose the best. When any of these rules
+ * rely on the current dependency context, the deepest node in the context has
+ * the most influence. Put another way, if contexts were strings, they could be
+ * ordered lexicographically from the right to the left.
+ * <p>
+ * When selecting BindRules to apply to a Desire, BindRules are ordered by the
+ * following rules:
+ * <ol>
+ * <li>Context closeness - BindRules with a context matching chain closer to the
+ * leaf nodes of the current dependency context are selected.</li>
+ * <li>Context chain length - BindRules with a longer context chain are
+ * selected.</li>
+ * <li>Context chain type delta - BindRules are ordered by how close their
+ * context matching chain is to the current dependency context, as determined by
+ * {@link Satisfaction#contextComparator()}</li>
+ * <li>Bind rule type delta - BindRules are lastly ordered by how well their
+ * type matches a particular desire, as determined by
+ * {@link Desire#ruleComparator()}.</li>
+ * </ol>
+ * <p>
+ * A summary of these rules is that the best specified BindRule is applied,
+ * where the context that the BindRule is activated in has more priority than
+ * the type of the BindRule. If multiple rules tie for best, then the solver
+ * fails with a checked exception.
+ * <p>
+ * This solver does not support cyclic dependencies because of the possibility
+ * that a context later on might activate a bind rule that breaks the cycle. To
+ * ensure termination, it has a maximum context depth that is configurable.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
