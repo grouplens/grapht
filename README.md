@@ -20,12 +20,11 @@ Grapht provides a fluent configuration API very similar to that of
 
 ## Maven
 
-Grapht fully supports Maven, and will be released to the Central Repository
-shortly. In the mean time, the current SNAPSHOT can be installed locally
-and then depended on with:
+Grapht can be depended on from Maven's Central Repository by adding the 
+following to the dependencies section in your POM:
 
     <dependency>
       <groupId>org.grouplens.grapht</groupId>
       <artifactId>grapht</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>0.1.0</version>
     </dependency>
