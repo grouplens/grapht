@@ -33,7 +33,7 @@ import org.grouplens.grapht.spi.InjectSPI;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class SimpleInjectionPoint implements InjectionPoint {
-    private final Annotation qualifier;
+    private final Attributes attrs;
     private final Class<?> type;
     private final boolean nullable;
     
@@ -43,7 +43,7 @@ public class SimpleInjectionPoint implements InjectionPoint {
             Checks.isQualifier(qualifier.annotationType());
         }
 
-        this.qualifier = qualifier;
+        this.attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
         this.type = type;
         this.nullable = nullable;
     }
@@ -85,12 +85,12 @@ public class SimpleInjectionPoint implements InjectionPoint {
 
     @Override
     public Attributes getAttributes() {
-        return new AttributesImpl(new Annotation[] { qualifier });
+        return attrs;
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode());
+        return type.hashCode() ^ attrs.hashCode();
     }
     
     @Override
@@ -99,12 +99,12 @@ public class SimpleInjectionPoint implements InjectionPoint {
             return false;
         }
         SimpleInjectionPoint p = (SimpleInjectionPoint) o;
-        return p.type.equals(type) && (p.qualifier == null ? qualifier == null : p.qualifier.equals(qualifier)) && p.nullable == nullable;
+        return p.type.equals(type) && p.attrs.equals(attrs) && p.nullable == nullable;
     }
     
     @Override
     public String toString() {
-        String q = (qualifier == null ? "" : qualifier + ":");
+        String q = (attrs.getQualifier() == null ? "" : attrs.getQualifier() + ":");
         return q + type.getSimpleName();
     }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.Pair;
 import org.junit.Test;
 
@@ -121,9 +122,9 @@ public class ContextChainTest {
         }
         ContextChain chain = new ContextChain(matchers);
         
-        List<Pair<Satisfaction, Qualifier>> context = new ArrayList<Pair<Satisfaction, Qualifier>>();
+        List<Pair<Satisfaction, Attributes>> context = new ArrayList<Pair<Satisfaction, Attributes>>();
         for (Class<?> type: contextTypes) {
-            context.add(Pair.<Satisfaction, Qualifier>of(new MockSatisfaction(type, new ArrayList<Desire>()), null));
+            context.add(Pair.<Satisfaction, Attributes>of(new MockSatisfaction(type, new ArrayList<Desire>()), new AttributesImpl()));
         }
         
         Assert.assertEquals(expectedMatch, chain.matches(context));

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Qualifier;
+
 import junit.framework.Assert;
 
 import org.grouplens.grapht.InjectorConfiguration;
@@ -40,10 +42,10 @@ import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.MockBindRule;
 import org.grouplens.grapht.spi.MockContextMatcher;
 import org.grouplens.grapht.spi.MockDesire;
-import org.grouplens.grapht.spi.MockQualifier;
 import org.grouplens.grapht.spi.MockQualifierMatcher;
 import org.grouplens.grapht.spi.MockSatisfaction;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Test;
 
 public class DependencySolverTest {
@@ -191,8 +193,8 @@ public class DependencySolverTest {
         // Test that a qualifiers are properly remembered in the context
         // - note that this is different than having a qualifier-binding, that is
         //   part of the bind rule's match implementation
-        MockQualifier qualifier1 = new MockQualifier();
-        MockQualifier qualifier2 = new MockQualifier();
+        Qual qualifier1 = AnnotationBuilder.of(Qual.class).setValue(0).build();
+        Qual qualifier2 = AnnotationBuilder.of(Qual.class).setValue(1).build();
         
         Desire dr1 = new MockDesire(null, qualifier1);
         Desire dr2 = new MockDesire(null, qualifier2);
@@ -530,10 +532,10 @@ public class DependencySolverTest {
     public void testComplexDependenciesSuccess() throws Exception {
         // Test a contrived example of a reasonably complex dependency scenario
         // that tests contexts, qualifiers, shared, and split nodes
-        MockQualifier r1 = new MockQualifier();
-        MockQualifier r2 = new MockQualifier();
-        MockQualifier r3 = new MockQualifier();
-        MockQualifier r4 = new MockQualifier();
+        Qual r1 = AnnotationBuilder.of(Qual.class).setValue(0).build();
+        Qual r2 = AnnotationBuilder.of(Qual.class).setValue(1).build();
+        Qual r3 = AnnotationBuilder.of(Qual.class).setValue(2).build();
+        Qual r4 = AnnotationBuilder.of(Qual.class).setValue(3).build();
         
         Desire d1 = new MockDesire(null, r1);
         Desire d2 = new MockDesire(null, r2);
@@ -1104,6 +1106,11 @@ public class DependencySolverTest {
     
     private Node<Satisfaction> getNode(Graph<Satisfaction, Desire> g, Satisfaction s) {
         return g.getNode(s);
+    }
+    
+    @Qualifier
+    public static @interface Qual {
+        int value();
     }
 
     private static class A {}

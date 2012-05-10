@@ -35,7 +35,7 @@ public class MockContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Qualifier> n) {
-        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight());
+    public boolean matches(Pair<Satisfaction, Attributes> n) {
+        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight().getQualifier());
     }
 }

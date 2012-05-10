@@ -18,7 +18,7 @@ public class AttributesImpl implements Attributes {
     private final Map<Class<? extends Annotation>, Annotation> attrs;
     private final Annotation qualifier;
     
-    public AttributesImpl(Annotation[] annots) {
+    public AttributesImpl(Annotation... annots) {
         attrs = new HashMap<Class<? extends Annotation>, Annotation>();
         Annotation foundQualifier = null;
         for (Annotation a: annots) {
@@ -57,7 +57,7 @@ public class AttributesImpl implements Attributes {
         }
         
         AttributesImpl a = (AttributesImpl) o;
-        return (qualifier == null ? a.qualifier == null : qualifier.equals(a)) && attrs.equals(a.attrs);
+        return (qualifier == null ? a.qualifier == null : qualifier.equals(a.qualifier)) && attrs.equals(a.attrs);
     }
     
     @Override

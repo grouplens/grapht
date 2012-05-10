@@ -19,6 +19,8 @@
 package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -29,7 +31,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.grouplens.grapht.annotation.Transient;
+import org.grouplens.grapht.annotation.Attribute;
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
@@ -38,12 +41,33 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class InjectionPointTest {
-    private static <T extends Annotation> AnnotationQualifier qualifier(Class<T> qtype) {
-        return new AnnotationQualifier(new AnnotationBuilder<T>(qtype).build());
+    private static <T extends Annotation> Attributes qualifier(Class<T> qtype, boolean hasAttr) {
+        if (hasAttr) {
+            return new AttributesImpl(AnnotationBuilder.of(qtype).build(), AnnotationBuilder.of(Transient.class).build());
+        } else {
+            return new AttributesImpl(AnnotationBuilder.of(qtype).build());
+        }
     }
     
-    private static <T extends Annotation> AnnotationQualifier named(String name) {
-        return new AnnotationQualifier(new AnnotationBuilder<Named>(Named.class).set("value", name).build());
+    private static <T extends Annotation> Attributes named(String name, boolean hasAttr) {
+        if (hasAttr) {
+            return new AttributesImpl(AnnotationBuilder.of(Named.class).setValue(name).build(), AnnotationBuilder.of(Transient.class).build());
+        } else {
+            return new AttributesImpl(AnnotationBuilder.of(Named.class).setValue(name).build());
+        }
+    }
+    
+    @Test
+    public void testAttributesLookup() throws Exception {
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class);
+        ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
+        ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
+        
+        // p1 has the transient attribute, p2 does not
+        Assert.assertNotNull(p1.getAttributes().getAttribute(Transient.class));
+        Assert.assertNull(p2.getAttributes().getAttribute(Transient.class));
+        Assert.assertEquals(1, p1.getAttributes().getAttributes().size());
+        Assert.assertEquals(0, p2.getAttributes().getAttributes().size());
     }
     
     @Test
@@ -58,16 +82,14 @@ public class InjectionPointTest {
         expected.add(p2);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(qualifier(RoleA.class), p1.getQualifier());
-        Assert.assertEquals(qualifier(RoleB.class), p2.getQualifier());
+        Assert.assertEquals(qualifier(RoleA.class, true), p1.getAttributes());
+        Assert.assertEquals(qualifier(RoleB.class, false), p2.getAttributes());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         
         // verify nullability and transience
         Assert.assertFalse(p1.isNullable());
-        Assert.assertTrue(p1.isTransient());
         Assert.assertTrue(p2.isNullable());
-        Assert.assertFalse(p2.isTransient());
         
         Assert.assertEquals(expected, getInjectionPoints(CtorType.class));
     }
@@ -89,11 +111,11 @@ public class InjectionPointTest {
         expected.add(p3);
         expected.add(p4);
         
-        // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(qualifier(RoleA.class), p1.getQualifier());
-        Assert.assertEquals(qualifier(RoleB.class), p2.getQualifier());
-        Assert.assertNull(p3.getQualifier());
-        Assert.assertEquals(qualifier(RoleD.class), p4.getQualifier());
+        // verify that the qualifiers, types, attrs are identified properly
+        Assert.assertEquals(qualifier(RoleA.class, true), p1.getAttributes());
+        Assert.assertEquals(qualifier(RoleB.class, false), p2.getAttributes());
+        Assert.assertEquals(new AttributesImpl(), p3.getAttributes());
+        Assert.assertEquals(qualifier(RoleD.class, false), p4.getAttributes());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         Assert.assertEquals(Object.class, p3.getType());
@@ -101,13 +123,9 @@ public class InjectionPointTest {
         
         // verify nullability and transience
         Assert.assertFalse(p1.isNullable());
-        Assert.assertTrue(p1.isTransient());
         Assert.assertFalse(p2.isNullable());
-        Assert.assertTrue(p2.isTransient());
         Assert.assertFalse(p3.isNullable());
-        Assert.assertFalse(p3.isTransient());
         Assert.assertTrue(p4.isNullable());
-        Assert.assertFalse(p4.isTransient());
         
         Assert.assertEquals(expected, getInjectionPoints(SetterType.class));
     }
@@ -136,8 +154,8 @@ public class InjectionPointTest {
         expected.add(p2);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(named("test1"), p1.getQualifier());
-        Assert.assertEquals(named("test2"), p2.getQualifier());
+        Assert.assertEquals(named("test1", false), p1.getAttributes());
+        Assert.assertEquals(named("test2", false), p2.getAttributes());
         Assert.assertEquals(String.class, p1.getType());
         Assert.assertEquals(Integer.class, p2.getType());
         
@@ -173,6 +191,10 @@ public class InjectionPointTest {
         return points;
     }
     
+    @Attribute
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Transient { }
+    
     public static class CtorType {
         @Inject
         public CtorType(@Transient @RoleA Object a, @Nullable @RoleB String b) { }
@@ -186,7 +208,6 @@ public class InjectionPointTest {
         public void setA(@Transient @RoleA Object a) { }
         
         @Inject
-        @Transient
         public void setB(@RoleB String b) { }
         
         @Inject
