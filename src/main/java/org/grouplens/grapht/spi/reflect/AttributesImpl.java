@@ -1,6 +1,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,11 @@ public class AttributesImpl implements Attributes {
     @Override
     public <A extends Annotation> A getAttribute(Class<A> atype) {
         return atype.cast(attrs.get(atype));
+    }
+    
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return attrs.values();
     }
     
     @Override

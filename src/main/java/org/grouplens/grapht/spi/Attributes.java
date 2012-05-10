@@ -1,9 +1,12 @@
 package org.grouplens.grapht.spi;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+
+import org.grouplens.grapht.annotation.Attribute;
 
 /**
  * Attributes contain additional annotations and metadata associated with an
@@ -34,4 +37,10 @@ public interface Attributes {
      * @throws NullPointerException if atype is null
      */
     @Nullable <A extends Annotation> A getAttribute(Class<A> atype);
+    
+    /**
+     * @return Immutable collection of attribute annotations (does not include
+     *         the qualifier)
+     */
+    Collection<Annotation> getAttributes();
 }
