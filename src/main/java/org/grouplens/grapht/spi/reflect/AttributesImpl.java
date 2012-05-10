@@ -13,7 +13,7 @@ import org.grouplens.grapht.spi.Attributes;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class AttributesImpl implements Attributes {
+public class AttributesImpl implements Attributes {
     private final Map<Class<? extends Annotation>, Annotation> attrs;
     private final Annotation qualifier;
     
@@ -42,5 +42,20 @@ class AttributesImpl implements Attributes {
     @Override
     public <A extends Annotation> A getAttribute(Class<A> atype) {
         return atype.cast(attrs.get(atype));
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AttributesImpl)) {
+            return false;
+        }
+        
+        AttributesImpl a = (AttributesImpl) o;
+        return (qualifier == null ? a.qualifier == null : qualifier.equals(a)) && attrs.equals(a.attrs);
+    }
+    
+    @Override
+    public int hashCode() {
+        return (qualifier == null ? 0 : qualifier.hashCode()) ^ attrs.hashCode();
     }
 }
