@@ -90,7 +90,7 @@ public class ContextChain {
      * @param nodes The current context
      * @return True if this chain matches
      */
-    public boolean matches(List<Pair<Satisfaction, Qualifier>> nodes) {
+    public boolean matches(List<Pair<Satisfaction, Attributes>> nodes) {
         int i = 0;
         for (ContextMatcher cm: matchers) {
             boolean found = false;

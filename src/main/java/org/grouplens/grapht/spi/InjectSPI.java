@@ -131,7 +131,7 @@ public interface InjectSPI {
      * @param nullable Whether or not the desire can be nullable
      * @return A Desire wrapping the qualifier and type
      */
-    Desire desire(@Nullable Qualifier qualifier, Class<?> type, boolean nullable);
+    Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable);
     
     /**
      * Create a QualifierMatcher that matches the given annotation type. This annotation must
@@ -160,13 +160,4 @@ public interface InjectSPI {
      * @return A QualifierMatcher that matches only the null qualifier
      */
     QualifierMatcher matchNone();
-
-    /**
-     * Create a Qualifier wrapping the given Annotation instance. This returns
-     * null if the annotation is null.
-     * 
-     * @param annot The qualifier annotation
-     * @return A Qualifier wrapping the given instance
-     */
-    Qualifier qualifier(@Nullable Annotation annot);
 }

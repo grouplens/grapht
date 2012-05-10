@@ -23,9 +23,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Named;
+import javax.inject.Qualifier;
 
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
@@ -35,27 +34,6 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  */
 public final class Qualifiers {
     private Qualifiers() { }
-    
-    /**
-     * Return the Qualifier representing the {@link Qualifier} contained in the
-     * parameter annotations given. If the annotations do not have any
-     * annotation that is a {@link Qualifier}, then null is returned. If
-     * {@link Named} is encountered, a NamedQualifier is used, otherwise a
-     * {@link AnnotationQualifier} is used.
-     * 
-     * @param parameterAnnots The parameter annotations on the setter or
-     *            constructor
-     * @return The Qualifier for the injection point, or null if there
-     *         is no {@link Qualifier}
-     */
-    public static AnnotationQualifier getQualifier(Annotation[] parameterAnnots) {
-        for (int i = 0; i < parameterAnnots.length; i++) {
-            if (Qualifiers.isQualifier(parameterAnnots[i].annotationType())) {
-                return new AnnotationQualifier(parameterAnnots[i]);
-            }
-        }
-        return null;
-    }
 
     /**
      * Return true or false whether or not the annotation type represents a
@@ -132,7 +110,7 @@ public final class Qualifiers {
     
     private static class AnyMatcher extends AbstractMatcher {
         @Override
-        public boolean matches(Qualifier q) {
+        public boolean matches(Annotation q) {
             return true;
         }
         
@@ -157,7 +135,7 @@ public final class Qualifiers {
     
     private static class NullMatcher extends AbstractMatcher {
         @Override
-        public boolean matches(Qualifier q) {
+        public boolean matches(Annotation q) {
             return q == null;
         }
         
@@ -190,8 +168,8 @@ public final class Qualifiers {
         }
         
         @Override
-        public boolean matches(Qualifier q) {
-            Class<? extends Annotation> qtype = (q == null ? null : ((AnnotationQualifier) q).getAnnotation().annotationType());
+        public boolean matches(Annotation q) {
+            Class<? extends Annotation> qtype = (q == null ? null : q.annotationType());
             return type.equals(qtype);
         }
         
@@ -224,9 +202,8 @@ public final class Qualifiers {
         }
         
         @Override
-        public boolean matches(Qualifier q) {
-            Annotation qa = (q == null ? null : ((AnnotationQualifier) q).getAnnotation());
-            return annot.equals(qa);
+        public boolean matches(Annotation q) {
+            return annot.equals(q);
         }
         
         @Override

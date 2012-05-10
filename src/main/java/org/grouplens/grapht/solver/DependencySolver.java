@@ -31,12 +31,12 @@ import org.grouplens.grapht.InjectorConfiguration;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
@@ -148,7 +148,7 @@ public class DependencySolver {
         Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
         tree.addNode(treeRoot);
         
-        resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Qualifier>>());
+        resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Attributes>>());
         merge(tree, treeRoot);
     }
     
@@ -229,7 +229,7 @@ public class DependencySolver {
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
-                              List<Pair<Satisfaction, Qualifier>> context) throws ResolverException {
+                              List<Pair<Satisfaction, Attributes>> context) throws ResolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth)
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
@@ -243,8 +243,8 @@ public class DependencySolver {
         graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.getRight()));
         
         // update the context
-        List<Pair<Satisfaction, Qualifier>> newContext = new ArrayList<Pair<Satisfaction, Qualifier>>(context);
-        newContext.add(Pair.of(resolved.getLeft(), desire.getQualifier()));
+        List<Pair<Satisfaction, Attributes>> newContext = new ArrayList<Pair<Satisfaction, Attributes>>(context);
+        newContext.add(Pair.of(resolved.getLeft(), desire.getAttributes()));
         
         List<? extends Desire> dependencies = resolved.getLeft().getDependencies();
         for (Desire d: dependencies) {
@@ -255,7 +255,7 @@ public class DependencySolver {
         }
     }
     
-    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Qualifier>> context) throws ResolverException {
+    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Attributes>> context) throws ResolverException {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();
@@ -362,9 +362,9 @@ public class DependencySolver {
      * and that they match the exact same nodes in the context.
      */
     private static class TypeDeltaComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final List<Pair<Satisfaction, Qualifier>> context;
+        private final List<Pair<Satisfaction, Attributes>> context;
         
-        public TypeDeltaComparator(List<Pair<Satisfaction, Qualifier>> context) {
+        public TypeDeltaComparator(List<Pair<Satisfaction, Attributes>> context) {
             this.context = context;
         }
         
@@ -380,7 +380,7 @@ public class DependencySolver {
                     break;
                 }
                 
-                Pair<Satisfaction, Qualifier> currentNode = context.get(i);
+                Pair<Satisfaction, Attributes> currentNode = context.get(i);
                 ContextMatcher m1 = o1.getLeft().getContexts().get(lastIndex1 - matcher);
                 ContextMatcher m2 = o2.getLeft().getContexts().get(lastIndex2 - matcher);
                 
@@ -429,9 +429,9 @@ public class DependencySolver {
      * end of the current context.
      */
     private static class ContextClosenessComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final List<Pair<Satisfaction, Qualifier>> context;
+        private final List<Pair<Satisfaction, Attributes>> context;
         
-        public ContextClosenessComparator(List<Pair<Satisfaction, Qualifier>> context) {
+        public ContextClosenessComparator(List<Pair<Satisfaction, Attributes>> context) {
             this.context = context;
         }
         

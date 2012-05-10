@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
 
@@ -50,10 +50,10 @@ public class ResolverException extends Exception {
     }
     
     protected String formatDesire(Desire desire) {
-        return format(desire.getQualifier(), desire.getType());
+        return format(desire.getAttributes(), desire.getType());
     }
     
-    protected String formatContext(Pair<Satisfaction, Qualifier> ctx) {
+    protected String formatContext(Pair<Satisfaction, Attributes> ctx) {
         return format(ctx.getRight(), ctx.getLeft().getErasedType());
     }
     
@@ -61,8 +61,8 @@ public class ResolverException extends Exception {
         return rule.toString();
     }
     
-    private String format(Qualifier q, Class<?> type) {
-        String base = (q != null ? q + ":" : "");
+    private String format(Attributes attr, Class<?> type) {
+        String base = (attr.getQualifier() != null ? attr.getQualifier() + ":" : "");
         return base + type.getName();
     }
 }

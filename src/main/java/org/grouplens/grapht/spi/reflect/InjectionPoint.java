@@ -20,7 +20,7 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.reflect.Member;
 
-import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.Attributes;
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -37,26 +37,15 @@ public interface InjectionPoint {
     Class<?> getType();
 
     /**
-     * Return any Qualifier on this injection point, or null if it is the default
-     * qualifier.
-     * 
-     * @return The qualifier on the injection point
+     * @return The attributes of this injection point
      */
-    AnnotationQualifier getQualifier();
+    Attributes getAttributes();
     
     /**
      * @return The Member that produces this injection point
      */
     Member getMember();
 
-    /**
-     * Return whether or not this injection point is a transient, with the same
-     * definition of {@link Desire#isTransient()}.
-     * 
-     * @return True if the injection point is for a transient desire
-     */
-    boolean isTransient();
-    
     /**
      * @return True if this injection point accepts null values
      */

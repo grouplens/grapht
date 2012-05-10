@@ -18,13 +18,14 @@
  */
 package org.grouplens.grapht.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.grouplens.grapht.annotation.Transient;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
 
 /**
  * Static helper methods for working with types.
@@ -190,23 +191,6 @@ public final class Types {
     public static boolean hasNullableAnnotation(Annotation[] annotations) {
         for (Annotation a: annotations) {
             if (a.annotationType().getSimpleName().equals("Nullable")) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Return true if the array of Annotations contains a {@link Transient}
-     * annotation.
-     * 
-     * @param annotations Array of annotations, e.g. from a setter or
-     *            constructor
-     * @return True if there exists a Transient annotation in the array
-     */
-    public static boolean hasTransientAnnotation(Annotation[] annotations) {
-        for (Annotation a: annotations) {
-            if (a instanceof Transient) {
                 return true;
             }
         }

@@ -18,6 +18,11 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.lang.annotation.Annotation;
+
+import javax.annotation.Nullable;
+import javax.inject.Qualifier;
+
 
 /**
  * <p>
@@ -35,12 +40,13 @@ package org.grouplens.grapht.spi;
  */
 public interface QualifierMatcher extends Comparable<QualifierMatcher> {
     /**
-     * Return true if this matcher matches the given Qualifier. It can be
-     * assumed that the qualifier is not null and was created by the same SPI
-     * that constructed this matcher.
+     * Return true if this matcher matches the given qualifier annotation. It
+     * can be assumed that the annotation type has been annotated with
+     * {@link Qualifier}. The qualifier will be null if the injection point
+     * being matched did not have a qualifier.
      * 
      * @param q The qualifier to match
      * @return True if matched
      */
-    boolean matches(Qualifier q);
+    boolean matches(@Nullable Annotation q);
 }

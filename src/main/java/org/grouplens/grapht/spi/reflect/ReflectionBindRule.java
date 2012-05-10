@@ -144,12 +144,10 @@ public class ReflectionBindRule implements BindRule {
     
     @Override
     public boolean matches(Desire desire) {
-        ReflectionDesire rd = (ReflectionDesire) desire;
-        
         // bind rules match type by equality
-        if (rd.getType().equals(sourceType)) {
+        if (desire.getType().equals(sourceType)) {
             // if the type is equal, then rely on the qualifier matcher
-            return qualifier.matches(rd.getQualifier());
+            return qualifier.matches(desire.getAttributes().getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false

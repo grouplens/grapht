@@ -18,17 +18,30 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
 import javax.annotation.Nullable;
 
-class SimpleInjectionPoint implements InjectionPoint {
-    private final AnnotationQualifier qualifier;
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.InjectSPI;
+
+/**
+ * SimpleInjectionPoint is a synthetic injection point used for
+ * {@link InjectSPI#desire(Annotation, Class, boolean)}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class SimpleInjectionPoint implements InjectionPoint {
+    private final Annotation qualifier;
     private final Class<?> type;
     private final boolean nullable;
     
-    public SimpleInjectionPoint(@Nullable AnnotationQualifier qualifier, Class<?> type, boolean nullable) {
+    public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Checks.notNull("type", type);
+        if (qualifier != null) {
+            Checks.isQualifier(qualifier.annotationType());
+        }
 
         this.qualifier = qualifier;
         this.type = type;
@@ -71,13 +84,19 @@ class SimpleInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
-        return qualifier;
-    }
+    public Attributes getAttributes() {
+        return new Attributes() {
+            @Override
+            public Annotation getQualifier() {
+                return qualifier;
+            }
 
-    @Override
-    public boolean isTransient() {
-        return false;
+            @Override
+            public <A extends Annotation> A getAttribute(Class<A> atype) {
+                // no attributes 
+                return null;
+            }
+        };
     }
     
     @Override

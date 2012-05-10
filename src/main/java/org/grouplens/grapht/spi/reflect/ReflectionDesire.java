@@ -35,6 +35,7 @@ import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultInteger;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.annotation.DefaultString;
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.util.Types;
@@ -183,8 +184,8 @@ public class ReflectionDesire implements Desire {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
-        return injectPoint.getQualifier();
+    public Attributes getAttributes() {
+        return injectPoint.getAttributes();
     }
 
     @Override
@@ -198,18 +199,13 @@ public class ReflectionDesire implements Desire {
     }
 
     @Override
-    public boolean isTransient() {
-        return injectPoint.isTransient();
-    }
-
-    @Override
     public Desire getDefaultDesire() {
-        AnnotationQualifier qualifier = getQualifier();
+        Annotation qualifier = getAttributes().getQualifier();
 
         // Check the qualifier first, but only if the qualifier source hasn't been disabled
         if (dfltSource == DefaultSource.QUALIFIER || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
             if (qualifier != null) {
-                Class<? extends Annotation> annotType = qualifier.getAnnotation().annotationType();
+                Class<? extends Annotation> annotType = qualifier.annotationType();
                 DefaultDouble dfltDouble = annotType.getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
                     return new ReflectionDesire(Double.class, injectPoint, new InstanceSatisfaction(dfltDouble.value()), DefaultSource.TYPE);

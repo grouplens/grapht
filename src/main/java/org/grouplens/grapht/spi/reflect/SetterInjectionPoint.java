@@ -20,6 +20,7 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.reflect.Method;
 
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -30,7 +31,7 @@ import org.grouplens.grapht.util.Types;
 public class SetterInjectionPoint implements InjectionPoint {
     private final Method setter;
     private final int parameter;
-    private final AnnotationQualifier qualifier;
+    private final Attributes attributes;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -41,7 +42,7 @@ public class SetterInjectionPoint implements InjectionPoint {
         Checks.notNull("setter method", setter);
         Checks.inRange(parameter, 0, setter.getParameterTypes().length);
         
-        this.qualifier = Qualifiers.getQualifier(setter.getParameterAnnotations()[parameter]);
+        this.attributes = new AttributesImpl(setter.getParameterAnnotations()[parameter]);
         this.setter = setter;
         this.parameter = parameter;
     }
@@ -68,12 +69,6 @@ public class SetterInjectionPoint implements InjectionPoint {
         return Types.hasNullableAnnotation(setter.getAnnotations()) || 
                Types.hasNullableAnnotation(setter.getParameterAnnotations()[parameter]);
     }
-    
-    @Override
-    public boolean isTransient() {
-        return Types.hasTransientAnnotation(setter.getAnnotations()) ||
-               Types.hasTransientAnnotation(setter.getParameterAnnotations()[parameter]);
-    }
 
     @Override
     public Class<?> getType() {
@@ -81,8 +76,8 @@ public class SetterInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
-        return qualifier;
+    public Attributes getAttributes() {
+        return attributes;
     }
     
     @Override
@@ -101,7 +96,7 @@ public class SetterInjectionPoint implements InjectionPoint {
     
     @Override
     public String toString() {
-        String q = (qualifier == null ? "" : qualifier + ":");
+        String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
         String p = setter.getParameterTypes()[parameter].getSimpleName();
         return setter.getName() + "(" + parameter + ", " + q + p + ")";
     }

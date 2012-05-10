@@ -18,8 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import javax.inject.Qualifier;
+
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
@@ -78,11 +80,11 @@ public class ReflectionContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Qualifier> n) {
+    public boolean matches(Pair<Satisfaction, Attributes> n) {
         // we must check for nulls in case it is a synthetic satisfaction
         if (n.getLeft().getErasedType() != null && type.isAssignableFrom(n.getLeft().getErasedType())) {
             // type is a match, so check the QualifierMatcher
-            return qualifier.matches(n.getRight());
+            return qualifier.matches(n.getRight().getQualifier());
         }
         
         return false;

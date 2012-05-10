@@ -29,24 +29,26 @@ import org.grouplens.grapht.util.Pair;
  * or first element within the dependency context. Later elements represent
  * dependencies or dependencies of dependencies of the root node.
  * <p>
- * ContextMatchers can match or apply to these nodes and {@link Qualifier}s within a
- * dependency context. As an example, the reflection based ContextMatcher
- * matches nodes that are sub-types of the type the matcher was configured with.
+ * ContextMatchers can match or apply to these nodes and {@link Qualifier}s
+ * within a dependency context. As an example, the reflection based
+ * ContextMatcher matches nodes that are sub-types of the type the matcher was
+ * configured with.
  * <p>
  * ContextMatchers are composed into a list with {@link ContextChain} to
- * parallel the composing of nodes and {@link Qualifier}s into the dependency context list.
- * The ContextChain can then be used to determine if the list of ContextMatchers
- * applies to any given dependency context.
+ * parallel the composing of nodes and {@link Qualifier}s into the dependency
+ * context list. The ContextChain can then be used to determine if the list of
+ * ContextMatchers applies to any given dependency context.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface ContextMatcher {
     /**
-     * Return true if this ContextMatcher matches or applies to the given Satisfaction
-     * and Qualifier.
+     * Return true if this ContextMatcher matches or applies to the given
+     * Satisfaction and Qualifier.
      * 
-     * @param n The node and {@link Qualifier} in the current dependency context
-     * @return True if this matcher matches the node and annotation, false otherwise
+     * @param n The node and attributes in the current dependency context
+     * @return True if this matcher matches the node and attributes, false
+     *         otherwise
      */
-    boolean matches(Pair<Satisfaction, Qualifier> n);
+    boolean matches(Pair<Satisfaction, Attributes> n);
 }

@@ -22,7 +22,6 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.InjectionException;
@@ -32,7 +31,6 @@ import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Node;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
 
 /**
@@ -90,17 +88,13 @@ public class DefaultInjector implements Injector {
     
     @Override
     public <T> T getInstance(Class<T> type) {
-        return getInstance((Qualifier) null, type);
+        return getInstance(null, type);
     }
     
     @Override
-    public <T> T getInstance(Annotation qualifier, Class<T> type) {
-        return getInstance(config.getSPI().qualifier(qualifier), type);
-    }
-    
     @SuppressWarnings("unchecked")
-    private <T> T getInstance(@Nullable Qualifier q, Class<T> type) {
-        Desire desire = config.getSPI().desire(q, type, false);
+    public <T> T getInstance(Annotation qualifier, Class<T> type) {
+        Desire desire = config.getSPI().desire(qualifier, type, false);
         
         // check if the desire is already in the graph
         Edge<Satisfaction, Desire> resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
