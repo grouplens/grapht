@@ -85,18 +85,7 @@ public class SimpleInjectionPoint implements InjectionPoint {
 
     @Override
     public Attributes getAttributes() {
-        return new Attributes() {
-            @Override
-            public Annotation getQualifier() {
-                return qualifier;
-            }
-
-            @Override
-            public <A extends Annotation> A getAttribute(Class<A> atype) {
-                // no attributes 
-                return null;
-            }
-        };
+        return new AttributesImpl(new Annotation[] { qualifier });
     }
     
     @Override
