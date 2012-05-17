@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.graph;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
 /**
@@ -37,11 +39,14 @@ import javax.annotation.Nullable;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Edge<N, E> {
-    private final Node<N> head;
-    private final Node<N> tail;
+public class Edge<N, E> implements Serializable {
+    private static final long serialVersionUID = 1L;
     
-    private final E label;
+    // "final"
+    private Node<N> head;
+    private Node<N> tail;
+    
+    private E label;
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and

@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.graph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,11 +39,13 @@ import javax.annotation.Nullable;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Graph<N, E> {
+public class Graph<N, E> implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     // The outgoing key set is used to represent the set of nodes in the graph,
     // although it should hold that the incoming key set is equivalent
-    private final Map<Node<N>, Set<Edge<N, E>>> outgoing; // edge.head == key
-    private final Map<Node<N>, Set<Edge<N, E>>> incoming; // edge.tail == key
+    private Map<Node<N>, Set<Edge<N, E>>> outgoing; // edge.head == key
+    private Map<Node<N>, Set<Edge<N, E>>> incoming; // edge.tail == key
     
     /**
      * Create an empty graph with no nodes or edges.
