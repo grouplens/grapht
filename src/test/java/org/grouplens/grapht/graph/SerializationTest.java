@@ -1,3 +1,21 @@
+/*
+ * Grapht, an open source dependency injector.
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 package org.grouplens.grapht.graph;
 
 import java.io.File;
@@ -7,6 +25,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import javax.inject.Named;
+
+import org.grouplens.grapht.InjectorConfigurationBuilder;
+import org.grouplens.grapht.solver.DependencySolver;
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
+import org.grouplens.grapht.spi.reflect.types.NamedType;
+import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -103,12 +130,49 @@ public class SerializationTest {
         Assert.assertEquals(null, read.getEdges(n1, n2).iterator().next().getLabel());
     }
     
+    @Test
+    public void testDependencySolverSerialization() throws Exception {
+        InjectorConfigurationBuilder b = new InjectorConfigurationBuilder();
+        b.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
+        b.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build()).to("hello world");
+        
+        DependencySolver solver = new DependencySolver(b.build(), 100);
+        solver.resolve(b.getSPI().desire(null, NamedType.class, false));
+        
+        Graph<Satisfaction, Desire> g = solver.getGraph();
+        write(g);
+        Graph<Satisfaction, Desire> read = read();
+        
+        Node<Satisfaction> root = read.getNode(null);
+        Assert.assertEquals(1, read.getOutgoingEdges(root).size());
+        Edge<Satisfaction, Desire> rootEdge = read.getOutgoingEdges(root).iterator().next();
+        Node<Satisfaction> namedType = rootEdge.getTail();
+        
+        Assert.assertEquals(NamedType.class, namedType.getLabel().getErasedType());
+        Assert.assertEquals(NamedType.class, rootEdge.getLabel().getType());
+        Assert.assertEquals(rootEdge.getLabel().getSatisfaction(), namedType.getLabel());
+        Assert.assertNull(rootEdge.getLabel().getAttributes().getQualifier());
+        Assert.assertTrue(rootEdge.getLabel().getAttributes().getAttributes().isEmpty());
+        
+        Assert.assertEquals(1, read.getOutgoingEdges(namedType).size());
+        Edge<Satisfaction, Desire> nameEdge = read.getOutgoingEdges(namedType).iterator().next();
+        Node<Satisfaction> string = nameEdge.getTail();
+        
+        Assert.assertEquals(String.class, string.getLabel().getErasedType());
+        Assert.assertEquals(String.class, nameEdge.getLabel().getType());
+        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getAttributes().getQualifier());
+        Assert.assertTrue(nameEdge.getLabel().getAttributes().getAttributes().isEmpty());
+        
+        Assert.assertTrue(string.getLabel() instanceof InstanceSatisfaction);
+        Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel()).getInstance());
+    }
+    
     @After
     public void cleanup() throws Exception {
         GRAPH_FILE.delete();
     }
     
-    private void write(Graph<String, String> g) throws IOException {
+    private <N, E> void write(Graph<N, E> g) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(GRAPH_FILE));
         out.writeObject(g);
         out.flush();
@@ -116,8 +180,8 @@ public class SerializationTest {
     }
     
     @SuppressWarnings("unchecked")
-    private Graph<String, String> read() throws IOException, ClassNotFoundException {
+    private <N, E> Graph<N, E> read() throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(GRAPH_FILE));
-        return (Graph<String, String>) in.readObject();
+        return (Graph<N, E>) in.readObject();
     }
 }
