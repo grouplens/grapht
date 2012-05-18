@@ -202,6 +202,18 @@ public final class Types {
         return false;
     }
     
+    /**
+     * Read in a Class from the given ObjectInputStream. This is only compatible
+     * with classes that were serialized with
+     * {@link #writeClass(ObjectOutputStream, Class)}. Although Class is
+     * Serializable, this guarantees a simple structure within a file.
+     * 
+     * @param in The stream to read from
+     * @return The next Class encoded in the stream
+     * @throws IOException if an IO error occurs
+     * @throws ClassNotFoundException if the class can no longer be found at
+     *             runtime
+     */
     public static Class<?> readClass(ObjectInputStream in) throws IOException, ClassNotFoundException {
         String typeName = in.readUTF();
         boolean array = in.readBoolean();
@@ -214,12 +226,41 @@ public final class Types {
         }
     }
     
+    /**
+     * <p>
+     * Write the Class to the given ObjectOutputStream. When the class type is
+     * not an array, its canonical name is written as a UTF string, and a false
+     * boolean to record that it's not an array. When it is an array type, the
+     * canonical name of its component type is written as a UTF string, and then
+     * a true boolean value.
+     * <p>
+     * The class can be decoded by calling {@link #readClass(ObjectInputStream)}.
+     * 
+     * @param out The stream to write to
+     * @param cls The class type to encode
+     * @throws IOException if an IO error occurs
+     */
     public static void writeClass(ObjectOutputStream out, Class<?> cls) throws IOException {
         Class<?> baseType = (cls.isArray() ? cls.getComponentType() : cls);
         out.writeUTF(baseType.getCanonicalName());
         out.writeBoolean(cls.isArray());
     }
     
+    /**
+     * Read in a Constructor from the given ObjectInputStream. This is only
+     * compatible with constructors serialized
+     * {@link #writeConstructor(ObjectOutputStream, Constructor)}. Because
+     * Constructor is not Serializable, this must be used instead of
+     * {@link ObjectInputStream#readObject()}.
+     * 
+     * @param in The stream to read from
+     * @return The next constructor encoded in the stream
+     * @throws IOException if an IO error occurs
+     * @throws ClassNotFoundException if the declaring class of the constructor
+     *             cannot be found at runtime
+     * @throws NoSuchMethodException if the constructor no longer exists in the
+     *             loaded class definition
+     */
     public static Constructor<?> readConstructor(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
         Class<?> declaring = readClass(in);
         Class<?>[] args = new Class<?>[in.readInt()];
@@ -230,6 +271,21 @@ public final class Types {
         return declaring.getDeclaredConstructor(args);
     }
     
+    /**
+     * <p>
+     * Write the Constructor to the given ObjectOutputStream. Because
+     * Constructor is not Serializable, it is encoded to the stream as its
+     * declaring class, the number of parameters, and then the parameter classes
+     * in their defined order. All classes are written to the stream using
+     * {@link #writeClass(ObjectOutputStream, Class)}.
+     * <p>
+     * The constructor can be decoded by calling
+     * {@link #readConstructor(ObjectInputStream)}.
+     * 
+     * @param out The output stream to write to
+     * @param ctor The constructor to serialize
+     * @throws IOException if an IO error occurs
+     */
     public static void writeConstructor(ObjectOutputStream out, Constructor<?> ctor) throws IOException {
         writeClass(out, ctor.getDeclaringClass());
         
@@ -240,6 +296,21 @@ public final class Types {
         }
     }
     
+    /**
+     * Read in a Method from the given ObjectInputStream. This is only
+     * compatible with methods serialized
+     * {@link #writeMethod(ObjectOutputStream, Method)}. Because Method is not
+     * Serializable, this must be used instead of
+     * {@link ObjectInputStream#readObject()}.
+     * 
+     * @param in The stream to read from
+     * @return The next method encoded in the stream
+     * @throws IOException If an IO error occurs
+     * @throws ClassNotFoundException if the declaring class of the method
+     *             cannot be found at runtime
+     * @throws NoSuchMethodException if the method no longer exists in the
+     *             loaded class definition
+     */
     public static Method readMethod(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
         Class<?> declaring = readClass(in);
         String name = in.readUTF();
@@ -252,6 +323,21 @@ public final class Types {
         return declaring.getDeclaredMethod(name, args);
     }
     
+    /**
+     * <p>
+     * Write the Method to the given ObjectOutputStream. Because Method is not
+     * Serializable, it is encoded to the stream as its declaring class, its
+     * name as a UTF string, the number of parameters, and then the parameter
+     * classes in their defined order. All classes are written to the stream
+     * using {@link #writeClass(ObjectOutputStream, Class)}.
+     * <p>
+     * The method can be decoded by calling
+     * {@link #readMethod(ObjectInputStream)}.
+     * 
+     * @param out The output stream to write to
+     * @param m The method to serialize
+     * @throws IOException if an IO error occurs
+     */
     public static void writeMethod(ObjectOutputStream out, Method m) throws IOException {
         writeClass(out, m.getDeclaringClass());
         out.writeUTF(m.getName());
