@@ -79,7 +79,7 @@ public class ReflectionInjectSPI implements InjectSPI {
     }
     
     @Override
-    public Desire desire(final @Nullable Annotation qualifier, final Class<?> type, boolean nullable) {
+    public Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         return new ReflectionDesire(new SimpleInjectionPoint(qualifier, type, nullable));
     }
 

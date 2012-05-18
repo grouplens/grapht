@@ -18,8 +18,13 @@
  */
 package org.grouplens.grapht.util;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -195,5 +200,66 @@ public final class Types {
             }
         }
         return false;
+    }
+    
+    public static Class<?> readClass(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        String typeName = in.readUTF();
+        boolean array = in.readBoolean();
+        
+        Class<?> baseType = Class.forName(typeName);
+        if (array) {
+            return Array.newInstance(baseType, 0).getClass();
+        } else {
+            return baseType;
+        }
+    }
+    
+    public static void writeClass(ObjectOutputStream out, Class<?> cls) throws IOException {
+        Class<?> baseType = (cls.isArray() ? cls.getComponentType() : cls);
+        out.writeUTF(baseType.getCanonicalName());
+        out.writeBoolean(cls.isArray());
+    }
+    
+    public static Constructor<?> readConstructor(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+        Class<?> declaring = readClass(in);
+        Class<?>[] args = new Class<?>[in.readInt()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = readClass(in);
+        }
+        
+        return declaring.getDeclaredConstructor(args);
+    }
+    
+    public static void writeConstructor(ObjectOutputStream out, Constructor<?> ctor) throws IOException {
+        writeClass(out, ctor.getDeclaringClass());
+        
+        Class<?>[] args = ctor.getParameterTypes();
+        out.writeInt(args.length);
+        for (int i = 0; i < args.length; i++) {
+            writeClass(out, args[i]);
+        }
+    }
+    
+    public static Method readMethod(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+        Class<?> declaring = readClass(in);
+        String name = in.readUTF();
+        
+        Class<?>[] args = new Class<?>[in.readInt()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = readClass(in);
+        }
+        
+        return declaring.getDeclaredMethod(name, args);
+    }
+    
+    public static void writeMethod(ObjectOutputStream out, Method m) throws IOException {
+        writeClass(out, m.getDeclaringClass());
+        out.writeUTF(m.getName());
+        
+        Class<?>[] args = m.getParameterTypes();
+        out.writeInt(args.length);
+        for (int i = 0; i < args.length; i++) {
+            writeClass(out, args[i]);
+        }
     }
 }

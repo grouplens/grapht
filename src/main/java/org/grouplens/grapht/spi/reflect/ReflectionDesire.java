@@ -304,14 +304,16 @@ public class ReflectionDesire implements Desire, Serializable {
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        desiredType = Class.forName(in.readUTF());
+        desiredType = Types.readClass(in);
+        
         dfltSource = (DefaultSource) in.readObject();
         injectPoint = (InjectionPoint) in.readObject();
         satisfaction = (ReflectionSatisfaction) in.readObject();
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeUTF(desiredType.getCanonicalName());
+        Types.writeClass(out, desiredType);
+        
         out.writeObject(dfltSource);
         out.writeObject(injectPoint);
         out.writeObject(satisfaction);

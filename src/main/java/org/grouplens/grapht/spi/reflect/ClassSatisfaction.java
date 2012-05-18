@@ -98,12 +98,10 @@ public class ClassSatisfaction extends ReflectionSatisfaction implements Seriali
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        String typeName = in.readUTF();
-        type = Class.forName(typeName);
+        type = Types.readClass(in);
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        // write the name of the class
-        out.writeUTF(type.getCanonicalName());
+        Types.writeClass(out, type);
     }
 }

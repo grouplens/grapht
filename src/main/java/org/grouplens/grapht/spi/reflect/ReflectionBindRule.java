@@ -200,20 +200,24 @@ public class ReflectionBindRule implements BindRule, Serializable {
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        sourceType = Types.readClass(in);
+        implType = Types.readClass(in);
+        
         satisfaction = (ReflectionSatisfaction) in.readObject();
-        terminateChain = in.readBoolean();
         qualifier = (QualifierMatcher) in.readObject();
-        sourceType = Class.forName(in.readUTF());
-        implType = Class.forName(in.readUTF());
+        
+        terminateChain = in.readBoolean();
         weight = in.readInt();
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
+        Types.writeClass(out, sourceType);
+        Types.writeClass(out, implType);
+        
         out.writeObject(satisfaction);
-        out.writeBoolean(terminateChain);
         out.writeObject(qualifier);
-        out.writeUTF(sourceType.getCanonicalName());
-        out.writeUTF(implType.getCanonicalName());
+
+        out.writeBoolean(terminateChain);
         out.writeInt(weight);
     }
 }

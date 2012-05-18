@@ -30,6 +30,7 @@ import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
@@ -118,12 +119,12 @@ public class ReflectionContextMatcher implements ContextMatcher, Serializable {
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        type = Class.forName(in.readUTF());
+        type = Types.readClass(in);
         qualifier = (QualifierMatcher) in.readObject();
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeUTF(type.getCanonicalName());
+        Types.writeClass(out, type);
         out.writeObject(qualifier);
     }
 }

@@ -108,14 +108,15 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
         return setter.getName() + "(" + parameter + ", " + q + p + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        setter = (Method) in.readObject();
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+        setter = Types.readMethod(in);
         parameter = in.readInt();
+        
         attributes = new AttributesImpl(setter.getParameterAnnotations()[parameter]);
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeObject(setter);
+        Types.writeMethod(out, setter);
         out.writeInt(parameter);
     }
 }

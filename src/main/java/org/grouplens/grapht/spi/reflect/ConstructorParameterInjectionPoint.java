@@ -113,14 +113,15 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
         return ctor.getDeclaringClass().getSimpleName() + "(" + parameter + ", " + q + p + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        ctor = (Constructor<?>) in.readObject();
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+        ctor = Types.readConstructor(in);
         parameter = in.readInt();
+        
         attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeObject(ctor);
+        Types.writeConstructor(out, ctor);
         out.writeInt(parameter);
     }
 }

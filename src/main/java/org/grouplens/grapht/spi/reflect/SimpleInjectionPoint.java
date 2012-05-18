@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.util.Types;
 
 /**
  * SimpleInjectionPoint is a synthetic injection point used for
@@ -116,7 +117,7 @@ public class SimpleInjectionPoint implements InjectionPoint, Serializable {
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        type = Class.forName(in.readUTF());
+        type = Types.readClass(in);
         nullable = in.readBoolean();
 
         Annotation qualifier = (Annotation) in.readObject();
@@ -124,7 +125,7 @@ public class SimpleInjectionPoint implements InjectionPoint, Serializable {
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeUTF(type.getCanonicalName());
+        Types.writeClass(out, type);
         out.writeBoolean(nullable);
         out.writeObject(attrs.getQualifier());
     }

@@ -110,12 +110,10 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction implements
     
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        String typeName = in.readUTF();
-        providerType = (Class<? extends Provider<?>>) Class.forName(typeName);
+        providerType = (Class<? extends Provider<?>>) Types.readClass(in);
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
-        // write the name of the class
-        out.writeUTF(providerType.getCanonicalName());
+        Types.writeClass(out, providerType);
     }
 }
