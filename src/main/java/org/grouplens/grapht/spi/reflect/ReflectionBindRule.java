@@ -18,6 +18,11 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.QualifierMatcher;
@@ -34,16 +39,19 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionBindRule implements BindRule {
-    private final ReflectionSatisfaction satisfaction;
-    private final boolean terminateChain;
+public class ReflectionBindRule implements BindRule, Serializable {
+    private static final long serialVersionUID = 1L;
     
-    private final QualifierMatcher qualifier;
-    private final Class<?> sourceType;
-    private final Class<?> implType;
+    // "final"
+    private ReflectionSatisfaction satisfaction;
+    private boolean terminateChain;
     
-    private final int weight;
-
+    private QualifierMatcher qualifier;
+    private Class<?> sourceType;
+    private Class<?> implType;
+    
+    private int weight;
+    
     /**
      * Create a bind rule that matches a desire when the desired type equals
      * <tt>sourceType</tt> and the desire's qualifier inherits from
@@ -189,5 +197,23 @@ public class ReflectionBindRule implements BindRule {
     public String toString() {
         String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
         return "Bind(weight=" + weight + ", " + qualifier + ":" + sourceType.getSimpleName() + " -> " + i + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        satisfaction = (ReflectionSatisfaction) in.readObject();
+        terminateChain = in.readBoolean();
+        qualifier = (QualifierMatcher) in.readObject();
+        sourceType = Class.forName(in.readUTF());
+        implType = Class.forName(in.readUTF());
+        weight = in.readInt();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(satisfaction);
+        out.writeBoolean(terminateChain);
+        out.writeObject(qualifier);
+        out.writeUTF(sourceType.getCanonicalName());
+        out.writeUTF(implType.getCanonicalName());
+        out.writeInt(weight);
     }
 }

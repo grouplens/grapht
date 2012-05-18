@@ -18,6 +18,11 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.spi.Attributes;
@@ -33,10 +38,13 @@ import org.grouplens.grapht.util.Pair;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionContextMatcher implements ContextMatcher {
-    private final Class<?> type;
-    private final QualifierMatcher qualifier;
-
+public class ReflectionContextMatcher implements ContextMatcher, Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Class<?> type;
+    private QualifierMatcher qualifier;
+    
     /**
      * Create a ReflectionContextMatcher that matches the given type 
      * and any qualifier.
@@ -107,5 +115,15 @@ public class ReflectionContextMatcher implements ContextMatcher {
     @Override
     public String toString() {
         return "ReflectionContextMatcher(" + qualifier + ":" + type.getSimpleName() + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        type = Class.forName(in.readUTF());
+        qualifier = (QualifierMatcher) in.readObject();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUTF(type.getCanonicalName());
+        out.writeObject(qualifier);
     }
 }
