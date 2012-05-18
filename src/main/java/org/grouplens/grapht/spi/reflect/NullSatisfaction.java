@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +39,11 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class NullSatisfaction extends ReflectionSatisfaction {
-    private final Class<?> type;
+public class NullSatisfaction extends ReflectionSatisfaction implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Class<?> type;
     
     /**
      * Create a NullSatisfaction that uses <code>null</code> to satisfy the
@@ -87,5 +94,15 @@ public class NullSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "Null(" + type.getSimpleName() + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        String typeName = in.readUTF();
+        type = Class.forName(typeName);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        // write the name of the class
+        out.writeUTF(type.getCanonicalName());
     }
 }

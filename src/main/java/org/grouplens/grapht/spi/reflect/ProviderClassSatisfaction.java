@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -33,8 +37,11 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ProviderClassSatisfaction extends ReflectionSatisfaction {
-    private final Class<? extends Provider<?>> providerType;
+public class ProviderClassSatisfaction extends ReflectionSatisfaction implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Class<? extends Provider<?>> providerType;
 
     /**
      * Create a ProviderClassSatisfaction that wraps a given provider type.
@@ -99,5 +106,16 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "Provider(" + providerType.getSimpleName() + ")";
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        String typeName = in.readUTF();
+        providerType = (Class<? extends Provider<?>>) Class.forName(typeName);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        // write the name of the class
+        out.writeUTF(providerType.getCanonicalName());
     }
 }

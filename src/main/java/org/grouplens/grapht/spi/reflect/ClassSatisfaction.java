@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -34,8 +38,11 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ClassSatisfaction extends ReflectionSatisfaction {
-    private final Class<?> type;
+public class ClassSatisfaction extends ReflectionSatisfaction implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Class<?> type;
 
     /**
      * Create a satisfaction wrapping the given class type.
@@ -88,5 +95,15 @@ public class ClassSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "Class(" + type.getSimpleName() + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        String typeName = in.readUTF();
+        type = Class.forName(typeName);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        // write the name of the class
+        out.writeUTF(type.getCanonicalName());
     }
 }

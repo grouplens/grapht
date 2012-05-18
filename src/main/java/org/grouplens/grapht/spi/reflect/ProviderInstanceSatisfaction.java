@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +40,11 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
-    private final Provider<?> provider;
+public class ProviderInstanceSatisfaction extends ReflectionSatisfaction implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Provider<?> provider;
 
     /**
      * Create a new satisfaction that wraps the given Provider instance.
@@ -93,5 +100,13 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "ProviderInstance(" + provider + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        provider = (Provider<?>) in.readObject();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(provider);
     }
 }
