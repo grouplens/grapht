@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ import java.util.Map;
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.util.Types;
 
 /**
  * Utilities related to Qualifier implementations.
@@ -133,7 +138,9 @@ public final class Qualifiers {
         }
     }
     
-    private static class NullMatcher extends AbstractMatcher {
+    private static class NullMatcher extends AbstractMatcher implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
         @Override
         public boolean matches(Annotation q) {
             return q == null;
@@ -158,8 +165,11 @@ public final class Qualifiers {
         }
     }
     
-    private static class AnnotationClassMatcher extends AbstractMatcher {
-        private final Class<? extends Annotation> type;
+    private static class AnnotationClassMatcher extends AbstractMatcher implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
+        // "final"
+        private Class<? extends Annotation> type;
         
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
             Checks.notNull("type", type);
@@ -190,10 +200,22 @@ public final class Qualifiers {
         public String toString() {
             return type.toString();
         }
+        
+        @SuppressWarnings("unchecked")
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+            type = (Class<? extends Annotation>) Types.readClass(in);
+        }
+        
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            Types.writeClass(out, type);
+        }
     }
     
-    private static class AnnotationMatcher extends AbstractMatcher {
-        private final Annotation annot;
+    private static class AnnotationMatcher extends AbstractMatcher implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        // "final"
+        private Annotation annot;
         
         public AnnotationMatcher(Annotation annot) {
             Checks.notNull("annotation", annot);
@@ -222,6 +244,14 @@ public final class Qualifiers {
         @Override
         public String toString() {
             return annot.toString();
+        }
+        
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+            annot = (Annotation) in.readObject();
+        }
+        
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            out.writeObject(annot);
         }
     }
 }
