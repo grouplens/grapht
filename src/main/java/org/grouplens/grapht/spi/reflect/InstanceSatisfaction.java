@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +39,11 @@ import org.grouplens.grapht.util.InstanceProvider;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InstanceSatisfaction extends ReflectionSatisfaction {
-    private final Object instance;
+public class InstanceSatisfaction extends ReflectionSatisfaction implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Object instance;
 
     /**
      * Create a new instance node wrapping an instance.
@@ -93,5 +100,13 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "Instance(" + instance + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        instance = in.readObject();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(instance);
     }
 }
