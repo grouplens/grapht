@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.grouplens.grapht.spi.Attributes;
@@ -28,10 +32,13 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class SetterInjectionPoint implements InjectionPoint {
-    private final Method setter;
-    private final int parameter;
-    private final Attributes attributes;
+public class SetterInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private Method setter;
+    private int parameter;
+    private transient Attributes attributes;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -99,5 +106,16 @@ public class SetterInjectionPoint implements InjectionPoint {
         String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
         String p = setter.getParameterTypes()[parameter].getSimpleName();
         return setter.getName() + "(" + parameter + ", " + q + p + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        setter = (Method) in.readObject();
+        parameter = in.readInt();
+        attributes = new AttributesImpl(setter.getParameterAnnotations()[parameter]);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(setter);
+        out.writeInt(parameter);
     }
 }

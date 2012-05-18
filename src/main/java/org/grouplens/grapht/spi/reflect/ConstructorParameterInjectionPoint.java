@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 
 import org.grouplens.grapht.spi.Attributes;
@@ -29,10 +33,13 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ConstructorParameterInjectionPoint implements InjectionPoint {
-    private final Attributes attributes;
-    private final Constructor<?> ctor;
-    private final int parameter;
+public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private transient Attributes attributes;
+    private Constructor<?> ctor;
+    private int parameter;
 
     /**
      * Create a ConstructorParameterInjectionPoint that wraps the given
@@ -104,5 +111,16 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
         String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
         String p = ctor.getParameterTypes()[parameter].getSimpleName();
         return ctor.getDeclaringClass().getSimpleName() + "(" + parameter + ", " + q + p + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        ctor = (Constructor<?>) in.readObject();
+        parameter = in.readInt();
+        attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(ctor);
+        out.writeInt(parameter);
     }
 }

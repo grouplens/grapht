@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
@@ -32,10 +36,13 @@ import org.grouplens.grapht.spi.InjectSPI;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class SimpleInjectionPoint implements InjectionPoint {
-    private final Attributes attrs;
-    private final Class<?> type;
-    private final boolean nullable;
+public class SimpleInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private transient Attributes attrs;
+    private Class<?> type;
+    private boolean nullable;
     
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Checks.notNull("type", type);
@@ -106,5 +113,19 @@ public class SimpleInjectionPoint implements InjectionPoint {
     public String toString() {
         String q = (attrs.getQualifier() == null ? "" : attrs.getQualifier() + ":");
         return q + type.getSimpleName();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        type = Class.forName(in.readUTF());
+        nullable = in.readBoolean();
+
+        Annotation qualifier = (Annotation) in.readObject();
+        attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUTF(type.getCanonicalName());
+        out.writeBoolean(nullable);
+        out.writeObject(attrs.getQualifier());
     }
 }

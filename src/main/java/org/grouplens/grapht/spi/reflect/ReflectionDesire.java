@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -47,7 +51,9 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionDesire implements Desire {
+public class ReflectionDesire implements Desire, Serializable {
+    private static final long serialVersionUID = 1L;
+    
     /**
      * Return a list of desires that must satisfied in order to instantiate the
      * given type.
@@ -107,11 +113,12 @@ public class ReflectionDesire implements Desire {
         QUALIFIER_AND_TYPE
     }
     
-    private final Class<?> desiredType;
-    private final InjectionPoint injectPoint;
-    private final ReflectionSatisfaction satisfaction;
+    // all are "final"
+    private Class<?> desiredType;
+    private InjectionPoint injectPoint;
+    private ReflectionSatisfaction satisfaction;
 
-    private final DefaultSource dfltSource;
+    private DefaultSource dfltSource;
 
     /**
      * Create a ReflectionDesire that immediately wraps the given
@@ -294,5 +301,19 @@ public class ReflectionDesire implements Desire {
     @Override
     public String toString() {
         return "Desire(" + desiredType.getSimpleName() + ", " + injectPoint + ")";
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        desiredType = Class.forName(in.readUTF());
+        dfltSource = (DefaultSource) in.readObject();
+        injectPoint = (InjectionPoint) in.readObject();
+        satisfaction = (ReflectionSatisfaction) in.readObject();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUTF(desiredType.getCanonicalName());
+        out.writeObject(dfltSource);
+        out.writeObject(injectPoint);
+        out.writeObject(satisfaction);
     }
 }
