@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
@@ -38,7 +39,7 @@ import javax.inject.Qualifier;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public interface QualifierMatcher extends Comparable<QualifierMatcher> {
+public interface QualifierMatcher extends Comparable<QualifierMatcher>, Serializable {
     /**
      * Return true if this matcher matches the given qualifier annotation. It
      * can be assumed that the annotation type has been annotated with

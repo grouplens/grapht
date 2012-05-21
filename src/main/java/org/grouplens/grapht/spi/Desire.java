@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -29,7 +30,7 @@ import java.util.Comparator;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
  */
-public interface Desire {
+public interface Desire extends Serializable {
     /**
      * Get the attributes and qualifier that were on the injection point of the
      * desire. This should return a non-null Attributes object even when the

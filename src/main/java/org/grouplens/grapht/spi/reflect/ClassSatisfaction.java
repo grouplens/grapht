@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -38,9 +38,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ClassSatisfaction extends ReflectionSatisfaction implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class ClassSatisfaction extends ReflectionSatisfaction implements Externalizable {    
     // "final"
     private Class<?> type;
 
@@ -57,6 +55,11 @@ public class ClassSatisfaction extends ReflectionSatisfaction implements Seriali
         this.type = Types.box(type);
         Checks.isInstantiable(this.type);
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ClassSatisfaction() { }
     
     @Override
     public List<? extends Desire> getDependencies() {
@@ -96,12 +99,14 @@ public class ClassSatisfaction extends ReflectionSatisfaction implements Seriali
     public String toString() {
         return "Class(" + type.getSimpleName() + ")";
     }
-    
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        type = Types.readClass(in);
-    }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException {
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeClass(out, type);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        type = Types.readClass(in);
     }
 }

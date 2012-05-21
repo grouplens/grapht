@@ -21,6 +21,8 @@ package org.grouplens.grapht.spi;
 import org.grouplens.grapht.util.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
+    private static final long serialVersionUID = 1L;
+
     private final Class<?> type;
     private final MockQualifierMatcher qualifier;
     

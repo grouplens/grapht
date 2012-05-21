@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
@@ -37,9 +37,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class SimpleInjectionPoint implements InjectionPoint, Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
     // "final"
     private transient Attributes attrs;
     private Class<?> type;
@@ -55,6 +53,11 @@ public class SimpleInjectionPoint implements InjectionPoint, Serializable {
         this.type = type;
         this.nullable = nullable;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public SimpleInjectionPoint() { }
     
     @Override
     public Member getMember() {
@@ -116,7 +119,8 @@ public class SimpleInjectionPoint implements InjectionPoint, Serializable {
         return q + type.getSimpleName();
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = Types.readClass(in);
         nullable = in.readBoolean();
 
@@ -124,7 +128,8 @@ public class SimpleInjectionPoint implements InjectionPoint, Serializable {
         attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeClass(out, type);
         out.writeBoolean(nullable);
         out.writeObject(attrs.getQualifier());

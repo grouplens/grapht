@@ -182,6 +182,8 @@ public class SerializationTest {
     @SuppressWarnings("unchecked")
     private <N, E> Graph<N, E> read() throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(GRAPH_FILE));
-        return (Graph<N, E>) in.readObject();
+        Graph<N, E> g = (Graph<N, E>) in.readObject();
+        in.close();
+        return g;
     }
 }

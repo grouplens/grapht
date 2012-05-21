@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Serializable;
 import java.lang.reflect.Member;
 
 import org.grouplens.grapht.spi.Attributes;
@@ -28,7 +29,7 @@ import org.grouplens.grapht.spi.Attributes;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public interface InjectionPoint {
+public interface InjectionPoint extends Serializable {
     /**
      * Return the type required to satisfy the injection point.
      * 

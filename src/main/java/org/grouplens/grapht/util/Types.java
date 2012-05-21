@@ -19,7 +19,9 @@
 package org.grouplens.grapht.util;
 
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -214,7 +216,7 @@ public final class Types {
      * @throws ClassNotFoundException if the class can no longer be found at
      *             runtime
      */
-    public static Class<?> readClass(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    public static Class<?> readClass(ObjectInput in) throws IOException, ClassNotFoundException {
         String typeName = in.readUTF();
         boolean array = in.readBoolean();
         
@@ -240,7 +242,7 @@ public final class Types {
      * @param cls The class type to encode
      * @throws IOException if an IO error occurs
      */
-    public static void writeClass(ObjectOutputStream out, Class<?> cls) throws IOException {
+    public static void writeClass(ObjectOutput out, Class<?> cls) throws IOException {
         Class<?> baseType = (cls.isArray() ? cls.getComponentType() : cls);
         out.writeUTF(baseType.getCanonicalName());
         out.writeBoolean(cls.isArray());
@@ -261,14 +263,18 @@ public final class Types {
      * @throws NoSuchMethodException if the constructor no longer exists in the
      *             loaded class definition
      */
-    public static Constructor<?> readConstructor(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+    public static Constructor<?> readConstructor(ObjectInput in) throws IOException, ClassNotFoundException {
         Class<?> declaring = readClass(in);
         Class<?>[] args = new Class<?>[in.readInt()];
         for (int i = 0; i < args.length; i++) {
             args[i] = readClass(in);
         }
         
-        return declaring.getDeclaredConstructor(args);
+        try {
+            return declaring.getDeclaredConstructor(args);
+        } catch (NoSuchMethodException e) {
+            throw new IOException("Constructor no longer exists", e);
+        }
     }
     
     /**
@@ -286,7 +292,7 @@ public final class Types {
      * @param ctor The constructor to serialize
      * @throws IOException if an IO error occurs
      */
-    public static void writeConstructor(ObjectOutputStream out, Constructor<?> ctor) throws IOException {
+    public static void writeConstructor(ObjectOutput out, Constructor<?> ctor) throws IOException {
         writeClass(out, ctor.getDeclaringClass());
         
         Class<?>[] args = ctor.getParameterTypes();
@@ -311,7 +317,7 @@ public final class Types {
      * @throws NoSuchMethodException if the method no longer exists in the
      *             loaded class definition
      */
-    public static Method readMethod(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+    public static Method readMethod(ObjectInput in) throws IOException, ClassNotFoundException {
         Class<?> declaring = readClass(in);
         String name = in.readUTF();
         
@@ -320,7 +326,11 @@ public final class Types {
             args[i] = readClass(in);
         }
         
-        return declaring.getDeclaredMethod(name, args);
+        try {
+            return declaring.getDeclaredMethod(name, args);
+        } catch (NoSuchMethodException e) {
+            throw new IOException("Method no longer exists", e);
+        }
     }
     
     /**
@@ -338,7 +348,7 @@ public final class Types {
      * @param m The method to serialize
      * @throws IOException if an IO error occurs
      */
-    public static void writeMethod(ObjectOutputStream out, Method m) throws IOException {
+    public static void writeMethod(ObjectOutput out, Method m) throws IOException {
         writeClass(out, m.getDeclaringClass());
         out.writeUTF(m.getName());
         

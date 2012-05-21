@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -40,9 +40,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ProviderInstanceSatisfaction extends ReflectionSatisfaction implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class ProviderInstanceSatisfaction extends ReflectionSatisfaction implements Externalizable {
     // "final"
     private Provider<?> provider;
 
@@ -56,6 +54,11 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction impleme
         Checks.notNull("provider", provider);
         this.provider = provider;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ProviderInstanceSatisfaction() { }
     
     /**
      * @return The provider instance returned by {@link #makeProvider(ProviderSource)}
@@ -102,11 +105,13 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction impleme
         return "ProviderInstance(" + provider + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         provider = (Provider<?>) in.readObject();
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(provider);
     }
 }

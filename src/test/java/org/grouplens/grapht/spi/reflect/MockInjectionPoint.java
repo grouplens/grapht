@@ -32,6 +32,8 @@ import org.grouplens.grapht.util.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockInjectionPoint implements InjectionPoint {
+    private static final long serialVersionUID = 1L;
+
     private final Class<?> type;
     private final Attributes attrs;
     private final boolean nullable;

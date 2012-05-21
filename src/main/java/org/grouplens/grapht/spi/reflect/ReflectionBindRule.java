@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
@@ -39,9 +39,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionBindRule implements BindRule, Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class ReflectionBindRule implements BindRule, Externalizable {
     // "final"
     private ReflectionSatisfaction satisfaction;
     private boolean terminateChain;
@@ -82,6 +80,11 @@ public class ReflectionBindRule implements BindRule, Serializable {
         // verify that the satisfaction produces proper types
         Checks.isAssignable(this.sourceType, this.implType);
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ReflectionBindRule() { }
     
     /**
      * As the other constructor, but this is used for type to type bindings
@@ -199,7 +202,8 @@ public class ReflectionBindRule implements BindRule, Serializable {
         return "Bind(weight=" + weight + ", " + qualifier + ":" + sourceType.getSimpleName() + " -> " + i + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         sourceType = Types.readClass(in);
         implType = Types.readClass(in);
         
@@ -210,7 +214,8 @@ public class ReflectionBindRule implements BindRule, Serializable {
         weight = in.readInt();
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeClass(out, sourceType);
         Types.writeClass(out, implType);
         

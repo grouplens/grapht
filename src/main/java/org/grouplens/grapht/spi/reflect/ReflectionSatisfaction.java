@@ -31,6 +31,8 @@ import org.grouplens.grapht.util.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public abstract class ReflectionSatisfaction implements Satisfaction {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public Comparator<ContextMatcher> contextComparator() {
         return new Comparator<ContextMatcher>() {

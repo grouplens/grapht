@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Serializable;
+
 import org.grouplens.grapht.util.Pair;
 
 /**
@@ -41,7 +43,7 @@ import org.grouplens.grapht.util.Pair;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public interface ContextMatcher {
+public interface ContextMatcher extends Serializable {
     /**
      * Return true if this ContextMatcher matches or applies to the given
      * Satisfaction and Qualifier.

@@ -30,6 +30,8 @@ import org.grouplens.grapht.spi.reflect.AttributesImpl;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockDesire implements Desire {
+    private static final long serialVersionUID = 1L;
+
     private final Annotation qualifier;
     private final Satisfaction satisfaction;
     

@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import javax.inject.Qualifier;
 
@@ -39,9 +39,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionContextMatcher implements ContextMatcher, Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class ReflectionContextMatcher implements ContextMatcher, Externalizable {
     // "final"
     private Class<?> type;
     private QualifierMatcher qualifier;
@@ -56,6 +54,11 @@ public class ReflectionContextMatcher implements ContextMatcher, Serializable {
     public ReflectionContextMatcher(Class<?> type) {
         this(type, Qualifiers.matchAny());
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ReflectionContextMatcher() { }
 
     /**
      * Create a ReflectionContextMatcher that matches the given type and the
@@ -118,12 +121,14 @@ public class ReflectionContextMatcher implements ContextMatcher, Serializable {
         return "ReflectionContextMatcher(" + qualifier + ":" + type.getSimpleName() + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = Types.readClass(in);
         qualifier = (QualifierMatcher) in.readObject();
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeClass(out, type);
         out.writeObject(qualifier);
     }

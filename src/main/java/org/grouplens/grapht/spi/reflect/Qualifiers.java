@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,6 +97,8 @@ public final class Qualifiers {
     }
     
     private static abstract class AbstractMatcher implements QualifierMatcher {
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compareTo(QualifierMatcher o) {
             Integer p1 = TYPE_PRIORITIES.get(getClass());
@@ -114,6 +116,8 @@ public final class Qualifiers {
     }
     
     private static class AnyMatcher extends AbstractMatcher {
+        private static final long serialVersionUID = 1L;
+
         @Override
         public boolean matches(Annotation q) {
             return true;
@@ -138,7 +142,7 @@ public final class Qualifiers {
         }
     }
     
-    private static class NullMatcher extends AbstractMatcher implements Serializable {
+    private static class NullMatcher extends AbstractMatcher {
         private static final long serialVersionUID = 1L;
         
         @Override
@@ -165,9 +169,7 @@ public final class Qualifiers {
         }
     }
     
-    private static class AnnotationClassMatcher extends AbstractMatcher implements Serializable {
-        private static final long serialVersionUID = 1L;
-        
+    private static class AnnotationClassMatcher extends AbstractMatcher implements Externalizable {
         // "final"
         private Class<? extends Annotation> type;
         
@@ -176,6 +178,12 @@ public final class Qualifiers {
             Checks.isQualifier(type);
             this.type = type;
         }
+        
+        /**
+         * Constructor required by {@link Externalizable}.
+         */
+        @SuppressWarnings("unused")
+        public AnnotationClassMatcher() { }
         
         @Override
         public boolean matches(Annotation q) {
@@ -201,19 +209,19 @@ public final class Qualifiers {
             return type.toString();
         }
         
+        @Override
         @SuppressWarnings("unchecked")
-        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             type = (Class<? extends Annotation>) Types.readClass(in);
         }
         
-        private void writeObject(ObjectOutputStream out) throws IOException {
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
             Types.writeClass(out, type);
         }
     }
     
-    private static class AnnotationMatcher extends AbstractMatcher implements Serializable {
-        private static final long serialVersionUID = 1L;
-
+    private static class AnnotationMatcher extends AbstractMatcher implements Externalizable {
         // "final"
         private Annotation annot;
         
@@ -222,6 +230,12 @@ public final class Qualifiers {
             Checks.isQualifier(annot.annotationType());
             this.annot = annot;
         }
+        
+        /**
+         * Constructor required by {@link Externalizable}.
+         */
+        @SuppressWarnings("unused")
+        public AnnotationMatcher() { }
         
         @Override
         public boolean matches(Annotation q) {
@@ -246,11 +260,13 @@ public final class Qualifiers {
             return annot.toString();
         }
         
-        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             annot = (Annotation) in.readObject();
         }
         
-        private void writeObject(ObjectOutputStream out) throws IOException {
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
             out.writeObject(annot);
         }
     }

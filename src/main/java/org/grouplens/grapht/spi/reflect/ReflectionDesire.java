@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -51,9 +51,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionDesire implements Desire, Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class ReflectionDesire implements Desire, Externalizable {
     /**
      * Return a list of desires that must satisfied in order to instantiate the
      * given type.
@@ -175,6 +173,11 @@ public class ReflectionDesire implements Desire, Serializable {
         this.satisfaction = satisfaction;
         this.dfltSource = dfltSource;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ReflectionDesire() { }
 
     /**
      * Return the injection point used to inject whatever satisfies this desire.
@@ -303,7 +306,8 @@ public class ReflectionDesire implements Desire, Serializable {
         return "Desire(" + desiredType.getSimpleName() + ", " + injectPoint + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         desiredType = Types.readClass(in);
         
         dfltSource = (DefaultSource) in.readObject();
@@ -311,7 +315,8 @@ public class ReflectionDesire implements Desire, Serializable {
         satisfaction = (ReflectionSatisfaction) in.readObject();
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeClass(out, desiredType);
         
         out.writeObject(dfltSource);

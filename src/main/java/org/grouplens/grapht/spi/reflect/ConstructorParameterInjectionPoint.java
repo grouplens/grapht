@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.Constructor;
 
 import org.grouplens.grapht.spi.Attributes;
@@ -33,9 +33,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class ConstructorParameterInjectionPoint implements InjectionPoint, Externalizable {
     // "final"
     private transient Attributes attributes;
     private Constructor<?> ctor;
@@ -60,6 +58,11 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
         this.ctor = ctor;
         this.parameter = parameter;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ConstructorParameterInjectionPoint() { }
 
     /**
      * @return The constructor wrapped by this injection point
@@ -113,14 +116,16 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
         return ctor.getDeclaringClass().getSimpleName() + "(" + parameter + ", " + q + p + ")";
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException {
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         ctor = Types.readConstructor(in);
         parameter = in.readInt();
         
         attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeConstructor(out, ctor);
         out.writeInt(parameter);
     }

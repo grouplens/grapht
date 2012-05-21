@@ -32,6 +32,8 @@ import org.grouplens.grapht.spi.Desire;
  * @author Michael Ludwig
  */
 public class MockBindRule implements BindRule {
+    private static final long serialVersionUID = 1L;
+    
     private final Map<Desire, Desire> bindings;
     private boolean terminate;
     
