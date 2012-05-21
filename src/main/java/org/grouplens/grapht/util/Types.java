@@ -26,10 +26,15 @@ import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -218,11 +223,16 @@ public final class Types {
      */
     public static Class<?> readClass(ObjectInput in) throws IOException, ClassNotFoundException {
         String typeName = in.readUTF();
-        boolean array = in.readBoolean();
+        int arrayCount = in.readInt();
+        int hash = in.readInt();
         
         Class<?> baseType = Class.forName(typeName);
-        if (array) {
-            return Array.newInstance(baseType, 0).getClass();
+        if (hash != hash(baseType)) {
+            throw new IOException("Class definition changed since serialization: " + typeName);
+        }
+        
+        if (arrayCount > 0) {
+            return Array.newInstance(baseType, new int[arrayCount]).getClass();
         } else {
             return baseType;
         }
@@ -243,9 +253,16 @@ public final class Types {
      * @throws IOException if an IO error occurs
      */
     public static void writeClass(ObjectOutput out, Class<?> cls) throws IOException {
-        Class<?> baseType = (cls.isArray() ? cls.getComponentType() : cls);
+        int arrayCount = 0;
+        Class<?> baseType = cls;
+        while(baseType.isArray()) {
+            arrayCount++;
+            baseType = baseType.getComponentType();
+        }
+        
         out.writeUTF(baseType.getCanonicalName());
-        out.writeBoolean(cls.isArray());
+        out.writeInt(arrayCount);
+        out.writeInt(hash(baseType));
     }
     
     /**
@@ -357,5 +374,40 @@ public final class Types {
         for (int i = 0; i < args.length; i++) {
             writeClass(out, args[i]);
         }
+    }
+    
+    private static int hash(Class<?> type) {
+        // convert to a string, both for lexigraphical ordering
+        // and to combine into a hash
+        List<String> ctors = new ArrayList<String>();
+        for (Constructor<?> c: type.getDeclaredConstructors()) {
+            ctors.add(c.getName() + ":" + Arrays.toString(c.getParameterTypes()));
+        }
+        List<String> methods = new ArrayList<String>();
+        for (Method m: type.getDeclaredMethods()) {
+            methods.add(m.getName() + ":" + Arrays.toString(m.getParameterTypes()));
+        }
+        List<String> fields = new ArrayList<String>();
+        for (Field f: type.getDeclaredFields()) {
+            fields.add(f.getName() + ":" + f.getType().getName());
+        }
+        
+        // impose a consistent ordering
+        Collections.sort(ctors);
+        Collections.sort(methods);
+        Collections.sort(fields);
+        
+        StringBuilder sb = new StringBuilder();
+        for (String c: ctors) {
+            sb.append(c);
+        }
+        for (String m: methods) {
+            sb.append(m);
+        }
+        for (String f: fields) {
+            sb.append(f);
+        }
+        
+        return sb.toString().hashCode();
     }
 }
