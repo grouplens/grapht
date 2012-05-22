@@ -40,6 +40,8 @@ import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -83,6 +85,8 @@ import org.grouplens.grapht.util.Pair;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class DependencySolver {
+    private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);
+    
     private final int maxDepth;
     private final InjectorConfiguration bindRules;
     
@@ -113,6 +117,8 @@ public class DependencySolver {
         graph = new Graph<Satisfaction, Desire>();
         root = new Node<Satisfaction>(null);
         graph.addNode(root);
+
+        logger.info("DependencySolver created, max depth: {}", maxDepth);
     }
     
     /**
@@ -144,6 +150,8 @@ public class DependencySolver {
      * @param desire The desire to include in the graph
      */
     public void resolve(Desire desire) throws ResolverException {
+        logger.info("Resolving desire: {}", desire);
+        
         Graph<Satisfaction, List<Desire>> tree = new Graph<Satisfaction, List<Desire>>();
         Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
         tree.addNode(treeRoot);
@@ -194,6 +202,8 @@ public class DependencySolver {
                 if (newNode == null) {
                     // this configuration for the satisfaction has not been seen before
                     // - add it to merged graph, and connect to its dependencies
+                    logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
+                    
                     newNode = new Node<Satisfaction>(toMerge.getLabel());
                     graph.addNode(newNode);
                     
@@ -203,6 +213,8 @@ public class DependencySolver {
                         Node<Satisfaction> filtered = mergedMap.get(dep.getTail());
                         graph.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getLabel().get(0)));
                     }
+                } else {
+                    logger.debug("Node already in merged graph for satisfaction: {}", toMerge.getLabel());
                 }
 
                 // update merge map so future nodes use this node as a dependency
@@ -231,8 +243,10 @@ public class DependencySolver {
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
                               List<Pair<Satisfaction, Attributes>> context) throws ResolverException {
         // check context depth against max to detect likely dependency cycles
-        if (context.size() > maxDepth)
+        if (context.size() > maxDepth) {
+            logger.error("Maximum depth reached, likely cycle depth reached");
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
+        }
         
         // resolve the current node
         Pair<Satisfaction, List<Desire>> resolved = resolve(desire, context);
@@ -251,6 +265,7 @@ public class DependencySolver {
             // complete the sub graph for the given desire
             // - the call to resolveFully() is responsible for adding the dependency edges
             //   so we don't need to process the returned node
+            logger.debug("Attempting to satisfy dependency: {}", d);
             resolveFully(d, newNode, graph, newContext);
         }
     }
@@ -263,6 +278,7 @@ public class DependencySolver {
         List<Desire> desireChain = new ArrayList<Desire>();
         Desire currentDesire = desire;
         while(true) {
+            logger.debug("Current desire: {}", currentDesire);
             // remember the current desire in the chain of followed desires
             desireChain.add(currentDesire);
             
@@ -275,6 +291,7 @@ public class DependencySolver {
                     for (BindRule br: bindRules.getBindRules().get(chain)) {
                         if (br.matches(currentDesire) && !appliedRules.contains(br)) {
                             validRules.add(Pair.of(chain, br));
+                            logger.trace("Matching rule, context: {}, rule: {}", chain, br);
                         }
                     }
                 }
@@ -300,6 +317,7 @@ public class DependencySolver {
                     
                     if (topRules.size() > 1) {
                         // additional rules match just as well as the first, so fail
+                        logger.error("Too many bindings available, count = {}", topRules.size());
                         throw new MultipleBindingsException(context, desireChain, topRules);
                     }
                 }
@@ -307,10 +325,13 @@ public class DependencySolver {
                 // apply the bind rule to get a new desire
                 BindRule selectedRule = validRules.get(0).getRight();
                 appliedRules.add(selectedRule);
+                
+                logger.debug("Applying rule: {} to desire: {}", selectedRule, currentDesire);
                 currentDesire = selectedRule.apply(currentDesire);
                 
                 // possibly terminate if the bind rule terminates
                 if (selectedRule.terminatesChain() && currentDesire.isInstantiable()) {
+                    logger.info("Satisfied {} with {}", currentDesire, currentDesire.getSatisfaction());
                     desireChain.add(currentDesire);
                     return Pair.of(currentDesire.getSatisfaction(), desireChain);
                 }
@@ -323,13 +344,16 @@ public class DependencySolver {
                     // default would create a cycle of desires
                     if (currentDesire.isInstantiable()) {
                         // the desire can be converted to a node, so we're done
+                        logger.info("Satisfied {} with {}", currentDesire, currentDesire.getSatisfaction());
                         return Pair.of(currentDesire.getSatisfaction(), desireChain);
                     } else {
                         // no more rules and we can't make a node
+                        logger.error("Unresolvable dependency for desire: {}", currentDesire);
                         throw new UnresolvableDependencyException(context, desireChain);
                     }
                 } else {
                     // continue with the default desire
+                    logger.debug("Falling back to default desire: {}" + defaultDesire);
                     currentDesire = defaultDesire;
                 }
             }

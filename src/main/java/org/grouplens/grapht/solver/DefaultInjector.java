@@ -32,6 +32,8 @@ import org.grouplens.grapht.graph.Node;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -44,6 +46,8 @@ import org.grouplens.grapht.spi.Satisfaction;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class DefaultInjector implements Injector {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
+    
     private final InjectorConfiguration config;
     private final DependencySolver solver;
     
@@ -103,6 +107,7 @@ public class DefaultInjector implements Injector {
         // it may be present in the graph at a deeper node. If that's the case
         // it will be properly merged after regenerating the graph at the root context.
         if (resolved == null) {
+            logger.info("Must resolve desire: {}", desire);
             try {
                 solver.resolve(desire);
             } catch(ResolverException e) {
@@ -120,6 +125,7 @@ public class DefaultInjector implements Injector {
     private Provider<?> getProvider(Node<Satisfaction> node) {
         Provider<?> cached = providerCache.get(node);
         if (cached == null) {
+            logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
             Provider<?> raw = node.getLabel().makeProvider(new DesireProviderMapper(node));
             cached = new MemoizingProvider(raw);
             providerCache.put(node, cached);
