@@ -47,52 +47,40 @@ class BindingImpl<T> implements Binding<T> {
     
     private final Set<Class<?>> excludeTypes;
     
-    private QualifierMatcher qualifier;
-    private boolean terminate;
-    
-    private boolean bindingCompleted;
+    private final QualifierMatcher qualifier;
+    private final boolean terminate;
     
     public BindingImpl(ContextImpl context, Class<T> type) {
+        this(context, type, context.getBuilder().getDefaultExclusions(),
+             context.getBuilder().getSPI().matchAny(), false);
+    }
+    
+    public BindingImpl(ContextImpl context, Class<T> type, 
+                       Set<Class<?>> excludes, QualifierMatcher matcher, 
+                       boolean terminateChain) {
         this.context = context;
         sourceType = type;
-        excludeTypes = new HashSet<Class<?>>(context.getBuilder().getDefaultExclusions());
-        qualifier = context.getBuilder().getSPI().matchAny();
-        
-        bindingCompleted = false;
-        terminate = false;
+        excludeTypes = excludes;
+        qualifier = matcher;
+        terminate = terminateChain;
     }
-    
-    private void validateState() {
-        if (bindingCompleted) {
-            throw new IllegalStateException("Binding already completed");
-        }
-    }
-    
+
     @Override
     public Binding<T> withQualifier(Class<? extends Annotation> qualifier) {
-        if (qualifier == null) {
-            throw new NullPointerException("Qualifier cannot be null");
-        }
-        validateState();
-        this.qualifier = context.getBuilder().getSPI().match(qualifier);
-        return this;
+        QualifierMatcher q = context.getBuilder().getSPI().match(qualifier);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, terminate);
     }
     
     @Override
     public Binding<T> withQualifier(Annotation annot) {
-        if (annot == null) {
-            throw new NullPointerException("Annotation cannot be null");
-        }
-        validateState();
-        qualifier = context.getBuilder().getSPI().match(annot);
-        return this;
+        QualifierMatcher q = context.getBuilder().getSPI().match(annot);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, terminate);
     }
     
     @Override
     public Binding<T> unqualified() {
-        validateState();
-        qualifier = context.getBuilder().getSPI().matchNone();
-        return this;
+        QualifierMatcher q = context.getBuilder().getSPI().matchNone();
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, terminate);
     }
 
     @Override
@@ -100,16 +88,14 @@ class BindingImpl<T> implements Binding<T> {
         if (exclude == null) {
             throw new NullPointerException("Type cannot be null");
         }
-        validateState();
-        excludeTypes.add(exclude);
-        return this;
+        Set<Class<?>> excludes = new HashSet<Class<?>>(excludeTypes);
+        excludes.add(exclude);
+        return new BindingImpl<T>(context, sourceType, excludes, qualifier, terminate);
     }
     
     @Override
     public Binding<T> finalBinding() {
-        validateState();
-        terminate = true;
-        return this;
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, true);
     }
 
     @Override
