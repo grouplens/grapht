@@ -18,6 +18,11 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.QualifierMatcher;
@@ -34,16 +39,17 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionBindRule implements BindRule {
-    private final ReflectionSatisfaction satisfaction;
-    private final boolean terminateChain;
+public class ReflectionBindRule implements BindRule, Externalizable {
+    // "final"
+    private ReflectionSatisfaction satisfaction;
+    private boolean terminateChain;
     
-    private final QualifierMatcher qualifier;
-    private final Class<?> sourceType;
-    private final Class<?> implType;
+    private QualifierMatcher qualifier;
+    private Class<?> sourceType;
+    private Class<?> implType;
     
-    private final int weight;
-
+    private int weight;
+    
     /**
      * Create a bind rule that matches a desire when the desired type equals
      * <tt>sourceType</tt> and the desire's qualifier inherits from
@@ -74,6 +80,11 @@ public class ReflectionBindRule implements BindRule {
         // verify that the satisfaction produces proper types
         Checks.isAssignable(this.sourceType, this.implType);
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ReflectionBindRule() { }
     
     /**
      * As the other constructor, but this is used for type to type bindings
@@ -144,12 +155,10 @@ public class ReflectionBindRule implements BindRule {
     
     @Override
     public boolean matches(Desire desire) {
-        ReflectionDesire rd = (ReflectionDesire) desire;
-        
         // bind rules match type by equality
-        if (rd.getType().equals(sourceType)) {
+        if (desire.getType().equals(sourceType)) {
             // if the type is equal, then rely on the qualifier matcher
-            return qualifier.matches(rd.getQualifier());
+            return qualifier.matches(desire.getAttributes().getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false
@@ -191,5 +200,29 @@ public class ReflectionBindRule implements BindRule {
     public String toString() {
         String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
         return "Bind(weight=" + weight + ", " + qualifier + ":" + sourceType.getSimpleName() + " -> " + i + ")";
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        sourceType = Types.readClass(in);
+        implType = Types.readClass(in);
+        
+        satisfaction = (ReflectionSatisfaction) in.readObject();
+        qualifier = (QualifierMatcher) in.readObject();
+        
+        terminateChain = in.readBoolean();
+        weight = in.readInt();
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        Types.writeClass(out, sourceType);
+        Types.writeClass(out, implType);
+        
+        out.writeObject(satisfaction);
+        out.writeObject(qualifier);
+
+        out.writeBoolean(terminateChain);
+        out.writeInt(weight);
     }
 }

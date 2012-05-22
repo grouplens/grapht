@@ -21,6 +21,8 @@ package org.grouplens.grapht.spi;
 import org.grouplens.grapht.util.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
+    private static final long serialVersionUID = 1L;
+
     private final Class<?> type;
     private final MockQualifierMatcher qualifier;
     
@@ -35,7 +37,7 @@ public class MockContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Qualifier> n) {
-        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight());
+    public boolean matches(Pair<Satisfaction, Attributes> n) {
+        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight().getQualifier());
     }
 }

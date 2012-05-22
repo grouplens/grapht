@@ -34,6 +34,8 @@ import javax.inject.Provider;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockSatisfaction implements Satisfaction {
+    private static final long serialVersionUID = 1L;
+
     private final Provider<?> provider;
     private final Class<?> type;
     private final List<Desire> dependencies;

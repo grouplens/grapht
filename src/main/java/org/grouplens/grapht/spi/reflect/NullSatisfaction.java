@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +39,9 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class NullSatisfaction extends ReflectionSatisfaction {
-    private final Class<?> type;
+public class NullSatisfaction extends ReflectionSatisfaction implements Externalizable {
+    // "final"
+    private Class<?> type;
     
     /**
      * Create a NullSatisfaction that uses <code>null</code> to satisfy the
@@ -49,6 +54,11 @@ public class NullSatisfaction extends ReflectionSatisfaction {
         Checks.notNull("type", type);
         this.type = Types.box(type);
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public NullSatisfaction() { }
     
     @Override
     public List<? extends Desire> getDependencies() {
@@ -87,5 +97,15 @@ public class NullSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "Null(" + type.getSimpleName() + ")";
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        type = Types.readClass(in);
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        Types.writeClass(out, type);
     }
 }

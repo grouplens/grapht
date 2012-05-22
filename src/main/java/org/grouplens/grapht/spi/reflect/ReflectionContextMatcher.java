@@ -18,11 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import javax.inject.Qualifier;
+
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
@@ -31,10 +39,11 @@ import org.grouplens.grapht.util.Pair;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionContextMatcher implements ContextMatcher {
-    private final Class<?> type;
-    private final QualifierMatcher qualifier;
-
+public class ReflectionContextMatcher implements ContextMatcher, Externalizable {
+    // "final"
+    private Class<?> type;
+    private QualifierMatcher qualifier;
+    
     /**
      * Create a ReflectionContextMatcher that matches the given type 
      * and any qualifier.
@@ -45,6 +54,11 @@ public class ReflectionContextMatcher implements ContextMatcher {
     public ReflectionContextMatcher(Class<?> type) {
         this(type, Qualifiers.matchAny());
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ReflectionContextMatcher() { }
 
     /**
      * Create a ReflectionContextMatcher that matches the given type and the
@@ -78,11 +92,11 @@ public class ReflectionContextMatcher implements ContextMatcher {
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Qualifier> n) {
+    public boolean matches(Pair<Satisfaction, Attributes> n) {
         // we must check for nulls in case it is a synthetic satisfaction
         if (n.getLeft().getErasedType() != null && type.isAssignableFrom(n.getLeft().getErasedType())) {
             // type is a match, so check the QualifierMatcher
-            return qualifier.matches(n.getRight());
+            return qualifier.matches(n.getRight().getQualifier());
         }
         
         return false;
@@ -105,5 +119,17 @@ public class ReflectionContextMatcher implements ContextMatcher {
     @Override
     public String toString() {
         return "ReflectionContextMatcher(" + qualifier + ":" + type.getSimpleName() + ")";
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        type = Types.readClass(in);
+        qualifier = (QualifierMatcher) in.readObject();
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        Types.writeClass(out, type);
+        out.writeObject(qualifier);
     }
 }

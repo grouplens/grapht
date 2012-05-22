@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Serializable;
+
 /**
  * A rule expressing an injector binding.  Bind rules can <i>match</i> desires,
  * in which case they apply to the desire.  They can then be <i>applied</i> to
@@ -27,7 +29,7 @@ package org.grouplens.grapht.spi;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
  */
-public interface BindRule {
+public interface BindRule extends Serializable {
     /**
      * The highest precedence bind rule, representing manual bind rules.
      */

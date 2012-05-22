@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,8 +37,9 @@ import org.grouplens.grapht.util.Pair;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ContextChain {
-    private final List<ContextMatcher> matchers;
+public class ContextChain implements Externalizable {
+    // "final"
+    private List<ContextMatcher> matchers;
 
     /**
      * Create a new ContextChain representing the empty context without any
@@ -90,7 +95,7 @@ public class ContextChain {
      * @param nodes The current context
      * @return True if this chain matches
      */
-    public boolean matches(List<Pair<Satisfaction, Qualifier>> nodes) {
+    public boolean matches(List<Pair<Satisfaction, Attributes>> nodes) {
         int i = 0;
         for (ContextMatcher cm: matchers) {
             boolean found = false;
@@ -133,5 +138,22 @@ public class ContextChain {
     @Override
     public String toString() {
         return "ContextChain(" + matchers.toString() + ")";
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(matchers.size());
+        for (ContextMatcher m: matchers) {
+            out.writeObject(m);
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        int count = in.readInt();
+        matchers = new ArrayList<ContextMatcher>(count);
+        for (int i = 0; i < count; i++) {
+            matchers.add((ContextMatcher) in.readObject());
+        }
     }
 }

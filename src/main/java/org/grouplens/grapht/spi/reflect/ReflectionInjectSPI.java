@@ -28,7 +28,6 @@ import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.Types;
 
@@ -80,8 +79,8 @@ public class ReflectionInjectSPI implements InjectSPI {
     }
     
     @Override
-    public Desire desire(final @Nullable Qualifier qualifier, final Class<?> type, boolean nullable) {
-        return new ReflectionDesire(new SimpleInjectionPoint((AnnotationQualifier) qualifier, type, nullable));
+    public Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
+        return new ReflectionDesire(new SimpleInjectionPoint(qualifier, type, nullable));
     }
 
     @Override
@@ -102,10 +101,5 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public QualifierMatcher matchNone() {
         return Qualifiers.matchNone();
-    }
-
-    @Override
-    public Qualifier qualifier(Annotation annot) {
-        return new AnnotationQualifier(annot);
     }
 }

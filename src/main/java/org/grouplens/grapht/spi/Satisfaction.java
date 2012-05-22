@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.List;
@@ -36,7 +37,7 @@ import javax.inject.Provider;
  *
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  */
-public interface Satisfaction {
+public interface Satisfaction extends Serializable {
     /**
      * Get this satisfaction's dependencies.
      *

@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
 
@@ -35,18 +35,18 @@ import org.grouplens.grapht.util.Pair;
 public class UnresolvableDependencyException extends ResolverException {
     private static final long serialVersionUID = 1L;
 
-    private final List<Pair<Satisfaction, Qualifier>> context;
+    private final List<Pair<Satisfaction, Attributes>> context;
     private final List<Desire> desireChain;
     
-    public UnresolvableDependencyException(List<Pair<Satisfaction, Qualifier>> context, List<Desire> desireChain) {
-        this.context = Collections.unmodifiableList(new ArrayList<Pair<Satisfaction, Qualifier>>(context));
+    public UnresolvableDependencyException(List<Pair<Satisfaction, Attributes>> context, List<Desire> desireChain) {
+        this.context = Collections.unmodifiableList(new ArrayList<Pair<Satisfaction, Attributes>>(context));
         this.desireChain = Collections.unmodifiableList(new ArrayList<Desire>(desireChain));
     }
     
     /**
      * @return The context that produced the unresolvable desire
      */
-    public List<Pair<Satisfaction, Qualifier>> getContext() {
+    public List<Pair<Satisfaction, Attributes>> getContext() {
         return context;
     }
     
@@ -74,7 +74,7 @@ public class UnresolvableDependencyException extends ResolverException {
         
         // context
         sb.append("Current context:\n");
-        for (Pair<Satisfaction, Qualifier> ctx: context) {
+        for (Pair<Satisfaction, Attributes> ctx: context) {
             sb.append('\t').append(formatContext(ctx)).append('\n');
         }
         sb.append('\n');

@@ -16,16 +16,26 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
+package org.grouplens.grapht.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.inject.Qualifier;
 
 /**
- * MockQualifier is a simple Qualifier implementation that represents
- * {@link Qualifier}s as unique objects.
+ * Attribute is an auxiliary annotation, like {@link Qualifier}, that can be
+ * used to add additional information to injection points (setters,
+ * constructors, fields). Unlike qualifiers, attributes do not determine the
+ * outcome of bindings, they only add information that is accessible in the
+ * final dependency graph.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class MockQualifier implements Qualifier {
-    
-    public MockQualifier() { }
-}
+@Documented
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Attribute { }

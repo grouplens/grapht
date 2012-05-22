@@ -18,11 +18,14 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
 public class MockQualifierMatcher implements QualifierMatcher {
-    private Set<MockQualifier> qualifiers;
+    private static final long serialVersionUID = 1L;
+
+    private Set<Annotation> qualifiers;
     
     private MockQualifierMatcher() {
         qualifiers = null;
@@ -33,13 +36,13 @@ public class MockQualifierMatcher implements QualifierMatcher {
     }
     
     public static MockQualifierMatcher none() {
-        return match((MockQualifier) null);
+        return match((Annotation) null);
     }
     
-    public static MockQualifierMatcher match(MockQualifier... mockQualifiers) {
+    public static MockQualifierMatcher match(Annotation... qualifiers) {
         MockQualifierMatcher q = new MockQualifierMatcher();
-        q.qualifiers = new HashSet<MockQualifier>();
-        for (MockQualifier m: mockQualifiers) {
+        q.qualifiers = new HashSet<Annotation>();
+        for (Annotation m: qualifiers) {
             q.qualifiers.add(m);
         }
         return q;
@@ -65,7 +68,7 @@ public class MockQualifierMatcher implements QualifierMatcher {
     }
 
     @Override
-    public boolean matches(Qualifier q) {
+    public boolean matches(Annotation q) {
         return qualifiers == null || qualifiers.contains(q);
     }
 }

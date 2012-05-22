@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -29,15 +30,16 @@ import java.util.Comparator;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
  */
-public interface Desire {
+public interface Desire extends Serializable {
     /**
-     * Return the {@link Qualifier} that was declared with this desire. A desire
-     * without a {@link Qualifier} should return null. No {@link Qualifier} can
-     * also be considered the default {@link Qualifier}.
+     * Get the attributes and qualifier that were on the injection point of the
+     * desire. This should return a non-null Attributes object even when the
+     * injection point does not have any attributes. In that case the Attributes
+     * instance will report null for its qualifier, etc.
      * 
-     * @return The {@link Qualifier} applied to this desire
+     * @return The Attributes and qualifier of this desire
      */
-    Qualifier getQualifier();
+    Attributes getAttributes();
 
     /**
      * Query whether this desire is instantiable, that is, resolved to a
@@ -49,15 +51,6 @@ public interface Desire {
      *         of the desire type.
      */
     boolean isInstantiable();
-
-    /**
-     * Return whether or not this desire is a transient desire. A transient
-     * desire is only needed during the instantiation of the satisfaction, but
-     * once the instance has been built it is no longer necessary.
-     * 
-     * @return True if the desire is transient
-     */
-    boolean isTransient();
 
     /**
      * Get the satisfaction (concrete type) if this desire is fully resolved.

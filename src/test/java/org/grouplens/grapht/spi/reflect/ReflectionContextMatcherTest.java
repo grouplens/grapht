@@ -19,9 +19,11 @@
 package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
 
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
@@ -85,8 +87,24 @@ public class ReflectionContextMatcherTest {
                              Class<?> satisfactionType, Class<? extends Annotation> satisfactionRole, 
                              boolean expected) {
         QualifierMatcher mr = (matcherRole == null ? new ReflectionInjectSPI().matchAny() : new ReflectionInjectSPI().match(matcherRole));
-        AnnotationQualifier sr = (satisfactionRole == null ? null : new AnnotationQualifier(new AnnotationBuilder(satisfactionRole).build()));
-        Pair<Satisfaction, Qualifier> node = Pair.<Satisfaction, Qualifier>of(new ClassSatisfaction(satisfactionType), sr);
+        final Annotation sr = (satisfactionRole == null ? null : new AnnotationBuilder(satisfactionRole).build());
+        Pair<Satisfaction, Attributes> node = Pair.<Satisfaction, Attributes>of(new ClassSatisfaction(satisfactionType),
+                                                                                new Attributes() {
+                                                                                    @Override
+                                                                                    public Annotation getQualifier() {
+                                                                                        return sr;
+                                                                                    }
+
+                                                                                    @Override
+                                                                                    public <T extends Annotation> T getAttribute(Class<T> atype) {
+                                                                                        return null;
+                                                                                    }
+                                                                                    
+                                                                                    @Override
+                                                                                    public Collection<Annotation> getAttributes() {
+                                                                                        return Collections.emptyList();
+                                                                                    }
+        });
         
         ReflectionContextMatcher cm = new ReflectionContextMatcher(matcherType, mr);
         Assert.assertEquals(expected, cm.matches(node));

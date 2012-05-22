@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
-import javax.annotation.Nullable;
-
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -32,15 +32,23 @@ import org.grouplens.grapht.util.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockInjectionPoint implements InjectionPoint {
+    private static final long serialVersionUID = 1L;
+
     private final Class<?> type;
-    private final AnnotationQualifier qualifier;
-    private final boolean trans;
+    private final Attributes attrs;
     private final boolean nullable;
     
-    public MockInjectionPoint(Class<?> type, @Nullable AnnotationQualifier qualifier, boolean trans, boolean nullable) {
+    public MockInjectionPoint(Class<?> type, boolean nullable) {
+        this(type, new Annotation[0], nullable);
+    }
+    
+    public MockInjectionPoint(Class<?> type, Annotation qualifier, boolean nullable) {
+        this(type, (qualifier == null ? new Annotation[0] : new Annotation[] { qualifier }), nullable);
+    }
+    
+    public MockInjectionPoint(Class<?> type, Annotation[] annots, boolean nullable) {
         this.type = Types.box(type);
-        this.qualifier = qualifier;
-        this.trans = trans;
+        this.attrs = new AttributesImpl(annots);
         this.nullable = nullable;
     }
     
@@ -75,13 +83,8 @@ public class MockInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
-        return qualifier;
-    }
-
-    @Override
-    public boolean isTransient() {
-        return trans;
+    public Attributes getAttributes() {
+        return attrs;
     }
     
     @Override
@@ -96,13 +99,12 @@ public class MockInjectionPoint implements InjectionPoint {
         }
         MockInjectionPoint m = (MockInjectionPoint) o;
         return m.type.equals(type) && 
-               m.trans == trans &&
                m.nullable == nullable && 
-               (m.qualifier == null ? qualifier == null : m.qualifier.equals(qualifier));
+               m.attrs.equals(attrs);
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ (trans ? 1 : 0) ^ (nullable ? 2 : 4);
+        return type.hashCode() ^ attrs.hashCode() ^ (nullable ? 2 : 4);
     }
 }

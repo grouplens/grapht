@@ -18,8 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.Constructor;
 
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -28,10 +33,11 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ConstructorParameterInjectionPoint implements InjectionPoint {
-    private final AnnotationQualifier qualifier;
-    private final Constructor<?> ctor;
-    private final int parameter;
+public class ConstructorParameterInjectionPoint implements InjectionPoint, Externalizable {
+    // "final"
+    private transient Attributes attributes;
+    private Constructor<?> ctor;
+    private int parameter;
 
     /**
      * Create a ConstructorParameterInjectionPoint that wraps the given
@@ -48,10 +54,15 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
         Checks.notNull("constructor", ctor);
         Checks.inRange(parameter, 0, ctor.getParameterTypes().length);
         
-        this.qualifier = Qualifiers.getQualifier(ctor.getParameterAnnotations()[parameter]);
+        this.attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
         this.ctor = ctor;
         this.parameter = parameter;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public ConstructorParameterInjectionPoint() { }
 
     /**
      * @return The constructor wrapped by this injection point
@@ -73,11 +84,6 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     public boolean isNullable() {
         return Types.hasNullableAnnotation(ctor.getParameterAnnotations()[parameter]);
     }
-    
-    @Override
-    public boolean isTransient() {
-        return Types.hasTransientAnnotation(ctor.getParameterAnnotations()[parameter]);
-    }
 
     @Override
     public Class<?> getType() {
@@ -85,8 +91,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     }
     
     @Override
-    public AnnotationQualifier getQualifier() {
-        return qualifier;
+    public Attributes getAttributes() {
+        return attributes;
     }
     
     @Override
@@ -105,8 +111,22 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint {
     
     @Override
     public String toString() {
-        String q = (qualifier == null ? "" : qualifier + ":");
+        String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
         String p = ctor.getParameterTypes()[parameter].getSimpleName();
         return ctor.getDeclaringClass().getSimpleName() + "(" + parameter + ", " + q + p + ")";
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        ctor = Types.readConstructor(in);
+        parameter = in.readInt();
+        
+        attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        Types.writeConstructor(out, ctor);
+        out.writeInt(parameter);
     }
 }

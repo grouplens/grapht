@@ -18,12 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
+import java.lang.annotation.Annotation;
 import java.util.Comparator;
 
-import org.grouplens.grapht.spi.BindRule;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 
 /**
  * MockDesire is a simple Desire implementation for use within certain types of
@@ -32,7 +30,9 @@ import org.grouplens.grapht.spi.Satisfaction;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MockDesire implements Desire {
-    private final Qualifier qualifier;
+    private static final long serialVersionUID = 1L;
+
+    private final Annotation qualifier;
     private final Satisfaction satisfaction;
     
     private final Desire defaultDesire;
@@ -45,11 +45,11 @@ public class MockDesire implements Desire {
         this(satisfaction, null);
     }
     
-    public MockDesire(Satisfaction satisfaction, Qualifier qualifier) {
+    public MockDesire(Satisfaction satisfaction, Annotation qualifier) {
         this(satisfaction, qualifier, null);
     }
     
-    public MockDesire(Satisfaction satisfaction, Qualifier qualifier, Desire dflt) {
+    public MockDesire(Satisfaction satisfaction, Annotation qualifier, Desire dflt) {
         this.satisfaction = satisfaction;
         this.qualifier = qualifier;
         this.defaultDesire = dflt;
@@ -76,18 +76,17 @@ public class MockDesire implements Desire {
     }
 
     @Override
-    public Qualifier getQualifier() {
-        return qualifier;
+    public Attributes getAttributes() {
+        if (qualifier == null) {
+            return new AttributesImpl();
+        } else {
+            return new AttributesImpl(new Annotation[] { qualifier });
+        }
     }
 
     @Override
     public Desire getDefaultDesire() {
         return defaultDesire;
-    }
-
-    @Override
-    public boolean isTransient() {
-        return false;
     }
 
     @Override

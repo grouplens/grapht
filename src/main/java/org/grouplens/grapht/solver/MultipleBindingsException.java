@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Pair;
 
@@ -37,12 +37,12 @@ import org.grouplens.grapht.util.Pair;
 public class MultipleBindingsException extends ResolverException {
     private static final long serialVersionUID = 1L;
 
-    private final List<Pair<Satisfaction, Qualifier>> context;
+    private final List<Pair<Satisfaction, Attributes>> context;
     private final List<Desire> desireChain;
     private final List<BindRule> bindRules;
     
-    public MultipleBindingsException(List<Pair<Satisfaction, Qualifier>> context, List<Desire> desireChain, List<BindRule> bindRules) {
-        this.context = Collections.unmodifiableList(new ArrayList<Pair<Satisfaction, Qualifier>>(context));
+    public MultipleBindingsException(List<Pair<Satisfaction, Attributes>> context, List<Desire> desireChain, List<BindRule> bindRules) {
+        this.context = Collections.unmodifiableList(new ArrayList<Pair<Satisfaction, Attributes>>(context));
         this.desireChain = Collections.unmodifiableList(new ArrayList<Desire>(desireChain));
         this.bindRules = Collections.unmodifiableList(new ArrayList<BindRule>(bindRules));
     }
@@ -50,7 +50,7 @@ public class MultipleBindingsException extends ResolverException {
     /**
      * @return The context that produced the problematic bindings
      */
-    public List<Pair<Satisfaction, Qualifier>> getContext() {
+    public List<Pair<Satisfaction, Attributes>> getContext() {
         return context;
     }
     
@@ -93,7 +93,7 @@ public class MultipleBindingsException extends ResolverException {
         
         // context
         sb.append("Current context:\n");
-        for (Pair<Satisfaction, Qualifier> ctx: context) {
+        for (Pair<Satisfaction, Attributes> ctx: context) {
             sb.append('\t').append(formatContext(ctx)).append('\n');
         }
         sb.append('\n');

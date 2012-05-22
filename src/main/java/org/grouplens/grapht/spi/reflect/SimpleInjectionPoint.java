@@ -18,22 +18,46 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
 import javax.annotation.Nullable;
 
-class SimpleInjectionPoint implements InjectionPoint {
-    private final AnnotationQualifier qualifier;
-    private final Class<?> type;
-    private final boolean nullable;
-    
-    public SimpleInjectionPoint(@Nullable AnnotationQualifier qualifier, Class<?> type, boolean nullable) {
-        Checks.notNull("type", type);
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.util.Types;
 
-        this.qualifier = qualifier;
+/**
+ * SimpleInjectionPoint is a synthetic injection point used for
+ * {@link InjectSPI#desire(Annotation, Class, boolean)}.
+ * 
+ * @author Michael Ludwig <mludwig@cs.umn.edu>
+ */
+public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
+    // "final"
+    private transient Attributes attrs;
+    private Class<?> type;
+    private boolean nullable;
+    
+    public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
+        Checks.notNull("type", type);
+        if (qualifier != null) {
+            Checks.isQualifier(qualifier.annotationType());
+        }
+
+        this.attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
         this.type = type;
         this.nullable = nullable;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public SimpleInjectionPoint() { }
     
     @Override
     public Member getMember() {
@@ -71,18 +95,13 @@ class SimpleInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public AnnotationQualifier getQualifier() {
-        return qualifier;
-    }
-
-    @Override
-    public boolean isTransient() {
-        return false;
+    public Attributes getAttributes() {
+        return attrs;
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode());
+        return type.hashCode() ^ attrs.hashCode();
     }
     
     @Override
@@ -91,12 +110,28 @@ class SimpleInjectionPoint implements InjectionPoint {
             return false;
         }
         SimpleInjectionPoint p = (SimpleInjectionPoint) o;
-        return p.type.equals(type) && (p.qualifier == null ? qualifier == null : p.qualifier.equals(qualifier)) && p.nullable == nullable;
+        return p.type.equals(type) && p.attrs.equals(attrs) && p.nullable == nullable;
     }
     
     @Override
     public String toString() {
-        String q = (qualifier == null ? "" : qualifier + ":");
+        String q = (attrs.getQualifier() == null ? "" : attrs.getQualifier() + ":");
         return q + type.getSimpleName();
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        type = Types.readClass(in);
+        nullable = in.readBoolean();
+
+        Annotation qualifier = (Annotation) in.readObject();
+        attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        Types.writeClass(out, type);
+        out.writeBoolean(nullable);
+        out.writeObject(attrs.getQualifier());
     }
 }

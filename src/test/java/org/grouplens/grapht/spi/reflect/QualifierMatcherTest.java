@@ -43,36 +43,36 @@ public class QualifierMatcherTest {
     @Test
     public void testAnnotationInstanceMatch() {
         QualifierMatcher matcher = spi.match(new AnnotationBuilder<Named>(Named.class).set("value", "test").build());
-        Assert.assertTrue(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test").build())));
-        Assert.assertFalse(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build())));
-        Assert.assertFalse(matcher.matches(spi.qualifier(new AnnotationBuilder<RoleA>(RoleA.class).build())));
+        Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
+        Assert.assertFalse(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
+        Assert.assertFalse(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
         Assert.assertFalse(matcher.matches(null));
     }
     
     @Test
     public void testAnnotationClassMatch() {
         QualifierMatcher matcher = spi.match(Named.class);
-        Assert.assertTrue(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test").build())));
-        Assert.assertTrue(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build())));
-        Assert.assertFalse(matcher.matches(spi.qualifier(new AnnotationBuilder<RoleA>(RoleA.class).build())));
+        Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
+        Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
+        Assert.assertFalse(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
         Assert.assertFalse(matcher.matches(null));
     }
     
     @Test
     public void testAnyMatch() {
         QualifierMatcher matcher = spi.matchAny();
-        Assert.assertTrue(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test").build())));
-        Assert.assertTrue(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build())));
-        Assert.assertTrue(matcher.matches(spi.qualifier(new AnnotationBuilder<RoleA>(RoleA.class).build())));
+        Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
+        Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
+        Assert.assertTrue(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
         Assert.assertTrue(matcher.matches(null));
     }
     
     @Test
     public void testNoContextMatch() {
         QualifierMatcher matcher = spi.matchNone();
-        Assert.assertFalse(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test").build())));
-        Assert.assertFalse(matcher.matches(spi.qualifier(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build())));
-        Assert.assertFalse(matcher.matches(spi.qualifier(new AnnotationBuilder<RoleA>(RoleA.class).build())));
+        Assert.assertFalse(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
+        Assert.assertFalse(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
+        Assert.assertFalse(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
         Assert.assertTrue(matcher.matches(null));
     }
     

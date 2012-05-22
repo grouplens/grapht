@@ -18,13 +18,26 @@
  */
 package org.grouplens.grapht.util;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.grouplens.grapht.annotation.Transient;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
 
 /**
  * Static helper methods for working with types.
@@ -197,19 +210,204 @@ public final class Types {
     }
     
     /**
-     * Return true if the array of Annotations contains a {@link Transient}
-     * annotation.
+     * Read in a Class from the given ObjectInputStream. This is only compatible
+     * with classes that were serialized with
+     * {@link #writeClass(ObjectOutputStream, Class)}. Although Class is
+     * Serializable, this guarantees a simple structure within a file.
      * 
-     * @param annotations Array of annotations, e.g. from a setter or
-     *            constructor
-     * @return True if there exists a Transient annotation in the array
+     * @param in The stream to read from
+     * @return The next Class encoded in the stream
+     * @throws IOException if an IO error occurs
+     * @throws ClassNotFoundException if the class can no longer be found at
+     *             runtime
      */
-    public static boolean hasTransientAnnotation(Annotation[] annotations) {
-        for (Annotation a: annotations) {
-            if (a instanceof Transient) {
-                return true;
-            }
+    public static Class<?> readClass(ObjectInput in) throws IOException, ClassNotFoundException {
+        String typeName = in.readUTF();
+        int arrayCount = in.readInt();
+        int hash = in.readInt();
+        
+        Class<?> baseType = Class.forName(typeName);
+        if (hash != hash(baseType)) {
+            throw new IOException("Class definition changed since serialization: " + typeName);
         }
-        return false;
+        
+        if (arrayCount > 0) {
+            return Array.newInstance(baseType, new int[arrayCount]).getClass();
+        } else {
+            return baseType;
+        }
+    }
+    
+    /**
+     * <p>
+     * Write the Class to the given ObjectOutputStream. When the class type is
+     * not an array, its canonical name is written as a UTF string, and a false
+     * boolean to record that it's not an array. When it is an array type, the
+     * canonical name of its component type is written as a UTF string, and then
+     * a true boolean value.
+     * <p>
+     * The class can be decoded by calling {@link #readClass(ObjectInputStream)}.
+     * 
+     * @param out The stream to write to
+     * @param cls The class type to encode
+     * @throws IOException if an IO error occurs
+     */
+    public static void writeClass(ObjectOutput out, Class<?> cls) throws IOException {
+        int arrayCount = 0;
+        Class<?> baseType = cls;
+        while(baseType.isArray()) {
+            arrayCount++;
+            baseType = baseType.getComponentType();
+        }
+        
+        out.writeUTF(baseType.getCanonicalName());
+        out.writeInt(arrayCount);
+        out.writeInt(hash(baseType));
+    }
+    
+    /**
+     * Read in a Constructor from the given ObjectInputStream. This is only
+     * compatible with constructors serialized
+     * {@link #writeConstructor(ObjectOutputStream, Constructor)}. Because
+     * Constructor is not Serializable, this must be used instead of
+     * {@link ObjectInputStream#readObject()}.
+     * 
+     * @param in The stream to read from
+     * @return The next constructor encoded in the stream
+     * @throws IOException if an IO error occurs
+     * @throws ClassNotFoundException if the declaring class of the constructor
+     *             cannot be found at runtime
+     * @throws NoSuchMethodException if the constructor no longer exists in the
+     *             loaded class definition
+     */
+    public static Constructor<?> readConstructor(ObjectInput in) throws IOException, ClassNotFoundException {
+        Class<?> declaring = readClass(in);
+        Class<?>[] args = new Class<?>[in.readInt()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = readClass(in);
+        }
+        
+        try {
+            return declaring.getDeclaredConstructor(args);
+        } catch (NoSuchMethodException e) {
+            throw new IOException("Constructor no longer exists", e);
+        }
+    }
+    
+    /**
+     * <p>
+     * Write the Constructor to the given ObjectOutputStream. Because
+     * Constructor is not Serializable, it is encoded to the stream as its
+     * declaring class, the number of parameters, and then the parameter classes
+     * in their defined order. All classes are written to the stream using
+     * {@link #writeClass(ObjectOutputStream, Class)}.
+     * <p>
+     * The constructor can be decoded by calling
+     * {@link #readConstructor(ObjectInputStream)}.
+     * 
+     * @param out The output stream to write to
+     * @param ctor The constructor to serialize
+     * @throws IOException if an IO error occurs
+     */
+    public static void writeConstructor(ObjectOutput out, Constructor<?> ctor) throws IOException {
+        writeClass(out, ctor.getDeclaringClass());
+        
+        Class<?>[] args = ctor.getParameterTypes();
+        out.writeInt(args.length);
+        for (int i = 0; i < args.length; i++) {
+            writeClass(out, args[i]);
+        }
+    }
+    
+    /**
+     * Read in a Method from the given ObjectInputStream. This is only
+     * compatible with methods serialized
+     * {@link #writeMethod(ObjectOutputStream, Method)}. Because Method is not
+     * Serializable, this must be used instead of
+     * {@link ObjectInputStream#readObject()}.
+     * 
+     * @param in The stream to read from
+     * @return The next method encoded in the stream
+     * @throws IOException If an IO error occurs
+     * @throws ClassNotFoundException if the declaring class of the method
+     *             cannot be found at runtime
+     * @throws NoSuchMethodException if the method no longer exists in the
+     *             loaded class definition
+     */
+    public static Method readMethod(ObjectInput in) throws IOException, ClassNotFoundException {
+        Class<?> declaring = readClass(in);
+        String name = in.readUTF();
+        
+        Class<?>[] args = new Class<?>[in.readInt()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = readClass(in);
+        }
+        
+        try {
+            return declaring.getDeclaredMethod(name, args);
+        } catch (NoSuchMethodException e) {
+            throw new IOException("Method no longer exists", e);
+        }
+    }
+    
+    /**
+     * <p>
+     * Write the Method to the given ObjectOutputStream. Because Method is not
+     * Serializable, it is encoded to the stream as its declaring class, its
+     * name as a UTF string, the number of parameters, and then the parameter
+     * classes in their defined order. All classes are written to the stream
+     * using {@link #writeClass(ObjectOutputStream, Class)}.
+     * <p>
+     * The method can be decoded by calling
+     * {@link #readMethod(ObjectInputStream)}.
+     * 
+     * @param out The output stream to write to
+     * @param m The method to serialize
+     * @throws IOException if an IO error occurs
+     */
+    public static void writeMethod(ObjectOutput out, Method m) throws IOException {
+        writeClass(out, m.getDeclaringClass());
+        out.writeUTF(m.getName());
+        
+        Class<?>[] args = m.getParameterTypes();
+        out.writeInt(args.length);
+        for (int i = 0; i < args.length; i++) {
+            writeClass(out, args[i]);
+        }
+    }
+    
+    private static int hash(Class<?> type) {
+        // convert to a string, both for lexigraphical ordering
+        // and to combine into a hash
+        List<String> ctors = new ArrayList<String>();
+        for (Constructor<?> c: type.getDeclaredConstructors()) {
+            ctors.add(c.getName() + ":" + Arrays.toString(c.getParameterTypes()));
+        }
+        List<String> methods = new ArrayList<String>();
+        for (Method m: type.getDeclaredMethods()) {
+            methods.add(m.getName() + ":" + Arrays.toString(m.getParameterTypes()));
+        }
+        List<String> fields = new ArrayList<String>();
+        for (Field f: type.getDeclaredFields()) {
+            fields.add(f.getName() + ":" + f.getType().getName());
+        }
+        
+        // impose a consistent ordering
+        Collections.sort(ctors);
+        Collections.sort(methods);
+        Collections.sort(fields);
+        
+        StringBuilder sb = new StringBuilder();
+        for (String c: ctors) {
+            sb.append(c);
+        }
+        for (String m: methods) {
+            sb.append(m);
+        }
+        for (String f: fields) {
+            sb.append(f);
+        }
+        
+        return sb.toString().hashCode();
     }
 }

@@ -18,15 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Named;
+import javax.inject.Qualifier;
 
-import org.grouplens.grapht.spi.Qualifier;
 import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.util.Types;
 
 /**
  * Utilities related to Qualifier implementations.
@@ -35,27 +39,6 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  */
 public final class Qualifiers {
     private Qualifiers() { }
-    
-    /**
-     * Return the Qualifier representing the {@link Qualifier} contained in the
-     * parameter annotations given. If the annotations do not have any
-     * annotation that is a {@link Qualifier}, then null is returned. If
-     * {@link Named} is encountered, a NamedQualifier is used, otherwise a
-     * {@link AnnotationQualifier} is used.
-     * 
-     * @param parameterAnnots The parameter annotations on the setter or
-     *            constructor
-     * @return The Qualifier for the injection point, or null if there
-     *         is no {@link Qualifier}
-     */
-    public static AnnotationQualifier getQualifier(Annotation[] parameterAnnots) {
-        for (int i = 0; i < parameterAnnots.length; i++) {
-            if (Qualifiers.isQualifier(parameterAnnots[i].annotationType())) {
-                return new AnnotationQualifier(parameterAnnots[i]);
-            }
-        }
-        return null;
-    }
 
     /**
      * Return true or false whether or not the annotation type represents a
@@ -114,6 +97,8 @@ public final class Qualifiers {
     }
     
     private static abstract class AbstractMatcher implements QualifierMatcher {
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compareTo(QualifierMatcher o) {
             Integer p1 = TYPE_PRIORITIES.get(getClass());
@@ -131,8 +116,10 @@ public final class Qualifiers {
     }
     
     private static class AnyMatcher extends AbstractMatcher {
+        private static final long serialVersionUID = 1L;
+
         @Override
-        public boolean matches(Qualifier q) {
+        public boolean matches(Annotation q) {
             return true;
         }
         
@@ -156,8 +143,10 @@ public final class Qualifiers {
     }
     
     private static class NullMatcher extends AbstractMatcher {
+        private static final long serialVersionUID = 1L;
+        
         @Override
-        public boolean matches(Qualifier q) {
+        public boolean matches(Annotation q) {
             return q == null;
         }
         
@@ -180,8 +169,9 @@ public final class Qualifiers {
         }
     }
     
-    private static class AnnotationClassMatcher extends AbstractMatcher {
-        private final Class<? extends Annotation> type;
+    private static class AnnotationClassMatcher extends AbstractMatcher implements Externalizable {
+        // "final"
+        private Class<? extends Annotation> type;
         
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
             Checks.notNull("type", type);
@@ -189,9 +179,15 @@ public final class Qualifiers {
             this.type = type;
         }
         
+        /**
+         * Constructor required by {@link Externalizable}.
+         */
+        @SuppressWarnings("unused")
+        public AnnotationClassMatcher() { }
+        
         @Override
-        public boolean matches(Qualifier q) {
-            Class<? extends Annotation> qtype = (q == null ? null : ((AnnotationQualifier) q).getAnnotation().annotationType());
+        public boolean matches(Annotation q) {
+            Class<? extends Annotation> qtype = (q == null ? null : q.annotationType());
             return type.equals(qtype);
         }
         
@@ -212,10 +208,22 @@ public final class Qualifiers {
         public String toString() {
             return type.toString();
         }
+        
+        @Override
+        @SuppressWarnings("unchecked")
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            type = (Class<? extends Annotation>) Types.readClass(in);
+        }
+        
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            Types.writeClass(out, type);
+        }
     }
     
-    private static class AnnotationMatcher extends AbstractMatcher {
-        private final Annotation annot;
+    private static class AnnotationMatcher extends AbstractMatcher implements Externalizable {
+        // "final"
+        private Annotation annot;
         
         public AnnotationMatcher(Annotation annot) {
             Checks.notNull("annotation", annot);
@@ -223,10 +231,15 @@ public final class Qualifiers {
             this.annot = annot;
         }
         
+        /**
+         * Constructor required by {@link Externalizable}.
+         */
+        @SuppressWarnings("unused")
+        public AnnotationMatcher() { }
+        
         @Override
-        public boolean matches(Qualifier q) {
-            Annotation qa = (q == null ? null : ((AnnotationQualifier) q).getAnnotation());
-            return annot.equals(qa);
+        public boolean matches(Annotation q) {
+            return annot.equals(q);
         }
         
         @Override
@@ -245,6 +258,16 @@ public final class Qualifiers {
         @Override
         public String toString() {
             return annot.toString();
+        }
+        
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            annot = (Annotation) in.readObject();
+        }
+        
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeObject(annot);
         }
     }
 }

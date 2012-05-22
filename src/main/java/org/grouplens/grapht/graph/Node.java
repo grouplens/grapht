@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.graph;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
 
@@ -36,9 +38,12 @@ import javax.annotation.Nullable;
  * @see Graph
  * @author Michael Ludwig <mludwig@cs.umn.edu
  */
-public class Node<T> {
-    private final T label;
-
+public class Node<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    // "final"
+    private T label;
+    
     /**
      * Create a new Node that uses the specified label instance.
      * 

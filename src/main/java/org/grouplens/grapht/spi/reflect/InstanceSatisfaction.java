@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +39,9 @@ import org.grouplens.grapht.util.InstanceProvider;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InstanceSatisfaction extends ReflectionSatisfaction {
-    private final Object instance;
+public class InstanceSatisfaction extends ReflectionSatisfaction implements Externalizable {
+    // "final"
+    private Object instance;
 
     /**
      * Create a new instance node wrapping an instance.
@@ -48,6 +53,11 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
         Checks.notNull("instance", obj);
         instance = obj;
     }
+    
+    /**
+     * Constructor required by {@link Externalizable}.
+     */
+    public InstanceSatisfaction() { }
     
     /**
      * @return The instance that satisfies this satisfaction
@@ -93,5 +103,15 @@ public class InstanceSatisfaction extends ReflectionSatisfaction {
     @Override
     public String toString() {
         return "Instance(" + instance + ")";
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        instance = in.readObject();
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(instance);
     }
 }
