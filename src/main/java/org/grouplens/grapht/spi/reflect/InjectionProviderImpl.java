@@ -28,6 +28,8 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * InjectionProviderImpl is a Provider implementation capable of creating any
@@ -38,6 +40,8 @@ import org.grouplens.grapht.spi.ProviderSource;
  * @param <T> The object type that is provided
  */
 public class InjectionProviderImpl<T> implements Provider<T> {
+    private static final Logger logger = LoggerFactory.getLogger(InjectionProviderImpl.class);
+    
     private final Class<T> type;
     private final List<ReflectionDesire> desires;
     private final ProviderSource providers;
@@ -78,6 +82,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         // create the instance that we are injecting
         T instance;
         try {
+            logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
             instance = ctor.newInstance(ctorArgs);
         } catch (Exception e) {
             throw new InjectionException(type, ctor, e);
@@ -104,6 +109,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         // invoke all completed setter methods
         for (Method setter: settersAndArguments.keySet()) {
             try {
+                logger.trace("Invoking setter {} with arguments {}", setter, settersAndArguments.get(setter));
                 setter.invoke(instance, settersAndArguments.get(setter));
             } catch (Exception e) {
                 throw new InjectionException(type, setter, e);
@@ -120,11 +126,14 @@ public class InjectionProviderImpl<T> implements Provider<T> {
             if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                 // since we only allow one injectable constructor, any ConstructorParameterInjectionPoint
                 // will have the same constructor as all other constructor parameter injection points
-                return (Constructor<T>) ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getMember();
+                Constructor<T> ctor = (Constructor<T>) ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getMember();
+                logger.debug("Using constructor annotated with @Inject: {}", ctor);
+                return ctor;
             }
         }
         
         try {
+            logger.debug("Using default constructor for {}", type);
             return type.getConstructor();
         } catch (NoSuchMethodException e) {
             // this constructor is being invoked for a ClassSatisfaction or a 

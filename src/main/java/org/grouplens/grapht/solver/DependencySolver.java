@@ -152,12 +152,20 @@ public class DependencySolver {
     public void resolve(Desire desire) throws ResolverException {
         logger.info("Resolving desire: {}", desire);
         
-        Graph<Satisfaction, List<Desire>> tree = new Graph<Satisfaction, List<Desire>>();
-        Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
-        tree.addNode(treeRoot);
-        
-        resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Attributes>>());
-        merge(tree, treeRoot);
+        try {
+            Graph<Satisfaction, List<Desire>> tree = new Graph<Satisfaction, List<Desire>>();
+            Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
+            tree.addNode(treeRoot);
+
+            resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Attributes>>());
+            merge(tree, treeRoot);
+        } catch(ResolverException e) {
+            logger.error("Error while resolving: {}", e.getMessage());
+            throw e;
+        } catch(RuntimeException e) {
+            logger.error("Error while resolving: {}", e.getMessage());
+            throw e;
+        }
     }
     
     private void merge(Graph<Satisfaction, List<Desire>> fullTree, Node<Satisfaction> root) {
@@ -244,7 +252,6 @@ public class DependencySolver {
                               List<Pair<Satisfaction, Attributes>> context) throws ResolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth) {
-            logger.error("Maximum depth reached, likely cycle depth reached");
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
         }
         
@@ -317,7 +324,6 @@ public class DependencySolver {
                     
                     if (topRules.size() > 1) {
                         // additional rules match just as well as the first, so fail
-                        logger.error("Too many bindings available, count = {}", topRules.size());
                         throw new MultipleBindingsException(context, desireChain, topRules);
                     }
                 }
@@ -331,7 +337,7 @@ public class DependencySolver {
                 
                 // possibly terminate if the bind rule terminates
                 if (selectedRule.terminatesChain() && currentDesire.isInstantiable()) {
-                    logger.info("Satisfied {} with {}", currentDesire, currentDesire.getSatisfaction());
+                    logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
                     desireChain.add(currentDesire);
                     return Pair.of(currentDesire.getSatisfaction(), desireChain);
                 }
@@ -344,11 +350,10 @@ public class DependencySolver {
                     // default would create a cycle of desires
                     if (currentDesire.isInstantiable()) {
                         // the desire can be converted to a node, so we're done
-                        logger.info("Satisfied {} with {}", currentDesire, currentDesire.getSatisfaction());
+                        logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
                         return Pair.of(currentDesire.getSatisfaction(), desireChain);
                     } else {
                         // no more rules and we can't make a node
-                        logger.error("Unresolvable dependency for desire: {}", currentDesire);
                         throw new UnresolvableDependencyException(context, desireChain);
                     }
                 } else {
