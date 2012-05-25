@@ -32,16 +32,6 @@ import java.util.Comparator;
  */
 public interface Desire extends Serializable {
     /**
-     * Get the attributes and qualifier that were on the injection point of the
-     * desire. This should return a non-null Attributes object even when the
-     * injection point does not have any attributes. In that case the Attributes
-     * instance will report null for its qualifier, etc.
-     * 
-     * @return The Attributes and qualifier of this desire
-     */
-    Attributes getAttributes();
-
-    /**
      * Query whether this desire is instantiable, that is, resolved to a
      * concrete type. If it is instantiable, then it can be converted to a Satisfaction
      * with {@link #getSatisfaction()}.
@@ -61,10 +51,15 @@ public interface Desire extends Serializable {
     Satisfaction getSatisfaction();
 
     /**
-     * @return The desired type, which may be an interface, abstract class, or
-     *         concrete class
+     * @return The injection point of this desire
      */
-    Class<?> getType();
+    InjectionPoint getInjectionPoint();
+    
+    /**
+     * @return The desired type, potentially more constrained than the injection
+     *         point's type
+     */
+    Class<?> getDesiredType();
     
     /**
      * <p>

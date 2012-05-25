@@ -29,7 +29,6 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.util.Types;
 
 
 /**

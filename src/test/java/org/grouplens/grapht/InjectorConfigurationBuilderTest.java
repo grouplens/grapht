@@ -29,6 +29,7 @@ import java.util.Set;
 
 import javax.inject.Named;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -41,7 +42,6 @@ import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

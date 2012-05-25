@@ -20,7 +20,9 @@ package org.grouplens.grapht.spi;
 
 import java.io.Serializable;
 
-import org.grouplens.grapht.util.Pair;
+import javax.inject.Qualifier;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * <p>

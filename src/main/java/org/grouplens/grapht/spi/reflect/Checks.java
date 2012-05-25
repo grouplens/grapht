@@ -23,15 +23,14 @@ import java.lang.reflect.Modifier;
 
 import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.InjectionException;
-import org.grouplens.grapht.util.Types;
 
 /**
- * Utility to organize checks for common insertions, and to throw
+ * Utility to organize checks for common assertions, and to throw
  * appropriately worded exceptions on failure.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-final class Checks {
+public final class Checks {
     private Checks() { }
 
     @SuppressWarnings("unchecked")

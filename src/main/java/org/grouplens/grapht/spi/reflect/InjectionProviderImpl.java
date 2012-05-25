@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

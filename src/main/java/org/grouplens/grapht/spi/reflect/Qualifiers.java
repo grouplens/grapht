@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.util.Types;
 
 /**
  * Utilities related to Qualifier implementations.

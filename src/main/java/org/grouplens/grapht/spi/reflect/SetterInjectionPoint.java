@@ -23,9 +23,10 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.InjectionPoint;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.
@@ -81,7 +82,12 @@ public class SetterInjectionPoint implements InjectionPoint, Externalizable {
     }
 
     @Override
-    public Class<?> getType() {
+    public Type getType() {
+        return Types.box(setter.getGenericParameterTypes()[parameter]);
+    }
+    
+    @Override
+    public Class<?> getErasedType() {
         return Types.box(setter.getParameterTypes()[parameter]);
     }
 

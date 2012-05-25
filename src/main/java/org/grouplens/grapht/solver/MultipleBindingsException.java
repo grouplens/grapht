@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Pair;
 
 /**
  * Thrown when a desire has too many BindRules that match and there is no
@@ -34,7 +34,7 @@ import org.grouplens.grapht.util.Pair;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class MultipleBindingsException extends ResolverException {
+public class MultipleBindingsException extends SolverException {
     private static final long serialVersionUID = 1L;
 
     private final List<Pair<Satisfaction, Attributes>> context;

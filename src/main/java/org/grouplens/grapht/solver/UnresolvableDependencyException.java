@@ -22,17 +22,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Pair;
 
 /**
  * Thrown when a desire cannot be resolved to an instantiable satisfaction.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class UnresolvableDependencyException extends ResolverException {
+public class UnresolvableDependencyException extends SolverException {
     private static final long serialVersionUID = 1L;
 
     private final List<Pair<Satisfaction, Attributes>> context;

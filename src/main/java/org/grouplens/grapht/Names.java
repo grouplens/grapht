@@ -20,7 +20,8 @@ package org.grouplens.grapht;
 
 import javax.inject.Named;
 
-import org.grouplens.grapht.util.AnnotationBuilder;
+import org.grouplens.grapht.annotation.AnnotationBuilder;
+
 
 /**
  * Names is a utility class to create {@link Named} annotation instances when

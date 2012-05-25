@@ -39,10 +39,9 @@ import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultInteger;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.annotation.DefaultString;
-import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.InjectionPoint;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary
@@ -88,35 +87,11 @@ public class ReflectionDesire implements Desire, Externalizable {
 
         return Collections.unmodifiableList(desires);
     }
-
-    // FIXME: review the requirements for this
-    public static enum DefaultSource {
-        /**
-         * Neither type nor qualifier will be examined for a default desire.
-         */
-        NONE,
-        /**
-         * Only the desired type is examined for a default desire.
-         */
-        TYPE,
-        /**
-         * Only the qualifier of the desire (or its injection point) is examined for
-         * a default desire.
-         */
-        QUALIFIER,
-        /**
-         * Both type and qualifier are examined for defaults, prioritizing qualifier over
-         * type. This is the default.
-         */
-        QUALIFIER_AND_TYPE
-    }
     
     // all are "final"
     private Class<?> desiredType;
     private InjectionPoint injectPoint;
     private ReflectionSatisfaction satisfaction;
-
-    private DefaultSource dfltSource;
 
     /**
      * Create a ReflectionDesire that immediately wraps the given
@@ -128,7 +103,7 @@ public class ReflectionDesire implements Desire, Externalizable {
      * @throws NullPointerException if injectPoint is null
      */
     public ReflectionDesire(InjectionPoint injectPoint) {
-        this(injectPoint.getType(), injectPoint, null, DefaultSource.QUALIFIER_AND_TYPE);
+        this(injectPoint.getErasedType(), injectPoint, null);
     }
 
     /**
@@ -141,20 +116,18 @@ public class ReflectionDesire implements Desire, Externalizable {
      * @param injectPoint The injection point of the desire
      * @param satisfaction The satisfaction satisfying this desire, if there is
      *            one
-     *            @param dfltSource The source of default bindings for this desire
      * @throws NullPointerException if desiredType, injectPoint, or dfltSource is null
      * @throws IllegalArgumentException if desiredType is not assignable to the
      *             type of the injection point, or if the satisfaction's type is
      *             not assignable to the desired type
      */
     public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint,
-                            ReflectionSatisfaction satisfaction, DefaultSource dfltSource) {
+                            ReflectionSatisfaction satisfaction) {
         Checks.notNull("desired type", desiredType);
         Checks.notNull("injection point", injectPoint);
-        Checks.notNull("default source", dfltSource);
 
         desiredType = Types.box(desiredType);
-        Checks.isAssignable(injectPoint.getType(), desiredType);
+        Checks.isAssignable(injectPoint.getErasedType(), desiredType);
         if (satisfaction != null) {
             Checks.isAssignable(desiredType, satisfaction.getErasedType());
         }
@@ -171,31 +144,21 @@ public class ReflectionDesire implements Desire, Externalizable {
         this.desiredType = desiredType;
         this.injectPoint = injectPoint;
         this.satisfaction = satisfaction;
-        this.dfltSource = dfltSource;
     }
     
     /**
      * Constructor required by {@link Externalizable}.
      */
     public ReflectionDesire() { }
-
-    /**
-     * Return the injection point used to inject whatever satisfies this desire.
-     * 
-     * @return The inject point for the desire
-     */
-    public InjectionPoint getInjectionPoint() {
-        return injectPoint;
-    }
     
     @Override
-    public Class<?> getType() {
+    public Class<?> getDesiredType() {
         return desiredType;
     }
 
     @Override
-    public Attributes getAttributes() {
-        return injectPoint.getAttributes();
+    public InjectionPoint getInjectionPoint() {
+        return injectPoint;
     }
 
     @Override
@@ -210,49 +173,47 @@ public class ReflectionDesire implements Desire, Externalizable {
 
     @Override
     public Desire getDefaultDesire() {
-        Annotation qualifier = getAttributes().getQualifier();
+        Annotation qualifier = injectPoint.getAttributes().getQualifier();
 
         // Check the qualifier first, but only if the qualifier source hasn't been disabled
-        if (dfltSource == DefaultSource.QUALIFIER || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
+        if (!isInstantiable()) {
             if (qualifier != null) {
                 Class<? extends Annotation> annotType = qualifier.annotationType();
                 DefaultDouble dfltDouble = annotType.getAnnotation(DefaultDouble.class);
                 if (dfltDouble != null) {
-                    return new ReflectionDesire(Double.class, injectPoint, new InstanceSatisfaction(dfltDouble.value()), DefaultSource.TYPE);
+                    return new ReflectionDesire(Double.class, injectPoint, new InstanceSatisfaction(dfltDouble.value()));
                 }
                 DefaultInteger dfltInt = annotType.getAnnotation(DefaultInteger.class);
                 if (dfltInt != null) {
-                    return new ReflectionDesire(Integer.class, injectPoint, new InstanceSatisfaction(dfltInt.value()), DefaultSource.TYPE);
+                    return new ReflectionDesire(Integer.class, injectPoint, new InstanceSatisfaction(dfltInt.value()));
                 }
                 DefaultBoolean dfltBool = annotType.getAnnotation(DefaultBoolean.class);
                 if (dfltBool != null) {
-                    return new ReflectionDesire(Boolean.class, injectPoint, new InstanceSatisfaction(dfltBool.value()), DefaultSource.TYPE);
+                    return new ReflectionDesire(Boolean.class, injectPoint, new InstanceSatisfaction(dfltBool.value()));
                 }
                 DefaultString dfltStr = annotType.getAnnotation(DefaultString.class);
                 if (dfltStr != null) {
-                    return new ReflectionDesire(String.class, injectPoint, new InstanceSatisfaction(dfltStr.value()), DefaultSource.TYPE);
+                    return new ReflectionDesire(String.class, injectPoint, new InstanceSatisfaction(dfltStr.value()));
                 }
                 DefaultImplementation impl = annotType.getAnnotation(DefaultImplementation.class);
                 if (impl != null) {
                     // let the constructor create any satisfaction
-                    return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);
+                    return new ReflectionDesire(impl.value(), injectPoint, null);
                 }
             }
         }
         
         // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
         // source has not been disabled.
-        if (dfltSource == DefaultSource.TYPE || dfltSource == DefaultSource.QUALIFIER_AND_TYPE) {
-            DefaultProvider provided = getType().getAnnotation(DefaultProvider.class);
-            if (provided != null) {
-                return new ReflectionDesire(Types.getProvidedType(provided.value()), injectPoint, 
-                                            new ProviderClassSatisfaction(provided.value()), DefaultSource.TYPE);
-            }
-            DefaultImplementation impl = getType().getAnnotation(DefaultImplementation.class);
-            if (impl != null) {
-                // let the constructor create any satisfaction
-                return new ReflectionDesire(impl.value(), injectPoint, null, DefaultSource.TYPE);
-            }
+        DefaultProvider provided = injectPoint.getErasedType().getAnnotation(DefaultProvider.class);
+        if (provided != null) {
+            return new ReflectionDesire(Types.getProvidedType(provided.value()), injectPoint, 
+                                        new ProviderClassSatisfaction(provided.value()));
+        }
+        DefaultImplementation impl = injectPoint.getErasedType().getAnnotation(DefaultImplementation.class);
+        if (impl != null) {
+            // let the constructor create any satisfaction
+            return new ReflectionDesire(impl.value(), injectPoint, null);
         }
         
         // There are no annotations on the {@link Qualifier} or the type that indicate a
@@ -292,13 +253,12 @@ public class ReflectionDesire implements Desire, Externalizable {
         ReflectionDesire r = (ReflectionDesire) o;
         return (r.desiredType.equals(desiredType) && 
                 r.injectPoint.equals(injectPoint) && 
-                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction)) &&
-                r.dfltSource.equals(dfltSource));
+                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction)));
     }
 
     @Override
     public int hashCode() {
-        return desiredType.hashCode() ^ injectPoint.hashCode() ^ (satisfaction == null ? 0 : satisfaction.hashCode()) ^ dfltSource.hashCode();
+        return desiredType.hashCode() ^ injectPoint.hashCode() ^ (satisfaction == null ? 0 : satisfaction.hashCode());
     }
 
     @Override
@@ -310,7 +270,6 @@ public class ReflectionDesire implements Desire, Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         desiredType = Types.readClass(in);
         
-        dfltSource = (DefaultSource) in.readObject();
         injectPoint = (InjectionPoint) in.readObject();
         satisfaction = (ReflectionSatisfaction) in.readObject();
     }
@@ -319,7 +278,6 @@ public class ReflectionDesire implements Desire, Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         Types.writeClass(out, desiredType);
         
-        out.writeObject(dfltSource);
         out.writeObject(injectPoint);
         out.writeObject(satisfaction);
     }

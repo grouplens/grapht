@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
@@ -29,7 +30,6 @@ import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.grouplens.grapht.util.Pair;
 import org.junit.Assert;
 import org.junit.Test;

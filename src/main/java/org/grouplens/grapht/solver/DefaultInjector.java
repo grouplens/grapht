@@ -110,7 +110,7 @@ public class DefaultInjector implements Injector {
             logger.info("Must resolve desire: {}", desire);
             try {
                 solver.resolve(desire);
-            } catch(ResolverException e) {
+            } catch(SolverException e) {
                 throw new InjectionException(type, null, e);
             }
             resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);

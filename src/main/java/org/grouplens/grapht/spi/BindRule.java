@@ -29,6 +29,7 @@ import java.io.Serializable;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  *
  */
+// FIXME delete/move
 public interface BindRule extends Serializable {
     /**
      * The highest precedence bind rule, representing manual bind rules.

@@ -25,12 +25,11 @@ import java.io.ObjectOutput;
 
 import javax.inject.Qualifier;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Pair;
-import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
@@ -118,7 +117,7 @@ public class ReflectionContextMatcher implements ContextMatcher, Externalizable 
     
     @Override
     public String toString() {
-        return "ReflectionContextMatcher(" + qualifier + ":" + type.getSimpleName() + ")";
+        return "Context(" + qualifier + ":" + type.getSimpleName() + ")";
     }
     
     @Override

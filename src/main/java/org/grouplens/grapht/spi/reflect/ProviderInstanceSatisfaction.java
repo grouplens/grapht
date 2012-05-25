@@ -30,7 +30,6 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.util.Types;
 
 
 /**
@@ -74,12 +73,12 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction impleme
 
     @Override
     public Type getType() {
-        return getErasedType();
+        return Types.getProvidedType(provider);
     }
 
     @Override
     public Class<?> getErasedType() {
-        return Types.getProvidedType(provider);
+        return Types.erase(getType());
     }
 
     @Override

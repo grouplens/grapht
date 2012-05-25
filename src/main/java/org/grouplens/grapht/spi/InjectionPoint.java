@@ -16,12 +16,14 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.spi;
 
 import java.io.Serializable;
 import java.lang.reflect.Member;
+import java.lang.reflect.Type;
 
-import org.grouplens.grapht.spi.Attributes;
+import javax.annotation.Nullable;
+
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -30,12 +32,21 @@ import org.grouplens.grapht.spi.Attributes;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface InjectionPoint extends Serializable {
+    // FIXME does this type return a Provider or provided type,
+    // if it's provided type, how do we designate that?
+    // - I think its a Provider class, since that way the desire won't match
+    //   any configured bindings, and can have its own dependency later on
     /**
      * Return the type required to satisfy the injection point.
      * 
      * @return The type of the injection point
      */
-    Class<?> getType();
+    Type getType();
+    
+    /**
+     * @return Return the erased type of {@link #getType()}
+     */
+    Class<?> getErasedType();
 
     /**
      * @return The attributes of this injection point
@@ -43,9 +54,12 @@ public interface InjectionPoint extends Serializable {
     Attributes getAttributes();
     
     /**
+     * Return the Member that produced this injection point. Synthetic injection
+     * points can have a null member.
+     * 
      * @return The Member that produces this injection point
      */
-    Member getMember();
+    @Nullable Member getMember();
 
     /**
      * @return True if this injection point accepts null values

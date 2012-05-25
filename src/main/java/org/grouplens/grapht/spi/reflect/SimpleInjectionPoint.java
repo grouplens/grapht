@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.InjectionPoint;
 
 /**
  * SimpleInjectionPoint is a synthetic injection point used for
@@ -61,27 +61,7 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
     
     @Override
     public Member getMember() {
-        return new Member() {
-            @Override
-            public Class<?> getDeclaringClass() {
-                return Void.class;
-            }
-
-            @Override
-            public String getName() {
-                return "synthetic";
-            }
-
-            @Override
-            public int getModifiers() {
-                return 0;
-            }
-
-            @Override
-            public boolean isSynthetic() {
-                return true;
-            }
-        };
+        return null;
     }
     
     @Override
@@ -133,5 +113,11 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
         Types.writeClass(out, type);
         out.writeBoolean(nullable);
         out.writeObject(attrs.getQualifier());
+    }
+
+    @Override
+    public Class<?> getErasedType() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

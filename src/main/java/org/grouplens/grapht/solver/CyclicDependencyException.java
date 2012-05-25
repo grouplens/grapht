@@ -26,7 +26,7 @@ import org.grouplens.grapht.spi.Desire;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class CyclicDependencyException extends ResolverException {
+public class CyclicDependencyException extends SolverException {
     private static final long serialVersionUID = 1L;
 
     private final Desire desire;

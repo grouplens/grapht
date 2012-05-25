@@ -27,7 +27,6 @@ import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.reflect.ReflectionDesire.DefaultSource;
-import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionBindRule is an abstract implementation of BindRule. It is a partial

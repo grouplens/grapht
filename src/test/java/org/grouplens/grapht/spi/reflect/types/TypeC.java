@@ -20,8 +20,8 @@ package org.grouplens.grapht.spi.reflect.types;
 
 import javax.inject.Inject;
 
+import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.ConstructorParameterInjectionPoint;
-import org.grouplens.grapht.spi.reflect.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.SetterInjectionPoint;
 
 public class TypeC {

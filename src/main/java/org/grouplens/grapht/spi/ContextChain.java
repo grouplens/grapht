@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.grouplens.grapht.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * ContextChain represents a list of ContextMatchers. ContextMatchers can match

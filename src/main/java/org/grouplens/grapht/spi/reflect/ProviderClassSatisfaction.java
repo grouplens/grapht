@@ -29,7 +29,6 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.util.Types;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -81,7 +80,7 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction implements
 
     @Override
     public Class<?> getErasedType() {
-        return Types.getProvidedType(providerType);
+        return Types.erase(getType());
     }
 
     @Override

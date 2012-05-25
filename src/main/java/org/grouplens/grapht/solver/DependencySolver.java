@@ -149,7 +149,7 @@ public class DependencySolver {
      * 
      * @param desire The desire to include in the graph
      */
-    public void resolve(Desire desire) throws ResolverException {
+    public void resolve(Desire desire) throws SolverException {
         logger.info("Resolving desire: {}", desire);
         
         try {
@@ -159,7 +159,7 @@ public class DependencySolver {
 
             resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Attributes>>());
             merge(tree, treeRoot);
-        } catch(ResolverException e) {
+        } catch(SolverException e) {
             logger.error("Error while resolving: {}", e.getMessage());
             throw e;
         } catch(RuntimeException e) {
@@ -249,7 +249,7 @@ public class DependencySolver {
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
-                              List<Pair<Satisfaction, Attributes>> context) throws ResolverException {
+                              List<Pair<Satisfaction, Attributes>> context) throws SolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth) {
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
@@ -277,7 +277,7 @@ public class DependencySolver {
         }
     }
     
-    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Attributes>> context) throws ResolverException {
+    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Attributes>> context) throws SolverException {
         // bind rules can only be used once when satisfying a desire,
         // this set will record all used bind rules so they are no longer considered
         Set<BindRule> appliedRules = new HashSet<BindRule>();

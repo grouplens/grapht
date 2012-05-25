@@ -32,6 +32,7 @@ import junit.framework.Assert;
 
 import org.grouplens.grapht.InjectorConfiguration;
 import org.grouplens.grapht.MockInjectorConfiguration;
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
@@ -45,7 +46,6 @@ import org.grouplens.grapht.spi.MockDesire;
 import org.grouplens.grapht.spi.MockQualifierMatcher;
 import org.grouplens.grapht.spi.MockSatisfaction;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Test;
 
 public class DependencySolverTest {

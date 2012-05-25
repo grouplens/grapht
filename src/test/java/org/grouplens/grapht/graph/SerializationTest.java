@@ -28,12 +28,12 @@ import java.io.ObjectOutputStream;
 import javax.inject.Named;
 
 import org.grouplens.grapht.InjectorConfigurationBuilder;
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;

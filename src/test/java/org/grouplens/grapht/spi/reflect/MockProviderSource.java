@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.ProviderSource;
 
 public class MockProviderSource implements ProviderSource {

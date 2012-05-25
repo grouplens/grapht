@@ -30,7 +30,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.reflect.Types;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 

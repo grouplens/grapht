@@ -32,7 +32,7 @@ import javax.inject.Provider;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.reflect.Types;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by

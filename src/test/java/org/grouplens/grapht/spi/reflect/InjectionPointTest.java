@@ -31,12 +31,13 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 

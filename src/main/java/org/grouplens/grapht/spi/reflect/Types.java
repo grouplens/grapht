@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.util;
+package org.grouplens.grapht.spi.reflect;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -51,7 +51,23 @@ public final class Types {
     /**
      * Return the boxed version of the given type if the type is primitive.
      * Otherwise, if the type is not a primitive the original type is returned.
-     * As an example, int.class is converted to Integer.class.
+     * As an example, int.class is converted to Integer.class, but List.class is
+     * unchanged. This version of box preserves generics.
+     * 
+     * @param type The possibly unboxed type
+     * @return The boxed type
+     */
+    public static Type box(Type type) {
+        if (type instanceof Class) {
+            return box((Class<?>) type);
+        } else {
+            return type;
+        }
+    }
+    
+    /**
+     * Return the boxed version of the given type if the type is primitive.
+     * Otherwise, if the type is not primitive the original class is returned.
      * 
      * @param type The possibly unboxed type
      * @return The boxed type

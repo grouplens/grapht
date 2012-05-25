@@ -22,7 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.InjectionPoint;
 
 /**
  * MockInjectionPoint is a simple injection point that wraps a type, qualifier, and a

@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.util;
+package org.grouplens.grapht.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;

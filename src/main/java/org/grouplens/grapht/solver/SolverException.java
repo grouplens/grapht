@@ -18,39 +18,38 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Pair;
 
 /**
- * Thrown by {@link DependencySolver} when it cannot resolve the dependency
- * graph for a requested type (and possibly qualifier).
+ * Thrown by {@link BindingFunction} when the function
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ResolverException extends Exception {
+public class SolverException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public ResolverException() {
+    public SolverException() {
         super();
     }
 
-    public ResolverException(String msg) {
+    public SolverException(String msg) {
         super(msg);
     }
 
-    public ResolverException(Throwable throwable) {
+    public SolverException(Throwable throwable) {
         super(throwable);
     }
 
-    public ResolverException(String msg, Throwable throwable) {
+    public SolverException(String msg, Throwable throwable) {
         super(msg, throwable);
     }
     
     protected String formatDesire(Desire desire) {
-        return format(desire.getAttributes(), desire.getType());
+        return format(desire.getInjectionPoint().getAttributes(), desire.getInjectionPoint().getErasedType());
     }
     
     protected String formatContext(Pair<Satisfaction, Attributes> ctx) {

@@ -27,9 +27,11 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.ReflectionDesire.DefaultSource;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
@@ -41,7 +43,6 @@ import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Test;
 
 public class ReflectionDesireTest {

@@ -24,10 +24,10 @@ import java.util.List;
 
 import javax.inject.Named;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
-import org.grouplens.grapht.util.AnnotationBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

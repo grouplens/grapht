@@ -23,9 +23,10 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.util.Types;
+import org.grouplens.grapht.spi.InjectionPoint;
 
 /**
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter
@@ -84,9 +85,14 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Exter
     public boolean isNullable() {
         return Types.hasNullableAnnotation(ctor.getParameterAnnotations()[parameter]);
     }
+    
+    @Override
+    public Type getType() {
+        return Types.box(ctor.getGenericParameterTypes()[parameter]);
+    }
 
     @Override
-    public Class<?> getType() {
+    public Class<?> getErasedType() {
         return Types.box(ctor.getParameterTypes()[parameter]);
     }
     

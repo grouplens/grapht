@@ -21,6 +21,7 @@ package org.grouplens.grapht.spi;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
@@ -28,10 +29,8 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 /**
  * InjectSPI is a service provider interface for accessing and creating the
  * types needed to use graph-based injections. InjectSPIs are responsible for
- * creating concrete instances of {@link BindRule BindRules},
- * {@link ContextMatcher ContextMatchers}, {@link Desire Desires},
- * {@link Qualifier}. These created instances will also likely create
- * SPI-specific implementations of {@link Satisfaction}.
+ * creating concrete instances of {@link Desire Desires}, {@link Satisfaction
+ * Satisfactions}, and other SPI related interfaces.
  * <p>
  * The {@link ReflectionInjectSPI} provides a complete implementation of the SPI
  * using reflection to analyze types.
@@ -41,73 +40,94 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  */
 public interface InjectSPI {
     /**
-     * Create a BindRule that matches the Qualifier and source pair, and binds
-     * to a target class type. The weight is a sorting weight used to break up
-     * ties between rules that match equally. See {@link BindRule} for more
-     * details.
+     * Return a Satisfaction wrapping the given class type. The type must be
+     * instantiable and injectable, e.g.
+     * <ol>
+     * <li>Not abstract</li>
+     * <li>Not an interface</li>
+     * <li>Has a single constructor annotated with {@link Inject @Inject}</li>
+     * <li>- or - has a no-argument constructor</li>
+     * </ol>
+     * <p>
+     * The returned satisfaction will create new instances of the type with its
+     * providers using the available constructor, as well as satisfy its
+     * dependencies based on the {@link ProviderSource} passed to
+     * {@link Satisfaction#makeProvider(ProviderSource)}.
      * 
-     * @param <T> The matched type
-     * @param qualifier The qualifier matcher
-     * @param source The type any injection point must match
-     * @param impl The implementation to satisfy the source
-     * @param weight The sorting weight of the bind rule
-     * @param terminate True if no other bind rules should be followed after
-     *            this is matched
-     * @return The bind rule binding qualifier:source to impl
+     * @param type The type to wrap
+     * @return A satisfaction wrapping the given class type, capable of
+     *         instantiating new instances
      */
-    <T> BindRule bindType(QualifierMatcher qualifier, Class<T> source,
-                          Class<? extends T> impl, int weight, boolean terminate);
+    Satisfaction satisfy(Class<?> type);
+    
+    /**
+     * Return a Satisfaction that satisfies the given type by explicitly
+     * returning null from the providers created by
+     * {@link Satisfaction#makeProvider(ProviderSource)}.
+     * 
+     * @param type The type to wrap
+     * @return A satisfaction wrapping the given class type, that satisfies with
+     *         null values
+     */
+    Satisfaction satisfyWithNull(Class<?> type);
+    
+    /**
+     * Return a Satisfaction that wraps the given instance, and can satisfy
+     * dependencies of the object's type. Its providers will always provide the
+     * specified instance.
+     * 
+     * @param o The instance to wrap
+     * @return A satisfaction wrapping the given instance
+     */
+    Satisfaction satisfy(Object o);
+    
+    /**
+     * Return a Satisfaction that wraps a Provider class, and can satisfy
+     * dependencies for the Provider's provided type. The satisfaction is
+     * responsible for creating instances of the Provider type.
+     * 
+     * @param providerType The provider type ultimately responsible for creating
+     *            instances of the satisfaction type
+     * @return A satisfaction wrapping the given provider class, that creates
+     *         instances of that provider type
+     */
+    Satisfaction satisfyWithProvider(Class<? extends Provider<?>> providerType);
+    
+    /**
+     * Return a Satisfaction that wraps the given Provider instance. The
+     * satisfaction will use the given Provider to construct the instances of
+     * its provided type.
+     * 
+     * @param provider The provider to wrap
+     * @return A satisfaction wrapping the given provider
+     */
+    Satisfaction satisfyWithProvider(Provider<?> provider);
 
     /**
-     * Create a BindRule that matches the Qualifier and source pair, and binds
-     * to an instance of the source type. See {@link BindRule} for more details
-     * about the weight parameter. The created bind rule should return false
-     * from {@link BindRule#terminatesChain()}.
+     * <p>
+     * Create a Desire that wraps the given InjectionPoint, and is optionally
+     * satisfied by the provided satisfaction. Exceptions will be raised if the
+     * injection point and satisfaction's types are not compatible.
+     * <p>
+     * For root desires, use {@link #desire(Annotation, Class, boolean)}
      * 
-     * @param <T> The matched type
-     * @param qualifier The qualifier matcher
-     * @param source The type any injection point must match
-     * @param instance The instance used to satisfy injection points
-     * @param weight The sorting weight for the bind rule
-     * @return The bind rule binding qualifier:source to instance
+     * @param inject The injection point
+     * @param satisfaction An optional satisfaction for the desire, if available
+     * @return A Desire wrapping the injection point and satisfaction
      */
-    <T> BindRule bindInstance(QualifierMatcher qualifier, Class<T> source,
-                              T instance, int weight);
-
+    Desire desire(InjectionPoint inject, @Nullable Satisfaction satisfaction);
+    
     /**
-     * Create a BindRule that matches the Qualifier and
-     * source pair, and binds to a Provider class type. See {@link BindRule} for
-     * more details about the weight parameter. The created bind rule should
-     * return false from {@link BindRule#terminatesChain()}.
+     * Create a Desire that wraps a synthetic InjectionPoint for the qualified
+     * type, that may or may not be satisfied by a null value.
      * 
-     * @param <T> The matched type
-     * @param qualifier The qualifier matcher
-     * @param source The type any injection point must match
-     * @param providerType The provider type that can create instances used to
-     *            satisfy injection points
-     * @param weight The sorting weight for the bind rule
-     * @return The bind rule binding qualifier:source to providerType
+     * @param qualifier The qualifier on the synthetic injection point
+     * @param type The desired type, and type of the injection point
+     * @param nullable True if the injection point accepts null values
+     * @return A Desire for the given qualified type
      */
-    <T> BindRule bindProvider(QualifierMatcher qualifier, Class<T> source, 
-                              Class<? extends Provider<? extends T>> providerType, int weight);
-
-    /**
-     * Create a BindRule that matches the Qualifier and
-     * source pair, and binds to a Provider instance. See {@link BindRule} for
-     * more details about the weight parameter. The created bind rule should
-     * return false from {@link BindRule#terminatesChain()}.
-     * 
-     * @param <T> The matched type
-     * @param qualifier The qualifier matcher
-     * @param source The type any injection point must match
-     * @param provider The provider that can create instances used to satisfy
-     *            injection points
-     * @param weight The sorting weight for the bind rule
-     * @return The bind rule binding qualifier:source to provider
-     */
-    <T> BindRule bindProvider(QualifierMatcher qualifier, Class<T> source, 
-                              Provider<? extends T> provider, int weight);
-
+    Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable);
+    
     /**
      * Create a ContextMatcher that matches the given context formed by a
      * Qualifier and a type. The created ContextMatcher must be
@@ -119,19 +139,6 @@ public interface InjectSPI {
      * @return A ContextMatcher representing the qualifier and type
      */
     ContextMatcher context(QualifierMatcher qualifier, Class<?> type);
-
-    /**
-     * Create a Desire that wraps the Qualifier and type. If the qualifier is
-     * null, the no qualifier is used. The created Desire must be
-     * compatible with the BindRules, ContextMatchers, and Satisfactions created
-     * by this InjectSPI.
-     * 
-     * @param qualifier The optional qualifier
-     * @param type The desired type
-     * @param nullable Whether or not the desire can be nullable
-     * @return A Desire wrapping the qualifier and type
-     */
-    Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable);
     
     /**
      * Create a QualifierMatcher that matches the given annotation type. This annotation must

@@ -21,6 +21,7 @@ package org.grouplens.grapht.util;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
