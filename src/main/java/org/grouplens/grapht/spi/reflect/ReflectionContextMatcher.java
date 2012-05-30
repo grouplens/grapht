@@ -30,6 +30,8 @@ import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
@@ -69,8 +71,8 @@ public class ReflectionContextMatcher implements ContextMatcher, Externalizable 
      * @throws NullPointerException if type or qualifier is null
      */
     public ReflectionContextMatcher(Class<?> type, QualifierMatcher qualifier) {
-        Checks.notNull("type", type);
-        Checks.notNull("qualifier matcher", qualifier);
+        Preconditions.notNull("type", type);
+        Preconditions.notNull("qualifier matcher", qualifier);
 
         this.type = type;
         this.qualifier = qualifier;

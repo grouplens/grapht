@@ -30,6 +30,8 @@ import java.util.Map;
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * Utilities related to Qualifier implementations.
@@ -173,8 +175,8 @@ public final class Qualifiers {
         private Class<? extends Annotation> type;
         
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
-            Checks.notNull("type", type);
-            Checks.isQualifier(type);
+            Preconditions.notNull("type", type);
+            Preconditions.isQualifier(type);
             this.type = type;
         }
         
@@ -225,8 +227,8 @@ public final class Qualifiers {
         private Annotation annot;
         
         public AnnotationMatcher(Annotation annot) {
-            Checks.notNull("annotation", annot);
-            Checks.isQualifier(annot.annotationType());
+            Preconditions.notNull("annotation", annot);
+            Preconditions.isQualifier(annot.annotationType());
             this.annot = annot;
         }
         

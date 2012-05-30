@@ -30,6 +30,8 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the
@@ -49,7 +51,7 @@ public class NullSatisfaction extends ReflectionSatisfaction implements External
      * @throws NullPointerException if type is null
      */
     public NullSatisfaction(Class<?> type) {
-        Checks.notNull("type", type);
+        Preconditions.notNull("type", type);
         this.type = Types.box(type);
     }
     

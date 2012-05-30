@@ -29,6 +29,8 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 
 /**
@@ -49,10 +51,10 @@ public class ClassSatisfaction extends ReflectionSatisfaction implements Externa
      * @throws IllegalArgumentException if the type cannot be instantiated
      */
     public ClassSatisfaction(Class<?> type) {
-        Checks.notNull("type", type);
+        Preconditions.notNull("type", type);
 
         this.type = Types.box(type);
-        Checks.isInstantiable(this.type);
+        Preconditions.isInstantiable(this.type);
     }
     
     /**

@@ -16,13 +16,14 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 
 import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.spi.reflect.Qualifiers;
 
 /**
  * Utility to organize checks for common assertions, and to throw
@@ -30,8 +31,8 @@ import org.grouplens.grapht.InjectionException;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public final class Checks {
-    private Checks() { }
+public final class Preconditions {
+    private Preconditions() { }
 
     @SuppressWarnings("unchecked")
     public static void isQualifier(Class<?> type) {

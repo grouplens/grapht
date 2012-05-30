@@ -16,39 +16,39 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.reflect.ReflectionDesire.DefaultSource;
+import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
- * ReflectionBindRule is an abstract implementation of BindRule. It is a partial
+ * BindRule is an abstract implementation of BindRule. It is a partial
  * function from desires to desires. Its matching logic only depends on the
  * source type and Qualifier of the rule, and not what the function produces. A
- * ReflectionBindRule will only match a desire if the desire's desired type
+ * BindRule will only match a desire if the desire's desired type
  * equals the source type, and only if the desire's Qualifier inherits from the
  * Qualifier of the bind rule.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionBindRule implements BindRule, Externalizable {
+class BindRule implements Externalizable {
     // "final"
-    private ReflectionSatisfaction satisfaction;
+    private Satisfaction satisfaction;
     private boolean terminateChain;
     
     private QualifierMatcher qualifier;
     private Class<?> sourceType;
     private Class<?> implType;
-    
-    private int weight;
-    
+        
     /**
      * Create a bind rule that matches a desire when the desired type equals
      * <tt>sourceType</tt> and the desire's qualifier inherits from
@@ -59,31 +59,24 @@ public class ReflectionBindRule implements BindRule, Externalizable {
      * @param sourceType The source type this bind rule matches
      * @param satisfaction The Satisfaction used by applied desires
      * @param qualifier The Qualifier the bind rule applies to
-     * @param weight The weight or precedence of the rule
      * @param terminateChain True if the bind rule is a terminating rule
      * @throws NullPointerException if sourceType or satisfaction is null
      */
-    public ReflectionBindRule(Class<?> sourceType, ReflectionSatisfaction satisfaction,
-                              QualifierMatcher qualifier, int weight, boolean terminateChain) {
-        Checks.notNull("source type", sourceType);
-        Checks.notNull("satisfaction", satisfaction);
-        Checks.notNull("qualifier matcher", qualifier);
+    public BindRule(Class<?> sourceType, Satisfaction satisfaction,
+                    QualifierMatcher qualifier, boolean terminateChain) {
+        Preconditions.notNull("source type", sourceType);
+        Preconditions.notNull("satisfaction", satisfaction);
+        Preconditions.notNull("qualifier matcher", qualifier);
         
         this.qualifier = qualifier;
         this.satisfaction = satisfaction;
         this.implType = satisfaction.getErasedType();
         this.sourceType = Types.box(sourceType);
-        this.weight = weight;
         this.terminateChain = terminateChain;
         
         // verify that the satisfaction produces proper types
-        Checks.isAssignable(this.sourceType, this.implType);
+        Preconditions.isAssignable(this.sourceType, this.implType);
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ReflectionBindRule() { }
     
     /**
      * As the other constructor, but this is used for type to type bindings
@@ -93,34 +86,29 @@ public class ReflectionBindRule implements BindRule, Externalizable {
      * @param sourceType The source type this bind rule matches
      * @param implType The implementation type that is bound
      * @param qualifier The Qualifier the bind rule applies to
-     * @param weight The weight or precedence of the rule
      * @param terminateChain True if the bind rule is a terminating rule
      * @throws NullPointerException if sourceType or implType is null
      */
-    public ReflectionBindRule(Class<?> sourceType, Class<?> implType,
-                              QualifierMatcher qualifier, int weight, boolean terminateChain) {
-        Checks.notNull("source type", sourceType);
-        Checks.notNull("implementation type", implType);
-        Checks.notNull("qualifier matcher", qualifier);
+    public BindRule(Class<?> sourceType, Class<?> implType,
+                    QualifierMatcher qualifier, boolean terminateChain) {
+        Preconditions.notNull("source type", sourceType);
+        Preconditions.notNull("implementation type", implType);
+        Preconditions.notNull("qualifier matcher", qualifier);
         
         this.qualifier = qualifier;
         this.satisfaction = null;
         this.implType = Types.box(implType);
         this.sourceType = Types.box(sourceType);
-        this.weight = weight;
         this.terminateChain = terminateChain;
         
         // verify that implType extends sourceType
-        Checks.isAssignable(this.sourceType, this.implType);
+        Preconditions.isAssignable(this.sourceType, this.implType);
     }
-
+    
     /**
-     * @return The weight or precedence of the rule
+     * Constructor required by {@link Externalizable}.
      */
-    @Override
-    public int getWeight() {
-        return weight;
-    }
+    public BindRule() { }
     
     /**
      * @return The annotation {@link QualifierMatcher} matched by this bind rule
@@ -136,28 +124,27 @@ public class ReflectionBindRule implements BindRule, Externalizable {
         return sourceType;
     }
     
-    public ReflectionSatisfaction getSatisfaction() {
+    public Satisfaction getSatisfaction() {
         return satisfaction;
     }
     
-    @Override
-    public Desire apply(Desire desire) {
-        ReflectionDesire input = (ReflectionDesire) desire;
-        return new ReflectionDesire(implType, input.getInjectionPoint(), 
-                                    satisfaction, DefaultSource.TYPE);
+    public Desire apply(Desire desire, InjectSPI spi) {
+        if (satisfaction != null) {
+            return spi.desire(desire.getInjectionPoint(), satisfaction);
+        } else {
+            return desire.restrict(implType);
+        }
     }
 
-    @Override
     public boolean terminatesChain() {
         return terminateChain;
     }
     
-    @Override
     public boolean matches(Desire desire) {
         // bind rules match type by equality
-        if (desire.getType().equals(sourceType)) {
+        if (desire.getDesiredType().equals(sourceType)) {
             // if the type is equal, then rely on the qualifier matcher
-            return qualifier.matches(desire.getAttributes().getQualifier());
+            return qualifier.matches(desire.getInjectionPoint().getAttributes().getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false
@@ -166,12 +153,11 @@ public class ReflectionBindRule implements BindRule, Externalizable {
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ReflectionBindRule)) {
+        if (!(o instanceof BindRule)) {
             return false;
         }
-        ReflectionBindRule r = (ReflectionBindRule) o;
-        return r.weight == weight && 
-               r.sourceType.equals(sourceType) &&
+        BindRule r = (BindRule) o;
+        return r.sourceType.equals(sourceType) &&
                r.implType.equals(implType) &&
                r.terminateChain == terminateChain &&
                r.qualifier.equals(qualifier) &&
@@ -182,7 +168,6 @@ public class ReflectionBindRule implements BindRule, Externalizable {
     public int hashCode() {
         int result = 17;
 
-        result += 31 * result + weight;
         result += 31 * result + (terminateChain ? 1 : 0);
         result += 31 * result + sourceType.hashCode();
         result += 31 * result + implType.hashCode();
@@ -198,7 +183,7 @@ public class ReflectionBindRule implements BindRule, Externalizable {
     @Override
     public String toString() {
         String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
-        return "Bind(weight=" + weight + ", " + qualifier + ":" + sourceType.getSimpleName() + " -> " + i + ")";
+        return "Bind(" + qualifier + ":" + sourceType.getSimpleName() + " -> " + i + ")";
     }
     
     @Override
@@ -206,11 +191,10 @@ public class ReflectionBindRule implements BindRule, Externalizable {
         sourceType = Types.readClass(in);
         implType = Types.readClass(in);
         
-        satisfaction = (ReflectionSatisfaction) in.readObject();
+        satisfaction = (Satisfaction) in.readObject();
         qualifier = (QualifierMatcher) in.readObject();
         
         terminateChain = in.readBoolean();
-        weight = in.readInt();
     }
     
     @Override
@@ -222,6 +206,5 @@ public class ReflectionBindRule implements BindRule, Externalizable {
         out.writeObject(qualifier);
 
         out.writeBoolean(terminateChain);
-        out.writeInt(weight);
     }
 }

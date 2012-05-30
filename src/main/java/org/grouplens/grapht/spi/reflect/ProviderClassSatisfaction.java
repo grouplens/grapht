@@ -29,6 +29,8 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -48,9 +50,9 @@ public class ProviderClassSatisfaction extends ReflectionSatisfaction implements
      * @throws IllegalArgumentException if the class is not a Provider, or is not instantiable
      */
     public ProviderClassSatisfaction(Class<? extends Provider<?>> providerType) {
-        Checks.notNull("provider type", providerType);
-        Checks.isAssignable(Provider.class, providerType);
-        Checks.isInstantiable(providerType);
+        Preconditions.notNull("provider type", providerType);
+        Preconditions.isAssignable(Provider.class, providerType);
+        Preconditions.isInstantiable(providerType);
         
         this.providerType = providerType;
     }

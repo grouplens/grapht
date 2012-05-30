@@ -19,6 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,12 +27,13 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
-import org.grouplens.grapht.InjectorConfiguration;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Node;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +50,8 @@ import org.slf4j.LoggerFactory;
 public class DefaultInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
     
-    private final InjectorConfiguration config;
+    private final InjectSPI spi;
     private final DependencySolver solver;
-    
     private final Map<Node<Satisfaction>, Provider<?>> providerCache;
 
     /**
@@ -59,10 +60,13 @@ public class DefaultInjector implements Injector {
      * dependency depth of 100 to estimate if there are cycles in the dependency
      * hierarchy.
      * 
-     * @throws NullPointerException if config is null
+     * @param spi The InjectSPI to use
+     * @param functions The BindingFunctions to use, ordered with highest
+     *            priority functions first
+     * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectorConfiguration config) {
-        this(config, 100);
+    public DefaultInjector(InjectSPI spi, BindingFunction... functions) {
+        this(spi, 100, functions);
     }
 
     /**
@@ -73,13 +77,18 @@ public class DefaultInjector implements Injector {
      * that configuration requires it, although for most purposes the default
      * 100 should be sufficient.
      * 
-     * @param maxDepth The maximum depth of the dependency hierarchy
+     * @param spi The InjectSPI to use * @param maxDepth The maximum depth of
+     *            the dependency hierarchy
+     * @param functions The BindingFunctions to use, ordered with highest
+     *            priority functions first
      * @throws IllegalArgumentException if maxDepth is less than 1
-     * @throws NullPointerException if config is null
+     * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectorConfiguration config, int maxDepth) {
-        this.config = config;
-        solver = new DependencySolver(config, maxDepth);
+    public DefaultInjector(InjectSPI spi, int maxDepth, BindingFunction... functions) {
+        Preconditions.notNull("spi", spi);
+        
+        this.spi = spi;
+        solver = new DependencySolver(Arrays.asList(functions), maxDepth);
         providerCache = new HashMap<Node<Satisfaction>, Provider<?>>();
     }
     
@@ -98,7 +107,7 @@ public class DefaultInjector implements Injector {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getInstance(Annotation qualifier, Class<T> type) {
-        Desire desire = config.getSPI().desire(qualifier, type, false);
+        Desire desire = spi.desire(qualifier, type, false);
         
         // check if the desire is already in the graph
         Edge<Satisfaction, Desire> resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);

@@ -20,6 +20,8 @@ package org.grouplens.grapht;
 
 import java.lang.annotation.Annotation;
 
+import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
+import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
@@ -38,7 +40,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class InjectorBuilder implements Context {
-    private final InjectorConfigurationBuilder builder;
+    private final BindingFunctionBuilder builder;
 
     /**
      * Create a new InjectorBuilder that automatically applies the given Modules
@@ -49,7 +51,7 @@ public class InjectorBuilder implements Context {
      * @param modules Any modules to apply immediately
      */
     public InjectorBuilder(Module... modules) {
-        builder = new InjectorConfigurationBuilder();
+        builder = new BindingFunctionBuilder();
         for (Module m: modules) {
             applyModule(m);
         }
@@ -93,6 +95,10 @@ public class InjectorBuilder implements Context {
     }
 
     public Injector build() {
-        return new DefaultInjector(builder.build());
+        return new DefaultInjector(builder.getSPI(), 
+                                   builder.getFunction(RuleSet.EXPLICIT),
+                                   builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
+                                   builder.getFunction(RuleSet.SUPER_TYPES),
+                                   new DefaultDesireBindingFunction(builder.getSPI()));
     }
 }

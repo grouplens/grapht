@@ -60,20 +60,20 @@ public class ReflectionBindRuleTest {
         // test various permutations of bind rule configurations
         TypeA instance = new TypeA();
         
-        ReflectionBindRule b1 = new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, false);
-        ReflectionBindRule b2 = new ReflectionBindRule(TypeA.class, new InstanceSatisfaction(instance), spi.matchAny(), 0, false);
-        ReflectionBindRule b3 = new ReflectionBindRule(TypeA.class, TypeA.class, spi.match(RoleA.class), 0, false);
+        BindRule b1 = new BindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, false);
+        BindRule b2 = new BindRule(TypeA.class, new InstanceSatisfaction(instance), spi.matchAny(), 0, false);
+        BindRule b3 = new BindRule(TypeA.class, TypeA.class, spi.match(RoleA.class), 0, false);
         
-        Assert.assertEquals(b1, new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, false));
-        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeB.class, spi.matchAny(), 0, false)));
-        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 1, false)));
-        Assert.assertFalse(b1.equals(new ReflectionBindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, true)));
+        Assert.assertEquals(b1, new BindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, false));
+        Assert.assertFalse(b1.equals(new BindRule(TypeA.class, TypeB.class, spi.matchAny(), 0, false)));
+        Assert.assertFalse(b1.equals(new BindRule(TypeA.class, TypeA.class, spi.matchAny(), 1, false)));
+        Assert.assertFalse(b1.equals(new BindRule(TypeA.class, TypeA.class, spi.matchAny(), 0, true)));
         
-        Assert.assertEquals(b2, new ReflectionBindRule(TypeA.class, new InstanceSatisfaction(instance), spi.matchAny(), 0, false));
-        Assert.assertFalse(b2.equals(new ReflectionBindRule(TypeA.class, new ProviderClassSatisfaction(ProviderA.class), spi.matchAny(), 0, false)));
+        Assert.assertEquals(b2, new BindRule(TypeA.class, new InstanceSatisfaction(instance), spi.matchAny(), 0, false));
+        Assert.assertFalse(b2.equals(new BindRule(TypeA.class, new ProviderClassSatisfaction(ProviderA.class), spi.matchAny(), 0, false)));
         
-        Assert.assertEquals(b3, new ReflectionBindRule(TypeA.class, TypeA.class, spi.match(RoleA.class), 0, false));
-        Assert.assertFalse(b3.equals(new ReflectionBindRule(TypeA.class, TypeA.class, spi.match(RoleD.class), 0, false)));
+        Assert.assertEquals(b3, new BindRule(TypeA.class, TypeA.class, spi.match(RoleA.class), 0, false));
+        Assert.assertFalse(b3.equals(new BindRule(TypeA.class, TypeA.class, spi.match(RoleD.class), 0, false)));
     }
     
     @Test
@@ -139,7 +139,7 @@ public class ReflectionBindRuleTest {
         ReflectionSatisfaction satisfaction = (nullableSatisfaction ? new NullSatisfaction(TypeA.class) 
                                                                     : new ClassSatisfaction(TypeA.class));
         
-        ReflectionBindRule rule = new ReflectionBindRule(TypeA.class, satisfaction, spi.matchAny(), 0, true);
+        BindRule rule = new BindRule(TypeA.class, satisfaction, spi.matchAny(), 0, true);
         ReflectionDesire desire = new ReflectionDesire(injectPoint);
         
         Assert.assertEquals(expected, rule.matches(desire));

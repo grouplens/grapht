@@ -19,91 +19,61 @@
 package org.grouplens.grapht.solver;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
 
 /**
- * Thrown when a desire has too many BindRules that match and there is no
- * single best rule to apply from the set of matched rules.
+ * Thrown when a BindingFunction would be required to return multiple binding
+ * results for a given desire and context. This is not thrown when multiple
+ * functions are each capable of producing a single result for a desire, since
+ * binding functions are given a priority.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class MultipleBindingsException extends SolverException {
     private static final long serialVersionUID = 1L;
 
-    private final List<Pair<Satisfaction, Attributes>> context;
-    private final List<Desire> desireChain;
-    private final List<BindRule> bindRules;
+    private final InjectionContext context;
+    private final Desire desire;
+    private final Collection<?> bindings;
     
-    public MultipleBindingsException(List<Pair<Satisfaction, Attributes>> context, List<Desire> desireChain, List<BindRule> bindRules) {
-        this.context = Collections.unmodifiableList(new ArrayList<Pair<Satisfaction, Attributes>>(context));
-        this.desireChain = Collections.unmodifiableList(new ArrayList<Desire>(desireChain));
-        this.bindRules = Collections.unmodifiableList(new ArrayList<BindRule>(bindRules));
+    public MultipleBindingsException(Desire desire, InjectionContext context, Collection<?> bindings) {
+        this.desire = desire;
+        this.context = context;
+        this.bindings = Collections.unmodifiableCollection(new ArrayList<Object>(bindings));
     }
     
     /**
      * @return The context that produced the problematic bindings
      */
-    public List<Pair<Satisfaction, Attributes>> getContext() {
+    public InjectionContext getContext() {
         return context;
     }
     
     /**
-     * @return The top bind rules that could not be reduced to a single rule,
-     *         the list will have at least 2 elements
+     * @return The possible bindings, which depends on the BindingFunction that
+     * produced this exception
      */
-    public List<BindRule> getBindRules() {
-        return bindRules;
+    public Collection<?> getBindRules() {
+        return bindings;
     }
     
     /**
-     * <p>
-     * Get the list of desires that were being resolved. The first Desire in the
-     * list represents the desire exposed by the last satisfaction in the
-     * context. The last desire is the desire that matched too many bind rules.
-     * <p>
-     * Any desires between those two are intermediate desires that were the
-     * result of applying other rules.
-     * 
-     * @return The desire chain that produced too many rules
+     * @return The desire that had too many possible binding within a
+     *         BindingFunction
      */
-    public List<Desire> getDesires() {
-        return desireChain;
+    public Desire getDesire() {
+        return desire;
     }
     
     @Override
     public String getMessage() {
-        // header
-        StringBuilder sb = new StringBuilder("Too many choices for desire: ")
-            .append(formatDesire(desireChain.get(desireChain.size() - 1)))
-            .append('\n');
-        
-        // bind rules
-        sb.append("Possible bindings:\n");
-        for (BindRule rule: bindRules) {
-            sb.append('\t').append(formatBindRule(rule)).append('\n');
-        }
-        sb.append('\n');
-        
-        // context
-        sb.append("Current context:\n");
-        for (Pair<Satisfaction, Attributes> ctx: context) {
-            sb.append('\t').append(formatContext(ctx)).append('\n');
-        }
-        sb.append('\n');
-        
-        // desire chain
-        sb.append("Desire resolution:\n");
-        for (Desire desire: desireChain) {
-            sb.append('\t').append(formatDesire(desire)).append('\n');
-        }
-        
-        return sb.toString();
+        return new StringBuilder("Too many choices for desire: ")
+            .append(format(desire))
+            .append('\n')
+            .append(format(context))
+            .toString();
     }
 }

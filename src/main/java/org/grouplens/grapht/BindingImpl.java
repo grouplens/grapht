@@ -29,10 +29,11 @@ import java.util.Set;
 
 import javax.inject.Provider;
 
-import org.grouplens.grapht.spi.BindRule;
+import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.reflect.Types;
+import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Types;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by
@@ -99,39 +100,54 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(Class<? extends T> impl) {
+        boolean useSatisfaction = Types.isInstantiable(impl);
+        
         ContextChain chain = context.getContextChain();
-        InjectorConfigurationBuilder config = context.getBuilder();
+        BindingFunctionBuilder config = context.getBuilder();
 
         if (config.getGenerateRules()) {
-            Map<Class<?>, Integer> bindPoints = generateBindPoints(impl);
-            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindType(qualifier, (Class) e.getKey(), impl, e.getValue(), terminate);
-                config.addBindRule(chain, rule);
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(impl);
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                if (useSatisfaction) {
+                    config.addBindRule(e.getValue(), chain, 
+                                       new BindRule(e.getKey(), config.getSPI().satisfy(impl), 
+                                                    qualifier, terminate));
+                } else {
+                    config.addBindRule(e.getValue(), chain,
+                                       new BindRule(e.getKey(), impl, 
+                                                    qualifier, terminate));
+                }
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindType(qualifier, sourceType, impl, BindRule.MANUAL_BIND_RULE, terminate));
+            if (useSatisfaction) {
+                config.addBindRule(RuleSet.EXPLICIT, chain, 
+                                   new BindRule(sourceType, config.getSPI().satisfy(impl), 
+                                                qualifier, terminate));
+            } else {
+                config.addBindRule(RuleSet.EXPLICIT, chain,
+                                   new BindRule(sourceType, impl, 
+                                                qualifier, terminate));
+            }
         }
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void to(T instance) {
         ContextChain chain = context.getContextChain();
-        InjectorConfigurationBuilder config = context.getBuilder();
+        BindingFunctionBuilder config = context.getBuilder();
 
         // Apply some type coercing if we're dealing with primitive types
         Object coerced = coerce(instance);
+        Satisfaction s = config.getSPI().satisfy(coerced);
         
         if (config.getGenerateRules()) {
-            Map<Class<?>, Integer> bindPoints = generateBindPoints(coerced.getClass());
-            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindInstance(qualifier, (Class) e.getKey(), coerced, e.getValue());
-                config.addBindRule(chain, rule);
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(coerced.getClass());
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                config.addBindRule(e.getValue(), chain, new BindRule(e.getKey(), s, qualifier, true));
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindInstance(qualifier, (Class) sourceType, coerced, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, qualifier, true));
         }
     }
     
@@ -181,47 +197,45 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void toProvider(Class<? extends Provider<? extends T>> provider) {
         ContextChain chain = context.getContextChain();
-        InjectorConfigurationBuilder config = context.getBuilder();
-
+        BindingFunctionBuilder config = context.getBuilder();
+        Satisfaction s = config.getSPI().satisfyWithProvider(provider);
+        
         if (config.getGenerateRules()) {
-            Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
-            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindProvider(qualifier, (Class) e.getKey(), provider, e.getValue());
-                config.addBindRule(chain, rule);
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                config.addBindRule(e.getValue(), chain, new BindRule(e.getKey(), s, qualifier, true));
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindProvider(qualifier, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, qualifier, true));
         }
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void toProvider(Provider<? extends T> provider) {
         ContextChain chain = context.getContextChain();
-        InjectorConfigurationBuilder config = context.getBuilder();
+        BindingFunctionBuilder config = context.getBuilder();
+        Satisfaction s = config.getSPI().satisfyWithProvider(provider);
 
         if (config.getGenerateRules()) {
-            Map<Class<?>, Integer> bindPoints = generateBindPoints(Types.getProvidedType(provider));
-            for (Entry<Class<?>, Integer> e: bindPoints.entrySet()) {
-                BindRule rule = config.getSPI().bindProvider(qualifier, (Class) e.getKey(), provider, e.getValue());
-                config.addBindRule(chain, rule);
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                config.addBindRule(e.getValue(), chain, new BindRule(e.getKey(), s, qualifier, true));
             }
         } else {
-            config.addBindRule(chain, config.getSPI().bindProvider(qualifier, sourceType, provider, BindRule.MANUAL_BIND_RULE));
+            config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, qualifier, true));
         }
     }
     
-    private Map<Class<?>, Integer> generateBindPoints(Class<?> target) {
-        Map<Class<?>, Integer> bindPoints = new HashMap<Class<?>, Integer>();
+    private Map<Class<?>, RuleSet> generateBindPoints(Class<?> target) {
+        Map<Class<?>, RuleSet> bindPoints = new HashMap<Class<?>, RuleSet>();
         // start the recursion up the type hierarchy, starting at the target type
         recordTypes(Types.box(sourceType), target, bindPoints);
         return bindPoints;
     }
     
-    private void recordTypes(Class<?> src, Class<?> type, Map<Class<?>, Integer> bindPoints) {
+    private void recordTypes(Class<?> src, Class<?> type, Map<Class<?>, RuleSet> bindPoints) {
         // check exclusions
         if (type == null || excludeTypes.contains(type)) {
             // the type is excluded, terminate recursion (this relies on Object
@@ -229,18 +243,18 @@ class BindingImpl<T> implements Binding<T> {
             return;
         }
         
-        int weight;
+        RuleSet set;
         if (type.equals(src)) {
             // type is the source type, so this is the manual rule
-            weight = BindRule.MANUAL_BIND_RULE;
+            set = RuleSet.EXPLICIT;
         } else if (src.isAssignableFrom(type)) {
             // type is a subclass of the source type, and a superclass
             // of the target type
-            weight = BindRule.FIRST_TIER_GENERATED_BIND_RULE;
+            set = RuleSet.INTERMEDIATE_TYPES;
         } else if (type.isAssignableFrom(src)) {
             // type is a superclass of the source type, so it is also a superclass
             // of the target type
-            weight = BindRule.SECOND_TIER_GENERATED_BIND_RULE;
+            set = RuleSet.SUPER_TYPES;
         } else {
             // type is a superclass of the target type, but not of the source type
             // so we don't generate any bindings
@@ -248,7 +262,7 @@ class BindingImpl<T> implements Binding<T> {
         }
         
         // record the type's weight
-        bindPoints.put(type, weight);
+        bindPoints.put(type, set);
         
         // recurse to superclass and implemented interfaces
         // - superclass is null for Object, interfaces, and primitives

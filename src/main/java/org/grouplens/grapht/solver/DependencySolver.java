@@ -18,33 +18,28 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.grouplens.grapht.InjectorConfiguration;
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Pair;
+import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * <p>
+ * FIXME Update the docs to match BindingFunctions
  * DependencySolver is a utility for resolving Desires into a dependency graph,
  * where nodes are shared when permitted by a Satisfaction's dependency
  * configuration. It supports qualified and context-aware injection, and
@@ -88,7 +83,7 @@ public class DependencySolver {
     private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);
     
     private final int maxDepth;
-    private final InjectorConfiguration bindRules;
+    private final List<BindingFunction> functions;
     
     private final Graph<Satisfaction, Desire> graph;
     private final Node<Satisfaction> root; // this has a null label
@@ -97,21 +92,19 @@ public class DependencySolver {
      * Create a DependencySolver that uses the given configuration, and max
      * depth of the dependency graph.
      * 
-     * @param bindRules The bind rule configuration
+     * @param bindFunctions The binding functions that control desire bindings
      * @param maxDepth A maximum depth of the graph before it's determined that
      *            a cycle exists
      * @throws IllegalArgumentException if maxDepth is less than 1
-     * @throws NullPointerException if bindRules is null
+     * @throws NullPointerException if bindFunctions is null
      */
-    public DependencySolver(InjectorConfiguration bindRules, int maxDepth) {
+    public DependencySolver(List<BindingFunction> bindFunctions, int maxDepth) {
+        Preconditions.notNull("bindFunctions", bindFunctions);
         if (maxDepth <= 0) {
             throw new IllegalArgumentException("Max depth must be at least 1");
         }
-        if (bindRules == null) {
-            throw new NullPointerException("InjectorConfiguration cannot be null");
-        }
         
-        this.bindRules = bindRules;
+        this.functions = bindFunctions;
         this.maxDepth = maxDepth;
         
         graph = new Graph<Satisfaction, Desire>();
@@ -119,13 +112,6 @@ public class DependencySolver {
         graph.addNode(root);
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
-    }
-    
-    /**
-     * @return The InjectSPI used by this solver's configuration
-     */
-    public InjectSPI getSPI() {
-        return bindRules.getSPI();
     }
     
     /**
@@ -157,7 +143,7 @@ public class DependencySolver {
             Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
             tree.addNode(treeRoot);
 
-            resolveFully(desire, treeRoot, tree, new ArrayList<Pair<Satisfaction, Attributes>>());
+            resolveFully(desire, treeRoot, tree, new InjectionContext());
             merge(tree, treeRoot);
         } catch(SolverException e) {
             logger.error("Error while resolving: {}", e.getMessage());
@@ -249,9 +235,9 @@ public class DependencySolver {
     }
     
     private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
-                              List<Pair<Satisfaction, Attributes>> context) throws SolverException {
+                              InjectionContext context) throws SolverException {
         // check context depth against max to detect likely dependency cycles
-        if (context.size() > maxDepth) {
+        if (context.getTypePath().size() > maxDepth) {
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
         }
         
@@ -263,276 +249,52 @@ public class DependencySolver {
         graph.addNode(newNode);
         graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.getRight()));
         
-        // update the context
-        List<Pair<Satisfaction, Attributes>> newContext = new ArrayList<Pair<Satisfaction, Attributes>>(context);
-        newContext.add(Pair.of(resolved.getLeft(), desire.getAttributes()));
-        
-        List<? extends Desire> dependencies = resolved.getLeft().getDependencies();
-        for (Desire d: dependencies) {
+        InjectionContext newContext = context.push(resolved.getLeft(), desire.getInjectionPoint().getAttributes());
+        for (Desire d: resolved.getLeft().getDependencies()) {
             // complete the sub graph for the given desire
             // - the call to resolveFully() is responsible for adding the dependency edges
             //   so we don't need to process the returned node
-            logger.debug("Attempting to satisfy dependency: {}", d);
+            logger.debug("Attempting to satisfy dependency {} of {}", d, resolved.getLeft());
             resolveFully(d, newNode, graph, newContext);
         }
     }
     
-    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, List<Pair<Satisfaction, Attributes>> context) throws SolverException {
-        // bind rules can only be used once when satisfying a desire,
-        // this set will record all used bind rules so they are no longer considered
-        Set<BindRule> appliedRules = new HashSet<BindRule>();
-        
-        List<Desire> desireChain = new ArrayList<Desire>();
+    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, InjectionContext context) throws SolverException {
         Desire currentDesire = desire;
         while(true) {
             logger.debug("Current desire: {}", currentDesire);
-            // remember the current desire in the chain of followed desires
-            desireChain.add(currentDesire);
             
-            // collect all bind rules that apply to this desire
-            List<Pair<ContextChain, BindRule>> validRules = new ArrayList<Pair<ContextChain, BindRule>>();
-            for (ContextChain chain: bindRules.getBindRules().keySet()) {
-                if (chain.matches(context)) {
-                    // the context applies to the current context, so go through all
-                    // bind rules within it and record those that match the desire
-                    for (BindRule br: bindRules.getBindRules().get(chain)) {
-                        if (br.matches(currentDesire) && !appliedRules.contains(br)) {
-                            validRules.add(Pair.of(chain, br));
-                            logger.trace("Matching rule, context: {}, rule: {}", chain, br);
-                        }
-                    }
+            BindingResult binding = null;
+            for (BindingFunction bf: functions) {
+                binding = bf.bind(context, currentDesire);
+                if (binding.getDesire() != null) {
+                    // found a binding, so don't continue to the next function
+                    break;
                 }
             }
             
-            if (!validRules.isEmpty()) {
-                // we have a bind rule to apply
-                Comparator<Pair<ContextChain, BindRule>> ordering = Ordering.from(new ContextClosenessComparator(context))
-                                                                            .compound(new ContextLengthComparator())
-                                                                            .compound(new TypeDeltaComparator(context))
-                                                                            .compound(new BindRuleComparator(currentDesire));
-                Collections.sort(validRules, ordering);
-
-                if (validRules.size() > 1) {
-                    // must check if other rules are equal to the first
-                    List<BindRule> topRules = new ArrayList<BindRule>();
-                    topRules.add(validRules.get(0).getRight());
-                    for (int i = 1; i < validRules.size(); i++) {
-                        if (ordering.compare(validRules.get(0), validRules.get(i)) == 0) {
-                            topRules.add(validRules.get(i).getRight());
-                        }
-                    }
-                    
-                    if (topRules.size() > 1) {
-                        // additional rules match just as well as the first, so fail
-                        throw new MultipleBindingsException(context, desireChain, topRules);
-                    }
-                }
-
-                // apply the bind rule to get a new desire
-                BindRule selectedRule = validRules.get(0).getRight();
-                appliedRules.add(selectedRule);
-                
-                logger.debug("Applying rule: {} to desire: {}", selectedRule, currentDesire);
-                currentDesire = selectedRule.apply(currentDesire);
-                
-                // possibly terminate if the bind rule terminates
-                if (selectedRule.terminatesChain() && currentDesire.isInstantiable()) {
+            if (binding == null || binding.getDesire() == null) {
+                if (currentDesire.isInstantiable()) {
                     logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
-                    desireChain.add(currentDesire);
-                    return Pair.of(currentDesire.getSatisfaction(), desireChain);
-                }
-            } else {
-                // attempt to use the default desire, or terminate if we've found
-                // a satisfiable desire
-                Desire defaultDesire = currentDesire.getDefaultDesire();
-                if (defaultDesire == null || desireChain.contains(defaultDesire)) {
-                    // we don't use the default if there wasn't one, or using the
-                    // default would create a cycle of desires
-                    if (currentDesire.isInstantiable()) {
-                        // the desire can be converted to a node, so we're done
-                        logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
-                        return Pair.of(currentDesire.getSatisfaction(), desireChain);
-                    } else {
-                        // no more rules and we can't make a node
-                        throw new UnresolvableDependencyException(context, desireChain);
-                    }
+                    // push current desire so that its included in the list of resolved desires
+                    return Pair.of(currentDesire.getSatisfaction(), context.push(currentDesire).getPriorDesires());
                 } else {
-                    // continue with the default desire
-                    logger.debug("Falling back to default desire: {}" + defaultDesire);
-                    currentDesire = defaultDesire;
-                }
-            }
-        }
-    }
-
-    /*
-     * A Comparator that orders Pair<ContextChain, BindRule> based on the BindRule/Desire
-     * implementation that orders BindRules.
-     */
-    private static class BindRuleComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final Desire desire;
-        
-        public BindRuleComparator(Desire desire) {
-            this.desire = desire;
-        }
-        
-        @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
-            Comparator<BindRule> ruleComparator = desire.ruleComparator();
-            return ruleComparator.compare(o1.getRight(), o2.getRight());
-        }
-    }
-    
-    /*
-     * A Comparator that compares rules based on the "type" delta of the matchers
-     * with the nodes in the current context.
-     * 
-     * This comparator assumes that both context chains are the same length,
-     * and that they match the exact same nodes in the context.
-     */
-    private static class TypeDeltaComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final List<Pair<Satisfaction, Attributes>> context;
-        
-        public TypeDeltaComparator(List<Pair<Satisfaction, Attributes>> context) {
-            this.context = context;
-        }
-        
-        @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
-            int lastIndex1 = o1.getLeft().getContexts().size() - 1;
-            int lastIndex2 = o2.getLeft().getContexts().size() - 1;
-            
-            int matcher = 0; // measured from the last index
-            for (int i = context.size() - 1; i >= 0; i--) {
-                if (matcher > lastIndex1 || matcher > lastIndex2) {
-                    // we've reached the end of one of the matcher chains
-                    break;
-                }
-                
-                Pair<Satisfaction, Attributes> currentNode = context.get(i);
-                ContextMatcher m1 = o1.getLeft().getContexts().get(lastIndex1 - matcher);
-                ContextMatcher m2 = o2.getLeft().getContexts().get(lastIndex2 - matcher);
-                
-                boolean match1 = m1.matches(currentNode);
-                boolean match2 = m2.matches(currentNode);
-                
-                // if the chains match the same nodes, they should both match
-                // or neither match
-                assert match1 == match2;
-                
-                if (match1 && match2) {
-                    // the chains apply to this node so we need to compare them
-                    int cmp = currentNode.getLeft().contextComparator().compare(m1, m2);
-                    if (cmp != 0) {
-                        // one chain finally has a type delta difference, so the
-                        // comparison of the chain equals the matcher comparison
-                        return cmp;
-                    } else {
-                        // otherwise the matchers are equal so move to the next matcher
-                        matcher++;
-                    }
+                    // desire cannot be satisfied
+                    throw new UnresolvableDependencyException(currentDesire, context);
                 }
             }
             
-            // if we've gotten here, all matchers in each chain have the
-            // same type delta to their respective matching nodes
-            return 0;
-        }
-    }
-    
-    /*
-     * A Comparator that compares rules based on how long the matching contexts are.
-     */
-    private static class ContextLengthComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
-            int l1 = o1.getLeft().getContexts().size();
-            int l2 = o2.getLeft().getContexts().size();
-            // select longer contexts over shorter (i.e. longer < shorter)
-            return l2 - l1;
-        }
-    }
-    
-    /*
-     * A Comparator that compares rules based on how close a context matcher chain is to the
-     * end of the current context.
-     */
-    private static class ContextClosenessComparator implements Comparator<Pair<ContextChain, BindRule>> {
-        private final List<Pair<Satisfaction, Attributes>> context;
-        
-        public ContextClosenessComparator(List<Pair<Satisfaction, Attributes>> context) {
-            this.context = context;
-        }
-        
-        @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
-            int lastIndex1 = o1.getLeft().getContexts().size() - 1;
-            int lastIndex2 = o2.getLeft().getContexts().size() - 1;
+            // FIXME: handle deferred binding results
             
-            int matcher = 0; // measured from the last index
-            for (int i = context.size() - 1; i >= 0; i--) {
-                if (matcher > lastIndex1 || matcher > lastIndex2) {
-                    // we've reached the end of one of the matcher chains
-                    break;
-                }
-                
-                boolean match1 = o1.getLeft().getContexts().get(lastIndex1 - matcher).matches(context.get(i));
-                boolean match2 = o2.getLeft().getContexts().get(lastIndex2 - matcher).matches(context.get(i));
-                
-                if (match1 && match2) {
-                    // both chains match this context element, so go to the next matcher
-                    matcher++;
-                } else if (match1 && !match2) {
-                    // first chain is closest match
-                    return -1;
-                } else if (!match1 && match2) {
-                    // second chain is the closest match
-                    return 1;
-                } // else not matched in the context yet, so move up the context
+            // update the context
+            context = context.push(currentDesire);
+            if (binding.terminates() && binding.getDesire().isInstantiable()) {
+                logger.info("Satisfied {} with {}", desire, binding.getDesire().getSatisfaction());
+                // push newly found desire so that its included in the list of resolved desires
+                return Pair.of(binding.getDesire().getSatisfaction(), context.push(binding.getDesire()).getPriorDesires());
             }
             
-            // if we've made it here, both chains were equal up to the shortest chain,
-            // or at least one of the chains was empty (that part is a little strange,
-            // but we'll get correct results when we sort by context chain length next).
-            return 0;
-        }
-    }
-    
-    private static class Ordering<T> implements Comparator<T> {
-        private final List<Comparator<T>> comparators;
-        
-        private Ordering() {
-            comparators = new ArrayList<Comparator<T>>();
-        }
-        
-        public static <T> Ordering<T> from(Comparator<T> c) {
-            if (c == null) {
-                throw new NullPointerException("Comparator cannot be null");
-            }
-            Ordering<T> o = new Ordering<T>();
-            o.comparators.add(c);
-            return o;
-        }
-        
-        public Ordering<T> compound(Comparator<T> c) {
-            if (c == null) {
-                throw new NullPointerException("Comparator cannot be null");
-            }
-            Ordering<T> no = new Ordering<T>();
-            no.comparators.addAll(comparators);
-            no.comparators.add(c);
-            return no;
-        }
-        
-        @Override
-        public int compare(T o1, T o2) {
-            for (Comparator<T> c: comparators) {
-                int result = c.compare(o1, o2);
-                if (result != 0) {
-                    return result;
-                }
-            }
-            return 0;
+            currentDesire = binding.getDesire();
         }
     }
 }

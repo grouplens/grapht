@@ -45,16 +45,11 @@ public class CyclicDependencyException extends SolverException {
     
     @Override
     public String getMessage() {
-        // header
-        StringBuilder sb = new StringBuilder(super.getMessage())
-            .append('\n');
-        
-        // current desire
-        sb.append("Unsatisfiable desire:\n")
-          .append('\t')
-          .append(formatDesire(desire))
-          .append('\n');
-        
-        return sb.toString();
+        return new StringBuilder("Unable to satisfy desire: ")
+            .append(format(desire))
+            .append('\n')
+            .append("Reason: ")
+            .append(super.getMessage())
+            .toString();
     }
 }

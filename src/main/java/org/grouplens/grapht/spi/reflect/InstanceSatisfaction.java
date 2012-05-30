@@ -30,6 +30,7 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.util.Preconditions;
 
 /**
  * Satisfaction implementation wrapping an instance. It has no dependencies, and
@@ -49,7 +50,7 @@ public class InstanceSatisfaction extends ReflectionSatisfaction implements Exte
      * @throws NullPointerException if obj is null
      */
     public InstanceSatisfaction(Object obj) {
-        Checks.notNull("instance", obj);
+        Preconditions.notNull("instance", obj);
         instance = obj;
     }
     

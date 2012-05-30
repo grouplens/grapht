@@ -23,8 +23,6 @@ import java.lang.annotation.Annotation;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 
-import org.grouplens.grapht.spi.BindRule;
-
 /**
  * Binding is part of the fluent API used for configuring an {@link Injector}.
  * It represents a binding action from one type to another type.

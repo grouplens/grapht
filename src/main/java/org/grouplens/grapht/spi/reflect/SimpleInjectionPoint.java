@@ -30,6 +30,8 @@ import javax.annotation.Nullable;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * SimpleInjectionPoint is a synthetic injection point used for
@@ -44,9 +46,9 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
     private boolean nullable;
     
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
-        Checks.notNull("type", type);
+        Preconditions.notNull("type", type);
         if (qualifier != null) {
-            Checks.isQualifier(qualifier.annotationType());
+            Preconditions.isQualifier(qualifier.annotationType());
         }
 
         this.attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
@@ -58,6 +60,11 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
      * Constructor required by {@link Externalizable}.
      */
     public SimpleInjectionPoint() { }
+    
+    @Override
+    public Class<?> getErasedType() {
+        return type;
+    }
     
     @Override
     public Member getMember() {
@@ -113,11 +120,5 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
         Types.writeClass(out, type);
         out.writeBoolean(nullable);
         out.writeObject(attrs.getQualifier());
-    }
-
-    @Override
-    public Class<?> getErasedType() {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

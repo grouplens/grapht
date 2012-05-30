@@ -37,17 +37,14 @@ import org.grouplens.grapht.spi.QualifierMatcher;
 class ContextImpl implements Context {
     private final ContextChain context;
     
-    private final InjectorConfigurationBuilder config;
+    private final BindingFunctionBuilder config;
     
-    public ContextImpl(InjectorConfigurationBuilder config, ContextChain context) {
+    public ContextImpl(BindingFunctionBuilder config, ContextChain context) {
         this.config = config;
         this.context = context;
     }
     
-    /**
-     * @return The root context
-     */
-    public InjectorConfigurationBuilder getBuilder() {
+    public BindingFunctionBuilder getBuilder() {
         return config;
     }
     

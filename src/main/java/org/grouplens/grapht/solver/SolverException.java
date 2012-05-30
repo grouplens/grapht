@@ -20,12 +20,12 @@ package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
 
 /**
- * Thrown by {@link BindingFunction} when the function
+ * Thrown by {@link BindingFunction} or {@link DependencySolver} when a desire
+ * cannot be satisfied.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
@@ -48,18 +48,34 @@ public class SolverException extends Exception {
         super(msg, throwable);
     }
     
-    protected String formatDesire(Desire desire) {
+    protected String format(InjectionContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        
+        // type path
+        sb.append("Context:\n");
+        sb.append("  Type path:\n");
+        for (Pair<Satisfaction, Attributes> path: ctx.getTypePath()) {
+            sb.append("    ")
+              .append(format(path.getRight(), path.getLeft().getErasedType()))
+              .append('\n');
+        }
+        sb.append('\n');
+        
+        // desire chain
+        sb.append("  Prior desires:\n");
+        for (Desire desire: ctx.getPriorDesires()) {
+            sb.append("    ")
+              .append(format(desire))
+              .append('\n');
+        }
+        
+        return sb.toString();
+    }
+    
+    protected String format(Desire desire) {
         return format(desire.getInjectionPoint().getAttributes(), desire.getInjectionPoint().getErasedType());
     }
-    
-    protected String formatContext(Pair<Satisfaction, Attributes> ctx) {
-        return format(ctx.getRight(), ctx.getLeft().getErasedType());
-    }
-    
-    protected String formatBindRule(BindRule rule) {
-        return rule.toString();
-    }
-    
+
     private String format(Attributes attr, Class<?> type) {
         String base = (attr.getQualifier() != null ? attr.getQualifier() + ":" : "");
         return base + type.getName();

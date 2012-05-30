@@ -30,6 +30,8 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 
 /**
@@ -50,7 +52,7 @@ public class ProviderInstanceSatisfaction extends ReflectionSatisfaction impleme
      * @throws NullPointerException if provider is null
      */
     public ProviderInstanceSatisfaction(Provider<?> provider) {
-        Checks.notNull("provider", provider);
+        Preconditions.notNull("provider", provider);
         this.provider = provider;
     }
     

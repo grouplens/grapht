@@ -27,6 +27,8 @@ import java.lang.reflect.Type;
 
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter
@@ -52,8 +54,8 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Exter
      *             the constructor's parameters
      */
     public ConstructorParameterInjectionPoint(Constructor<?> ctor, int parameter) {
-        Checks.notNull("constructor", ctor);
-        Checks.inRange(parameter, 0, ctor.getParameterTypes().length);
+        Preconditions.notNull("constructor", ctor);
+        Preconditions.inRange(parameter, 0, ctor.getParameterTypes().length);
         
         this.attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
         this.ctor = ctor;

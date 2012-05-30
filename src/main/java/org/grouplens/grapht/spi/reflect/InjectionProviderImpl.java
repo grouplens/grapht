@@ -29,6 +29,7 @@ import javax.inject.Provider;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,9 +58,9 @@ public class InjectionProviderImpl<T> implements Provider<T> {
      * @param providers The providers that satisfy the desires of the type
      */
     public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, ProviderSource providers) {
-        Checks.notNull("type", type);
-        Checks.notNull("desires", desires);
-        Checks.notNull("providers", providers);
+        Preconditions.notNull("type", type);
+        Preconditions.notNull("desires", desires);
+        Preconditions.notNull("providers", providers);
         
         this.type = type;
         this.desires = desires;

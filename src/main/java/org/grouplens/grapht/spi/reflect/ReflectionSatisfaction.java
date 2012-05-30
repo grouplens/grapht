@@ -22,6 +22,7 @@ import java.util.Comparator;
 
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionSatisfaction is an abstract satisfaction that implements the

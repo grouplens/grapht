@@ -22,26 +22,19 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.grouplens.grapht.InvalidBindingException;
-import org.grouplens.grapht.annotation.DefaultBoolean;
-import org.grouplens.grapht.annotation.DefaultDouble;
-import org.grouplens.grapht.annotation.DefaultImplementation;
-import org.grouplens.grapht.annotation.DefaultInteger;
-import org.grouplens.grapht.annotation.DefaultProvider;
-import org.grouplens.grapht.annotation.DefaultString;
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary
@@ -123,13 +116,13 @@ public class ReflectionDesire implements Desire, Externalizable {
      */
     public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint,
                             ReflectionSatisfaction satisfaction) {
-        Checks.notNull("desired type", desiredType);
-        Checks.notNull("injection point", injectPoint);
+        Preconditions.notNull("desired type", desiredType);
+        Preconditions.notNull("injection point", injectPoint);
 
         desiredType = Types.box(desiredType);
-        Checks.isAssignable(injectPoint.getErasedType(), desiredType);
+        Preconditions.isAssignable(injectPoint.getErasedType(), desiredType);
         if (satisfaction != null) {
-            Checks.isAssignable(desiredType, satisfaction.getErasedType());
+            Preconditions.isAssignable(desiredType, satisfaction.getErasedType());
         }
 
         // try and find a satisfaction
@@ -170,79 +163,10 @@ public class ReflectionDesire implements Desire, Externalizable {
     public ReflectionSatisfaction getSatisfaction() {
         return satisfaction;
     }
-
+    
     @Override
-    public Desire getDefaultDesire() {
-        Annotation qualifier = injectPoint.getAttributes().getQualifier();
-
-        // Check the qualifier first, but only if the qualifier source hasn't been disabled
-        if (!isInstantiable()) {
-            if (qualifier != null) {
-                Class<? extends Annotation> annotType = qualifier.annotationType();
-                DefaultDouble dfltDouble = annotType.getAnnotation(DefaultDouble.class);
-                if (dfltDouble != null) {
-                    return new ReflectionDesire(Double.class, injectPoint, new InstanceSatisfaction(dfltDouble.value()));
-                }
-                DefaultInteger dfltInt = annotType.getAnnotation(DefaultInteger.class);
-                if (dfltInt != null) {
-                    return new ReflectionDesire(Integer.class, injectPoint, new InstanceSatisfaction(dfltInt.value()));
-                }
-                DefaultBoolean dfltBool = annotType.getAnnotation(DefaultBoolean.class);
-                if (dfltBool != null) {
-                    return new ReflectionDesire(Boolean.class, injectPoint, new InstanceSatisfaction(dfltBool.value()));
-                }
-                DefaultString dfltStr = annotType.getAnnotation(DefaultString.class);
-                if (dfltStr != null) {
-                    return new ReflectionDesire(String.class, injectPoint, new InstanceSatisfaction(dfltStr.value()));
-                }
-                DefaultImplementation impl = annotType.getAnnotation(DefaultImplementation.class);
-                if (impl != null) {
-                    // let the constructor create any satisfaction
-                    return new ReflectionDesire(impl.value(), injectPoint, null);
-                }
-            }
-        }
-        
-        // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
-        // source has not been disabled.
-        DefaultProvider provided = injectPoint.getErasedType().getAnnotation(DefaultProvider.class);
-        if (provided != null) {
-            return new ReflectionDesire(Types.getProvidedType(provided.value()), injectPoint, 
-                                        new ProviderClassSatisfaction(provided.value()));
-        }
-        DefaultImplementation impl = injectPoint.getErasedType().getAnnotation(DefaultImplementation.class);
-        if (impl != null) {
-            // let the constructor create any satisfaction
-            return new ReflectionDesire(impl.value(), injectPoint, null);
-        }
-        
-        // There are no annotations on the {@link Qualifier} or the type that indicate a
-        // default binding or value, or the defaults have been disabled,
-        // so we return null
-        return null;
-    }
-
-    @Override
-    public Comparator<BindRule> ruleComparator() {
-        // 1st comparison is manual vs generated bind rules
-        // - manual bind rules are preferred over any generated rules
-        // 2nd comparison is the priority of the qualifier matcher, e.g:
-        // - match a specific instance/none > match class type > match any
-        return new Comparator<BindRule>() {
-            @Override
-            public int compare(BindRule o1, BindRule o2) {
-                ReflectionBindRule b1 = (ReflectionBindRule) o1;
-                ReflectionBindRule b2 = (ReflectionBindRule) o2;
-
-                // #1 - select manual over generated
-                if (b1.getWeight() != b2.getWeight()) {
-                    return b1.getWeight() - b2.getWeight();
-                }
-
-                // #2 - select the higher priority qualifier matcher
-                return b1.getQualifier().compareTo(b2.getQualifier());
-            }
-        };
+    public Desire restrict(Class<?> type) {
+        return new ReflectionDesire(type, injectPoint, satisfaction);
     }
 
     @Override

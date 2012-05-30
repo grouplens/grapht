@@ -27,6 +27,8 @@ import java.lang.reflect.Type;
 
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.
@@ -45,8 +47,8 @@ public class SetterInjectionPoint implements InjectionPoint, Externalizable {
      * @param setter The setter method
      */
     public SetterInjectionPoint(Method setter, int parameter) {
-        Checks.notNull("setter method", setter);
-        Checks.inRange(parameter, 0, setter.getParameterTypes().length);
+        Preconditions.notNull("setter method", setter);
+        Preconditions.inRange(parameter, 0, setter.getParameterTypes().length);
         
         this.attributes = new AttributesImpl(setter.getParameterAnnotations()[parameter]);
         this.setter = setter;

@@ -126,9 +126,9 @@ public class ReflectionDesireTest {
     @Test
     public void testBindRuleComparator() throws Exception {
         InjectSPI spi = new ReflectionInjectSPI();
-        BindRule b1 = new ReflectionBindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), spi.match(RoleB.class), 0, true);
-        BindRule b2 = new ReflectionBindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), spi.match(RoleA.class), 0, true);
-        BindRule b3 = new ReflectionBindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), spi.match(RoleA.class), 1, true);
+        BindRule b1 = new BindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), spi.match(RoleB.class), 0, true);
+        BindRule b2 = new BindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), spi.match(RoleA.class), 0, true);
+        BindRule b3 = new BindRule(InterfaceB.class, new InstanceSatisfaction(new TypeB()), spi.match(RoleA.class), 1, true);
         
         Annotation[] as = new Annotation[] { AnnotationBuilder.of(RoleB.class).build() };
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceB.class, as, false));

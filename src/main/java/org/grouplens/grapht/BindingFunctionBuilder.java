@@ -1,21 +1,3 @@
-/*
- * Grapht, an open source dependency injector.
- * Copyright 2010-2012 Regents of the University of Minnesota and contributors
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
 package org.grouplens.grapht;
 
 import java.io.Externalizable;
@@ -26,50 +8,62 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
-import org.grouplens.grapht.spi.BindRule;
+import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 /**
- * <p>
- * InjectorConfigurationBuilder is a Builder that creates
- * InjectorConfigurations. This uses its own implementations of {@link Context}
- * and {@link Binding} to accumulate {@link BindRule BindRules}. For simple
- * applications, {@link InjectorBuilder} is the recommended entry point.
- * InjectorConfigurationBuilder is useful for different implementations of
- * Injector that only need to change the inject behavior, but do not need to
- * modify configuration.
- * <p>
- * The fluent API provided by the InjectorConfigurationBuilder will by default
- * generate additional {@link BindRule BindRules} when {@link Binding bindings}
- * are completed. A BindRule has a source type and a target type; the source
- * represents the type declared at the injection point and the target type is
- * the satisfying implementation. The fluent API generates bindings for the
- * super types of the source type, and the intermediate types between the source
- * and target. This allows for much simpler binding configurations that still
- * allow types to have narrower dependencies.
+ * BindingFunctionBuilder provides a convenient access to the fluent API and
+ * converts calls to {@link Context} and {@link Binding} methods into multiple
+ * {@link BindingFunction BindingFunctions}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InjectorConfigurationBuilder implements Cloneable {
+public class BindingFunctionBuilder implements Cloneable {
+    /**
+     * BindingFunctionBuilder generates three binding functions at separate
+     * priorities.
+     */
+    public static enum RuleSet {
+        /**
+         * Rule set for the explicitly configured rules with the fluent API.
+         */
+        EXPLICIT,
+        /**
+         * Rule set for the intermediate types between a source type (
+         * {@link Context#bind(Class)}) and the target type (
+         * {@link Binding#to(Class)})
+         */
+        INTERMEDIATE_TYPES,
+        /**
+         * Rule set for the super types of the source types of bindings (e.g.
+         * {@link Context#bind(Class)})
+         */
+        SUPER_TYPES
+    }
+    
     private final InjectSPI spi;
     private final Context root;
     
     private final Set<Class<?>> defaultExcludes;
-    private final Map<ContextChain, Collection<BindRule>> bindRules;
     private final boolean generateRules;
+    
+    private final Map<ContextChain, Collection<BindRule>> manualRules;
+    private final Map<ContextChain, Collection<BindRule>> intermediateRules; // "generated"
+    private final Map<ContextChain, Collection<BindRule>> superRules; // "generated"
+
 
     /**
      * Create a new InjectorConfigurationBuilder that uses a
      * {@link ReflectionInjectSPI} and automatically generates bind rules for
      * super and intermediate types.
      */
-    public InjectorConfigurationBuilder() {
+    public BindingFunctionBuilder() {
         this(true);
     }
 
@@ -81,7 +75,7 @@ public class InjectorConfigurationBuilder implements Cloneable {
      * 
      * @param generateRules True if additional bind rules should be generated
      */
-    public InjectorConfigurationBuilder(boolean generateRules) {
+    public BindingFunctionBuilder(boolean generateRules) {
         this(new ReflectionInjectSPI(), generateRules);
     }
     
@@ -94,7 +88,7 @@ public class InjectorConfigurationBuilder implements Cloneable {
      *            for intermediate and super types
      * @throws NullPointerException if spi is null
      */
-    public InjectorConfigurationBuilder(InjectSPI spi, boolean generateRules) {
+    public BindingFunctionBuilder(InjectSPI spi, boolean generateRules) {
         if (spi == null) {
             throw new NullPointerException("SPI cannot be null");
         }
@@ -109,22 +103,26 @@ public class InjectorConfigurationBuilder implements Cloneable {
         defaultExcludes.add(Externalizable.class);
         defaultExcludes.add(Cloneable.class);
         
-        bindRules = new HashMap<ContextChain, Collection<BindRule>>();
+        manualRules = new HashMap<ContextChain, Collection<BindRule>>();
+        intermediateRules = new HashMap<ContextChain, Collection<BindRule>>();
+        superRules = new HashMap<ContextChain, Collection<BindRule>>();
         
         root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
     }
     
-    private InjectorConfigurationBuilder(InjectorConfigurationBuilder clone) {
+    private BindingFunctionBuilder(BindingFunctionBuilder clone) {
         spi = clone.spi;
         generateRules = clone.generateRules;
         defaultExcludes = new HashSet<Class<?>>(clone.defaultExcludes);
-        bindRules = clone.getBindRulesDeepClone();
+        manualRules = deepCloneRules(clone.manualRules);
+        intermediateRules = deepCloneRules(clone.intermediateRules);
+        superRules = deepCloneRules(clone.superRules);
         root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
     }
     
     @Override
-    public InjectorConfigurationBuilder clone() {
-        return new InjectorConfigurationBuilder(this);
+    public BindingFunctionBuilder clone() {
+        return new BindingFunctionBuilder(this);
     }
     
     /**
@@ -187,11 +185,17 @@ public class InjectorConfigurationBuilder implements Cloneable {
         defaultExcludes.remove(type);
     }
     
-    void addBindRule(ContextChain context, BindRule rule) {
-        Collection<BindRule> inContext = bindRules.get(context);
+    public BindingFunction getFunction(RuleSet set) {
+        return new RuleBasedBindingFunction(spi, getMap(set));
+    }
+    
+    void addBindRule(RuleSet set, ContextChain context, BindRule rule) {
+        Map<ContextChain, Collection<BindRule>> map = getMap(set);
+        
+        Collection<BindRule> inContext = map.get(context);
         if (inContext == null) {
             inContext = new ArrayList<BindRule>();
-            bindRules.put(context, inContext);
+            map.put(context, inContext);
         }
         
         inContext.add(rule);
@@ -201,7 +205,7 @@ public class InjectorConfigurationBuilder implements Cloneable {
         return Collections.unmodifiableSet(defaultExcludes);
     }
     
-    private Map<ContextChain, Collection<BindRule>> getBindRulesDeepClone() {
+    private static Map<ContextChain, Collection<BindRule>> deepCloneRules(Map<ContextChain, Collection<BindRule>> bindRules) {
         Map<ContextChain, Collection<BindRule>> rules = new HashMap<ContextChain, Collection<BindRule>>();
         for (Entry<ContextChain, Collection<BindRule>> e: bindRules.entrySet()) {
             rules.put(e.getKey(), new ArrayList<BindRule>(e.getValue()));
@@ -209,23 +213,16 @@ public class InjectorConfigurationBuilder implements Cloneable {
         return rules;
     }
     
-    @SuppressWarnings("rawtypes")
-    public InjectorConfiguration build() {
-        // make a deep copy of the bind rules, since the map's key set can change
-        // and the collection of bind rules can change
-        final Map rules = getBindRulesDeepClone();
-        
-        return new InjectorConfiguration() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public Map<ContextChain, Collection<? extends BindRule>> getBindRules() {
-                return Collections.unmodifiableMap(rules);
-            }
-
-            @Override
-            public InjectSPI getSPI() {
-                return spi;
-            }
-        };
+    private Map<ContextChain, Collection<BindRule>> getMap(RuleSet set) {
+        switch(set) {
+        case EXPLICIT:
+            return manualRules;
+        case INTERMEDIATE_TYPES:
+            return intermediateRules;
+        case SUPER_TYPES:
+            return superRules;
+        default:
+            throw new RuntimeException("Should not happen");
+        }
     }
 }
