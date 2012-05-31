@@ -9,6 +9,8 @@ public class BindingResult {
     private final boolean defer;
     private final boolean terminate;
     
+    // FIXME: it might make more sense to have this Desire be not null,
+    // and return a null BindingResult when no binding exists
     public BindingResult(@Nullable Desire desire, boolean defer, boolean terminate) {
         this.desire = desire;
         this.defer = defer;

@@ -18,20 +18,15 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.grouplens.grapht.InjectorConfiguration;
-import org.grouplens.grapht.MockInjectorConfiguration;
+import org.grouplens.grapht.BindingFunctionBuilder;
+import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Node;
+import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
-import org.grouplens.grapht.spi.BindRule;
-import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
@@ -55,8 +50,7 @@ public class ReflectionInjectionTest {
         // All of TypeC's dependencies have defaults or are satisfiable.
         InjectSPI spi = new ReflectionInjectSPI();
         Desire rootDesire = spi.desire(null, TypeC.class, false);
-        InjectorConfiguration config = new MockInjectorConfiguration(spi, new HashMap<ContextChain, Collection<? extends BindRule>>());
-        DefaultInjector r = new DefaultInjector(config);
+        DefaultInjector r = new DefaultInjector(spi, new DefaultDesireBindingFunction(spi));
         
         TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(5, instance.getIntValue());
@@ -135,15 +129,14 @@ public class ReflectionInjectionTest {
         TypeA a = new TypeA();
         TypeB b = new TypeB();
         
-        Map<ContextChain, Collection<? extends BindRule>> bindRules = new HashMap<ContextChain, Collection<? extends BindRule>>();
-        bindRules.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                      Arrays.asList(spi.bindInstance(spi.match(ParameterA.class), Integer.class, 10, 0),
-                                    spi.bindType(spi.match(RoleA.class), InterfaceA.class, PrimeA.class, 0, false),
-                                    spi.bindType(spi.match(RoleD.class), InterfaceB.class, PrimeB.class, 0, false),
-                                    spi.bindInstance(spi.matchAny(), TypeA.class, a, 0),
-                                    spi.bindInstance(spi.matchAny(), TypeB.class, b, 0)));
+        BindingFunctionBuilder bindRules = new BindingFunctionBuilder(spi, false);
+        bindRules.getRootContext().bind(ParameterA.class, 10);
+        bindRules.getRootContext().bind(InterfaceA.class).withQualifier(RoleA.class).to(PrimeA.class);
+        bindRules.getRootContext().bind(InterfaceB.class).withQualifier(RoleD.class).to(PrimeB.class);
+        bindRules.getRootContext().bind(TypeA.class).to(a);
+        bindRules.getRootContext().bind(TypeB.class).to(b);
         
-        DefaultInjector r = new DefaultInjector(new MockInjectorConfiguration(spi, bindRules));
+        DefaultInjector r = new DefaultInjector(spi, 100, bindRules.getFunction(RuleSet.EXPLICIT), new DefaultDesireBindingFunction(spi));
 
         TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(10, instance.getIntValue());

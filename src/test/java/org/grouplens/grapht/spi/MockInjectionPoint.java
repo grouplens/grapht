@@ -16,13 +16,13 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.spi;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
+import java.lang.reflect.Type;
 
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.Types;
 
 /**
@@ -79,7 +79,12 @@ public class MockInjectionPoint implements InjectionPoint {
     }
     
     @Override
-    public Class<?> getType() {
+    public Type getType() {
+        return type;
+    }
+    
+    @Override
+    public Class<?> getErasedType() {
         return type;
     }
 

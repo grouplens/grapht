@@ -104,20 +104,6 @@ public interface InjectSPI {
     Satisfaction satisfyWithProvider(Provider<?> provider);
 
     /**
-     * <p>
-     * Create a Desire that wraps the given InjectionPoint, and is optionally
-     * satisfied by the provided satisfaction. Exceptions will be raised if the
-     * injection point and satisfaction's types are not compatible.
-     * <p>
-     * For root desires, use {@link #desire(Annotation, Class, boolean)}
-     * 
-     * @param inject The injection point
-     * @param satisfaction An optional satisfaction for the desire, if available
-     * @return A Desire wrapping the injection point and satisfaction
-     */
-    Desire desire(InjectionPoint inject, @Nullable Satisfaction satisfaction);
-    
-    /**
      * Create a Desire that wraps a synthetic InjectionPoint for the qualified
      * type, that may or may not be satisfied by a null value.
      * 

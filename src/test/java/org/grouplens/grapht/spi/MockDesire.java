@@ -19,9 +19,8 @@
 package org.grouplens.grapht.spi;
 
 import java.lang.annotation.Annotation;
-import java.util.Comparator;
 
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
+import org.grouplens.grapht.spi.reflect.SimpleInjectionPoint;
 
 /**
  * MockDesire is a simple Desire implementation for use within certain types of
@@ -34,25 +33,21 @@ public class MockDesire implements Desire {
 
     private final Annotation qualifier;
     private final Satisfaction satisfaction;
-    
-    private final Desire defaultDesire;
+    private final Class<?> desiredType;
     
     public MockDesire() {
         this(null);
     }
     
     public MockDesire(Satisfaction satisfaction) {
-        this(satisfaction, null);
+        this((satisfaction == null ? Void.class : satisfaction.getErasedType()), 
+             satisfaction, null);
     }
     
-    public MockDesire(Satisfaction satisfaction, Annotation qualifier) {
-        this(satisfaction, qualifier, null);
-    }
-    
-    public MockDesire(Satisfaction satisfaction, Annotation qualifier, Desire dflt) {
+    public MockDesire(Class<?> desiredType, Satisfaction satisfaction, Annotation qualifier) {
+        this.desiredType = desiredType;
         this.satisfaction = satisfaction;
         this.qualifier = qualifier;
-        this.defaultDesire = dflt;
     }
     
     @Override
@@ -66,31 +61,22 @@ public class MockDesire implements Desire {
     }
 
     @Override
-    public Comparator<BindRule> ruleComparator() {
-        return new Comparator<BindRule>() {
-            @Override
-            public int compare(BindRule o1, BindRule o2) {
-                return 0;
-            }
-        };
+    public Class<?> getDesiredType() {
+        return desiredType;
     }
 
     @Override
-    public Attributes getAttributes() {
-        if (qualifier == null) {
-            return new AttributesImpl();
-        } else {
-            return new AttributesImpl(new Annotation[] { qualifier });
-        }
+    public InjectionPoint getInjectionPoint() {
+        return new SimpleInjectionPoint(qualifier, getDesiredType(), false);
     }
 
     @Override
-    public Desire getDefaultDesire() {
-        return defaultDesire;
+    public Desire restrict(Class<?> type) {
+        return new MockDesire(type, satisfaction, qualifier);
     }
 
     @Override
-    public Class<?> getType() {
-        return (satisfaction != null ? satisfaction.getErasedType() : Void.class);
+    public Desire restrict(Satisfaction satisfaction) {
+        return new MockDesire(satisfaction.getErasedType(), satisfaction, qualifier);
     }
 }

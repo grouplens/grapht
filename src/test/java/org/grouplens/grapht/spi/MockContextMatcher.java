@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
-import org.grouplens.grapht.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class MockContextMatcher implements ContextMatcher {
     private static final long serialVersionUID = 1L;

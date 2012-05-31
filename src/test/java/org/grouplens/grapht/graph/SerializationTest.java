@@ -24,11 +24,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 import javax.inject.Named;
 
-import org.grouplens.grapht.InjectorConfigurationBuilder;
+import org.grouplens.grapht.BindingFunctionBuilder;
+import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
@@ -132,11 +135,14 @@ public class SerializationTest {
     
     @Test
     public void testDependencySolverSerialization() throws Exception {
-        InjectorConfigurationBuilder b = new InjectorConfigurationBuilder();
+        BindingFunctionBuilder b = new BindingFunctionBuilder();
         b.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
         b.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build()).to("hello world");
         
-        DependencySolver solver = new DependencySolver(b.build(), 100);
+        DependencySolver solver = new DependencySolver(Arrays.asList(b.getFunction(RuleSet.EXPLICIT), 
+                                                                     b.getFunction(RuleSet.INTERMEDIATE_TYPES), 
+                                                                     b.getFunction(RuleSet.SUPER_TYPES), 
+                                                                     new DefaultDesireBindingFunction(b.getSPI())), 100);
         solver.resolve(b.getSPI().desire(null, NamedType.class, false));
         
         Graph<Satisfaction, Desire> g = solver.getGraph();
@@ -149,19 +155,19 @@ public class SerializationTest {
         Node<Satisfaction> namedType = rootEdge.getTail();
         
         Assert.assertEquals(NamedType.class, namedType.getLabel().getErasedType());
-        Assert.assertEquals(NamedType.class, rootEdge.getLabel().getType());
+        Assert.assertEquals(NamedType.class, rootEdge.getLabel().getDesiredType());
         Assert.assertEquals(rootEdge.getLabel().getSatisfaction(), namedType.getLabel());
-        Assert.assertNull(rootEdge.getLabel().getAttributes().getQualifier());
-        Assert.assertTrue(rootEdge.getLabel().getAttributes().getAttributes().isEmpty());
+        Assert.assertNull(rootEdge.getLabel().getInjectionPoint().getAttributes().getQualifier());
+        Assert.assertTrue(rootEdge.getLabel().getInjectionPoint().getAttributes().getAttributes().isEmpty());
         
         Assert.assertEquals(1, read.getOutgoingEdges(namedType).size());
         Edge<Satisfaction, Desire> nameEdge = read.getOutgoingEdges(namedType).iterator().next();
         Node<Satisfaction> string = nameEdge.getTail();
         
         Assert.assertEquals(String.class, string.getLabel().getErasedType());
-        Assert.assertEquals(String.class, nameEdge.getLabel().getType());
-        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getAttributes().getQualifier());
-        Assert.assertTrue(nameEdge.getLabel().getAttributes().getAttributes().isEmpty());
+        Assert.assertEquals(String.class, nameEdge.getLabel().getDesiredType());
+        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getInjectionPoint().getAttributes().getQualifier());
+        Assert.assertTrue(nameEdge.getLabel().getInjectionPoint().getAttributes().getAttributes().isEmpty());
         
         Assert.assertTrue(string.getLabel() instanceof InstanceSatisfaction);
         Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel()).getInstance());

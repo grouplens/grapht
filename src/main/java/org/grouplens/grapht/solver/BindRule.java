@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht;
+package org.grouplens.grapht.solver;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -24,7 +24,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
@@ -40,7 +39,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class BindRule implements Externalizable {
+public class BindRule implements Externalizable {
     // "final"
     private Satisfaction satisfaction;
     private boolean terminateChain;
@@ -128,9 +127,9 @@ class BindRule implements Externalizable {
         return satisfaction;
     }
     
-    public Desire apply(Desire desire, InjectSPI spi) {
+    public Desire apply(Desire desire) {
         if (satisfaction != null) {
-            return spi.desire(desire.getInjectionPoint(), satisfaction);
+            return desire.restrict(satisfaction);
         } else {
             return desire.restrict(implType);
         }

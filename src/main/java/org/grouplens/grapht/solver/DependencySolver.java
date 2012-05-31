@@ -249,13 +249,12 @@ public class DependencySolver {
         graph.addNode(newNode);
         graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.getRight()));
         
-        InjectionContext newContext = context.push(resolved.getLeft(), desire.getInjectionPoint().getAttributes());
         for (Desire d: resolved.getLeft().getDependencies()) {
             // complete the sub graph for the given desire
             // - the call to resolveFully() is responsible for adding the dependency edges
             //   so we don't need to process the returned node
             logger.debug("Attempting to satisfy dependency {} of {}", d, resolved.getLeft());
-            resolveFully(d, newNode, graph, newContext);
+            resolveFully(d, newNode, graph, context.push(resolved.getLeft(), desire.getInjectionPoint().getAttributes()));
         }
     }
     
@@ -285,6 +284,9 @@ public class DependencySolver {
             }
             
             // FIXME: handle deferred binding results
+            // FIXME: I can clean this up
+            // FIXME: prevent cycles if an already visited desire appears again
+            //  - is this the responsibility of the BindingFunction or not?
             
             // update the context
             context = context.push(currentDesire);

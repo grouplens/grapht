@@ -68,4 +68,14 @@ public interface Desire extends Serializable {
      * @return A restricted Desire
      */
     Desire restrict(Class<?> type);
+    
+    /**
+     * Return a new Desire that restricts the type of this desire to the erased
+     * type of the satisfaction. The returned Desire will also be instantiable
+     * and return the provided satisfaction from {@link #getSatisfaction()}.
+     * 
+     * @param satisfaction The satisfaction to restrict this desire to
+     * @return A restricted and satisfied desire
+     */
+    Desire restrict(Satisfaction satisfaction);
 }

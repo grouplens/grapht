@@ -23,8 +23,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
-import org.grouplens.grapht.util.Pair;
 import org.junit.Test;
 
 public class ContextChainTest {

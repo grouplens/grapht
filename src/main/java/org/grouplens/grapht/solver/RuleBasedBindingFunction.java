@@ -1,4 +1,4 @@
-package org.grouplens.grapht;
+package org.grouplens.grapht.solver;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,16 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.solver.BindingFunction;
-import org.grouplens.grapht.solver.BindingResult;
-import org.grouplens.grapht.solver.InjectionContext;
-import org.grouplens.grapht.solver.MultipleBindingsException;
-import org.grouplens.grapht.solver.SolverException;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
@@ -32,20 +26,24 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class RuleBasedBindingFunction implements BindingFunction {
+public class RuleBasedBindingFunction implements BindingFunction {
     private static final String APPLIED_RULES = "APPLIED_BIND_RULES";
     
     private static final Logger logger = LoggerFactory.getLogger(RuleBasedBindingFunction.class);
     
-    private final InjectSPI spi;
     private final Map<ContextChain, Collection<BindRule>> rules;
     
-    public RuleBasedBindingFunction(InjectSPI spi, Map<ContextChain, Collection<BindRule>> rules) {
-        Preconditions.notNull("spi", spi);
+    public RuleBasedBindingFunction(Map<ContextChain, Collection<BindRule>> rules) {
         Preconditions.notNull("rules", rules);
         
-        this.spi = spi;
-        this.rules = new HashMap<ContextChain, Collection<BindRule>>(rules);
+        this.rules = Collections.unmodifiableMap(new HashMap<ContextChain, Collection<BindRule>>(rules));
+    }
+    
+    /**
+     * @return The rules used by this BindingFunction
+     */
+    public Map<ContextChain, Collection<BindRule>> getRules() {
+        return rules;
     }
     
     @Override
@@ -100,7 +98,7 @@ class RuleBasedBindingFunction implements BindingFunction {
             appliedRules.add(selectedRule);
             
             logger.debug("Applying rule: {} to desire: {}", selectedRule, desire);
-            return new BindingResult(selectedRule.apply(desire, spi), false, selectedRule.terminatesChain());
+            return new BindingResult(selectedRule.apply(desire), false, selectedRule.terminatesChain());
         }
         
         // No rule to apply, so return null to delegate to the next binding function

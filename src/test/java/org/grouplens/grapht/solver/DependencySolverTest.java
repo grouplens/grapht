@@ -36,11 +36,9 @@ import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.MockBindRule;
 import org.grouplens.grapht.spi.MockContextMatcher;
 import org.grouplens.grapht.spi.MockDesire;
 import org.grouplens.grapht.spi.MockQualifierMatcher;
@@ -49,7 +47,7 @@ import org.grouplens.grapht.spi.Satisfaction;
 import org.junit.Test;
 
 public class DependencySolverTest {
-    private DependencySolver createSolver(Map<ContextChain, Collection<? extends BindRule>> rules) {
+    private DependencySolver createSolver(Map<ContextChain, Collection<BindRule>> rules) {
         InjectorConfiguration config = new MockInjectorConfiguration(null, rules);
         return new DependencySolver(config, 100);
     }
@@ -65,7 +63,7 @@ public class DependencySolverTest {
         Satisfaction sat = new MockSatisfaction(A.class, new ArrayList<Desire>());
         Desire desire = new MockDesire(sat);
 
-        DependencySolver r = createSolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        DependencySolver r = createSolver(new HashMap<ContextChain, Collection<BindRule>>());
         r.resolve(desire);
         Assert.assertEquals(1 + 1, r.getGraph().getNodes().size()); // add one for synthetic root
         
@@ -83,7 +81,7 @@ public class DependencySolverTest {
         Satisfaction rootSat = new MockSatisfaction(A.class, Arrays.asList(depDesire));
         Desire rootDesire = new MockDesire(rootSat);
         
-        DependencySolver r = createSolver(new HashMap<ContextChain, Collection<? extends BindRule>>());
+        DependencySolver r = createSolver(new HashMap<ContextChain, Collection<BindRule>>());
         r.resolve(rootDesire);
         
         Node<Satisfaction> rootNode = getRoot(r, rootDesire);
@@ -103,7 +101,7 @@ public class DependencySolverTest {
         Satisfaction root = new MockSatisfaction(A.class, Arrays.asList(d1));
         Desire rootDesire = new MockDesire(root);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
@@ -129,7 +127,7 @@ public class DependencySolverTest {
         Desire d3 = new MockDesire(dep);
         Satisfaction root = new MockSatisfaction(A.class, Arrays.asList(d1));
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
@@ -161,7 +159,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire(s3);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2)));
@@ -211,7 +209,7 @@ public class DependencySolverTest {
         Desire b3 = new MockDesire(r4);
         Desire ob3 = new MockDesire(or4);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(dr1, br1),
                                    new MockBindRule(dr2, br2)));
@@ -257,7 +255,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(r2);
         Desire ob1 = new MockDesire(or2);
 
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1)));
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
@@ -289,7 +287,7 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(r3);
         Desire ob2 = new MockDesire(or3);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1)));
         // for this test, A is farther than B so b2 should be selected over ob2
@@ -336,7 +334,7 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(r3);
         Desire ob2 = new MockDesire(or3);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1)));
         // for this test, AB is longer than A so b2 is selected over ob2
@@ -381,7 +379,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(r2);
         Desire ob1 = new MockDesire(or2);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         // for this test, A is more specific than default, so b2 is selected
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, ob1)));
@@ -421,7 +419,7 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(sd2);
         Desire b3 = new MockDesire(sd3);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2),
@@ -465,7 +463,7 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(sd1);
         Desire b3 = new MockDesire(sd1);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2),
@@ -504,7 +502,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire(s3);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2)));
@@ -560,7 +558,7 @@ public class DependencySolverTest {
         Desire b5 = new MockDesire(s6);
         Desire b6 = new MockDesire(s7);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1), // d1 -> s2
                                    new MockBindRule(d2, b1), // d2 -> s2
@@ -651,7 +649,7 @@ public class DependencySolverTest {
         
         // configure bindings so that s1 and s2 cycle for a couple of iterations
         // until the context s2/s2 is reached, then switches to os2
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2)));
@@ -720,7 +718,7 @@ public class DependencySolverTest {
         
         // configure bindings so that d1 has two solutions, but 1 is only active
         // within a Bp context (which is not possible in this case)
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1)));
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(Bp.class))),
@@ -752,7 +750,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         
         // configure bindings so that s1:d1->d1, d1->b1
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1)));
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
@@ -790,7 +788,7 @@ public class DependencySolverTest {
         Desire dap = new MockDesire(sap);
         
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
                                    new MockBindRule(d1, new MockDesire(sb)),
@@ -842,7 +840,7 @@ public class DependencySolverTest {
         Desire dap = new MockDesire(sap);
         
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
                                    new MockBindRule(d1, new MockDesire(sb)),
@@ -896,7 +894,7 @@ public class DependencySolverTest {
         Desire da = new MockDesire(sa);
         Desire dd = new MockDesire(sd);
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
                                    new MockBindRule(d1, new MockDesire(sb)),
@@ -937,7 +935,7 @@ public class DependencySolverTest {
         Desire dd = new MockDesire(sd);
         
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(a1, new MockDesire(sd)),
                                    new MockBindRule(d1, new MockDesire(sbp)),
@@ -984,7 +982,7 @@ public class DependencySolverTest {
         Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1));
         
         // configure bindings so that d1->d1 so binding fails
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d1)));
         
@@ -1006,7 +1004,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire(s1);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(d2, b2)));
@@ -1027,7 +1025,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire ob1 = new MockDesire(s3);
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1), 
                                    new MockBindRule(d1, ob1)));
@@ -1045,7 +1043,7 @@ public class DependencySolverTest {
         Desire d3 = new MockDesire();
         
         Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1));
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, d2), 
                                    new MockBindRule(d2, d3)));
@@ -1064,7 +1062,7 @@ public class DependencySolverTest {
         Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1));
         
         Desire b2 = new MockDesire();
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d2, b2)));
 
@@ -1084,7 +1082,7 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire();
         
-        Map<ContextChain, Collection<? extends BindRule>> bindings = new HashMap<ContextChain, Collection<? extends BindRule>>();
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.asList(new MockBindRule(d1, b1),
                                    new MockBindRule(b1, b2))); 

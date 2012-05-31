@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
+import org.grouplens.grapht.solver.RuleBasedBindingFunction;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
@@ -186,7 +188,7 @@ public class BindingFunctionBuilder implements Cloneable {
     }
     
     public BindingFunction getFunction(RuleSet set) {
-        return new RuleBasedBindingFunction(spi, getMap(set));
+        return new RuleBasedBindingFunction(getMap(set));
     }
     
     void addBindRule(RuleSet set, ContextChain context, BindRule rule) {

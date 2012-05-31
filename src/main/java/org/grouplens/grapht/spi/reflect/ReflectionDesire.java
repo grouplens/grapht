@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
@@ -167,6 +168,11 @@ public class ReflectionDesire implements Desire, Externalizable {
     @Override
     public Desire restrict(Class<?> type) {
         return new ReflectionDesire(type, injectPoint, satisfaction);
+    }
+    
+    @Override
+    public Desire restrict(Satisfaction satis) {
+        return new ReflectionDesire(satis.getErasedType(), injectPoint, (ReflectionSatisfaction) satis);
     }
 
     @Override

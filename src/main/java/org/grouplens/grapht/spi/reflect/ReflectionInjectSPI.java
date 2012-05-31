@@ -27,7 +27,6 @@ import javax.inject.Provider;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 
@@ -50,11 +49,6 @@ public class ReflectionInjectSPI implements InjectSPI {
         return new ReflectionDesire(new SimpleInjectionPoint(qualifier, type, nullable));
     }
     
-    @Override
-    public Desire desire(InjectionPoint inject, @Nullable Satisfaction satisfaction) {
-        return new ReflectionDesire(inject.getErasedType(), inject, (ReflectionSatisfaction) satisfaction);
-    }
-
     @Override
     public QualifierMatcher match(Class<? extends Annotation> qualifier) {
         return Qualifiers.match(qualifier);
