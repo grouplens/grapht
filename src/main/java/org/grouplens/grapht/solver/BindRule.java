@@ -116,17 +116,6 @@ public class BindRule implements Externalizable {
         return qualifier;
     }
     
-    /**
-     * @return The source type matched by this bind rule
-     */
-    public Class<?> getSourceType() {
-        return sourceType;
-    }
-    
-    public Satisfaction getSatisfaction() {
-        return satisfaction;
-    }
-    
     public Desire apply(Desire desire) {
         if (satisfaction != null) {
             return desire.restrict(satisfaction);

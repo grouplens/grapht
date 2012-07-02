@@ -40,8 +40,12 @@ public class MockDesire implements Desire {
     }
     
     public MockDesire(Satisfaction satisfaction) {
-        this((satisfaction == null ? Void.class : satisfaction.getErasedType()), 
-             satisfaction, null);
+        this(satisfaction, null);
+    }
+    
+    public MockDesire(Satisfaction satisfaction, Annotation qualifier) {
+        this((satisfaction == null ? Void.class : satisfaction.getErasedType()),
+             satisfaction, qualifier);
     }
     
     public MockDesire(Class<?> desiredType, Satisfaction satisfaction, Annotation qualifier) {

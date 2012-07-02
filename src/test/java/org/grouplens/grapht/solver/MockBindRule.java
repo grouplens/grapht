@@ -21,8 +21,9 @@ package org.grouplens.grapht.solver;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.grouplens.grapht.spi.BindRule;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.MockQualifierMatcher;
+import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
  * MockBindRule is a simple implementation of BindRule where the matching
@@ -31,7 +32,7 @@ import org.grouplens.grapht.spi.Desire;
  * 
  * @author Michael Ludwig
  */
-public class MockBindRule implements BindRule {
+public class MockBindRule extends BindRule {
     private static final long serialVersionUID = 1L;
     
     private final Map<Desire, Desire> bindings;
@@ -65,12 +66,22 @@ public class MockBindRule implements BindRule {
     }
 
     @Override
-    public int getWeight() {
-        return 0;
-    }
-
-    @Override
     public boolean terminatesChain() {
         return terminate;
+    }
+    
+    @Override
+    public QualifierMatcher getQualifier() {
+        return MockQualifierMatcher.any();
+    }
+    
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return this == o;
     }
 }
