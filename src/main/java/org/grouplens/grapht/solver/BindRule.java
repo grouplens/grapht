@@ -30,12 +30,9 @@ import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 /**
- * BindRule is an abstract implementation of BindRule. It is a partial
- * function from desires to desires. Its matching logic only depends on the
- * source type and Qualifier of the rule, and not what the function produces. A
- * BindRule will only match a desire if the desire's desired type
- * equals the source type, and only if the desire's Qualifier inherits from the
- * Qualifier of the bind rule.
+ * BindRule is a partial function from desire to desire that acts as a binding.
+ * The {@link RuleBasedBindingFunction} takes a collection of BindRules grouped
+ * into their activating contexts to form a {@link BindingFunction}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
@@ -50,10 +47,8 @@ public class BindRule implements Externalizable {
         
     /**
      * Create a bind rule that matches a desire when the desired type equals
-     * <tt>sourceType</tt> and the desire's qualifier inherits from
-     * <tt>qualifier</tt>. <tt>weight</tt> is an integer value that specifies
-     * the priority between matching bind rules. Lower weights have a higher
-     * priority.
+     * <tt>sourceType</tt> and the desire's qualifier matches <tt>qualifier</tt>
+     * .
      * 
      * @param sourceType The source type this bind rule matches
      * @param satisfaction The Satisfaction used by applied desires

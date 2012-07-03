@@ -25,6 +25,8 @@ import java.util.List;
 
 import javax.inject.Provider;
 
+import org.grouplens.grapht.Injector;
+
 
 /**
  * A concrete type. It has a set of dependencies which must be satisfied in
@@ -63,12 +65,22 @@ public interface Satisfaction extends Serializable {
     Class<?> getErasedType();
 
     /**
+     * <p>
      * Create a provider from this satisfaction.
-     *
+     * <p>
+     * If the details of the Satisfaction require instantiation (e.g. a class or
+     * provider class satisfaction), the returned provider should be a new
+     * instance, and it should perform no memoization of its own. Caching is the
+     * purview of {@link Injector} implementations.
+     * <p>
+     * If the satisfaction is configured to use specific instances, this rule is
+     * obviously void.
+     * 
      * @param dependencies A function mapping desires to providers of their
-     *                     instances.
-     * @return A provider of new instances of the type specified by this satisfaction,
-     *         instantiated using the specified dependency mapping.
+     *            instances.
+     * @return A provider of new instances of the type specified by this
+     *         satisfaction, instantiated using the specified dependency
+     *         mapping.
      */
     Provider<?> makeProvider(ProviderSource dependencies);
 

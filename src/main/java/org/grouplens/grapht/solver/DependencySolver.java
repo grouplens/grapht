@@ -28,10 +28,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
-import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
@@ -39,44 +36,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * FIXME Update the docs to match BindingFunctions
  * DependencySolver is a utility for resolving Desires into a dependency graph,
  * where nodes are shared when permitted by a Satisfaction's dependency
  * configuration. It supports qualified and context-aware injection, and
  * just-in-time injection if the type has an injectable constructor.
  * <p>
- * For more details on context management, see {@link ContextChain},
- * {@link ContextMatcher}, and {@link QualifierMatcher}. The DependencySolver
- * uses the context to activate and select BindRules. A number of rules are used
- * to order applicable BindRules and choose the best. When any of these rules
- * rely on the current dependency context, the deepest node in the context has
- * the most influence. Put another way, if contexts were strings, they could be
- * ordered lexicographically from the right to the left.
- * <p>
- * When selecting BindRules to apply to a Desire, BindRules are ordered by the
- * following rules:
- * <ol>
- * <li>Context closeness - BindRules with a context matching chain closer to the
- * leaf nodes of the current dependency context are selected.</li>
- * <li>Context chain length - BindRules with a longer context chain are
- * selected.</li>
- * <li>Context chain type delta - BindRules are ordered by how close their
- * context matching chain is to the current dependency context, as determined by
- * {@link Satisfaction#contextComparator()}</li>
- * <li>Bind rule type delta - BindRules are lastly ordered by how well their
- * type matches a particular desire, as determined by
- * {@link Desire#ruleComparator()}.</li>
- * </ol>
- * <p>
- * A summary of these rules is that the best specified BindRule is applied,
- * where the context that the BindRule is activated in has more priority than
- * the type of the BindRule. If multiple rules tie for best, then the solver
- * fails with a checked exception.
+ * The conceptual binding function used by this solver is represented as a list
+ * of prioritized {@link BindingFunction functions}. Functions at the start of
+ * the list are used first, which makes it easy to provide custom functions that
+ * override default behaviors.
  * <p>
  * This solver does not support cyclic dependencies because of the possibility
  * that a context later on might activate a bind rule that breaks the cycle. To
  * ensure termination, it has a maximum context depth that is configurable.
  * 
+ * @see DefaultInjector
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class DependencySolver {
@@ -89,7 +63,7 @@ public class DependencySolver {
     private final Node<Satisfaction> root; // this has a null label
 
     /**
-     * Create a DependencySolver that uses the given configuration, and max
+     * Create a DependencySolver that uses the given functions, and max
      * depth of the dependency graph.
      * 
      * @param bindFunctions The binding functions that control desire bindings
@@ -254,7 +228,8 @@ public class DependencySolver {
             // - the call to resolveFully() is responsible for adding the dependency edges
             //   so we don't need to process the returned node
             logger.debug("Attempting to satisfy dependency {} of {}", d, resolved.getLeft());
-            resolveFully(d, newNode, graph, context.push(resolved.getLeft(), desire.getInjectionPoint().getAttributes()));
+            InjectionContext newContext = context.push(resolved.getLeft(), desire.getInjectionPoint().getAttributes());
+            resolveFully(d, newNode, graph, newContext);
         }
     }
     
@@ -266,37 +241,36 @@ public class DependencySolver {
             BindingResult binding = null;
             for (BindingFunction bf: functions) {
                 binding = bf.bind(context, currentDesire);
-                if (binding.getDesire() != null) {
-                    // found a binding, so don't continue to the next function
+                if (binding != null && !context.getPriorDesires().contains(binding.getDesire())) {
+                    // found a binding that hasn't been used before, 
+                    // so don't continue to the next function
                     break;
                 }
             }
             
-            if (binding == null || binding.getDesire() == null) {
-                if (currentDesire.isInstantiable()) {
-                    logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
-                    // push current desire so that its included in the list of resolved desires
-                    return Pair.of(currentDesire.getSatisfaction(), context.push(currentDesire).getPriorDesires());
-                } else {
-                    // desire cannot be satisfied
-                    throw new UnresolvableDependencyException(currentDesire, context);
-                }
-            }
-            
             // FIXME: handle deferred binding results
-            // FIXME: I can clean this up
-            // FIXME: prevent cycles if an already visited desire appears again
-            //  - is this the responsibility of the BindingFunction or not?
             
-            // update the context
-            context = context.push(currentDesire);
-            if (binding.terminates() && binding.getDesire().isInstantiable()) {
-                logger.info("Satisfied {} with {}", desire, binding.getDesire().getSatisfaction());
-                // push newly found desire so that its included in the list of resolved desires
-                return Pair.of(binding.getDesire().getSatisfaction(), context.push(binding.getDesire()).getPriorDesires());
+            boolean terminate = true;
+            if (binding != null) {
+                // update the prior desires
+                context.recordDesire(currentDesire);
+                currentDesire = binding.getDesire();
+                terminate = binding.terminates();
             }
             
-            currentDesire = binding.getDesire();
+            if (terminate && currentDesire.isInstantiable()) {
+                // push current desire so its included in resolved desires
+                // (if binding != null, the above block makes this the 2nd
+                //  desire pushed into the context, which is what we want)
+                context.recordDesire(currentDesire);
+                logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
+                return Pair.of(currentDesire.getSatisfaction(), context.getPriorDesires());
+            } else if (binding == null) {
+                // binding == null implies terminate stayed true, so 
+                // currentDesire is not instantiable, but there are no more
+                // bindings to follow, so it cannot be satisfied
+                throw new UnresolvableDependencyException(currentDesire, context);
+            }
         }
     }
 }

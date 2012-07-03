@@ -84,4 +84,9 @@ public class MockBindRule extends BindRule {
     public boolean equals(Object o) {
         return this == o;
     }
+    
+    @Override
+    public String toString() {
+        return getClass() + "@" + Integer.toHexString(System.identityHashCode(this));
+    }
 }

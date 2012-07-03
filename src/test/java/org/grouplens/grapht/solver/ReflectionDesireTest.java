@@ -126,25 +126,28 @@ public class ReflectionDesireTest {
     }
     
     private ReflectionDesire getDefaultDesire(Object methodOrCtorParam, List<ReflectionDesire>  desires) throws SolverException {
+        BindingResult result = null;
         for (ReflectionDesire d: desires) {
             if (methodOrCtorParam instanceof Method) {
                 if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                     SetterInjectionPoint sp = (SetterInjectionPoint) (d.getInjectionPoint());
                     if (sp.getMember().equals(methodOrCtorParam)) {
-                        return (ReflectionDesire) new DefaultDesireBindingFunction(new ReflectionInjectSPI()).bind(new InjectionContext(), d).getDesire();
+                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI()).bind(new InjectionContext(), d);
+                        break;
                     }
                 }
             } else { // assume its an Integer
                 if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                     ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) (d.getInjectionPoint());
                     if (((Integer) methodOrCtorParam).intValue() == cp.getParameterIndex()) {
-                        return (ReflectionDesire) new DefaultDesireBindingFunction(new ReflectionInjectSPI()).bind(new InjectionContext(), d).getDesire();
+                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI()).bind(new InjectionContext(), d);
+                        break;
                     }
                 }
             }
         }
         
-        return null;
+        return (result == null ? null : (ReflectionDesire) result.getDesire());
     }
     
     public static class A { }
