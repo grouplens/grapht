@@ -59,8 +59,8 @@ public class DependencySolver {
     private final int maxDepth;
     private final List<BindingFunction> functions;
     
-    private final Graph<Satisfaction, Desire> graph;
-    private final Node<Satisfaction> root; // this has a null label
+    private final Graph<Pair<Satisfaction, CachePolicy>, Desire> graph;
+    private final Node<Pair<Satisfaction, CachePolicy>> root; // this has a null label
 
     /**
      * Create a DependencySolver that uses the given functions, and max
@@ -81,8 +81,8 @@ public class DependencySolver {
         this.functions = bindFunctions;
         this.maxDepth = maxDepth;
         
-        graph = new Graph<Satisfaction, Desire>();
-        root = new Node<Satisfaction>(null);
+        graph = new Graph<Pair<Satisfaction, CachePolicy>, Desire>();
+        root = new Node<Pair<Satisfaction, CachePolicy>>(null);
         graph.addNode(root);
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
@@ -91,14 +91,14 @@ public class DependencySolver {
     /**
      * @return The resolved dependency graph
      */
-    public Graph<Satisfaction, Desire> getGraph() {
+    public Graph<Pair<Satisfaction, CachePolicy>, Desire> getGraph() {
         return graph;
     }
     
     /**
      * @return The root node of the graph, with a null label
      */
-    public Node<Satisfaction> getRootNode() {
+    public Node<Pair<Satisfaction, CachePolicy>> getRootNode() {
         return root;
     }
     
@@ -113,8 +113,8 @@ public class DependencySolver {
         logger.info("Resolving desire: {}", desire);
         
         try {
-            Graph<Satisfaction, List<Desire>> tree = new Graph<Satisfaction, List<Desire>>();
-            Node<Satisfaction> treeRoot = new Node<Satisfaction>(null); // set label to null to identify it
+            Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> tree = new Graph<Pair<Satisfaction, CachePolicy>, List<Desire>>();
+            Node<Pair<Satisfaction, CachePolicy>> treeRoot = new Node<Pair<Satisfaction, CachePolicy>>(null); // set label to null to identify it
             tree.addNode(treeRoot);
 
             resolveFully(desire, treeRoot, tree, new InjectionContext());
@@ -128,20 +128,20 @@ public class DependencySolver {
         }
     }
     
-    private void merge(Graph<Satisfaction, List<Desire>> fullTree, Node<Satisfaction> root) {
-        List<Node<Satisfaction>> sorted = fullTree.sort(root);
+    private void merge(Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> fullTree, Node<Pair<Satisfaction, CachePolicy>> root) {
+        List<Node<Pair<Satisfaction, CachePolicy>>> sorted = fullTree.sort(root);
         
         // Look up each node's dependencies in the merged graph, since we sorted
         // by reverse depth we can guarantee that dependencies have already
         // been merged
-        Map<Node<Satisfaction>, Node<Satisfaction>> mergedMap = new HashMap<Node<Satisfaction>, Node<Satisfaction>>();
-        for (Node<Satisfaction> toMerge: sorted) {
+        Map<Node<Pair<Satisfaction, CachePolicy>>, Node<Pair<Satisfaction, CachePolicy>>> mergedMap = new HashMap<Node<Pair<Satisfaction, CachePolicy>>, Node<Pair<Satisfaction, CachePolicy>>>();
+        for (Node<Pair<Satisfaction, CachePolicy>> toMerge: sorted) {
             if (toMerge == root) {
                 // This is the synthetic root of the tree.
                 // We replace the root node of the tree with the root in the merged graph.
-                for (Edge<Satisfaction, List<Desire>> oldEdge: fullTree.getOutgoingEdges(root)) {
+                for (Edge<Pair<Satisfaction, CachePolicy>, List<Desire>> oldEdge: fullTree.getOutgoingEdges(root)) {
                     Desire label = oldEdge.getLabel().get(0);
-                    Node<Satisfaction> newTail = mergedMap.get(oldEdge.getTail());
+                    Node<Pair<Satisfaction, CachePolicy>> newTail = mergedMap.get(oldEdge.getTail());
                     assert newTail != null; // like below, it must have been merged previously
                     
                     // there can be at most one edge with this label in the merged
@@ -149,37 +149,37 @@ public class DependencySolver {
                     // way to cause their configurations to diverge
                     if (graph.getOutgoingEdge(this.root, label) ==  null) {
                         // this desire is not in the merged graph
-                        graph.addEdge(new Edge<Satisfaction, Desire>(this.root, newTail, label));
+                        graph.addEdge(new Edge<Pair<Satisfaction, CachePolicy>, Desire>(this.root, newTail, label));
                     }
                 }
             } else {
                 // Get all previously seen dependency configurations for this satisfaction
-                Map<Set<Node<Satisfaction>>, Node<Satisfaction>> dependencyOptions = getDependencyOptions(toMerge.getLabel());
+                Map<Set<Node<Pair<Satisfaction, CachePolicy>>>, Node<Pair<Satisfaction, CachePolicy>>> dependencyOptions = getDependencyOptions(toMerge.getLabel());
                 
                 // Accumulate the set of dependencies for this node, filtering
                 // them through the previous level map
-                Set<Node<Satisfaction>> dependencies = new HashSet<Node<Satisfaction>>();
-                for (Edge<Satisfaction, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
+                Set<Node<Pair<Satisfaction, CachePolicy>>> dependencies = new HashSet<Node<Pair<Satisfaction, CachePolicy>>>();
+                for (Edge<Pair<Satisfaction, CachePolicy>, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
                     // levelMap converts from the tree to the merged graph
-                    Node<Satisfaction> filtered = mergedMap.get(dep.getTail());
+                    Node<Pair<Satisfaction, CachePolicy>> filtered = mergedMap.get(dep.getTail());
                     assert filtered != null; // all dependencies should have been merged previously
                     dependencies.add(filtered);
                 }
                 
-                Node<Satisfaction> newNode = dependencyOptions.get(dependencies);
+                Node<Pair<Satisfaction, CachePolicy>> newNode = dependencyOptions.get(dependencies);
                 if (newNode == null) {
                     // this configuration for the satisfaction has not been seen before
                     // - add it to merged graph, and connect to its dependencies
                     logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
                     
-                    newNode = new Node<Satisfaction>(toMerge.getLabel());
+                    newNode = new Node<Pair<Satisfaction, CachePolicy>>(toMerge.getLabel());
                     graph.addNode(newNode);
                     
-                    for (Edge<Satisfaction, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
+                    for (Edge<Pair<Satisfaction, CachePolicy>, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
                         // add the edge with the new head and the previously merged tail
                         // List<Desire> is downsized to the first Desire, too
-                        Node<Satisfaction> filtered = mergedMap.get(dep.getTail());
-                        graph.addEdge(new Edge<Satisfaction, Desire>(newNode, filtered, dep.getLabel().get(0)));
+                        Node<Pair<Satisfaction, CachePolicy>> filtered = mergedMap.get(dep.getTail());
+                        graph.addEdge(new Edge<Pair<Satisfaction, CachePolicy>, Desire>(newNode, filtered, dep.getLabel().get(0)));
                     }
                 } else {
                     logger.debug("Node already in merged graph for satisfaction: {}", toMerge.getLabel());
@@ -191,15 +191,15 @@ public class DependencySolver {
         }
     }
     
-    private Map<Set<Node<Satisfaction>>, Node<Satisfaction>> getDependencyOptions(Satisfaction satisfaction) {
+    private Map<Set<Node<Pair<Satisfaction, CachePolicy>>>, Node<Pair<Satisfaction, CachePolicy>>> getDependencyOptions(Pair<Satisfaction, CachePolicy> satisfaction) {
         // build a base map of dependency configurations to nodes for the provided
         // satisfaction, using the current state of the graph
-        Map<Set<Node<Satisfaction>>, Node<Satisfaction>> options = new HashMap<Set<Node<Satisfaction>>, Node<Satisfaction>>();
-        for (Node<Satisfaction> node: graph.getNodes()) {
+        Map<Set<Node<Pair<Satisfaction, CachePolicy>>>, Node<Pair<Satisfaction, CachePolicy>>> options = new HashMap<Set<Node<Pair<Satisfaction, CachePolicy>>>, Node<Pair<Satisfaction, CachePolicy>>>();
+        for (Node<Pair<Satisfaction, CachePolicy>> node: graph.getNodes()) {
             if (satisfaction.equals(node.getLabel())) {
                 // accumulate all of its immediate dependencies
-                Set<Node<Satisfaction>> option = new HashSet<Node<Satisfaction>>();
-                for (Edge<Satisfaction, Desire> edge: graph.getOutgoingEdges(node)) {
+                Set<Node<Pair<Satisfaction, CachePolicy>>> option = new HashSet<Node<Pair<Satisfaction, CachePolicy>>>();
+                for (Edge<Pair<Satisfaction, CachePolicy>, Desire> edge: graph.getOutgoingEdges(node)) {
                     option.add(edge.getTail());
                 }
                 options.put(option, node);
@@ -208,7 +208,8 @@ public class DependencySolver {
         return options;
     }
     
-    private void resolveFully(Desire desire, Node<Satisfaction> parent, Graph<Satisfaction, List<Desire>> graph, 
+    private void resolveFully(Desire desire, Node<Pair<Satisfaction, CachePolicy>> parent, 
+                              Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> graph, 
                               InjectionContext context) throws SolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.getTypePath().size() > maxDepth) {
@@ -216,25 +217,29 @@ public class DependencySolver {
         }
         
         // resolve the current node
-        Pair<Satisfaction, List<Desire>> resolved = resolve(desire, context);
-        Node<Satisfaction> newNode = new Node<Satisfaction>(resolved.getLeft());
+        //  - pair of pairs is a little awkward, but there's no triple type
+        Pair<Pair<Satisfaction, CachePolicy>, List<Desire>> resolved = resolve(desire, context);
+        Node<Pair<Satisfaction, CachePolicy>> newNode = new Node<Pair<Satisfaction, CachePolicy>>(resolved.getLeft());
         
         // add the node to the graph, and connect it with its parent
         graph.addNode(newNode);
-        graph.addEdge(new Edge<Satisfaction, List<Desire>>(parent, newNode, resolved.getRight()));
+        graph.addEdge(new Edge<Pair<Satisfaction, CachePolicy>, List<Desire>>(parent, newNode, resolved.getRight()));
         
-        for (Desire d: resolved.getLeft().getDependencies()) {
+        Satisfaction resolvedSatisfaction = resolved.getLeft().getLeft();
+        
+        for (Desire d: resolvedSatisfaction.getDependencies()) {
             // complete the sub graph for the given desire
             // - the call to resolveFully() is responsible for adding the dependency edges
             //   so we don't need to process the returned node
             logger.debug("Attempting to satisfy dependency {} of {}", d, resolved.getLeft());
-            InjectionContext newContext = context.push(resolved.getLeft(), desire.getInjectionPoint().getAttributes());
+            InjectionContext newContext = context.push(resolvedSatisfaction, desire.getInjectionPoint().getAttributes());
             resolveFully(d, newNode, graph, newContext);
         }
     }
     
-    private Pair<Satisfaction, List<Desire>> resolve(Desire desire, InjectionContext context) throws SolverException {
+    private Pair<Pair<Satisfaction, CachePolicy>, List<Desire>> resolve(Desire desire, InjectionContext context) throws SolverException {
         Desire currentDesire = desire;
+        CachePolicy policy = CachePolicy.NO_PREFERENCE;
         while(true) {
             logger.debug("Current desire: {}", currentDesire);
             
@@ -242,8 +247,7 @@ public class DependencySolver {
             for (BindingFunction bf: functions) {
                 binding = bf.bind(context, currentDesire);
                 if (binding != null && !context.getPriorDesires().contains(binding.getDesire())) {
-                    // found a binding that hasn't been used before, 
-                    // so don't continue to the next function
+                    // found a binding that hasn't been used before
                     break;
                 }
             }
@@ -256,19 +260,21 @@ public class DependencySolver {
                 context.recordDesire(currentDesire);
                 currentDesire = binding.getDesire();
                 terminate = binding.terminates();
+                
+                // upgrade policy if needed
+                if (binding.getCachePolicy().compareTo(policy) > 0) {
+                    policy = binding.getCachePolicy();
+                }
             }
             
             if (terminate && currentDesire.isInstantiable()) {
                 // push current desire so its included in resolved desires
-                // (if binding != null, the above block makes this the 2nd
-                //  desire pushed into the context, which is what we want)
                 context.recordDesire(currentDesire);
                 logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
-                return Pair.of(currentDesire.getSatisfaction(), context.getPriorDesires());
+                return Pair.of(Pair.of(currentDesire.getSatisfaction(), policy), 
+                               context.getPriorDesires());
             } else if (binding == null) {
-                // binding == null implies terminate stayed true, so 
-                // currentDesire is not instantiable, but there are no more
-                // bindings to follow, so it cannot be satisfied
+                // no more desires to process, it cannot be satisfied
                 throw new UnresolvableDependencyException(currentDesire, context);
             }
         }

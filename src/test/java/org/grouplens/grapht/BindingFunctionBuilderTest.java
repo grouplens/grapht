@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.solver.BindRule;
+import org.grouplens.grapht.solver.CachePolicy;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -45,6 +46,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+// TODO Add test cases for shared() and unshared()
 public class BindingFunctionBuilderTest {
     private InjectSPI spi;
     
@@ -64,7 +66,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -81,7 +83,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(a), spi.matchAny(), true)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(a), CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -97,7 +99,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfyWithProvider(ProviderA.class), spi.matchAny(), true)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfyWithProvider(ProviderA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -114,7 +116,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfyWithProvider(pa), spi.matchAny(), true)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfyWithProvider(pa), CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -132,11 +134,11 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         expected.put(new ContextChain(Arrays.asList(spi.context(spi.matchAny(), TypeC.class))),
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeB.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         expected.put(new ContextChain(Arrays.asList(spi.context(spi.match(RoleD.class), TypeC.class))),
-                     Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeB.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -151,7 +153,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), spi.matchAny(), true)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -166,7 +168,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), spi.match(RoleD.class), false)));
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, spi.match(RoleD.class), false)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -181,7 +183,7 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
         expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                     Arrays.asList(new BindRule(String.class, spi.satisfy("hello world"), spi.match(Names.named("test1")), true)));
+                     Arrays.asList(new BindRule(String.class, spi.satisfy("hello world"), CachePolicy.NO_PREFERENCE, spi.match(Names.named("test1")), true)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
@@ -196,14 +198,14 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> explicit = new HashMap<ContextChain, Collection<BindRule>>();
         explicit.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                     Arrays.asList(new BindRule(TypeA.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(TypeA.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         Map<ContextChain, Collection<BindRule>> superTypes = new HashMap<ContextChain, Collection<BindRule>>();
         superTypes.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                       Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                       Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         Map<ContextChain, Collection<BindRule>> interTypes = new HashMap<ContextChain, Collection<BindRule>>();
         interTypes.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                       Arrays.asList(new BindRule(TypeB.class, spi.satisfy(TypeBp.class), spi.matchAny(), false),
-                                     new BindRule(TypeBp.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                       Arrays.asList(new BindRule(TypeB.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false),
+                                     new BindRule(TypeBp.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.SUPER_TYPES)).getRules());
@@ -222,13 +224,13 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> explicit = new HashMap<ContextChain, Collection<BindRule>>();
         explicit.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                     Arrays.asList(new BindRule(TypeB.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(TypeB.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         Map<ContextChain, Collection<BindRule>> interTypes = new HashMap<ContextChain, Collection<BindRule>>();
         interTypes.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                       Arrays.asList(new BindRule(TypeBp.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                       Arrays.asList(new BindRule(TypeBp.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         Map<ContextChain, Collection<BindRule>> superTypes = new HashMap<ContextChain, Collection<BindRule>>();
         superTypes.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                       Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                       Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.SUPER_TYPES)).getRules());
@@ -246,13 +248,13 @@ public class BindingFunctionBuilderTest {
         // expected
         Map<ContextChain, Collection<BindRule>> explicit = new HashMap<ContextChain, Collection<BindRule>>();
         explicit.put(new ContextChain(new ArrayList<ContextMatcher>()),
-                     Arrays.asList(new BindRule(TypeB.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                     Arrays.asList(new BindRule(TypeB.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         Map<ContextChain, Collection<BindRule>> interTypes = new HashMap<ContextChain, Collection<BindRule>>();
         interTypes.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                       Arrays.asList(new BindRule(TypeBp.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                       Arrays.asList(new BindRule(TypeBp.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         Map<ContextChain, Collection<BindRule>> superTypes = new HashMap<ContextChain, Collection<BindRule>>();
         superTypes.put(new ContextChain(new ArrayList<ContextMatcher>()), 
-                       Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeBp.class), spi.matchAny(), false)));
+                       Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
 
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.SUPER_TYPES)).getRules());

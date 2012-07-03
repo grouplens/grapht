@@ -30,6 +30,7 @@ import org.grouplens.grapht.util.Preconditions;
  */
 public class BindingResult {
     private final Desire desire;
+    private final CachePolicy policy;
     private final boolean defer;
     private final boolean terminate;
     
@@ -37,15 +38,19 @@ public class BindingResult {
      * Create a new result that wraps the given Desire.
      * 
      * @param desire The resultant desire from a BindingFunction
+     * @param policy The CachePolicy for this binding
      * @param defer True if the desire should be processed later (including any
      *            dependencies)
      * @param terminate True if no more functions should be applied to the
      *            desire
-     * @throws NullPointerException if desire is null
+     * @throws NullPointerException if desire or policy is null
      */
-    public BindingResult(Desire desire, boolean defer, boolean terminate) {
+    public BindingResult(Desire desire, CachePolicy policy, 
+                         boolean defer, boolean terminate) {
         Preconditions.notNull("desire", desire);
+        Preconditions.notNull("policy", policy);
         
+        this.policy = policy;
         this.desire = desire;
         this.defer = defer;
         this.terminate = terminate;
@@ -56,6 +61,13 @@ public class BindingResult {
      */
     public Desire getDesire() {
         return desire;
+    }
+    
+    /**
+     * @return The CachePolicy for this binding
+     */
+    public CachePolicy getCachePolicy() {
+        return policy;
     }
     
     /**

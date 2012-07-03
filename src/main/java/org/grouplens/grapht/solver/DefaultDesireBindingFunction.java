@@ -58,35 +58,36 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             DefaultDouble dfltDouble = annotType.getAnnotation(DefaultDouble.class);
             if (dfltDouble != null) {
                 return new BindingResult(desire.restrict(spi.satisfy(dfltDouble.value())),
-                                         false, true);
+                                         CachePolicy.NO_PREFERENCE, false, true);
             }
             DefaultInteger dfltInt = annotType.getAnnotation(DefaultInteger.class);
             if (dfltInt != null) {
                 return new BindingResult(desire.restrict(spi.satisfy(dfltInt.value())),
-                                         false, true);
+                                         CachePolicy.NO_PREFERENCE, false, true);
             }
             DefaultBoolean dfltBool = annotType.getAnnotation(DefaultBoolean.class);
             if (dfltBool != null) {
                 return new BindingResult(desire.restrict(spi.satisfy(dfltBool.value())),
-                                         false, true);
+                                         CachePolicy.NO_PREFERENCE, false, true);
             }
             DefaultString dfltStr = annotType.getAnnotation(DefaultString.class);
             if (dfltStr != null) {
                 return new BindingResult(desire.restrict(spi.satisfy(dfltStr.value())),
-                                         false, true);
+                                         CachePolicy.NO_PREFERENCE, false, true);
             }
             DefaultProvider provided = annotType.getAnnotation(DefaultProvider.class);
             if (provided != null) {
                 return new BindingResult(desire.restrict(spi.satisfyWithProvider(provided.value())),
-                                         false, true);
+                                         CachePolicy.NO_PREFERENCE, false, true);
             }
             DefaultImplementation impl = annotType.getAnnotation(DefaultImplementation.class);
             if (impl != null) {
                 if (Types.isInstantiable(impl.value())) {
                     return new BindingResult(desire.restrict(spi.satisfy(impl.value())),
-                                             false, false);
+                                             CachePolicy.NO_PREFERENCE, false, false);
                 } else {
-                    return new BindingResult(desire.restrict(impl.value()), false, false);
+                    return new BindingResult(desire.restrict(impl.value()), 
+                                             CachePolicy.NO_PREFERENCE, false, false);
                 }
             }
         }
@@ -96,15 +97,16 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         DefaultProvider provided = desire.getDesiredType().getAnnotation(DefaultProvider.class);
         if (provided != null) {
             return new BindingResult(desire.restrict(spi.satisfyWithProvider(provided.value())),
-                                     false, true);
+                                     CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultImplementation impl = desire.getDesiredType().getAnnotation(DefaultImplementation.class);
         if (impl != null) {
             if (Types.isInstantiable(impl.value())) {
                 return new BindingResult(desire.restrict(spi.satisfy(impl.value())),
-                                         false, false);
+                                         CachePolicy.NO_PREFERENCE, false, false);
             } else {
-                return new BindingResult(desire.restrict(impl.value()), false, false);
+                return new BindingResult(desire.restrict(impl.value()), 
+                                         CachePolicy.NO_PREFERENCE, false, false);
             }
         }
         

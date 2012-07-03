@@ -28,9 +28,11 @@ import java.util.Arrays;
 
 import javax.inject.Named;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.solver.CachePolicy;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.spi.Desire;
@@ -145,32 +147,32 @@ public class SerializationTest {
                                                                      new DefaultDesireBindingFunction(b.getSPI())), 100);
         solver.resolve(b.getSPI().desire(null, NamedType.class, false));
         
-        Graph<Satisfaction, Desire> g = solver.getGraph();
+        Graph<Pair<Satisfaction, CachePolicy>, Desire> g = solver.getGraph();
         write(g);
-        Graph<Satisfaction, Desire> read = read();
+        Graph<Pair<Satisfaction, CachePolicy>, Desire> read = read();
         
-        Node<Satisfaction> root = read.getNode(null);
+        Node<Pair<Satisfaction, CachePolicy>> root = read.getNode(null);
         Assert.assertEquals(1, read.getOutgoingEdges(root).size());
-        Edge<Satisfaction, Desire> rootEdge = read.getOutgoingEdges(root).iterator().next();
-        Node<Satisfaction> namedType = rootEdge.getTail();
+        Edge<Pair<Satisfaction, CachePolicy>, Desire> rootEdge = read.getOutgoingEdges(root).iterator().next();
+        Node<Pair<Satisfaction, CachePolicy>> namedType = rootEdge.getTail();
         
-        Assert.assertEquals(NamedType.class, namedType.getLabel().getErasedType());
+        Assert.assertEquals(NamedType.class, namedType.getLabel().getKey().getErasedType());
         Assert.assertEquals(NamedType.class, rootEdge.getLabel().getDesiredType());
-        Assert.assertEquals(rootEdge.getLabel().getSatisfaction(), namedType.getLabel());
+        Assert.assertEquals(rootEdge.getLabel().getSatisfaction(), namedType.getLabel().getKey());
         Assert.assertNull(rootEdge.getLabel().getInjectionPoint().getAttributes().getQualifier());
         Assert.assertTrue(rootEdge.getLabel().getInjectionPoint().getAttributes().getAttributes().isEmpty());
         
         Assert.assertEquals(1, read.getOutgoingEdges(namedType).size());
-        Edge<Satisfaction, Desire> nameEdge = read.getOutgoingEdges(namedType).iterator().next();
-        Node<Satisfaction> string = nameEdge.getTail();
+        Edge<Pair<Satisfaction, CachePolicy>, Desire> nameEdge = read.getOutgoingEdges(namedType).iterator().next();
+        Node<Pair<Satisfaction, CachePolicy>> string = nameEdge.getTail();
         
-        Assert.assertEquals(String.class, string.getLabel().getErasedType());
+        Assert.assertEquals(String.class, string.getLabel().getKey().getErasedType());
         Assert.assertEquals(String.class, nameEdge.getLabel().getDesiredType());
         Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getInjectionPoint().getAttributes().getQualifier());
         Assert.assertTrue(nameEdge.getLabel().getInjectionPoint().getAttributes().getAttributes().isEmpty());
         
-        Assert.assertTrue(string.getLabel() instanceof InstanceSatisfaction);
-        Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel()).getInstance());
+        Assert.assertTrue(string.getLabel().getKey() instanceof InstanceSatisfaction);
+        Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel().getKey()).getInstance());
     }
     
     @After

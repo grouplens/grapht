@@ -127,8 +127,8 @@ public interface InjectSPI {
     ContextMatcher context(QualifierMatcher qualifier, Class<?> type);
     
     /**
-     * Create a QualifierMatcher that matches the given annotation type. This annotation must
-     * be annotated with {@link javax.inject.Qualifier}.
+     * Create a QualifierMatcher that matches the given annotation type. This
+     * annotation must be annotated with {@link javax.inject.Qualifier}.
      * 
      * @param qualifier The qualifier annotation type
      * @return A QualifierMatcher matching the qualifier type

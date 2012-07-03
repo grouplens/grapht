@@ -37,14 +37,20 @@ public class MockBindRule extends BindRule {
     
     private final Map<Desire, Desire> bindings;
     private boolean terminate;
+    private CachePolicy policy;
     
     public MockBindRule() {
         bindings = new HashMap<Desire, Desire>();
+        policy = CachePolicy.NO_PREFERENCE;
     }
     
     public MockBindRule(Desire in, Desire out) {
         this();
         addMapping(in, out);
+    }
+    
+    public void setCachePolicy(CachePolicy policy) {
+        this.policy = policy;
     }
     
     public void setTerminatesChain(boolean terminate) {
@@ -53,6 +59,11 @@ public class MockBindRule extends BindRule {
     
     public void addMapping(Desire in, Desire out) {
         bindings.put(in, out);
+    }
+    
+    @Override
+    public CachePolicy getCachePolicy() {
+        return policy;
     }
     
     @Override

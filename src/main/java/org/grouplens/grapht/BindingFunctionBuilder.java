@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
@@ -76,7 +76,6 @@ public class BindingFunctionBuilder implements Cloneable {
     private final Map<ContextChain, Collection<BindRule>> manualRules;
     private final Map<ContextChain, Collection<BindRule>> intermediateRules; // "generated"
     private final Map<ContextChain, Collection<BindRule>> superRules; // "generated"
-
 
     /**
      * Create a new InjectorConfigurationBuilder that uses a
@@ -205,6 +204,12 @@ public class BindingFunctionBuilder implements Cloneable {
         defaultExcludes.remove(type);
     }
     
+    /**
+     * Return the built BindingFunction for the given RuleSet.
+     * 
+     * @param set
+     * @return
+     */
     public BindingFunction getFunction(RuleSet set) {
         return new RuleBasedBindingFunction(getMap(set));
     }

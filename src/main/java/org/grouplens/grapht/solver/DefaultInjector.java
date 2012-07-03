@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.inject.Provider;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.graph.Edge;
@@ -52,44 +53,74 @@ public class DefaultInjector implements Injector {
     
     private final InjectSPI spi;
     private final DependencySolver solver;
-    private final Map<Node<Satisfaction>, Provider<?>> providerCache;
+    private final Map<Node<Pair<Satisfaction, CachePolicy>>, Provider<?>> providerCache;
+    
+    private final CachePolicy defaultPolicy;
 
     /**
      * <p>
      * Create a new DefaultInjector. The created resolver will use a max
      * dependency depth of 100 to estimate if there are cycles in the dependency
-     * hierarchy.
+     * hierarchy. Bindings with a NO_PREFERENCE cache policy will be treated as
+     * MEMOIZED.
      * 
      * @param spi The InjectSPI to use
      * @param functions The BindingFunctions to use, ordered with highest
-     *            priority functions first
-     * @throws NullPointerException if spi or functions are null
+     *            priority function first
+     * @throws NullPointerException if spi or functions ar enull
      */
     public DefaultInjector(InjectSPI spi, BindingFunction... functions) {
-        this(spi, 100, functions);
+        this(spi, CachePolicy.MEMOIZE, functions);
+    }
+    
+    /**
+     * <p>
+     * Create a new DefaultInjector. The created resolver will use a max
+     * dependency depth of 100 to estimate if there are cycles in the dependency
+     * hierarchy. Bindings with a NO_PREFERENCE cache policy will use
+     * <tt>defaultPolicy</tt>.
+     * 
+     * @param spi The InjectSPI to use
+     * @param defaultPolicy The CachePolicy used in place of NO_PREFERENCE
+     * @param functions The BindingFunctions to use, ordered with highest
+     *            priority functions first
+     * @throws IllegalArgumentException if defaultPolicy is NO_PREFERENCE
+     * @throws NullPointerException if spi or functions are null
+     */
+    public DefaultInjector(InjectSPI spi, CachePolicy defaultPolicy, BindingFunction... functions) {
+        this(spi, defaultPolicy, 100, functions);
     }
 
     /**
      * <p>
      * Create a new DefaultInjector. <tt>maxDepth</tt> represents the maximum
      * depth of the dependency hierarchy before it is assume that there is a
-     * cycle. This constructor can be used to increase this depth in the event
-     * that configuration requires it, although for most purposes the default
-     * 100 should be sufficient.
+     * cycle. Bindings with a NO_PREFERENCE cache policy will use
+     * <tt>defaultPolicy</tt>.
+     * <p>
+     * This constructor can be used to increase this depth in the event that
+     * configuration requires it, although for most purposes the default 100
+     * should be sufficient.
      * 
-     * @param spi The InjectSPI to use * @param maxDepth The maximum depth of
-     *            the dependency hierarchy
+     * @param spi The InjectSPI to use
+     * @param defaultPolicy The CachePolicy used in place of NO_PREFERENCE
+     * @param maxDepth The maximum depth of the dependency hierarchy
      * @param functions The BindingFunctions to use, ordered with highest
      *            priority functions first
-     * @throws IllegalArgumentException if maxDepth is less than 1
+     * @throws IllegalArgumentException if maxDepth is less than 1, or if
+     *             defaultPolicy is NO_PREFERENCE
      * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectSPI spi, int maxDepth, BindingFunction... functions) {
+    public DefaultInjector(InjectSPI spi, CachePolicy defaultPolicy, int maxDepth, BindingFunction... functions) {
         Preconditions.notNull("spi", spi);
+        if (defaultPolicy.equals(CachePolicy.NO_PREFERENCE)) {
+            throw new IllegalArgumentException("Default CachePolicy cannot be NO_PREFERENCE");
+        }
         
         this.spi = spi;
+        this.defaultPolicy = defaultPolicy;
         solver = new DependencySolver(Arrays.asList(functions), maxDepth);
-        providerCache = new HashMap<Node<Satisfaction>, Provider<?>>();
+        providerCache = new HashMap<Node<Pair<Satisfaction, CachePolicy>>, Provider<?>>();
     }
     
     /**
@@ -110,7 +141,7 @@ public class DefaultInjector implements Injector {
         Desire desire = spi.desire(qualifier, type, false);
         
         // check if the desire is already in the graph
-        Edge<Satisfaction, Desire> resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
+        Edge<Pair<Satisfaction, CachePolicy>, Desire> resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
         
         // The edge is only non-null if getInstance() has been called before,
         // it may be present in the graph at a deeper node. If that's the case
@@ -126,17 +157,31 @@ public class DefaultInjector implements Injector {
         }
         
         // Check if the provider for the resolved node is in our cache
-        Node<Satisfaction> resolvedNode = resolved.getTail();
+        Node<Pair<Satisfaction, CachePolicy>> resolvedNode = resolved.getTail();
         return (T) getProvider(resolvedNode).get();
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Provider<?> getProvider(Node<Satisfaction> node) {
+    private Provider<?> getProvider(Node<Pair<Satisfaction, CachePolicy>> node) {
         Provider<?> cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
-            Provider<?> raw = node.getLabel().makeProvider(new DesireProviderMapper(node));
-            cached = new MemoizingProvider(raw);
+            Provider<?> raw = node.getLabel().getKey().makeProvider(new DesireProviderMapper(node));
+            
+            CachePolicy policy = node.getLabel().getValue();
+            if (policy.equals(CachePolicy.NO_PREFERENCE)) {
+                policy = defaultPolicy;
+            }
+            
+            if (policy.equals(CachePolicy.MEMOIZE)) {
+                // enforce memoization on providers for MEMOIZE policy
+                cached = new MemoizingProvider(raw);
+            } else {
+                // Satisfaction.makeProvider() returns providers that are expected
+                // to create new instances with each invocation
+                assert policy.equals(CachePolicy.NEW_INSTANCE);
+                cached = raw;
+            }
             providerCache.put(node, cached);
         }
         return cached;
@@ -160,16 +205,16 @@ public class DefaultInjector implements Injector {
     }
     
     private class DesireProviderMapper implements ProviderSource {
-        private final Node<Satisfaction> forNode;
+        private final Node<Pair<Satisfaction, CachePolicy>> forNode;
         
-        public DesireProviderMapper(Node<Satisfaction> forNode) {
+        public DesireProviderMapper(Node<Pair<Satisfaction, CachePolicy>> forNode) {
             this.forNode = forNode;
         }
         
         @Override
         public Provider<?> apply(Desire desire) {
-            Edge<Satisfaction, Desire> edge = solver.getGraph().getOutgoingEdge(forNode, desire);
-            Node<Satisfaction> dependency = edge.getTail();
+            Edge<Pair<Satisfaction, CachePolicy>, Desire> edge = solver.getGraph().getOutgoingEdge(forNode, desire);
+            Node<Pair<Satisfaction, CachePolicy>> dependency = edge.getTail();
             return getProvider(dependency);
         }
     }

@@ -44,6 +44,8 @@ public class BindRule implements Externalizable {
     private QualifierMatcher qualifier;
     private Class<?> sourceType;
     private Class<?> implType;
+    
+    private CachePolicy policy;
         
     /**
      * Create a bind rule that matches a desire when the desired type equals
@@ -52,19 +54,22 @@ public class BindRule implements Externalizable {
      * 
      * @param sourceType The source type this bind rule matches
      * @param satisfaction The Satisfaction used by applied desires
+     * @param policy The CachePolicy for nodes created by this bind rule
      * @param qualifier The Qualifier the bind rule applies to
      * @param terminateChain True if the bind rule is a terminating rule
-     * @throws NullPointerException if sourceType or satisfaction is null
+     * @throws NullPointerException if arguments are null
      */
-    public BindRule(Class<?> sourceType, Satisfaction satisfaction,
+    public BindRule(Class<?> sourceType, Satisfaction satisfaction, CachePolicy policy,
                     QualifierMatcher qualifier, boolean terminateChain) {
         Preconditions.notNull("source type", sourceType);
         Preconditions.notNull("satisfaction", satisfaction);
+        Preconditions.notNull("policy", policy);
         Preconditions.notNull("qualifier matcher", qualifier);
         
         this.qualifier = qualifier;
         this.satisfaction = satisfaction;
         this.implType = satisfaction.getErasedType();
+        this.policy = policy;
         this.sourceType = Types.box(sourceType);
         this.terminateChain = terminateChain;
         
@@ -79,19 +84,22 @@ public class BindRule implements Externalizable {
      * 
      * @param sourceType The source type this bind rule matches
      * @param implType The implementation type that is bound
+     * @param policy The CachePolicy for nodes created by this bind rule
      * @param qualifier The Qualifier the bind rule applies to
      * @param terminateChain True if the bind rule is a terminating rule
-     * @throws NullPointerException if sourceType or implType is null
+     * @throws NullPointerException if arguments are null
      */
-    public BindRule(Class<?> sourceType, Class<?> implType,
+    public BindRule(Class<?> sourceType, Class<?> implType, CachePolicy policy,
                     QualifierMatcher qualifier, boolean terminateChain) {
         Preconditions.notNull("source type", sourceType);
         Preconditions.notNull("implementation type", implType);
+        Preconditions.notNull("policy", policy);
         Preconditions.notNull("qualifier matcher", qualifier);
         
         this.qualifier = qualifier;
         this.satisfaction = null;
         this.implType = Types.box(implType);
+        this.policy = policy;
         this.sourceType = Types.box(sourceType);
         this.terminateChain = terminateChain;
         
@@ -111,6 +119,21 @@ public class BindRule implements Externalizable {
         return qualifier;
     }
     
+    /**
+     * @return The CachePolicy to use for satisfactions created with this rule
+     */
+    public CachePolicy getCachePolicy() {
+        return policy;
+    }
+    
+    /**
+     * Apply this BindRule to the given Desire, and return a restricted and
+     * possibly satisfied desire. It is assumed that {@link #matches(Desire)}
+     * returns true.
+     * 
+     * @param desire The desire that is input to this partial binding function
+     * @return The restricted desire
+     */
     public Desire apply(Desire desire) {
         if (satisfaction != null) {
             return desire.restrict(satisfaction);
@@ -119,10 +142,19 @@ public class BindRule implements Externalizable {
         }
     }
 
+    /**
+     * @return True if this should be the last bind rule applied to the desire
+     *         chain when attempting to find a satisfaction
+     */
     public boolean terminatesChain() {
         return terminateChain;
     }
     
+    /**
+     * @param desire The input desire
+     * @return True if this desire matches this BindRule and can be passed to
+     *         {@link #apply(Desire)}
+     */
     public boolean matches(Desire desire) {
         // bind rules match type by equality
         if (desire.getDesiredType().equals(sourceType)) {
@@ -144,6 +176,7 @@ public class BindRule implements Externalizable {
                r.implType.equals(implType) &&
                r.terminateChain == terminateChain &&
                r.qualifier.equals(qualifier) &&
+               r.policy.equals(policy) &&
                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction));
     }
     
@@ -155,6 +188,7 @@ public class BindRule implements Externalizable {
         result += 31 * result + sourceType.hashCode();
         result += 31 * result + implType.hashCode();
         result += 31 * result + qualifier.hashCode();
+        result += 31 * result + policy.hashCode();
 
         if (satisfaction != null) {
             result += 31 * result + satisfaction.hashCode(); 
@@ -176,6 +210,7 @@ public class BindRule implements Externalizable {
         
         satisfaction = (Satisfaction) in.readObject();
         qualifier = (QualifierMatcher) in.readObject();
+        policy = (CachePolicy) in.readObject();
         
         terminateChain = in.readBoolean();
     }
@@ -187,6 +222,7 @@ public class BindRule implements Externalizable {
         
         out.writeObject(satisfaction);
         out.writeObject(qualifier);
+        out.writeObject(policy);
 
         out.writeBoolean(terminateChain);
     }

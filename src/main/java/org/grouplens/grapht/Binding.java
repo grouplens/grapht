@@ -43,7 +43,7 @@ public interface Binding<T> {
      * Bindings to instances and {@link Provider Providers} are automatically
      * final bindings.
      * 
-     * @return This Binding
+     * @return A newly configured Binding
      */
     Binding<T> finalBinding();
 
@@ -58,7 +58,7 @@ public interface Binding<T> {
      * This will override any previous name or qualifier annotation.
      * 
      * @param qualifier The Qualifier that must match
-     * @return This Binding
+     * @return A newly configured Binding
      * @throws NullPointerException if qualifier is null
      */
     Binding<T> withQualifier(Class<? extends Annotation> qualifier);
@@ -71,7 +71,7 @@ public interface Binding<T> {
      * This will override any previous name or qualifier annotation.
      * 
      * @param annot The annotation instance to match
-     * @return This Binding
+     * @return A newly configured Binding
      * @throws NullPointerException if annot is null
      */
     Binding<T> withQualifier(Annotation annot);
@@ -84,7 +84,7 @@ public interface Binding<T> {
      * same type will still be preferred first when resolving a qualified
      * injection point.
      * 
-     * @return This binding
+     * @return A newly configured binding
      */
     Binding<T> unqualified();
 
@@ -95,9 +95,26 @@ public interface Binding<T> {
      * BindRules generated for them.
      * 
      * @param exclude The type to exclude from automated rule generation
-     * @return This Binding
+     * @return A newly configured Binding
      */
     Binding<T> exclude(Class<?> exclude);
+    
+    /**
+     * Configure the binding so that a shared instance is always used when
+     * satisfying matched injection points, effectively making it a singleton or
+     * memoized within its container.
+     * 
+     * @return A newly configured Binding
+     */
+    Binding<T> shared();
+    
+    /**
+     * Configure the binding so that new instances are always created when
+     * satisfying matched injection.
+     * 
+     * @return A newly configured binding
+     */
+    Binding<T> unshared();
 
     /**
      * <p>
@@ -114,8 +131,10 @@ public interface Binding<T> {
     void to(Class<? extends T> impl);
 
     /**
-     * Complete this binding by specifying an instance to use. This instance
-     * will be used to satisfy matched injection points.
+     * Complete this binding by specifying an instance to use. The instance will
+     * be used to satisfy matched injection points. Because the instance never
+     * changes, any cache policy assigned by {@link #shared()} or
+     * {@link #unshared()} is effectively ignored.
      * 
      * @param instance The instance to use
      */
