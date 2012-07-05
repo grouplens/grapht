@@ -21,6 +21,7 @@ package org.grouplens.grapht;
 import java.lang.annotation.Annotation;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
+import org.grouplens.grapht.solver.CachePolicy;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
@@ -41,6 +42,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  */
 public class InjectorBuilder implements Context {
     private final BindingFunctionBuilder builder;
+    private CachePolicy cachePolicy;
 
     /**
      * Create a new InjectorBuilder that automatically applies the given Modules
@@ -55,6 +57,24 @@ public class InjectorBuilder implements Context {
         for (Module m: modules) {
             applyModule(m);
         }
+        cachePolicy = CachePolicy.MEMOIZE;
+    }
+    
+    /**
+     * Set the default cache policy used by injectors created by this builder.
+     * 
+     * @param policy The default policy
+     * @return This builder
+     * @throws NullPointerException if policy is null
+     * @throws IllegalArgumentException if policy is NO_PREFERENCE
+     */
+    public InjectorBuilder setDefaultCachePolicy(CachePolicy policy) {
+        if (policy.equals(CachePolicy.NO_PREFERENCE)) {
+            throw new IllegalArgumentException("Cannot be NO_PREFERENCE");
+        }
+        
+        cachePolicy = policy;
+        return this;
     }
     
     @Override
@@ -95,7 +115,9 @@ public class InjectorBuilder implements Context {
     }
 
     public Injector build() {
-        return new DefaultInjector(builder.getSPI(), 
+        return new DefaultInjector(builder.getSPI(),
+                                   cachePolicy,
+                                   100,
                                    builder.getFunction(RuleSet.EXPLICIT),
                                    builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
                                    builder.getFunction(RuleSet.SUPER_TYPES),

@@ -46,13 +46,38 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-// TODO Add test cases for shared() and unshared()
 public class BindingFunctionBuilderTest {
     private InjectSPI spi;
     
     @Before
     public void setup() {
         spi = new ReflectionInjectSPI();
+    }
+    
+    @Test
+    public void testCachePolicy() throws Exception {
+        doCachePolicyTest(CachePolicy.MEMOIZE);
+        doCachePolicyTest(CachePolicy.NEW_INSTANCE);
+        doCachePolicyTest(CachePolicy.NO_PREFERENCE);
+    }
+    
+    private void doCachePolicyTest(CachePolicy expectedPolicy) throws Exception {
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        
+        if (expectedPolicy.equals(CachePolicy.MEMOIZE)) {
+            builder.getRootContext().bind(InterfaceA.class).shared().to(TypeA.class);
+        } else if (expectedPolicy.equals(CachePolicy.NEW_INSTANCE)) {
+            builder.getRootContext().bind(InterfaceA.class).unshared().to(TypeA.class);
+        } else {
+            builder.getRootContext().bind(InterfaceA.class).to(TypeA.class);
+        }
+        
+        // expected
+        Map<ContextChain, Collection<BindRule>> expected = new HashMap<ContextChain, Collection<BindRule>>();
+        expected.put(new ContextChain(new ArrayList<ContextMatcher>()), 
+                     Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), expectedPolicy, spi.matchAny(), false)));
+        
+        assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.getFunction(RuleSet.EXPLICIT)).getRules());
     }
     
     @Test

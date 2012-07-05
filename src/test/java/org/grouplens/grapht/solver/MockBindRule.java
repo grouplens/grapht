@@ -49,16 +49,19 @@ public class MockBindRule extends BindRule {
         addMapping(in, out);
     }
     
-    public void setCachePolicy(CachePolicy policy) {
+    public MockBindRule setCachePolicy(CachePolicy policy) {
         this.policy = policy;
+        return this;
     }
     
-    public void setTerminatesChain(boolean terminate) {
+    public MockBindRule setTerminatesChain(boolean terminate) {
         this.terminate = terminate;
+        return this;
     }
     
-    public void addMapping(Desire in, Desire out) {
+    public MockBindRule addMapping(Desire in, Desire out) {
         bindings.put(in, out);
+        return this;
     }
     
     @Override

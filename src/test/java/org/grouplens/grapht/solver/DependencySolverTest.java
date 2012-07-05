@@ -45,8 +45,6 @@ import org.grouplens.grapht.spi.MockSatisfaction;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.junit.Test;
 
-// TODO add tests to make sure that changing the cache policy of bind rules doesn't affect any merged state,
-// and that NO_PREFERENCE and NEW_INSTANCE nodes are separated
 public class DependencySolverTest {
     private DependencySolver createSolver(Map<ContextChain, Collection<BindRule>> rules) {
         return new DependencySolver(Arrays.<BindingFunction>asList(new RuleBasedBindingFunction(rules)), 100);
@@ -55,6 +53,41 @@ public class DependencySolverTest {
     // bypass synthetic root and return node that resolves the desire 
     private Node<Pair<Satisfaction, CachePolicy>> getRoot(DependencySolver r, Desire d) {
         return r.getGraph().getOutgoingEdge(r.getRootNode(), d).getTail();
+    }
+    
+    @Test
+    public void testCachePolicySuccess() throws Exception {
+        // Test that satisfactions formed with different cache policies 
+        // correctly restrict merging of nodes
+        Satisfaction sa = new MockSatisfaction(A.class, new ArrayList<Desire>());
+        Desire da = new MockDesire();
+        Satisfaction sb = new MockSatisfaction(B.class, Arrays.asList(da));
+        
+        Desire ra = new MockDesire(sa);
+        Desire rb = new MockDesire(sb);
+        
+        Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
+        bindings.put(new ContextChain(Arrays.<ContextMatcher>asList(new MockContextMatcher(B.class))), 
+                     Arrays.<BindRule>asList(new MockBindRule(da, ra).setCachePolicy(CachePolicy.MEMOIZE)));
+        bindings.put(new ContextChain(new ArrayList<ContextMatcher>()),
+                     Arrays.<BindRule>asList(new MockBindRule(da, ra).setCachePolicy(CachePolicy.NEW_INSTANCE)));
+        
+        DependencySolver r = createSolver(bindings);
+        r.resolve(rb);
+        r.resolve(da); // should create a single extra sa node with different cache policy
+        
+        Assert.assertEquals(3 + 1, r.getGraph().getNodes().size());
+        
+        Node<Pair<Satisfaction, CachePolicy>> bnode = getRoot(r, rb);
+        Assert.assertEquals(CachePolicy.NO_PREFERENCE, bnode.getLabel().getValue());
+        
+        Node<Pair<Satisfaction, CachePolicy>> adepnode = getNode(r.getGraph(), bnode, sa, da);
+        Assert.assertNotNull(adepnode);
+        Assert.assertEquals(CachePolicy.MEMOIZE, adepnode.getLabel().getValue());
+        
+        Node<Pair<Satisfaction, CachePolicy>> anode = getRoot(r, da);
+        Assert.assertNotSame(adepnode, anode);
+        Assert.assertEquals(CachePolicy.NEW_INSTANCE, anode.getLabel().getValue());
     }
     
     @Test

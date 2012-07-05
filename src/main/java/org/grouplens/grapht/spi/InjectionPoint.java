@@ -32,10 +32,6 @@ import javax.annotation.Nullable;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface InjectionPoint extends Serializable {
-    // FIXME does this type return a Provider or provided type,
-    // if it's provided type, how do we designate that?
-    // - I think its a Provider class, since that way the desire won't match
-    //   any configured bindings, and can have its own dependency later on
     /**
      * Return the type required to satisfy the injection point.
      * 

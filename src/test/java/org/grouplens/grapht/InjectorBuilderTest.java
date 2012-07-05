@@ -21,6 +21,7 @@ package org.grouplens.grapht;
 import javax.inject.Named;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.solver.CachePolicy;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
@@ -35,6 +36,102 @@ import org.junit.Test;
 // TODO add tests here or in ReflectionInjectionTest that verifies DefaultInjector
 // cache policy behavior
 public class InjectorBuilderTest {
+    
+    @Test
+    public void testNewInstanceCachePolicy() throws Exception {
+        // Test that setting the cache policy to NEW_INSTANCE 
+        // overrides default MEMOIZE behavior
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(InterfaceA.class).unshared().to(TypeA.class);
+        b.bind(InterfaceB.class).to(TypeB.class);
+        Injector i = b.build();
+        
+        InterfaceA a1 = i.getInstance(InterfaceA.class);
+        InterfaceA a2 = i.getInstance(InterfaceA.class);
+        InterfaceB b1 = i.getInstance(InterfaceB.class);
+        InterfaceB b2 = i.getInstance(InterfaceB.class);
+        
+        Assert.assertTrue(a1 instanceof TypeA);
+        Assert.assertTrue(a2 instanceof TypeA);
+        Assert.assertNotSame(a1, a2);
+        
+        Assert.assertTrue(b1 instanceof TypeB);
+        Assert.assertTrue(b2 instanceof TypeB);
+        Assert.assertSame(b1, b2);
+    }
+    
+    @Test
+    public void testMemoizeCachePolicy() throws Exception {
+        // Test that setting the cache policy to MEMOIZE
+        // overrides the default NEW_INSTANCE behavior
+        InjectorBuilder b = new InjectorBuilder();
+        b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
+        b.bind(InterfaceA.class).shared().to(TypeA.class);
+        b.bind(InterfaceB.class).to(TypeB.class);
+        Injector i = b.build();
+        
+        InterfaceA a1 = i.getInstance(InterfaceA.class);
+        InterfaceA a2 = i.getInstance(InterfaceA.class);
+        InterfaceB b1 = i.getInstance(InterfaceB.class);
+        InterfaceB b2 = i.getInstance(InterfaceB.class);
+        
+        Assert.assertTrue(a1 instanceof TypeA);
+        Assert.assertTrue(a2 instanceof TypeA);
+        Assert.assertSame(a1, a2);
+        
+        Assert.assertTrue(b1 instanceof TypeB);
+        Assert.assertTrue(b2 instanceof TypeB);
+        Assert.assertNotSame(b1, b2);
+    }
+    
+    @Test
+    public void testMemoizeDefaultCachePolicy() throws Exception {
+        // Test that using the default binding cache policy 
+        // correctly uses the default MEMOIZE policy of the injector
+        InjectorBuilder b = new InjectorBuilder();
+        b.setDefaultCachePolicy(CachePolicy.MEMOIZE);
+        b.bind(InterfaceA.class).to(TypeA.class);
+        b.bind(InterfaceB.class).to(TypeB.class);
+        Injector i = b.build();
+        
+        InterfaceA a1 = i.getInstance(InterfaceA.class);
+        InterfaceA a2 = i.getInstance(InterfaceA.class);
+        InterfaceB b1 = i.getInstance(InterfaceB.class);
+        InterfaceB b2 = i.getInstance(InterfaceB.class);
+        
+        Assert.assertTrue(a1 instanceof TypeA);
+        Assert.assertTrue(a2 instanceof TypeA);
+        Assert.assertSame(a1, a2);
+        
+        Assert.assertTrue(b1 instanceof TypeB);
+        Assert.assertTrue(b2 instanceof TypeB);
+        Assert.assertSame(b1, b2);
+    }
+    
+    @Test
+    public void testNewInstanceDefaultCachePolicy() throws Exception {
+        // Test that using the default binding cache policy 
+        // correctly uses the default MEMOIZE policy of the injector
+        InjectorBuilder b = new InjectorBuilder();
+        b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
+        b.bind(InterfaceA.class).to(TypeA.class);
+        b.bind(InterfaceB.class).to(TypeB.class);
+        Injector i = b.build();
+        
+        InterfaceA a1 = i.getInstance(InterfaceA.class);
+        InterfaceA a2 = i.getInstance(InterfaceA.class);
+        InterfaceB b1 = i.getInstance(InterfaceB.class);
+        InterfaceB b2 = i.getInstance(InterfaceB.class);
+        
+        Assert.assertTrue(a1 instanceof TypeA);
+        Assert.assertTrue(a2 instanceof TypeA);
+        Assert.assertNotSame(a1, a2);
+        
+        Assert.assertTrue(b1 instanceof TypeB);
+        Assert.assertTrue(b2 instanceof TypeB);
+        Assert.assertNotSame(b1, b2);        
+    }
+    
     @Test
     public void testInjectorBuilderWithAnnotatedBindings() throws Exception {
         // Test that injector building works as expected
