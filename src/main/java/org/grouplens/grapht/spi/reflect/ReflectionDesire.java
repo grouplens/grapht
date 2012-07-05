@@ -85,7 +85,7 @@ public class ReflectionDesire implements Desire, Externalizable {
     // all are "final"
     private Class<?> desiredType;
     private InjectionPoint injectPoint;
-    private ReflectionSatisfaction satisfaction;
+    private Satisfaction satisfaction;
 
     /**
      * Create a ReflectionDesire that immediately wraps the given
@@ -116,7 +116,7 @@ public class ReflectionDesire implements Desire, Externalizable {
      *             not assignable to the desired type
      */
     public ReflectionDesire(Class<?> desiredType, InjectionPoint injectPoint,
-                            ReflectionSatisfaction satisfaction) {
+                            Satisfaction satisfaction) {
         Preconditions.notNull("desired type", desiredType);
         Preconditions.notNull("injection point", injectPoint);
 
@@ -161,7 +161,7 @@ public class ReflectionDesire implements Desire, Externalizable {
     }
 
     @Override
-    public ReflectionSatisfaction getSatisfaction() {
+    public Satisfaction getSatisfaction() {
         return satisfaction;
     }
     
