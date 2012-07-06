@@ -21,9 +21,11 @@ package org.grouplens.grapht;
 import java.lang.annotation.Annotation;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
+import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.CachePolicy;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
+import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 /**
@@ -43,6 +45,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 public class InjectorBuilder implements Context {
     private final BindingFunctionBuilder builder;
     private CachePolicy cachePolicy;
+    private boolean enableProviderInjection;
 
     /**
      * Create a new InjectorBuilder that automatically applies the given Modules
@@ -58,6 +61,7 @@ public class InjectorBuilder implements Context {
             applyModule(m);
         }
         cachePolicy = CachePolicy.MEMOIZE;
+        enableProviderInjection = false;
     }
     
     /**
@@ -74,6 +78,18 @@ public class InjectorBuilder implements Context {
         }
         
         cachePolicy = policy;
+        return this;
+    }
+    
+    /**
+     * Set whether or not to enable provider injection support in the built
+     * Injectors.
+     * 
+     * @param enable True if the injector should support "provider injection"
+     * @return This builder
+     */
+    public InjectorBuilder setProviderInjectionEnabled(boolean enable) {
+        enableProviderInjection = enable;
         return this;
     }
     
@@ -115,12 +131,24 @@ public class InjectorBuilder implements Context {
     }
 
     public Injector build() {
-        return new DefaultInjector(builder.getSPI(),
-                                   cachePolicy,
-                                   100,
-                                   builder.getFunction(RuleSet.EXPLICIT),
-                                   builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
-                                   builder.getFunction(RuleSet.SUPER_TYPES),
-                                   new DefaultDesireBindingFunction(builder.getSPI()));
+        BindingFunction[] functions;
+        if (enableProviderInjection) {
+            functions = new BindingFunction[] { 
+                builder.getFunction(RuleSet.EXPLICIT),
+                builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
+                builder.getFunction(RuleSet.SUPER_TYPES),
+                new ProviderBindingFunction(builder.getSPI()), // insert extra provider injection
+                new DefaultDesireBindingFunction(builder.getSPI()) 
+            };
+        } else {
+            functions = new BindingFunction[] { 
+                builder.getFunction(RuleSet.EXPLICIT),
+                builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
+                builder.getFunction(RuleSet.SUPER_TYPES),
+                new DefaultDesireBindingFunction(builder.getSPI()) 
+            };
+        }
+        
+        return new DefaultInjector(builder.getSPI(), cachePolicy, 100, functions);
     }
 }
