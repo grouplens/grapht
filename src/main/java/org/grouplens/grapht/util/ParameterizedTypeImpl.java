@@ -28,4 +28,20 @@ class ParameterizedTypeImpl implements ParameterizedType {
     public Type getOwnerType() {
         return null;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ParameterizedType)) {
+            return false;
+        }
+        ParameterizedType t = (ParameterizedType) o;
+        return t.getRawType().equals(rawType) && 
+               t.getOwnerType() == null &&
+               Arrays.equals(arguments, t.getActualTypeArguments());
+    }
+    
+    @Override
+    public int hashCode() {
+        return rawType.hashCode() ^ Arrays.hashCode(arguments);
+    }
 }
