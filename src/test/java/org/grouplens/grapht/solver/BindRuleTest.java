@@ -19,20 +19,28 @@
 package org.grouplens.grapht.solver;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.MockInjectionPoint;
 import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
 import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
 import org.grouplens.grapht.spi.reflect.NullSatisfaction;
 import org.grouplens.grapht.spi.reflect.ProviderClassSatisfaction;
 import org.grouplens.grapht.spi.reflect.ProviderInstanceSatisfaction;
+import org.grouplens.grapht.spi.reflect.ReflectionContextMatcher;
 import org.grouplens.grapht.spi.reflect.ReflectionDesire;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
-import org.grouplens.grapht.spi.reflect.ReflectionSatisfaction;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.ProviderA;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
@@ -45,12 +53,36 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ReflectionBindRuleTest {
+public class BindRuleTest {
     private ReflectionInjectSPI spi;
     
     @Before
     public void setup() {
         spi = new ReflectionInjectSPI();
+    }
+    
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testContextMatcherComparator() throws Exception {
+        InjectSPI spi = new ReflectionInjectSPI();
+        ContextMatcher cm1 = new ReflectionContextMatcher(TypeB.class, spi.matchAny()); // type dist = 0, annot dist = 0
+        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, spi.match(RoleD.class)); // type dist = 1, annot dist = 0
+        ContextMatcher cm3 = new ReflectionContextMatcher(TypeA.class, spi.matchAny()); // type dist = 1, annot dist = 1
+        
+        List<ContextMatcher> cms = new ArrayList<ContextMatcher>();
+        cms.add(cm3);
+        cms.add(cm1);
+        cms.add(cm2);
+        
+        // grab this from the internals of RuleBasedBindingFunction
+        Class<?> comparatorType = Class.forName("org.grouplens.grapht.solver.RuleBasedBindingFunction$ContextMatcherComparator");
+        Constructor<?> ctor = comparatorType.getConstructor(Class.class);
+        ctor.setAccessible(true);
+        
+        Collections.sort(cms, (Comparator<ContextMatcher>) ctor.newInstance(TypeB.class));
+        Assert.assertEquals(cm1, cms.get(0));
+        Assert.assertEquals(cm2, cms.get(1));
+        Assert.assertEquals(cm3, cms.get(2));
     }
     
     @Test
@@ -135,8 +167,8 @@ public class ReflectionBindRuleTest {
     
     private void doNullableTest(boolean nullableDesire, boolean nullableSatisfaction, boolean expected) throws Exception {
         InjectionPoint injectPoint = new MockInjectionPoint(TypeA.class, nullableDesire);
-        ReflectionSatisfaction satisfaction = (nullableSatisfaction ? new NullSatisfaction(TypeA.class) 
-                                                                    : new ClassSatisfaction(TypeA.class));
+        Satisfaction satisfaction = (nullableSatisfaction ? new NullSatisfaction(TypeA.class) 
+                                                          : new ClassSatisfaction(TypeA.class));
         
         BindRule rule = new BindRule(TypeA.class, satisfaction, CachePolicy.NO_PREFERENCE, spi.matchAny(), true);
         ReflectionDesire desire = new ReflectionDesire(injectPoint);

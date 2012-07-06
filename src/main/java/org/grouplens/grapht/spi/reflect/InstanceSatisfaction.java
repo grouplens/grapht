@@ -30,6 +30,7 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 
 /**
@@ -39,7 +40,7 @@ import org.grouplens.grapht.util.Preconditions;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InstanceSatisfaction extends ReflectionSatisfaction implements Externalizable {
+public class InstanceSatisfaction implements Satisfaction, Externalizable {
     // "final"
     private Object instance;
 

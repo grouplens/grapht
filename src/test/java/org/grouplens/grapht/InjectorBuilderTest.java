@@ -30,10 +30,27 @@ import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
+import org.grouplens.grapht.spi.reflect.types.TypeD;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class InjectorBuilderTest {
+    @Test
+    public void testSimpleProviderInjection() throws Exception {
+        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        Injector i = b.build();
+        
+        TypeD d = i.getInstance(TypeD.class);
+        Assert.assertNotNull(d.getProvider());
+        
+        // assert that default configuration was used
+        TypeC c = d.getProvider().get();
+        Assert.assertEquals(5, c.getIntValue());
+        Assert.assertTrue(c.getInterfaceA() instanceof TypeB);
+        Assert.assertTrue(c.getTypeA() instanceof TypeB);
+        Assert.assertTrue(c.getInterfaceB() instanceof TypeB);
+        Assert.assertTrue(c.getTypeB() instanceof TypeB);
+    }
     
     @Test
     public void testNewInstanceCachePolicy() throws Exception {

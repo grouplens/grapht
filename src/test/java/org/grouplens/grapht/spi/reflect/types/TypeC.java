@@ -36,7 +36,7 @@ public class TypeC {
             CONSTRUCTOR = new ConstructorParameterInjectionPoint(TypeC.class.getConstructor(int.class), 0);
             INTERFACE_A = new SetterInjectionPoint(TypeC.class.getMethod("setRoleA", InterfaceA.class), 0);
             TYPE_A = new SetterInjectionPoint(TypeC.class.getMethod("setTypeA", TypeA.class), 0);
-            INTERFACE_B = new SetterInjectionPoint(TypeC.class.getMethod("setRoleE", InterfaceB.class), 0);
+            INTERFACE_B = new SetterInjectionPoint(TypeC.class.getMethod("setRoleD", InterfaceB.class), 0);
             TYPE_B = new SetterInjectionPoint(TypeC.class.getMethod("setTypeB", TypeB.class), 0);
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -69,7 +69,7 @@ public class TypeC {
     }
     
     @Inject
-    public void setRoleE(@RoleD InterfaceB b) {
+    public void setRoleD(@RoleD InterfaceB b) {
         // RoleE has no default type, but inherits from RoleD, which defaults to TypeB
         b1 = b;
     }

@@ -20,7 +20,6 @@ package org.grouplens.grapht.spi;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Provider;
@@ -34,9 +33,9 @@ import org.grouplens.grapht.Injector;
  * of {@link Type}.
  * <p>
  * Satisfactions are expected to provide a reasonable implementation of
- * {@link Object#equals(Object)} and {@link Object#hashCode()} so that they can be
- * de-duplicated, etc.
- *
+ * {@link Object#equals(Object)} and {@link Object#hashCode()} so that they can
+ * be de-duplicated, etc.
+ * 
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  */
 public interface Satisfaction extends Serializable {
@@ -83,12 +82,4 @@ public interface Satisfaction extends Serializable {
      *         mapping.
      */
     Provider<?> makeProvider(ProviderSource dependencies);
-
-    /**
-     * Create a Comparator that can be used to compare ContextMatchers that
-     * apply to this Satisfaction.
-     * 
-     * @return A comparator for context matchers for this satisfaction
-     */
-    Comparator<ContextMatcher> contextComparator();
 }

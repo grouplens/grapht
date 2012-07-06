@@ -172,7 +172,7 @@ public class ReflectionDesire implements Desire, Externalizable {
     
     @Override
     public Desire restrict(Satisfaction satis) {
-        return new ReflectionDesire(satis.getErasedType(), injectPoint, (ReflectionSatisfaction) satis);
+        return new ReflectionDesire(satis.getErasedType(), injectPoint, satis);
     }
 
     @Override
@@ -201,7 +201,7 @@ public class ReflectionDesire implements Desire, Externalizable {
         desiredType = Types.readClass(in);
         
         injectPoint = (InjectionPoint) in.readObject();
-        satisfaction = (ReflectionSatisfaction) in.readObject();
+        satisfaction = (Satisfaction) in.readObject();
     }
     
     @Override

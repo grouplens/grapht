@@ -20,7 +20,6 @@ package org.grouplens.grapht.spi;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Provider;
@@ -80,16 +79,6 @@ public class MockSatisfaction implements Satisfaction {
     @Override
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return provider;
-    }
-    
-    @Override
-    public Comparator<ContextMatcher> contextComparator() {
-        return new Comparator<ContextMatcher>() {
-            @Override
-            public int compare(ContextMatcher arg0, ContextMatcher arg1) {
-                return 0;
-            }
-        };
     }
 
     @SuppressWarnings("rawtypes")

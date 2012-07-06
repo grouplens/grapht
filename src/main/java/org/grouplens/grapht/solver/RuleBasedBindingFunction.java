@@ -35,7 +35,9 @@ import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.ReflectionContextMatcher;
 import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +62,7 @@ import org.slf4j.LoggerFactory;
  * <li>Context chain length - BindRules with a longer context chain are
  * selected.</li>
  * <li>Context chain type delta - BindRules are ordered by how close their
- * context matching chain is to the current dependency context, as determined by
- * {@link Satisfaction#contextComparator()}</li>
+ * context matching chain is to the current dependency context.</li>
  * <li>Bind rule type delta - BindRules are lastly ordered by how well their
  * type matches a particular desire, as determined by
  * {@link Desire#ruleComparator()}.</li>
@@ -204,7 +205,8 @@ public class RuleBasedBindingFunction implements BindingFunction {
                 
                 if (match1 && match2) {
                     // the chains apply to this node so we need to compare them
-                    int cmp = currentNode.getLeft().contextComparator().compare(m1, m2);
+                    Class<?> type = currentNode.getLeft().getErasedType();
+                    int cmp = new ContextMatcherComparator(type).compare(m1, m2);
                     if (cmp != 0) {
                         // one chain finally has a type delta difference, so the
                         // comparison of the chain equals the matcher comparison
@@ -277,6 +279,30 @@ public class RuleBasedBindingFunction implements BindingFunction {
             // or at least one of the chains was empty (that part is a little strange,
             // but we'll get correct results when we sort by context chain length next).
             return 0;
+        }
+    }
+    
+    private static class ContextMatcherComparator implements Comparator<ContextMatcher> {
+        private final Class<?> type;
+        
+        public ContextMatcherComparator(Class<?> type) {
+            this.type = type;
+        }
+        
+        @Override
+        public int compare(ContextMatcher o1, ContextMatcher o2) {
+            ReflectionContextMatcher cm1 = (ReflectionContextMatcher) o1;
+            ReflectionContextMatcher cm2 = (ReflectionContextMatcher) o2;
+            
+            // #1 - order by type distance, select the matcher that is closest
+            int td1 = Types.getTypeDistance(type, cm1.getMatchedType());
+            int td2 = Types.getTypeDistance(type, cm2.getMatchedType());
+            if (td1 != td2) {
+                return td1 - td2;
+            }
+            
+            // #2 - order by qualifier priority
+            return cm1.getMatchedQualifier().compareTo(cm2.getMatchedQualifier());
         }
     }
     

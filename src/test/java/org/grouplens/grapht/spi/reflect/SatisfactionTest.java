@@ -18,23 +18,18 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 
-import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.ProviderC;
-import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
@@ -42,7 +37,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ReflectionSatisfactionTest {
+public class SatisfactionTest {
     private InjectionPoint ctorProviderCIP;
     
     private Set<InjectionPoint> typeCInjectPoints;
@@ -64,7 +59,7 @@ public class ReflectionSatisfactionTest {
         providerCInjectPoints.add(ctorProviderCIP);
     }
     
-    private Set<InjectionPoint> getInjectionPoints(ReflectionSatisfaction s) {
+    private Set<InjectionPoint> getInjectionPoints(Satisfaction s) {
         Set<InjectionPoint> detected = new HashSet<InjectionPoint>();
         for (Desire d: s.getDependencies()) {
             detected.add(((ReflectionDesire) d).getInjectionPoint());
@@ -161,24 +156,6 @@ public class ReflectionSatisfactionTest {
         ProviderC instance = new ProviderC(10);
         Provider<?> provider = new ProviderInstanceSatisfaction(instance).makeProvider(new MockProviderSource());
         Assert.assertSame(instance, provider);
-    }
-    
-    @Test
-    public void testContextMatcherComparator() throws Exception {
-        InjectSPI spi = new ReflectionInjectSPI();
-        ContextMatcher cm1 = new ReflectionContextMatcher(TypeB.class, spi.matchAny()); // type dist = 0, annot dist = 0
-        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, spi.match(RoleD.class)); // type dist = 1, annot dist = 0
-        ContextMatcher cm3 = new ReflectionContextMatcher(TypeA.class, spi.matchAny()); // type dist = 1, annot dist = 1
-        
-        List<ContextMatcher> cms = new ArrayList<ContextMatcher>();
-        cms.add(cm3);
-        cms.add(cm1);
-        cms.add(cm2);
-        
-        Collections.sort(cms, new ClassSatisfaction(TypeB.class).contextComparator());
-        Assert.assertEquals(cm1, cms.get(0));
-        Assert.assertEquals(cm2, cms.get(1));
-        Assert.assertEquals(cm3, cms.get(2));
     }
     
     @Test

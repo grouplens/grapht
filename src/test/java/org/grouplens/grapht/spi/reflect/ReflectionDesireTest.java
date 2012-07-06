@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.solver;
+package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -25,6 +25,10 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.solver.BindingResult;
+import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
+import org.grouplens.grapht.solver.InjectionContext;
+import org.grouplens.grapht.solver.SolverException;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.MockInjectionPoint;
@@ -68,7 +72,7 @@ public class ReflectionDesireTest {
         // Test that the default desire for the setRoleE injection point in TypeC
         // defaults to TypeB.  This also tests qualifier default inheritence
         List<ReflectionDesire> desires = ReflectionDesire.getDesires(TypeC.class);
-        ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleE", InterfaceB.class), desires);
+        ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleD", InterfaceB.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
         Assert.assertEquals(qualifier(RoleD.class), dflt.getInjectionPoint().getAttributes());

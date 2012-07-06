@@ -47,6 +47,17 @@ import javax.inject.Provider;
  */
 public final class Types {
     private Types() {}
+    
+    /**
+     * Create a parameterized type wrapping the given class and type arguments.
+     * 
+     * @param type
+     * @param arguments
+     * @return
+     */
+    public static Type parameterizedType(Class<?> type, Type... arguments) {
+        return new ParameterizedTypeImpl(type, arguments);
+    }
 
     /**
      * Return the boxed version of the given type if the type is primitive.

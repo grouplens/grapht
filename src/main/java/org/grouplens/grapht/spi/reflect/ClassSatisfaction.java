@@ -29,6 +29,7 @@ import javax.inject.Provider;
 
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
@@ -39,7 +40,7 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ClassSatisfaction extends ReflectionSatisfaction implements Externalizable {    
+public class ClassSatisfaction implements Satisfaction, Externalizable {    
     // "final"
     private Class<?> type;
 
