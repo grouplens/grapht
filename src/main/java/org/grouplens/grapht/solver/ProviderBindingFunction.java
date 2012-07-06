@@ -1,14 +1,16 @@
 package org.grouplens.grapht.solver;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Provider;
 
-import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.ProviderSource;
@@ -57,7 +59,7 @@ public class ProviderBindingFunction implements BindingFunction {
                     Desire providedDesire = spi.desire(desire.getInjectionPoint().getAttributes().getQualifier(), 
                                                        providedType, desire.getInjectionPoint().isNullable());
                     // Satisfied JIT desire for this injection point
-                    Desire jitDesire = desire.restrict(new ProviderInjectionSatisfaction(providerType, providedDesire));
+                    Desire jitDesire = desire.restrict(new ProviderInjectionSatisfaction(providedDesire));
                     // Make sure to defer this binding since the single dependency
                     // on the provided type might very well create a cycle that deferred
                     // injection must break.
@@ -75,16 +77,10 @@ public class ProviderBindingFunction implements BindingFunction {
      * Satisfaction implementation that provides a Provider, and has a single
      * dependency on the provided type.
      */
-    private static class ProviderInjectionSatisfaction implements Satisfaction {
-        // FIXME: Must make this externalizable
-        // FIXME: To do that easily, parameterizedType really should be transient
-        // and get reconstructed from the providedDesire's type
-        // FIXME That requires a ParameterizedTypeImpl that we'll have to bring back
-        private final Type parameterizedType;
-        private final Desire providedDesire;
+    private static class ProviderInjectionSatisfaction implements Satisfaction, Externalizable {
+        private Desire providedDesire; // final
         
-        public ProviderInjectionSatisfaction(Type parameterizedType, Desire providedDesire) {
-            this.parameterizedType = parameterizedType;
+        public ProviderInjectionSatisfaction(Desire providedDesire) {
             this.providedDesire = providedDesire;
         }
         
@@ -95,7 +91,7 @@ public class ProviderBindingFunction implements BindingFunction {
 
         @Override
         public Type getType() {
-            return parameterizedType;
+            return Types.parameterizedType(Provider.class, providedDesire.getDesiredType());
         }
 
         @Override
@@ -111,11 +107,13 @@ public class ProviderBindingFunction implements BindingFunction {
         }
 
         @Override
-        public Comparator<ContextMatcher> contextComparator() {
-            // FIXME maybe this comparator logic really ought to be part
-            // of the SPI and satisfaction. That would allow a lot more
-            // composability
-            return null;
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeObject(providedDesire);
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            providedDesire = (Desire) in.readObject();
         }
     }
 }
