@@ -33,8 +33,6 @@ import org.grouplens.grapht.spi.reflect.types.TypeC;
 import org.junit.Assert;
 import org.junit.Test;
 
-// TODO add tests here or in ReflectionInjectionTest that verifies DefaultInjector
-// cache policy behavior
 public class InjectorBuilderTest {
     
     @Test
