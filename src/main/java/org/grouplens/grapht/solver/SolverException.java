@@ -21,6 +21,7 @@ package org.grouplens.grapht.solver;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.Satisfaction;
 
 /**
@@ -65,18 +66,18 @@ public class SolverException extends Exception {
         sb.append("  Prior desires:\n");
         for (Desire desire: ctx.getPriorDesires()) {
             sb.append("    ")
-              .append(format(desire))
+              .append(format(desire.getInjectionPoint().getAttributes(), desire.getDesiredType()))
               .append('\n');
         }
         
         return sb.toString();
     }
     
-    protected String format(Desire desire) {
-        return format(desire.getInjectionPoint().getAttributes(), desire.getInjectionPoint().getErasedType());
+    protected String format(InjectionPoint ip) {
+        return format(ip.getAttributes(), ip.getErasedType());
     }
 
-    private String format(Attributes attr, Class<?> type) {
+    protected String format(Attributes attr, Class<?> type) {
         String base = (attr.getQualifier() != null ? attr.getQualifier() + ":" : "");
         return base + type.getName();
     }

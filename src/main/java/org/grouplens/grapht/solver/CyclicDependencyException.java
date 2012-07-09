@@ -46,7 +46,7 @@ public class CyclicDependencyException extends SolverException {
     @Override
     public String getMessage() {
         return new StringBuilder("Unable to satisfy desire: ")
-            .append(format(desire))
+            .append(format(desire.getInjectionPoint()))
             .append('\n')
             .append("Reason: ")
             .append(super.getMessage())

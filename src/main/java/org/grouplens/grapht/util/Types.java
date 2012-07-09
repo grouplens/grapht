@@ -201,13 +201,13 @@ public final class Types {
             // first check for a constructor annotated with @Inject, 
             //  - this doesn't care how many we'll let the injector complain
             //    if there are more than one
-            for (Constructor<?> c: type.getConstructors()) {
+            for (Constructor<?> c: type.getDeclaredConstructors()) {
                 if (c.getAnnotation(Inject.class) != null) {
                     return true;
                 }
             }
             
-            // check if we only have the default constructor
+            // check if we only have the public default constructor
             if (type.getConstructors().length == 1 
                 && type.getConstructors()[0].getParameterTypes().length == 0) {
                 return true;

@@ -85,6 +85,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         T instance;
         try {
             logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
+            ctor.setAccessible(true);
             instance = ctor.newInstance(ctorArgs);
         } catch (Exception e) {
             throw new InjectionException(type, ctor, e);
@@ -112,6 +113,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         for (Method setter: settersAndArguments.keySet()) {
             try {
                 logger.trace("Invoking setter {} with arguments {}", setter, settersAndArguments.get(setter));
+                setter.setAccessible(true);
                 setter.invoke(instance, settersAndArguments.get(setter));
             } catch (Exception e) {
                 throw new InjectionException(type, setter, e);
@@ -136,7 +138,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         
         try {
             logger.debug("Using default constructor for {}", type);
-            return type.getConstructor();
+            return type.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             // this constructor is being invoked for a ClassSatisfaction or a 
             // ProviderClassSatisfaction, both of which assert that the type is

@@ -71,7 +71,7 @@ public class MultipleBindingsException extends SolverException {
     @Override
     public String getMessage() {
         return new StringBuilder("Too many choices for desire: ")
-            .append(format(desire))
+            .append(format(desire.getInjectionPoint()))
             .append('\n')
             .append(format(context))
             .toString();

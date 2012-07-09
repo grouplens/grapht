@@ -24,9 +24,13 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -57,7 +61,7 @@ public class ReflectionDesire implements Desire, Externalizable {
         List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
 
         boolean ctorFound = false;
-        for (Constructor<?> ctor: type.getConstructors()) {
+        for (Constructor<?> ctor: type.getDeclaredConstructors()) {
             if (ctor.getAnnotation(Inject.class) != null) {
                 if (!ctorFound) {
                     ctorFound = true;
@@ -71,13 +75,32 @@ public class ReflectionDesire implements Desire, Externalizable {
             }
         }
 
-        for (Method m: type.getMethods()) {
-            if (m.getAnnotation(Inject.class) != null) {
-                for (int i = 0; i < m.getParameterTypes().length; i++) {
-                    desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
+        // JSR 330 mandates that super class methods are injected first, so we
+        // collect method injection points into a separate list and then reverse
+        // it to get the ordering correct.
+        List<ReflectionDesire> methodDesires = new ArrayList<ReflectionDesire>();
+        // Must also keep track of methods overridden in the subtypes.
+        Set<Signature> visitedMethods = new HashSet<Signature>();
+        while(type != null) {
+            for (Method m: type.getDeclaredMethods()) {
+                Signature s = new Signature(m);
+                if (!visitedMethods.contains(s) && m.getAnnotation(Inject.class) != null) {
+                    // have not seen this signature, and its an injection point
+                    for (int i = 0; i < m.getParameterTypes().length; i++) {
+                        desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
+                    }
                 }
+                // always add signature, because a subclass without @Inject
+                // overrides any @Inject on the superclass's method declaration
+                visitedMethods.add(s);
             }
+            
+            type = type.getSuperclass();
         }
+        
+        // reverse ordering because we want super < sub, but we filled the other direction
+        Collections.reverse(methodDesires);
+        desires.addAll(methodDesires);
 
         return Collections.unmodifiableList(desires);
     }
@@ -210,5 +233,33 @@ public class ReflectionDesire implements Desire, Externalizable {
         
         out.writeObject(injectPoint);
         out.writeObject(satisfaction);
+    }
+    
+    /*
+     * Internal class to track a methods signature. Java's default reflection
+     * doesn't give us a convenient way to record just this information.
+     */
+    public static class Signature {
+        private final String name;
+        private final Type[] args;
+        
+        public Signature(Method m) {
+            name = m.getName();
+            args = m.getGenericParameterTypes();
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Signature)) {
+                return false;
+            }
+            Signature s = (Signature) o;
+            return s.name.equals(name) && Arrays.equals(args, s.args);
+        }
+        
+        @Override
+        public int hashCode() {
+            return name.hashCode() ^ Arrays.hashCode(args);
+        }
     }
 }

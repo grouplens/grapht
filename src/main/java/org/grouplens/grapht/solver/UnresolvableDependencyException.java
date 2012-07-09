@@ -53,7 +53,7 @@ public class UnresolvableDependencyException extends SolverException {
     @Override
     public String getMessage() {
         return new StringBuilder("Unable to satisfy desire: ")
-            .append(format(desire))
+            .append(format(desire.getInjectionPoint()))
             .append('\n')
             .append(format(context))
             .toString();
