@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.solver.BindRule;
-import org.grouplens.grapht.solver.CachePolicy;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.InjectSPI;

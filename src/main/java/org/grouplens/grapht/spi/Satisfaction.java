@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.grouplens.grapht.Injector;
 
@@ -62,6 +63,16 @@ public interface Satisfaction extends Serializable {
      * @return The class object for this satisfaction's type.
      */
     Class<?> getErasedType();
+    
+    /**
+     * Get the default cache policy for instances created by this satisfaction.
+     * In most cases this should be NO_PREFERENCE, but annotations such as
+     * {@link Singleton} can be used to specify a default. BindingFunctions are
+     * allowed to overrule the default cache policy.
+     * 
+     * @return The default cache policy if no function overrules it
+     */
+    CachePolicy getDefaultCachePolicy();
 
     /**
      * <p>

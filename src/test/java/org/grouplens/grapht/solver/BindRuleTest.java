@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;

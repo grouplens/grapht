@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,34 +76,48 @@ public class ReflectionDesire implements Desire, Externalizable {
                 }
             }
         }
-
+        
         // JSR 330 mandates that super class methods are injected first, so we
         // collect method injection points into a separate list and then reverse
         // it to get the ordering correct.
-        List<ReflectionDesire> methodDesires = new ArrayList<ReflectionDesire>();
+        List<ReflectionDesire> groupDesires = new ArrayList<ReflectionDesire>();
+        
         // Must also keep track of methods overridden in the subtypes.
         Set<Signature> visitedMethods = new HashSet<Signature>();
         while(type != null) {
             for (Method m: type.getDeclaredMethods()) {
                 Signature s = new Signature(m);
-                if (!visitedMethods.contains(s) && m.getAnnotation(Inject.class) != null) {
+                if (!visitedMethods.contains(s) && m.getAnnotation(Inject.class) != null
+                    && !Modifier.isStatic(m.getModifiers())) {
                     // have not seen this signature, and its an injection point
-                    for (int i = 0; i < m.getParameterTypes().length; i++) {
-                        desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
+                    if (m.getParameterTypes().length > 0) {
+                        for (int i = 0; i < m.getParameterTypes().length; i++) {
+                            groupDesires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
+                        }
+                    } else {
+                        // hack to invoke no-argument injectable methods required by JSR 330
+                        groupDesires.add(new ReflectionDesire(new NoArgumentInjectionPoint(m)));
                     }
                 }
                 // always add signature, because a subclass without @Inject
                 // overrides any @Inject on the superclass's method declaration
                 visitedMethods.add(s);
             }
+            for (Field f: type.getDeclaredFields()) {
+                if (f.getAnnotation(Inject.class) != null && !Modifier.isStatic(f.getModifiers())) {
+                    // have not seen this field
+                    groupDesires.add(new ReflectionDesire(new FieldInjectionPoint(f)));
+                }
+            }
             
             type = type.getSuperclass();
         }
         
-        // reverse ordering because we want super < sub, but we filled the other direction
-        Collections.reverse(methodDesires);
-        desires.addAll(methodDesires);
-
+        // after reversing this list, fields will be injected 
+        // before methods as required
+        Collections.reverse(groupDesires);
+        desires.addAll(groupDesires);
+        
         return Collections.unmodifiableList(desires);
     }
     
@@ -244,7 +260,18 @@ public class ReflectionDesire implements Desire, Externalizable {
         private final Type[] args;
         
         public Signature(Method m) {
-            name = m.getName();
+            int mods = m.getModifiers();
+            if (Modifier.isPublic(mods) || Modifier.isProtected(mods)) {
+                // method overrides depends solely on method name
+                name = m.getName();
+            } else if (Modifier.isPrivate(mods)) {
+                // method overrides depend on method name and class name
+                name = m.getName() + m.getDeclaringClass().getCanonicalName();
+            } else {
+                // method overrides depend on method name and package,
+                // since it is package-private
+                name = m.getName() + m.getDeclaringClass().getPackage().getName();
+            }
             args = m.getGenericParameterTypes();
         }
         
@@ -259,7 +286,7 @@ public class ReflectionDesire implements Desire, Externalizable {
         
         @Override
         public int hashCode() {
-            return name.hashCode() ^ Arrays.hashCode(args);
+            return (name.hashCode() ^ Arrays.hashCode(args));
         }
     }
 }

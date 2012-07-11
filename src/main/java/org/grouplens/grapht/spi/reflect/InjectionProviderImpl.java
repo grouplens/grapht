@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -91,32 +92,57 @@ public class InjectionProviderImpl<T> implements Provider<T> {
             throw new InjectionException(type, ctor, e);
         }
         
-        // complete injection by satisfying any setter method dependencies
-        Map<Method, Object[]> settersAndArguments = new HashMap<Method, Object[]>();
+        // satisfy dependencies in the order of the list, which was
+        // prepared to comply with JSR 330
+        Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
         for (ReflectionDesire d: desires) {
-            if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
+            if (d.getInjectionPoint() instanceof FieldInjectionPoint) {
+                FieldInjectionPoint fd = (FieldInjectionPoint) d.getInjectionPoint();
+                Object value = checkNull(fd, providers.apply(d).get());
+                Field field = fd.getMember();
+
+                try {
+                    logger.trace("Setting field {} with arguments {}", field, value);
+                    field.setAccessible(true);
+                    field.set(instance, value);
+                } catch (Exception e) {
+                    throw new InjectionException(type, fd.getMember(), e);
+                }
+            } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
+                // collect parameters before invoking
                 SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
-                Object[] args = settersAndArguments.get(sd.getMember());
-                
+                InjectionArgs args = settersAndArguments.get(sd.getMember());
+                Method setter = sd.getMember();
+
                 if (args == null) {
                     // first encounter of this method
-                    args = new Object[sd.getMember().getParameterTypes().length];
-                    settersAndArguments.put(sd.getMember(), args);
+                    args = new InjectionArgs(setter.getParameterTypes().length);
+                    settersAndArguments.put(setter, args);
                 }
                 
                 Provider<?> provider = providers.apply(d);
-                args[sd.getParameterIndex()] = checkNull(sd, provider.get());
-            }
-        }
-        
-        // invoke all completed setter methods
-        for (Method setter: settersAndArguments.keySet()) {
-            try {
-                logger.trace("Invoking setter {} with arguments {}", setter, settersAndArguments.get(setter));
-                setter.setAccessible(true);
-                setter.invoke(instance, settersAndArguments.get(setter));
-            } catch (Exception e) {
-                throw new InjectionException(type, setter, e);
+                args.set(sd.getParameterIndex(), checkNull(sd, provider.get()));
+                
+                if (args.isCompleted()) {
+                    // all parameters initialized, invoke the setter with all arguments
+                    try {
+                        logger.trace("Invoking setter {} with arguments {}", setter, args.arguments);
+                        setter.setAccessible(true);
+                        setter.invoke(instance, args.arguments);
+                    } catch (Exception e) {
+                        throw new InjectionException(type, setter, e);
+                    }
+                }
+            } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
+                // just invoke the method
+                Method method = ((NoArgumentInjectionPoint) d.getInjectionPoint()).getMember();
+                try {
+                    logger.trace("Invoking no-argument injection point {}", d.getInjectionPoint());
+                    method.setAccessible(true);
+                    method.invoke(instance);
+                } catch (Exception e) {
+                    throw new InjectionException(type, method, e);
+                }
             }
         }
         
@@ -154,6 +180,30 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                                          "Injection point is not annotated with @Nullable, but binding configuration provided a null value");
         } else {
             return value;
+        }
+    }
+    
+    private static class InjectionArgs {
+        private final Object[] arguments;
+        private final boolean[] injected;
+        
+        public InjectionArgs(int num) {
+            arguments = new Object[num];
+            injected = new boolean[num];
+        }
+        
+        public void set(int i, Object o) {
+            arguments[i] =o;
+            injected[i] = true;
+        }
+        
+        public boolean isCompleted() {
+            for (int i = 0; i < injected.length; i++) {
+                if (!injected[i]) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

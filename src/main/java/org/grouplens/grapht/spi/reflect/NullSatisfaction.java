@@ -27,10 +27,13 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
@@ -60,6 +63,11 @@ public class NullSatisfaction implements Satisfaction, Externalizable {
      * Constructor required by {@link Externalizable}.
      */
     public NullSatisfaction() { }
+    
+    @Override
+    public CachePolicy getDefaultCachePolicy() {
+        return (getErasedType().getAnnotation(Singleton.class) != null ? CachePolicy.MEMOIZE : CachePolicy.NO_PREFERENCE);
+    }
     
     @Override
     public List<? extends Desire> getDependencies() {

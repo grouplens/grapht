@@ -20,9 +20,7 @@ package org.grouplens.grapht.util;
 
 import java.io.IOException;
 import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -237,10 +235,10 @@ public final class Types {
     }
     
     /**
-     * Read in a Class from the given ObjectInputStream. This is only compatible
-     * with classes that were serialized with
-     * {@link #writeClass(ObjectOutputStream, Class)}. Although Class is
-     * Serializable, this guarantees a simple structure within a file.
+     * Read in a Class from the given ObjectInput. This is only compatible with
+     * classes that were serialized with
+     * {@link #writeClass(ObjectOutput, Class)}. Although Class is Serializable,
+     * this guarantees a simple structure within a file.
      * 
      * @param in The stream to read from
      * @return The next Class encoded in the stream
@@ -267,13 +265,13 @@ public final class Types {
     
     /**
      * <p>
-     * Write the Class to the given ObjectOutputStream. When the class type is
-     * not an array, its canonical name is written as a UTF string, and a false
-     * boolean to record that it's not an array. When it is an array type, the
-     * canonical name of its component type is written as a UTF string, and then
-     * a true boolean value.
+     * Write the Class to the given ObjectOutput. When the class type is not an
+     * array, its canonical name is written as a UTF string, and a false boolean
+     * to record that it's not an array. When it is an array type, the canonical
+     * name of its component type is written as a UTF string, and then a true
+     * boolean value.
      * <p>
-     * The class can be decoded by calling {@link #readClass(ObjectInputStream)}.
+     * The class can be decoded by calling {@link #readClass(ObjectInput)}.
      * 
      * @param out The stream to write to
      * @param cls The class type to encode
@@ -293,11 +291,11 @@ public final class Types {
     }
     
     /**
-     * Read in a Constructor from the given ObjectInputStream. This is only
-     * compatible with constructors serialized
-     * {@link #writeConstructor(ObjectOutputStream, Constructor)}. Because
-     * Constructor is not Serializable, this must be used instead of
-     * {@link ObjectInputStream#readObject()}.
+     * Read in a Constructor from the given ObjectInput. This is only compatible
+     * with constructors serialized
+     * {@link #writeConstructor(ObjectOutput, Constructor)}. Because Constructor
+     * is not Serializable, this must be used instead of
+     * {@link ObjectInput#readObject()}.
      * 
      * @param in The stream to read from
      * @return The next constructor encoded in the stream
@@ -323,14 +321,14 @@ public final class Types {
     
     /**
      * <p>
-     * Write the Constructor to the given ObjectOutputStream. Because
-     * Constructor is not Serializable, it is encoded to the stream as its
-     * declaring class, the number of parameters, and then the parameter classes
-     * in their defined order. All classes are written to the stream using
-     * {@link #writeClass(ObjectOutputStream, Class)}.
+     * Write the Constructor to the given ObjectOutput. Because Constructor is
+     * not Serializable, it is encoded to the stream as its declaring class, the
+     * number of parameters, and then the parameter classes in their defined
+     * order. All classes are written to the stream using
+     * {@link #writeClass(ObjectOutput, Class)}.
      * <p>
      * The constructor can be decoded by calling
-     * {@link #readConstructor(ObjectInputStream)}.
+     * {@link #readConstructor(ObjectInput)}.
      * 
      * @param out The output stream to write to
      * @param ctor The constructor to serialize
@@ -347,19 +345,17 @@ public final class Types {
     }
     
     /**
-     * Read in a Method from the given ObjectInputStream. This is only
-     * compatible with methods serialized
-     * {@link #writeMethod(ObjectOutputStream, Method)}. Because Method is not
-     * Serializable, this must be used instead of
-     * {@link ObjectInputStream#readObject()}.
+     * Read in a Method from the given ObjectInput. This is only compatible with
+     * methods serialized {@link #writeMethod(ObjectOutput, Method)}. Because
+     * Method is not Serializable, this must be used instead of
+     * {@link ObjectInput#readObject()}.
      * 
      * @param in The stream to read from
      * @return The next method encoded in the stream
-     * @throws IOException If an IO error occurs
+     * @throws IOException If an IO error occurs or if the method no longer
+     *             exists
      * @throws ClassNotFoundException if the declaring class of the method
      *             cannot be found at runtime
-     * @throws NoSuchMethodException if the method no longer exists in the
-     *             loaded class definition
      */
     public static Method readMethod(ObjectInput in) throws IOException, ClassNotFoundException {
         Class<?> declaring = readClass(in);
@@ -379,14 +375,13 @@ public final class Types {
     
     /**
      * <p>
-     * Write the Method to the given ObjectOutputStream. Because Method is not
+     * Write the Method to the given ObjectOutput. Because Method is not
      * Serializable, it is encoded to the stream as its declaring class, its
      * name as a UTF string, the number of parameters, and then the parameter
      * classes in their defined order. All classes are written to the stream
-     * using {@link #writeClass(ObjectOutputStream, Class)}.
+     * using {@link #writeClass(ObjectOutput, Class)}.
      * <p>
-     * The method can be decoded by calling
-     * {@link #readMethod(ObjectInputStream)}.
+     * The method can be decoded by calling {@link #readMethod(ObjectInput)}.
      * 
      * @param out The output stream to write to
      * @param m The method to serialize
@@ -401,6 +396,56 @@ public final class Types {
         for (int i = 0; i < args.length; i++) {
             writeClass(out, args[i]);
         }
+    }
+    
+    /**
+     * Read in a Field from the given ObjectInput. This is only compatible with
+     * methods serialized {@link #writeField(ObjectOutput, Field)}. Because
+     * Method is not Serializable, this must be used instead of
+     * {@link ObjectInput#readObject()}.
+     * 
+     * @param in The stream to read from
+     * @return The next field encoded in the stream
+     * @throws IOException If an IO error occurs or if the field no longer
+     *             exists
+     * @throws ClassNotFoundException if the declaring class of the field cannot
+     *             be found at runtime
+     */
+    public static Field readField(ObjectInput in) throws IOException, ClassNotFoundException {
+        Class<?> declaring = readClass(in);
+        String name = in.readUTF();
+        
+        Class<?> fieldType = readClass(in);
+        
+        Field f;
+        try {
+            f = declaring.getDeclaredField(name);
+            if (f.getType().equals(fieldType)) {
+                throw new IOException("Field type changed from " + fieldType + " to " + f.getType());
+            }
+            return f;
+        } catch (NoSuchFieldException e) {
+            throw new IOException("Field no longer exists", e);
+        }
+    }
+    
+    /**
+     * <p>
+     * Write the Field to the given ObjectOutput. Because Field is not
+     * Serializable, it is encoded to the stream as its declaring class, its
+     * name as a UTF string, and its type. All classes are written to the stream
+     * using {@link #writeClass(ObjectOutput, Class)}.
+     * <p>
+     * The method can be decoded by calling {@link #readField(ObjectInput)}.
+     * 
+     * @param out The output stream to write to
+     * @param f The field to serialize
+     * @throws IOException if an IO error occurs
+     */
+    public static void writeField(ObjectOutput out, Field f) throws IOException {
+        writeClass(out, f.getDeclaringClass());
+        out.writeUTF(f.getName());
+        writeClass(out, f.getType());
     }
     
     private static int hash(Class<?> type) {

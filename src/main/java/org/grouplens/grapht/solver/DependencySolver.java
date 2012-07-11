@@ -18,16 +18,19 @@
  */
 package org.grouplens.grapht.solver;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
@@ -61,6 +64,8 @@ public class DependencySolver {
     
     private final Graph<Pair<Satisfaction, CachePolicy>, Desire> graph;
     private final Node<Pair<Satisfaction, CachePolicy>> root; // this has a null label
+    
+    private final Queue<DeferredResult> deferredNodes;
 
     /**
      * Create a DependencySolver that uses the given functions, and max
@@ -80,6 +85,8 @@ public class DependencySolver {
         
         this.functions = bindFunctions;
         this.maxDepth = maxDepth;
+        
+        deferredNodes = new ArrayDeque<DeferredResult>();
         
         graph = new Graph<Pair<Satisfaction, CachePolicy>, Desire>();
         root = new Node<Pair<Satisfaction, CachePolicy>>(null);
@@ -113,12 +120,32 @@ public class DependencySolver {
         logger.info("Resolving desire: {}", desire);
         
         try {
-            Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> tree = new Graph<Pair<Satisfaction, CachePolicy>, List<Desire>>();
-            Node<Pair<Satisfaction, CachePolicy>> treeRoot = new Node<Pair<Satisfaction, CachePolicy>>(null); // set label to null to identify it
-            tree.addNode(treeRoot);
+            // should not have any nodes waiting to be processed at the start
+            assert deferredNodes.isEmpty();
+            
+            // before any deferred nodes are processed, we use a synthetic root
+            // and null original desire since nothing produced this root
+            deferredNodes.add(new DeferredResult(new Node<Pair<Satisfaction, CachePolicy>>(null), null, new InjectionContext()));
+            
+            while(!deferredNodes.isEmpty()) {
+                DeferredResult treeRoot = deferredNodes.poll();
+                
+                Map<Node<Pair<Satisfaction, CachePolicy>>, DeferredResult> toResolve = new HashMap<Node<Pair<Satisfaction,CachePolicy>>, DeferredResult>();
+                Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> tree = new Graph<Pair<Satisfaction, CachePolicy>, List<Desire>>();
+                tree.addNode(treeRoot.deferredNode);
 
-            resolveFully(desire, treeRoot, tree, new InjectionContext());
-            merge(tree, treeRoot);
+                if (treeRoot.deferredNode.getLabel() == null) {
+                    resolveFully(desire, treeRoot.deferredNode, tree, treeRoot.originalContext, toResolve);
+                } else {
+                    Satisfaction deferredSatisfaction = treeRoot.deferredNode.getLabel().getKey();
+                    for (Desire d: deferredSatisfaction.getDependencies()) {
+                        logger.debug("Attempting to resolve deferred dependency {} of {}", d, deferredSatisfaction);
+                        InjectionContext newContext = treeRoot.originalContext.push(deferredSatisfaction, treeRoot.originalDesire.getInjectionPoint().getAttributes());
+                        resolveFully(d, treeRoot.deferredNode, tree, newContext, toResolve);
+                    }
+                }
+                merge(tree, treeRoot.deferredNode, toResolve);
+            }
         } catch(SolverException e) {
             logger.error("Error while resolving: {}", e.getMessage());
             throw e;
@@ -128,7 +155,9 @@ public class DependencySolver {
         }
     }
     
-    private void merge(Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> fullTree, Node<Pair<Satisfaction, CachePolicy>> root) {
+    private void merge(Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> fullTree, 
+                       Node<Pair<Satisfaction, CachePolicy>> root,
+                       Map<Node<Pair<Satisfaction, CachePolicy>>, DeferredResult> defer) {
         List<Node<Pair<Satisfaction, CachePolicy>>> sorted = fullTree.sort(root);
         
         // Look up each node's dependencies in the merged graph, since we sorted
@@ -136,14 +165,14 @@ public class DependencySolver {
         // been merged
         Map<Node<Pair<Satisfaction, CachePolicy>>, Node<Pair<Satisfaction, CachePolicy>>> mergedMap = new HashMap<Node<Pair<Satisfaction, CachePolicy>>, Node<Pair<Satisfaction, CachePolicy>>>();
         for (Node<Pair<Satisfaction, CachePolicy>> toMerge: sorted) {
-            if (toMerge == root) {
+            if (toMerge == root && root.getLabel() == null) {
                 // This is the synthetic root of the tree.
                 // We replace the root node of the tree with the root in the merged graph.
                 for (Edge<Pair<Satisfaction, CachePolicy>, List<Desire>> oldEdge: fullTree.getOutgoingEdges(root)) {
                     Desire label = oldEdge.getLabel().get(0);
                     Node<Pair<Satisfaction, CachePolicy>> newTail = mergedMap.get(oldEdge.getTail());
                     assert newTail != null; // like below, it must have been merged previously
-                    
+
                     // there can be at most one edge with this label in the merged
                     // graph because this is at the root context, and there is no
                     // way to cause their configurations to diverge
@@ -170,18 +199,36 @@ public class DependencySolver {
                 if (newNode == null) {
                     // this configuration for the satisfaction has not been seen before
                     // - add it to merged graph, and connect to its dependencies
-                    logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
-                    
-                    newNode = new Node<Pair<Satisfaction, CachePolicy>>(toMerge.getLabel());
-                    graph.addNode(newNode);
-                    
+
+                    if (toMerge == root) {
+                        // non-cyclic deferred node from a prior resolution, so toMerge
+                        // is already in this graph (but had no edges, so it didn't
+                        // get identified correctly)
+                        newNode = toMerge;
+                        logger.debug("Linking deferred satisfaction to graph: {}", toMerge.getLabel());
+                    } else {
+                        // create a new node
+                        newNode = new Node<Pair<Satisfaction, CachePolicy>>(toMerge.getLabel());
+                        graph.addNode(newNode);
+                        logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
+                    }
+
                     for (Edge<Pair<Satisfaction, CachePolicy>, List<Desire>> dep: fullTree.getOutgoingEdges(toMerge)) {
                         // add the edge with the new head and the previously merged tail
                         // List<Desire> is downsized to the first Desire, too
                         Node<Pair<Satisfaction, CachePolicy>> filtered = mergedMap.get(dep.getTail());
                         graph.addEdge(new Edge<Pair<Satisfaction, CachePolicy>, Desire>(newNode, filtered, dep.getLabel().get(0)));
                     }
+
+                    // if the original node was in the defer queue, insert
+                    // merged node into the final queue
+                    if (defer.containsKey(toMerge)) {
+                        DeferredResult oldResult = defer.get(toMerge);
+                        deferredNodes.add(new DeferredResult(newNode, oldResult.originalDesire, oldResult.originalContext));
+                    }
                 } else {
+                    // note that if the original node was in the defer queue,
+                    // it does not get transfered to the final queue
                     logger.debug("Node already in merged graph for satisfaction: {}", toMerge.getLabel());
                 }
 
@@ -210,7 +257,8 @@ public class DependencySolver {
     
     private void resolveFully(Desire desire, Node<Pair<Satisfaction, CachePolicy>> parent, 
                               Graph<Pair<Satisfaction, CachePolicy>, List<Desire>> graph, 
-                              InjectionContext context) throws SolverException {
+                              InjectionContext context, 
+                              Map<Node<Pair<Satisfaction, CachePolicy>>, DeferredResult> defer) throws SolverException {
         // check context depth against max to detect likely dependency cycles
         if (context.getTypePath().size() > maxDepth) {
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
@@ -218,26 +266,30 @@ public class DependencySolver {
         
         // resolve the current node
         //  - pair of pairs is a little awkward, but there's no triple type
-        Pair<Pair<Satisfaction, CachePolicy>, List<Desire>> resolved = resolve(desire, context);
-        Node<Pair<Satisfaction, CachePolicy>> newNode = new Node<Pair<Satisfaction, CachePolicy>>(resolved.getLeft());
+        Resolution result = resolve(desire, context);
+        Node<Pair<Satisfaction, CachePolicy>> newNode = new Node<Pair<Satisfaction, CachePolicy>>(Pair.of(result.satisfaction, result.policy));
         
         // add the node to the graph, and connect it with its parent
         graph.addNode(newNode);
-        graph.addEdge(new Edge<Pair<Satisfaction, CachePolicy>, List<Desire>>(parent, newNode, resolved.getRight()));
+        graph.addEdge(new Edge<Pair<Satisfaction, CachePolicy>, List<Desire>>(parent, newNode, result.desires));
         
-        Satisfaction resolvedSatisfaction = resolved.getLeft().getLeft();
-        
-        for (Desire d: resolvedSatisfaction.getDependencies()) {
-            // complete the sub graph for the given desire
-            // - the call to resolveFully() is responsible for adding the dependency edges
-            //   so we don't need to process the returned node
-            logger.debug("Attempting to satisfy dependency {} of {}", d, resolved.getLeft());
-            InjectionContext newContext = context.push(resolvedSatisfaction, desire.getInjectionPoint().getAttributes());
-            resolveFully(d, newNode, graph, newContext);
+        if (result.deferDependencies) {
+            // push node onto deferred queue and skip its dependencies for now
+            logger.debug("Deferring dependencies of {}", result.satisfaction);
+            defer.put(newNode, new DeferredResult(newNode, desire, context));
+        } else {
+            for (Desire d: result.satisfaction.getDependencies()) {
+                // complete the sub graph for the given desire
+                // - the call to resolveFully() is responsible for adding the dependency edges
+                //   so we don't need to process the returned node
+                logger.debug("Attempting to satisfy dependency {} of {}", d, result.satisfaction);
+                InjectionContext newContext = context.push(result.satisfaction, desire.getInjectionPoint().getAttributes());
+                resolveFully(d, newNode, graph, newContext, defer);
+            }
         }
     }
     
-    private Pair<Pair<Satisfaction, CachePolicy>, List<Desire>> resolve(Desire desire, InjectionContext context) throws SolverException {
+    private Resolution resolve(Desire desire, InjectionContext context) throws SolverException {
         Desire currentDesire = desire;
         CachePolicy policy = CachePolicy.NO_PREFERENCE;
         while(true) {
@@ -252,14 +304,15 @@ public class DependencySolver {
                 }
             }
             
-            // FIXME: handle deferred binding results
-            
+            boolean defer = false;
             boolean terminate = true;
             if (binding != null) {
                 // update the prior desires
                 context.recordDesire(currentDesire);
                 currentDesire = binding.getDesire();
+                
                 terminate = binding.terminates();
+                defer = binding.isDeferred();
                 
                 // upgrade policy if needed
                 if (binding.getCachePolicy().compareTo(policy) > 0) {
@@ -271,12 +324,51 @@ public class DependencySolver {
                 // push current desire so its included in resolved desires
                 context.recordDesire(currentDesire);
                 logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
-                return Pair.of(Pair.of(currentDesire.getSatisfaction(), policy), 
-                               context.getPriorDesires());
+                
+                // update cache policy if the final type is marked as a singleton
+                if (policy.equals(CachePolicy.NO_PREFERENCE)) {
+                    policy = currentDesire.getSatisfaction().getDefaultCachePolicy();
+                }
+                
+                return new Resolution(currentDesire.getSatisfaction(), policy, context.getPriorDesires(), defer);
             } else if (binding == null) {
                 // no more desires to process, it cannot be satisfied
                 throw new UnresolvableDependencyException(currentDesire, context);
             }
+        }
+    }
+    
+    /*
+     * Result tuple for resolve(Desire, InjectionContext)
+     */
+    private static class Resolution {
+        private final Satisfaction satisfaction;
+        private final CachePolicy policy;
+        private final List<Desire> desires;
+        private final boolean deferDependencies;
+        
+        public Resolution(Satisfaction satisfaction, CachePolicy policy, 
+                          List<Desire> desires, boolean deferDependencies) {
+            this.satisfaction = satisfaction;
+            this.policy = policy;
+            this.desires = desires;
+            this.deferDependencies = deferDependencies;
+        }
+    }
+    
+    /*
+     * Deferred results tuple
+     */
+    private static class DeferredResult {
+        private final Desire originalDesire;
+        private final Node<Pair<Satisfaction, CachePolicy>> deferredNode; // deps haven't been processed yet
+        private final InjectionContext originalContext;
+        
+        public DeferredResult(Node<Pair<Satisfaction, CachePolicy>> deferredNode, 
+                              Desire originalDesire, InjectionContext originalContext) {
+            this.deferredNode = deferredNode;
+            this.originalContext = originalContext;
+            this.originalDesire = originalDesire;
         }
     }
 }

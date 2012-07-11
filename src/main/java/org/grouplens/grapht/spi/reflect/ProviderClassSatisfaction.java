@@ -26,7 +26,9 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
@@ -62,6 +64,11 @@ public class ProviderClassSatisfaction implements Satisfaction, Externalizable {
      * Constructor required by {@link Externalizable}.
      */
     public ProviderClassSatisfaction() { }
+    
+    @Override
+    public CachePolicy getDefaultCachePolicy() {
+        return (getErasedType().getAnnotation(Singleton.class) != null ? CachePolicy.MEMOIZE : CachePolicy.NO_PREFERENCE);
+    }
     
     /**
      * @return The Provider class that provides instances satisfying this

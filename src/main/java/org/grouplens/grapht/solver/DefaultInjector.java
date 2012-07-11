@@ -30,10 +30,12 @@ import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Node;
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.MemoizingProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,23 +187,6 @@ public class DefaultInjector implements Injector {
             providerCache.put(node, cached);
         }
         return cached;
-    }
-    
-    private class MemoizingProvider<T> implements Provider<T> {
-        private final Provider<T> raw;
-        private T cached;
-        
-        public MemoizingProvider(Provider<T> raw) {
-            this.raw = raw;
-        }
-        
-        @Override
-        public T get() {
-            if (cached == null) {
-                cached = raw.get();
-            }
-            return cached;
-        }
     }
     
     private class DesireProviderMapper implements ProviderSource {

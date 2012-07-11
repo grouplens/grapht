@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
@@ -164,23 +165,48 @@ public class InjectionPointTest {
     }
     
     @Test
+    public void testFieldInjectionPoints() throws Exception {
+        Field f1 = FieldType.class.getField("field");
+        FieldInjectionPoint p1 = new FieldInjectionPoint(f1);
+        
+        Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
+        expected.add(p1);
+        
+        Assert.assertEquals(expected, getInjectionPoints(FieldType.class));
+    }
+    
+    @Test
     public void testCombinedDesires() throws Exception {
         // create expected injection points
-        Constructor<BothTypes> ctor = BothTypes.class.getConstructor(Object.class, String.class);
+        Constructor<AllTypes> ctor = AllTypes.class.getConstructor(Object.class, String.class);
         ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
         ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
-        Method m1 = BothTypes.class.getMethod("setC", Object.class);
-        Method m2 = BothTypes.class.getMethod("setD", String.class);
-        SetterInjectionPoint p3 = new SetterInjectionPoint(m1, 0);
-        SetterInjectionPoint p4 = new SetterInjectionPoint(m2, 0);
+        Method m1 = AllTypes.class.getMethod("setC", Object.class);
+        Method m2 = AllTypes.class.getMethod("setD", String.class);
+        Field f1 = AllTypes.class.getField("field");
+        FieldInjectionPoint p3 = new FieldInjectionPoint(f1);
+        SetterInjectionPoint p4 = new SetterInjectionPoint(m1, 0);
+        SetterInjectionPoint p5 = new SetterInjectionPoint(m2, 0);
         
         Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
         expected.add(p1);
         expected.add(p2);
         expected.add(p3);
         expected.add(p4);
+        expected.add(p5);
         
-        Assert.assertEquals(expected, getInjectionPoints(BothTypes.class));
+        Assert.assertEquals(expected, getInjectionPoints(AllTypes.class));
+    }
+    
+    @Test
+    public void testSubclassOverrides() throws Exception {
+        Method m1 = SubType.class.getMethod("injectMethod", Object.class);
+        SetterInjectionPoint p1 = new SetterInjectionPoint(m1, 0);
+        
+        Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
+        expected.add(p1);
+        
+        Assert.assertEquals(expected, getInjectionPoints(SubType.class));
     }
     
     private Set<InjectionPoint> getInjectionPoints(Class<?> types) {
@@ -220,9 +246,15 @@ public class InjectionPointTest {
         public void setX(Object c) { }
     }
     
-    public static class BothTypes {
+    public static class FieldType {
+        @Inject public String field;
+    }
+    
+    public static class AllTypes {
+        @Inject public String field;
+        
         @Inject
-        public BothTypes(@RoleA Object a, @RoleB String b) { }
+        public AllTypes(@RoleA Object a, @RoleB String b) { }
         
         @Inject
         public void setC(Object c) { }
@@ -242,5 +274,19 @@ public class InjectionPointTest {
     public static class NamedType {
         @Inject
         public NamedType(@Named("test1") String a, @Named("test2") Integer b) { }
+    }
+    
+    public static class SuperType {
+        @Inject
+        public void nonInjectMethod(Object o) { }
+        
+        public void injectMethod(Object o) { }
+    }
+    
+    public static class SubType extends SuperType {
+        public void nonInjectMethod(Object o) { }
+        
+        @Inject
+        public void injectMethod(Object o) { }
     }
 }

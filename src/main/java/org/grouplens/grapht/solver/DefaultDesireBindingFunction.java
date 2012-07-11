@@ -26,6 +26,7 @@ import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultInteger;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.annotation.DefaultString;
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.util.Preconditions;

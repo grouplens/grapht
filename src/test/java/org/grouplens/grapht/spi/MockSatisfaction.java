@@ -62,6 +62,11 @@ public class MockSatisfaction implements Satisfaction {
     }
     
     @Override
+    public CachePolicy getDefaultCachePolicy() {
+        return CachePolicy.NO_PREFERENCE;
+    }
+    
+    @Override
     public List<Desire> getDependencies() {
         return dependencies;
     }

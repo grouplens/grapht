@@ -18,10 +18,12 @@
  */
 package org.grouplens.grapht;
 
+import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.solver.CachePolicy;
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
@@ -35,6 +37,21 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class InjectorBuilderTest {
+    // FIXME: Add tests that:
+    // 1. Test that injecting a MEMOIZED provider into a NEW_INSTANCE reuses same provider
+    // 2. Test that injecting a NEW_INSTANCE provider always creates a new instance (but is the same provider object)
+    // 3. Test that cycles are resolved properly
+    
+    @Test
+    public void testProviderInjectionCycleBreaking() throws Exception {
+        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        Injector i = b.build();
+        
+        A a = i.getInstance(A.class);
+        Assert.assertNotNull(a.b);
+        Assert.assertSame(a, a.b.pa.get());
+    }
+    
     @Test
     public void testSimpleProviderInjection() throws Exception {
         InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
@@ -198,5 +215,23 @@ public class InjectorBuilderTest {
         // a usable constructor for String (although it has the default constructor,
         // it defines others that are not injectable).
         i.getInstance(NamedType.class);
+    }
+    
+    public static class A {
+        private final B b;
+        
+        @Inject
+        A(B b) {
+            this.b = b;
+        }
+    }
+    
+    public static class B {
+        private final Provider<A> pa;
+        
+        @Inject
+        B(Provider<A> pa) {
+            this.pa = pa;
+        }
     }
 }

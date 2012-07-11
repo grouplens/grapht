@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.util.Preconditions;
 

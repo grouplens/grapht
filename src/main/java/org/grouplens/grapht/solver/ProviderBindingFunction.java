@@ -29,11 +29,12 @@ import java.util.List;
 
 import javax.inject.Provider;
 
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.InstanceProvider;
+import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
@@ -103,6 +104,11 @@ public class ProviderBindingFunction implements BindingFunction {
         }
         
         @Override
+        public CachePolicy getDefaultCachePolicy() {
+            return CachePolicy.NO_PREFERENCE;
+        }
+        
+        @Override
         public List<? extends Desire> getDependencies() {
             return Collections.singletonList(providedDesire);
         }
@@ -119,9 +125,11 @@ public class ProviderBindingFunction implements BindingFunction {
 
         @Override
         public Provider<?> makeProvider(ProviderSource dependencies) {
-            // Create a provider that provides another provider, since we'll
-            // be injecting the provider and not the final object
-            return new InstanceProvider<Provider<?>>(dependencies.apply(providedDesire));
+            Provider<?> trueProvider = dependencies.apply(providedDesire);
+            
+            // Return a provider wrapping this provider so the memoizing provider
+            // is the final instance that is injected
+            return new InstanceProvider<Provider<?>>(trueProvider);
         }
 
         @Override
@@ -132,6 +140,25 @@ public class ProviderBindingFunction implements BindingFunction {
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             providedDesire = (Desire) in.readObject();
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof ProviderInjectionSatisfaction)) {
+                return false;
+            }
+            
+            return ((ProviderInjectionSatisfaction) o).providedDesire.equals(providedDesire);
+        }
+        
+        @Override
+        public int hashCode() {
+            return providedDesire.hashCode();
+        }
+        
+        @Override
+        public String toString() {
+            return "Provider<" + providedDesire + ">";
         }
     }
 }
