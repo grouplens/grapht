@@ -19,6 +19,7 @@
 package org.grouplens.grapht;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 
 import org.atinject.tck.Tck;
 import org.atinject.tck.auto.Car;
@@ -32,7 +33,7 @@ import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.SpareTire;
 import org.grouplens.grapht.spi.CachePolicy;
 
-public class TckTest {
+public class TckTest extends TestCase {
     
     public static Test suite() {
         InjectorBuilder ib = new InjectorBuilder()
