@@ -18,12 +18,12 @@
  */
 package org.grouplens.grapht;
 
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.spi.reflect.types.CycleA;
+import org.grouplens.grapht.spi.reflect.types.CycleB;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
@@ -37,19 +37,45 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class InjectorBuilderTest {
-    // FIXME: Add tests that:
-    // 1. Test that injecting a MEMOIZED provider into a NEW_INSTANCE reuses same provider
-    // 2. Test that injecting a NEW_INSTANCE provider always creates a new instance (but is the same provider object)
-    // 3. Test that cycles are resolved properly
+    @Test
+    public void testNewInstanceProviderCachePolicy() throws Exception {
+        // Test that injecting a new-instance provider creates
+        // new instances each time
+        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        b.bind(CycleA.class).unshared().to(CycleA.class);
+        b.bind(CycleB.class).shared().to(CycleB.class);
+        Injector i = b.build();
+        
+        CycleB cycleB = i.getInstance(CycleB.class);
+        
+        Assert.assertNotSame(cycleB.pa.get(), cycleB.pa.get());
+    }
+    
+    @Test
+    public void testMemoizedProviderCachePolicy() throws Exception {
+        // Test that injecting a memoized provider into a new instance
+        // reuses the same instance
+        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        b.bind(CycleA.class).shared().to(CycleA.class);
+        b.bind(CycleB.class).unshared().to(CycleB.class);
+        Injector i = b.build();
+        
+        CycleB b1 = i.getInstance(CycleB.class);
+        CycleB b2 = i.getInstance(CycleB.class);
+        
+        Assert.assertNotSame(b1, b2);
+        Assert.assertSame(b1.pa, b2.pa);
+        Assert.assertSame(b1.pa.get(), b2.pa.get());
+    }
     
     @Test
     public void testProviderInjectionCycleBreaking() throws Exception {
         InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
         Injector i = b.build();
         
-        A a = i.getInstance(A.class);
-        Assert.assertNotNull(a.b);
-        Assert.assertSame(a, a.b.pa.get());
+        CycleA cycleA = i.getInstance(CycleA.class);
+        Assert.assertNotNull(cycleA.b);
+        Assert.assertSame(cycleA, cycleA.b.pa.get());
     }
     
     @Test
@@ -215,23 +241,5 @@ public class InjectorBuilderTest {
         // a usable constructor for String (although it has the default constructor,
         // it defines others that are not injectable).
         i.getInstance(NamedType.class);
-    }
-    
-    public static class A {
-        private final B b;
-        
-        @Inject
-        A(B b) {
-            this.b = b;
-        }
-    }
-    
-    public static class B {
-        private final Provider<A> pa;
-        
-        @Inject
-        B(Provider<A> pa) {
-            this.pa = pa;
-        }
     }
 }

@@ -21,10 +21,15 @@ package org.grouplens.grapht.spi.reflect;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Provider;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
+import org.grouplens.grapht.Injector;
+import org.grouplens.grapht.InjectorBuilder;
 import org.grouplens.grapht.graph.Edge;
+import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
@@ -33,6 +38,8 @@ import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.types.CycleA;
+import org.grouplens.grapht.spi.reflect.types.CycleB;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.InterfaceB;
 import org.grouplens.grapht.spi.reflect.types.ParameterA;
@@ -46,6 +53,34 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ReflectionInjectionTest {
+    @Test
+    public void testProviderCycleInjection() throws Exception {
+        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        Injector i = b.build();
+        
+        i.getInstance(CycleA.class);
+        Graph<Pair<Satisfaction, CachePolicy>, Desire> g = ((DefaultInjector) i).getSolver().getGraph();
+        
+        Assert.assertEquals(3 + 1, g.getNodes().size());
+        Node<Pair<Satisfaction, CachePolicy>> root = g.getNode(null);
+        
+        Assert.assertEquals(1, g.getOutgoingEdges(root).size());
+        Node<Pair<Satisfaction, CachePolicy>> anode = g.getOutgoingEdges(root).iterator().next().getTail();
+        Assert.assertEquals(CycleA.class, anode.getLabel().getKey().getErasedType());
+        
+        Assert.assertEquals(1, g.getOutgoingEdges(anode).size());
+        Node<Pair<Satisfaction, CachePolicy>> bnode = g.getOutgoingEdges(anode).iterator().next().getTail();
+        Assert.assertEquals(CycleB.class, bnode.getLabel().getKey().getErasedType());
+        
+        Assert.assertEquals(1, g.getOutgoingEdges(bnode).size());
+        Node<Pair<Satisfaction, CachePolicy>> pnode = g.getOutgoingEdges(bnode).iterator().next().getTail();
+        Assert.assertEquals(Provider.class, pnode.getLabel().getKey().getErasedType());
+        
+        Assert.assertEquals(1, g.getOutgoingEdges(pnode).size());
+        Node<Pair<Satisfaction, CachePolicy>> anode2 = g.getOutgoingEdges(pnode).iterator().next().getTail();
+        Assert.assertSame(anode, anode2);
+    }
+    
     @Test
     public void testTypeCInjectionWithDefaults() throws Exception {
         // Test that TypeC can be resolved successfully without any bind rules.
@@ -74,19 +109,19 @@ public class ReflectionInjectionTest {
             ReflectionDesire d = (ReflectionDesire) e.getLabel();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
-                // A ParameterA defaults to 5
+                // CycleA ParameterA defaults to 5
                 Assert.assertFalse(deps.containsKey(TypeC.CONSTRUCTOR));
                 Assert.assertTrue(e.getTail().getLabel().getKey() instanceof InstanceSatisfaction);
                 Assert.assertEquals(5, ((InstanceSatisfaction) e.getTail().getLabel().getKey()).getInstance());
                 deps.put(TypeC.CONSTRUCTOR, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.INTERFACE_A)) {
-                // An InterfaceA is implemented by TypeA, which is then provided by Provider A
+                // An InterfaceA is implemented by TypeA, which is then provided by Provider CycleA
                 Assert.assertFalse(deps.containsKey(TypeC.INTERFACE_A));
                 Assert.assertTrue(e.getTail().getLabel().getKey() instanceof ProviderClassSatisfaction);
                 Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) e.getTail().getLabel().getKey()).getProviderType());
                 deps.put(TypeC.INTERFACE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_A)) {
-                // A TypeA is provided by a ProviderA
+                // CycleA TypeA is provided by a ProviderA
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_A));
                 Assert.assertTrue(e.getTail().getLabel().getKey() instanceof ProviderClassSatisfaction);
                 Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) e.getTail().getLabel().getKey()).getProviderType());
@@ -172,7 +207,7 @@ public class ReflectionInjectionTest {
                 Assert.assertEquals(PrimeA.class, e.getTail().getLabel().getKey().getErasedType());
                 deps.put(TypeC.INTERFACE_A, e.getTail());
             } else if (d.getInjectionPoint().equals(TypeC.TYPE_A)) {
-                // A TypeA has been bound to an instance
+                // CycleA TypeA has been bound to an instance
                 Assert.assertFalse(deps.containsKey(TypeC.TYPE_A));
                 Assert.assertTrue(e.getTail().getLabel().getKey() instanceof InstanceSatisfaction);
                 Assert.assertSame(a, ((InstanceSatisfaction) e.getTail().getLabel().getKey()).getInstance());

@@ -324,7 +324,7 @@ public class DependencySolverTest {
         Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
-        // for this test, A is farther than B so b2 should be selected over ob2
+        // for this test, CycleA is farther than B so b2 should be selected over ob2
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
                      Arrays.<BindRule>asList(new MockBindRule(d2, ob2)));
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(B.class))),
@@ -371,7 +371,7 @@ public class DependencySolverTest {
         Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
-        // for this test, AB is longer than A so b2 is selected over ob2
+        // for this test, AB is longer than CycleA so b2 is selected over ob2
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
                      Arrays.<BindRule>asList(new MockBindRule(d2, ob2)));
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class), new MockContextMatcher(B.class))),
@@ -414,7 +414,7 @@ public class DependencySolverTest {
         Desire ob1 = new MockDesire(or2);
         
         Map<ContextChain, Collection<BindRule>> bindings = new HashMap<ContextChain, Collection<BindRule>>();
-        // for this test, A is more specific than default, so b2 is selected
+        // for this test, CycleA is more specific than default, so b2 is selected
         bindings.put(new ContextChain(new ArrayList<ContextMatcher>()), 
                      Arrays.<BindRule>asList(new MockBindRule(d1, ob1)));
         bindings.put(new ContextChain(Arrays.asList(new MockContextMatcher(A.class))),
@@ -813,7 +813,7 @@ public class DependencySolverTest {
         Desire d1 = new MockDesire(); // d's first dependency
         Desire d2 = new MockDesire(); // d's second dependency
         Satisfaction sa = new MockSatisfaction(A.class, Arrays.asList(a1));
-        Satisfaction sap = new MockSatisfaction(Ap.class, Arrays.asList(a1)); // variant of A
+        Satisfaction sap = new MockSatisfaction(Ap.class, Arrays.asList(a1)); // variant of CycleA
         Satisfaction sd = new MockSatisfaction(D.class, Arrays.asList(d1, d2));
         Satisfaction sb = new MockSatisfaction(B.class);
         Satisfaction sc = new MockSatisfaction(C.class);
@@ -863,7 +863,7 @@ public class DependencySolverTest {
         Desire d1 = new MockDesire(); // d's first dependency
         Desire d2 = new MockDesire(); // d's second dependency
         Satisfaction sa = new MockSatisfaction(A.class, Arrays.asList(a1));
-        Satisfaction sap = new MockSatisfaction(Ap.class, Arrays.asList(a1)); // variant of A
+        Satisfaction sap = new MockSatisfaction(Ap.class, Arrays.asList(a1)); // variant of CycleA
         Satisfaction sd = new MockSatisfaction(D.class, Arrays.asList(d1, d2));
         Satisfaction sb = new MockSatisfaction(B.class);
         Satisfaction sbp = new MockSatisfaction(Bp.class); // variant of B
