@@ -138,7 +138,7 @@ public class ReflectionInjectionTest {
         bindRules.getRootContext().bind(TypeA.class).to(a);
         bindRules.getRootContext().bind(TypeB.class).to(b);
         
-        DefaultInjector r = new DefaultInjector(spi, bindRules.getFunction(RuleSet.EXPLICIT), new DefaultDesireBindingFunction(spi));
+        DefaultInjector r = new DefaultInjector(spi, bindRules.build(RuleSet.EXPLICIT), new DefaultDesireBindingFunction(spi));
 
         TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(10, instance.getIntValue());

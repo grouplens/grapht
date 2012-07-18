@@ -118,9 +118,9 @@ public class InjectorBuilder implements Context {
         return new DefaultInjector(builder.getSPI(),
                                    cachePolicy,
                                    100,
-                                   builder.getFunction(RuleSet.EXPLICIT),
-                                   builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
-                                   builder.getFunction(RuleSet.SUPER_TYPES),
+                                   builder.build(RuleSet.EXPLICIT),
+                                   builder.build(RuleSet.INTERMEDIATE_TYPES),
+                                   builder.build(RuleSet.SUPER_TYPES),
                                    new DefaultDesireBindingFunction(builder.getSPI()));
     }
 }

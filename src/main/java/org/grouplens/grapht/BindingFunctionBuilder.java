@@ -210,7 +210,7 @@ public class BindingFunctionBuilder implements Cloneable {
      * @param set
      * @return
      */
-    public BindingFunction getFunction(RuleSet set) {
+    public BindingFunction build(RuleSet set) {
         return new RuleBasedBindingFunction(getMap(set));
     }
     
