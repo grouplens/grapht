@@ -167,7 +167,7 @@ public class ReflectionDesire implements Desire, Externalizable {
     
     @Override
     public Desire restrict(Class<?> type) {
-        return new ReflectionDesire(type, injectPoint, satisfaction);
+        return new ReflectionDesire(type, injectPoint, null);
     }
     
     @Override
