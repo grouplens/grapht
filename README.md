@@ -26,5 +26,32 @@ following to the dependencies section in your POM:
     <dependency>
       <groupId>org.grouplens.grapht</groupId>
       <artifactId>grapht</artifactId>
-      <version>0.1.0</version>
+      <version>0.3.0</version>
     </dependency>
+    
+## Release Notes
+
+### 0.3.0
+* Refactor SPI and bind rules to allow for more flexible binding functions.
+  This brings the implementation much closer to the theoretical formulation
+  presented in our paper.
+* Implement Provider injection, including breaking dependency cycles with
+  Provider injection.
+* Pass the JSR 330 TCK.
+* Simplify and clean up Graph API to no longer take type parameters.
+
+### 0.2.1
+* Rename getFunction() to build() in BindingFunctionBuilder.
+
+### 0.2.0
+
+* Make dependency graph solutions serializable using Java's serialization
+  framework.
+* Add CachePolicy lifecycle specification for instances (e.g. new, memoize, etc)
+* Add support for generic attribute annotations on injection points that are
+  carried through the solution graph.
+* Add slf4j logging to grapht
+
+### 0.1.0
+* Initial published release of grapht
+* Supports basic and context-aware dependency injection
