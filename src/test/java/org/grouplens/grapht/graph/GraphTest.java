@@ -18,25 +18,30 @@
  */
 package org.grouplens.grapht.graph;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.grouplens.grapht.graph.Edge;
-import org.grouplens.grapht.graph.Graph;
-import org.grouplens.grapht.graph.Node;
+import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.spi.CachedSatisfaction;
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.junit.Test;
 
 public class GraphTest {
     @Test
     public void testGetEdges() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, tail, new Object());
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, new Object());
-        Edge<Object, Object> edge3 = new Edge<Object, Object>(tail, head, new Object());
+        Edge edge1 = new Edge(head, tail, null);
+        Edge edge2 = new Edge(head, tail, null);
+        Edge edge3 = new Edge(tail, head, null);
         
         graph.addNode(head);
         graph.addNode(tail);
@@ -44,7 +49,7 @@ public class GraphTest {
         graph.addEdge(edge2);
         graph.addEdge(edge3);
 
-        Set<Edge<Object, Object>> edges = graph.getEdges(head, tail);
+        Set<Edge> edges = graph.getEdges(head, tail);
         Assert.assertEquals(2, edges.size());
         Assert.assertTrue(edges.contains(edge1));
         Assert.assertTrue(edges.contains(edge2));
@@ -53,13 +58,14 @@ public class GraphTest {
     
     @Test
     public void testRemoveEdges() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, tail, new Object());
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, new Object());
-        Edge<Object, Object> edge3 = new Edge<Object, Object>(tail, head, new Object());
+        Edge edge1 = new Edge(head, tail, null);
+        Edge edge2 = new Edge(head, tail, null);
+        Edge edge3 = new Edge(tail, head, null);
         
         graph.addNode(head);
         graph.addNode(tail);
@@ -67,7 +73,7 @@ public class GraphTest {
         graph.addEdge(edge2);
         graph.addEdge(edge3);
 
-        Set<Edge<Object, Object>> edges = graph.removeEdges(head, tail);
+        Set<Edge> edges = graph.removeEdges(head, tail);
         Assert.assertEquals(2, edges.size());
         Assert.assertTrue(edges.contains(edge1));
         Assert.assertTrue(edges.contains(edge2));
@@ -78,11 +84,12 @@ public class GraphTest {
     
     @Test
     public void testAddNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> node = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node node = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
         Assert.assertTrue(graph.addNode(node));
-        Set<Node<Object>> nodes = graph.getNodes();
+        Set<Node> nodes = graph.getNodes();
         Assert.assertEquals(1, nodes.size());
         Assert.assertTrue(nodes.contains(node));
         Assert.assertTrue(graph.getOutgoingEdges(node).isEmpty());
@@ -90,8 +97,9 @@ public class GraphTest {
     
     @Test
     public void testUnknownNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> node = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node node = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
         Assert.assertFalse(graph.getNodes().contains(node));
         Assert.assertNull(graph.getOutgoingEdges(node));
@@ -99,20 +107,22 @@ public class GraphTest {
     
     @Test
     public void testAddExistingNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> node = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node node = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         graph.addNode(node);
         
         Assert.assertFalse(graph.addNode(node));
-        Set<Node<Object>> nodes = graph.getNodes();
+        Set<Node> nodes = graph.getNodes();
         Assert.assertEquals(1, nodes.size());
     }
     
     @Test
     public void testRemoveNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> node = new Node<Object>(new Object());
-        Node<Object> node2 = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node node = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node node2 = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
         graph.addNode(node);
         graph.addNode(node2);
@@ -126,9 +136,10 @@ public class GraphTest {
     
     @Test
     public void testRemoveNonExistingNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> node = new Node<Object>(new Object());
-        graph.addNode(new Node<Object>(new Object()));
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node node = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        graph.addNode(new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)));
         
         Assert.assertFalse(graph.removeNode(node));
         Assert.assertEquals(1, graph.getNodes().size());
@@ -136,15 +147,16 @@ public class GraphTest {
     
     @Test
     public void testReplaceNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
         
-        Node<Object> toBeReplaced = new Node<Object>(new Object());
-        Node<Object> outgoingNode = new Node<Object>(new Object());
-        Node<Object> incomingNode = new Node<Object>(new Object());
-        Node<Object> otherNode = new Node<Object>(new Object());
+        Node toBeReplaced = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node outgoingNode = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node incomingNode = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node otherNode = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> outgoing = new Edge<Object, Object>(toBeReplaced, outgoingNode, new Object());
-        Edge<Object, Object> incoming = new Edge<Object, Object>(incomingNode, toBeReplaced, new Object());
+        Edge outgoing = new Edge(toBeReplaced, outgoingNode, null);
+        Edge incoming = new Edge(incomingNode, toBeReplaced, null);
         graph.addNode(toBeReplaced);
         graph.addNode(outgoingNode);
         graph.addNode(incomingNode);
@@ -152,7 +164,7 @@ public class GraphTest {
         graph.addEdge(outgoing);
         graph.addEdge(incoming);
         
-        Node<Object> newNode = new Node<Object>(new Object());
+        Node newNode = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         Assert.assertTrue(graph.replaceNode(toBeReplaced, newNode));
         
         // verify that the node was replaced properly
@@ -162,13 +174,13 @@ public class GraphTest {
         
         // verify that the edges have been updated
         Assert.assertEquals(1, graph.getOutgoingEdges(newNode).size());
-        Edge<Object, Object> newOutgoing = graph.getOutgoingEdges(newNode).iterator().next();
+        Edge newOutgoing = graph.getOutgoingEdges(newNode).iterator().next();
         Assert.assertEquals(newNode, newOutgoing.getHead());
         Assert.assertEquals(outgoingNode, newOutgoing.getTail());
         Assert.assertEquals(newOutgoing, graph.getIncomingEdges(outgoingNode).iterator().next());
         
         Assert.assertEquals(1, graph.getIncomingEdges(newNode).size());
-        Edge<Object, Object> newIncoming = graph.getIncomingEdges(newNode).iterator().next();
+        Edge newIncoming = graph.getIncomingEdges(newNode).iterator().next();
         Assert.assertEquals(incomingNode, newIncoming.getHead());
         Assert.assertEquals(newNode, newIncoming.getTail());
         Assert.assertEquals(newIncoming, graph.getOutgoingEdges(incomingNode).iterator().next());
@@ -176,11 +188,12 @@ public class GraphTest {
     
     @Test
     public void testReplaceNonExistingNode() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        graph.addNode(new Node<Object>(new Object()));
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        graph.addNode(new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)));
         
-        Node<Object> toReplace = new Node<Object>(new Object());
-        Node<Object> newNode = new Node<Object>(new Object());
+        Node toReplace = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node newNode = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
         Assert.assertFalse(graph.replaceNode(toReplace, newNode));
         Assert.assertFalse(graph.getNodes().contains(newNode));
@@ -190,11 +203,12 @@ public class GraphTest {
     
     @Test
     public void testAddEdge() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
+        Graph graph = new Graph();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge = new Edge<Object, Object>(head, tail, new Object());
+        Edge edge = new Edge(head, tail, null);
         Assert.assertTrue(graph.addEdge(edge));
         
         // addEdge should auto-add the nodes too
@@ -205,7 +219,7 @@ public class GraphTest {
         Assert.assertEquals(edge, graph.getIncomingEdges(tail).iterator().next());
         
         // Add another edge to the graph
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, new Object());
+        Edge edge2 = new Edge(head, tail, null);
         Assert.assertTrue(graph.addEdge(edge2));
         
         Assert.assertTrue(graph.getOutgoingEdges(head).contains(edge));
@@ -216,12 +230,12 @@ public class GraphTest {
     
     @Test
     public void testAddExistingEdge() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        Object payload = new Object();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge = new Edge<Object, Object>(head, tail, payload);
+        Edge edge = new Edge(head, tail, null);
         graph.addEdge(edge);
         
         Assert.assertFalse(graph.addEdge(edge));
@@ -229,12 +243,12 @@ public class GraphTest {
     
     @Test
     public void testRemoveEdge() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        Object payload = new Object();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge = new Edge<Object, Object>(head, tail, payload);
+        Edge edge = new Edge(head, tail, null);
         graph.addEdge(edge);
         
         Assert.assertTrue(graph.removeEdge(edge));
@@ -250,12 +264,13 @@ public class GraphTest {
     
     @Test
     public void testRemoveNonExistingEdge() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        graph.addEdge(new Edge<Object, Object>(head, tail, new Object()));
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        graph.addEdge(new Edge(head, tail, null));
         
-        Edge<Object, Object> edge = new Edge<Object, Object>(head, tail, new Object());
+        Edge edge = new Edge(head, tail, null);
         Assert.assertFalse(graph.removeEdge(edge));
         Assert.assertEquals(1, graph.getOutgoingEdges(head).size());
         Assert.assertFalse(graph.getOutgoingEdges(head).contains(edge));
@@ -265,21 +280,22 @@ public class GraphTest {
     
     @Test
     public void testReplaceEdge() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
         
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Object payload1 = new Object();
-        Object payload2 = new Object();
+        List<Desire> payload1 = Arrays.asList(spi.desire(null, Object.class, false));
+        List<Desire> payload2 = Arrays.asList(spi.desire(null, Object.class, true));
         
-        Edge<Object, Object> toBeReplaced = new Edge<Object, Object>(head, tail, payload1);
-        Edge<Object, Object> otherEdge = new Edge<Object, Object>(head, tail, new Object());
+        Edge toBeReplaced = new Edge(head, tail, payload1);
+        Edge otherEdge = new Edge(head, tail, null);
         
         graph.addEdge(toBeReplaced);
         graph.addEdge(otherEdge);
         
-        Edge<Object, Object> newEdge = graph.updateEdgeLabel(toBeReplaced, payload2);
+        Edge newEdge = graph.updateEdgeLabel(toBeReplaced, payload2);
         Assert.assertNotNull(newEdge);
         
         Assert.assertEquals(head, newEdge.getHead());
@@ -294,14 +310,15 @@ public class GraphTest {
     
     @Test
     public void testReplaceNonExistingEdge() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
         
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        graph.addEdge(new Edge<Object, Object>(head, tail, new Object()));
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        graph.addEdge(new Edge(head, tail, null));
         
-        Edge<Object, Object> notInGraph = new Edge<Object, Object>(tail, head, new Object());
-        Assert.assertNull(graph.updateEdgeLabel(notInGraph, new Object()));
+        Edge notInGraph = new Edge(tail, head, null);
+        Assert.assertNull(graph.updateEdgeLabel(notInGraph, null));
         Assert.assertEquals(1, graph.getOutgoingEdges(head).size());
         Assert.assertEquals(1, graph.getIncomingEdges(tail).size());
         
@@ -311,16 +328,17 @@ public class GraphTest {
     
     @Test
     public void testNodeIterate() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
-        Node<Object> node1 = new Node<Object>(new Object());
-        Node<Object> node2 = new Node<Object>(new Object());
-        Node<Object> node3 = new Node<Object>(new Object());
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
+        Node node1 = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node node2 = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
+        Node node3 = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
         graph.addNode(node1);
         graph.addNode(node2);
         graph.addNode(node3);
         
-        Set<Node<Object>> nodes = graph.getNodes();
+        Set<Node> nodes = graph.getNodes();
         Assert.assertEquals(3, nodes.size());
         Assert.assertTrue(nodes.contains(node1));
         Assert.assertTrue(nodes.contains(node2));
@@ -329,19 +347,20 @@ public class GraphTest {
     
     @Test
     public void testGetIncomingEdges() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
         
-        Node<Object> tail = new Node<Object>(new Object());
+        Node tail = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge1 = new Edge<Object, Object>(new Node<Object>(new Object()), tail, new Object());
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(new Node<Object>(new Object()), tail, new Object());
-        Edge<Object, Object> edge3 = new Edge<Object, Object>(new Node<Object>(new Object()), tail, new Object());
+        Edge edge1 = new Edge(new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)), tail, null);
+        Edge edge2 = new Edge(new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)), tail, null);
+        Edge edge3 = new Edge(new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)), tail, null);
         
         graph.addEdge(edge1);
         graph.addEdge(edge2);
         graph.addEdge(edge3);
         
-        Set<Edge<Object, Object>> incoming = graph.getIncomingEdges(tail);
+        Set<Edge> incoming = graph.getIncomingEdges(tail);
         Assert.assertEquals(3, incoming.size());
         Assert.assertTrue(incoming.contains(edge1));
         Assert.assertTrue(incoming.contains(edge2));
@@ -350,19 +369,20 @@ public class GraphTest {
     
     @Test
     public void testGetOutgoingEdges() {
-        Graph<Object, Object> graph = new Graph<Object, Object>();
+        InjectSPI spi = new ReflectionInjectSPI();
+        Graph graph = new Graph();
         
-        Node<Object> head = new Node<Object>(new Object());
+        Node head = new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE));
         
-        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, new Node<Object>(new Object()), new Object());
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, new Node<Object>(new Object()), new Object());
-        Edge<Object, Object> edge3 = new Edge<Object, Object>(head, new Node<Object>(new Object()), new Object());
+        Edge edge1 = new Edge(head, new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)), null);
+        Edge edge2 = new Edge(head, new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)), null);
+        Edge edge3 = new Edge(head, new Node(new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE)), null);
         
         graph.addEdge(edge1);
         graph.addEdge(edge2);
         graph.addEdge(edge3);
         
-        Set<Edge<Object, Object>> outgoing = graph.getOutgoingEdges(head);
+        Set<Edge> outgoing = graph.getOutgoingEdges(head);
         Assert.assertEquals(3, outgoing.size());
         Assert.assertTrue(outgoing.contains(edge1));
         Assert.assertTrue(outgoing.contains(edge2));

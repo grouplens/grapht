@@ -18,23 +18,28 @@
  */
 package org.grouplens.grapht.graph;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.grouplens.grapht.graph.Edge;
-import org.grouplens.grapht.graph.Node;
+import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.spi.CachedSatisfaction;
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.MockDesire;
+import org.grouplens.grapht.spi.MockSatisfaction;
 import org.junit.Test;
 
 public class EdgeTest {
     @Test
     public void testGetters() {
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        Object ep = new Object();
+        Node head = new Node(new CachedSatisfaction(new MockSatisfaction(), CachePolicy.MEMOIZE));
+        Node tail = new Node(new CachedSatisfaction(new MockSatisfaction(), CachePolicy.MEMOIZE));
+        List<Desire> ep = Arrays.<Desire>asList(new MockDesire());
         
-        Edge<Object, Object> edge = new Edge<Object, Object>(head, tail, ep);
+        Edge edge = new Edge(head, tail, ep);
         
         Assert.assertEquals(head, edge.getHead());
         Assert.assertEquals(tail, edge.getTail());
@@ -43,15 +48,15 @@ public class EdgeTest {
     
     @Test
     public void testEquals() {
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        Object ep1 = new Object();
-        Object ep2 = new Object();
-        
-        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, tail, ep1);
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, ep1);
-        Edge<Object, Object> reversedEdge = new Edge<Object, Object>(tail, head, ep1);
-        Edge<Object, Object> diffPayload = new Edge<Object, Object>(head, tail, ep2);
+        Node head = new Node(new CachedSatisfaction(new MockSatisfaction(), CachePolicy.MEMOIZE));
+        Node tail = new Node(new CachedSatisfaction(new MockSatisfaction(), CachePolicy.MEMOIZE));
+        List<Desire> ep1 = Arrays.<Desire>asList(new MockDesire());
+        List<Desire> ep2 = Arrays.<Desire>asList(new MockDesire());
+
+        Edge edge1 = new Edge(head, tail, ep1);
+        Edge edge2 = new Edge(head, tail, ep1);
+        Edge reversedEdge = new Edge(tail, head, ep1);
+        Edge diffPayload = new Edge(head, tail, ep2);
         
         Assert.assertEquals(edge1, edge1);
         // Edges use instance equality
@@ -62,14 +67,14 @@ public class EdgeTest {
     
     @Test
     public void testHashcode() {
-        Node<Object> head = new Node<Object>(new Object());
-        Node<Object> tail = new Node<Object>(new Object());
-        Object ep = new Object();
+        Node head = new Node(new CachedSatisfaction(new MockSatisfaction(), CachePolicy.MEMOIZE));
+        Node tail = new Node(new CachedSatisfaction(new MockSatisfaction(), CachePolicy.MEMOIZE));
+        List<Desire> ep = Arrays.<Desire>asList(new MockDesire());
         
-        Edge<Object, Object> edge1 = new Edge<Object, Object>(head, tail, ep);
-        Edge<Object, Object> edge2 = new Edge<Object, Object>(head, tail, ep);
+        Edge edge1 = new Edge(head, tail, ep);
+        Edge edge2 = new Edge(head, tail, ep);
         
-        Set<Edge<Object, Object>> edges = new HashSet<Edge<Object, Object>>();
+        Set<Edge> edges = new HashSet<Edge>();
         edges.add(edge1);
         
         // Edges use instance equality and hashing, so make sure that edge2

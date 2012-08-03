@@ -19,8 +19,13 @@
 package org.grouplens.grapht.graph;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.Nullable;
+
+import org.grouplens.grapht.spi.Desire;
 
 /**
  * <p>
@@ -39,32 +44,42 @@ import javax.annotation.Nullable;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Edge<N, E> implements Serializable {
+public class Edge implements Serializable {
     private static final long serialVersionUID = 1L;
     
     // "final"
-    private Node<N> head;
-    private Node<N> tail;
+    private Node head;
+    private Node tail;
     
-    private E label;
+    private List<Desire> label;
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and
-     * ending at <tt>tail</tt>. The provided label is a domain-specific
-     * object to be associated with the edge between the two nodes.
+     * ending at <tt>tail</tt>. The provided label is the sequence of Desires
+     * followed by binding functions to reach the tail with the edge between the
+     * two nodes.
      * 
      * @param head The start or head node of the edge
      * @param tail The end or tail node of the edge
      * @param label The label data along the edge
      * @throws NullPointerException if the head, tail
      */
-    public Edge(Node<N> head, Node<N> tail, @Nullable E label) {
+    public Edge(Node head, Node tail, @Nullable List<Desire> label) {
         if (head == null || tail == null)
             throw new NullPointerException("Head and tail cannot be null");
         
         this.head = head;
         this.tail = tail;
-        this.label = label;
+        
+        // this serves three purposes:
+        // 1. clone input so original list can be modified
+        // 2. guarantee our field is serializable
+        // 3. make the returned instance unmodifiable
+        if (label != null) {
+            this.label = Collections.unmodifiableList(new ArrayList<Desire>(label));
+        } else {
+            this.label = null;
+        }
     }
 
     /**
@@ -73,7 +88,7 @@ public class Edge<N, E> implements Serializable {
      * 
      * @return The head node of the edge
      */
-    public Node<N> getHead() {
+    public Node getHead() {
         return head;
     }
 
@@ -83,7 +98,7 @@ public class Edge<N, E> implements Serializable {
      * 
      * @return The tail node of the edge
      */
-    public Node<N> getTail() {
+    public Node getTail() {
         return tail;
     }
 
@@ -93,8 +108,18 @@ public class Edge<N, E> implements Serializable {
      * 
      * @return The label on this edge
      */
-    public @Nullable E getLabel() {
+    public @Nullable List<Desire> getLabel() {
         return label;
+    }
+    
+    /**
+     * Return the first Desire in the sequence of desires of this edge's label.
+     * If the sequence is null or empty, a null desire is returned.
+     * 
+     * @return The first or primary desire along this edge
+     */
+    public @Nullable Desire getDesire() {
+        return (label == null || label.isEmpty() ? null : label.get(0));
     }
     
     @Override

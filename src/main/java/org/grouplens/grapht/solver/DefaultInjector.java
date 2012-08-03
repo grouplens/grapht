@@ -25,7 +25,6 @@ import java.util.Map;
 
 import javax.inject.Provider;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.graph.Edge;
@@ -34,7 +33,6 @@ import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.MemoizingProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
@@ -55,7 +53,7 @@ public class DefaultInjector implements Injector {
     
     private final InjectSPI spi;
     private final DependencySolver solver;
-    private final Map<Node<Pair<Satisfaction, CachePolicy>>, Provider<?>> providerCache;
+    private final Map<Node, Provider<?>> providerCache;
     
     private final CachePolicy defaultPolicy;
 
@@ -122,7 +120,7 @@ public class DefaultInjector implements Injector {
         this.spi = spi;
         this.defaultPolicy = defaultPolicy;
         solver = new DependencySolver(Arrays.asList(functions), maxDepth);
-        providerCache = new HashMap<Node<Pair<Satisfaction, CachePolicy>>, Provider<?>>();
+        providerCache = new HashMap<Node, Provider<?>>();
     }
     
     /**
@@ -143,7 +141,7 @@ public class DefaultInjector implements Injector {
         Desire desire = spi.desire(qualifier, type, false);
         
         // check if the desire is already in the graph
-        Edge<Pair<Satisfaction, CachePolicy>, Desire> resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
+        Edge resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
         
         // The edge is only non-null if getInstance() has been called before,
         // it may be present in the graph at a deeper node. If that's the case
@@ -159,18 +157,18 @@ public class DefaultInjector implements Injector {
         }
         
         // Check if the provider for the resolved node is in our cache
-        Node<Pair<Satisfaction, CachePolicy>> resolvedNode = resolved.getTail();
+        Node resolvedNode = resolved.getTail();
         return (T) getProvider(resolvedNode).get();
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Provider<?> getProvider(Node<Pair<Satisfaction, CachePolicy>> node) {
+    private Provider<?> getProvider(Node node) {
         Provider<?> cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
-            Provider<?> raw = node.getLabel().getKey().makeProvider(new DesireProviderMapper(node));
+            Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node));
             
-            CachePolicy policy = node.getLabel().getValue();
+            CachePolicy policy = node.getLabel().getCachePolicy();
             if (policy.equals(CachePolicy.NO_PREFERENCE)) {
                 policy = defaultPolicy;
             }
@@ -190,16 +188,16 @@ public class DefaultInjector implements Injector {
     }
     
     private class DesireProviderMapper implements ProviderSource {
-        private final Node<Pair<Satisfaction, CachePolicy>> forNode;
+        private final Node forNode;
         
-        public DesireProviderMapper(Node<Pair<Satisfaction, CachePolicy>> forNode) {
+        public DesireProviderMapper(Node forNode) {
             this.forNode = forNode;
         }
         
         @Override
         public Provider<?> apply(Desire desire) {
-            Edge<Pair<Satisfaction, CachePolicy>, Desire> edge = solver.getGraph().getOutgoingEdge(forNode, desire);
-            Node<Pair<Satisfaction, CachePolicy>> dependency = edge.getTail();
+            Edge edge = solver.getGraph().getOutgoingEdge(forNode, desire);
+            Node dependency = edge.getTail();
             return getProvider(dependency);
         }
     }

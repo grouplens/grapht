@@ -28,16 +28,16 @@ import java.util.Arrays;
 
 import javax.inject.Named;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.CachedSatisfaction;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
+import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
 import org.junit.After;
 import org.junit.Assert;
@@ -48,88 +48,47 @@ public class SerializationTest {
     
     @Test
     public void testEmptyGraph() throws Exception {
-        Graph<String, String> g = new Graph<String, String>();
+        Graph g = new Graph();
         write(g);
-        Graph<String, String> read = read();
+        Graph read = read();
         
         Assert.assertTrue(read.getNodes().isEmpty());
     }
     
     @Test
-    public void testSingleNodeGraph() throws Exception {
-        Graph<String, String> g = new Graph<String, String>();
-        g.addNode(new Node<String>("hello"));
-        write(g);
-        Graph<String, String> read = read();
-        
-        Assert.assertEquals(1, read.getNodes().size());
-        Assert.assertNotNull(read.getNode("hello"));
-    }
-    
-    @Test
-    public void testSingleEdgeGraph() throws Exception {
-        Graph<String, String> g = new Graph<String, String>();
-        Node<String> n1 = new Node<String>("hello");
-        Node<String> n2 = new Node<String>("world");
-        g.addEdge(new Edge<String, String>(n1, n2, "!"));
-        write(g);
-        Graph<String, String> read = read();
-        
-        Assert.assertEquals(2, read.getNodes().size());
-        n1 = read.getNode("hello");
-        n2 = read.getNode("world");
-        Assert.assertEquals(1, read.getEdges(n1, n2).size());
-        Assert.assertEquals("!", read.getEdges(n1, n2).iterator().next().getLabel());
-    }
-    
-    @Test
-    public void testManyEdgesGraph() throws Exception {
-        Graph<String, String> g = new Graph<String, String>();
-        Node<String> n1 = new Node<String>("hello");
-        Node<String> n2 = new Node<String>("world");
-        Node<String> n3 = new Node<String>("goodbye");
-        g.addEdge(new Edge<String, String>(n1, n2, "!"));
-        g.addEdge(new Edge<String, String>(n1, n3, "@"));
-        write(g);
-        Graph<String, String> read = read();
-        
-        Assert.assertEquals(3, read.getNodes().size());
-        n1 = read.getNode("hello");
-        n2 = read.getNode("world");
-        n3 = read.getNode("goodbye");
-        Assert.assertEquals(2, read.getOutgoingEdges(n1).size());
-        Assert.assertSame(n2, read.getOutgoingEdge(n1, "!").getTail());
-        Assert.assertSame(n3, read.getOutgoingEdge(n1, "@").getTail());
-    }
-    
-    @Test
     public void testSharedNodesGraph() throws Exception {
-        Graph<String, String> g = new Graph<String, String>();
-        Node<String> n1 = new Node<String>("hello");
-        Node<String> n2 = new Node<String>("world");
-        g.addEdge(new Edge<String, String>(n1, n2, "!"));
-        g.addEdge(new Edge<String, String>(n1, n2, "@"));
+        InjectSPI spi = new ReflectionInjectSPI();
+        CachedSatisfaction s1 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
+        CachedSatisfaction s2 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.MEMOIZE);
+        
+        Graph g = new Graph();
+        Node n1 = new Node(s1);
+        Node n2 = new Node(s2);
+        g.addEdge(new Edge(n1, n2, null));
+        g.addEdge(new Edge(n1, n2, null));
         write(g);
-        Graph<String, String> read = read();
+        Graph read = read();
         
         Assert.assertEquals(2, read.getNodes().size());
-        n1 = read.getNode("hello");
-        n2 = read.getNode("world");
+        n1 = read.getNode(s1);
+        n2 = read.getNode(s2);
         Assert.assertEquals(2, read.getOutgoingEdges(n1).size());
         Assert.assertEquals(2, read.getEdges(n1, n2).size());
     }
     
     @Test
     public void testNullLabels() throws Exception {
-        Graph<String, String> g = new Graph<String, String>();
-        Node<String> n1 = new Node<String>("root");
-        Node<String> n2 = new Node<String>(null);
-        g.addEdge(new Edge<String, String>(n1, n2, null));
+        InjectSPI spi = new ReflectionInjectSPI();
+        CachedSatisfaction rootLabel = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
+        Graph g = new Graph();
+        Node n1 = new Node(rootLabel);
+        Node n2 = new Node(null);
+        g.addEdge(new Edge(n1, n2, null));
         write(g);
-        Graph<String, String> read = read();
+        Graph read = read();
         
         Assert.assertEquals(2, read.getNodes().size());
-        n1 = read.getNode("root");
+        n1 = read.getNode(rootLabel);
         n2 = read.getNode(null);
         Assert.assertEquals(1, read.getEdges(n1, n2).size());
         Assert.assertEquals(null, read.getEdges(n1, n2).iterator().next().getLabel());
@@ -147,32 +106,32 @@ public class SerializationTest {
                                                                      new DefaultDesireBindingFunction(b.getSPI())), 100);
         solver.resolve(b.getSPI().desire(null, NamedType.class, false));
         
-        Graph<Pair<Satisfaction, CachePolicy>, Desire> g = solver.getGraph();
+        Graph g = solver.getGraph();
         write(g);
-        Graph<Pair<Satisfaction, CachePolicy>, Desire> read = read();
+        Graph read = read();
         
-        Node<Pair<Satisfaction, CachePolicy>> root = read.getNode(null);
+        Node root = read.getNode(null);
         Assert.assertEquals(1, read.getOutgoingEdges(root).size());
-        Edge<Pair<Satisfaction, CachePolicy>, Desire> rootEdge = read.getOutgoingEdges(root).iterator().next();
-        Node<Pair<Satisfaction, CachePolicy>> namedType = rootEdge.getTail();
+        Edge rootEdge = read.getOutgoingEdges(root).iterator().next();
+        Node namedType = rootEdge.getTail();
         
-        Assert.assertEquals(NamedType.class, namedType.getLabel().getKey().getErasedType());
-        Assert.assertEquals(NamedType.class, rootEdge.getLabel().getDesiredType());
-        Assert.assertEquals(rootEdge.getLabel().getSatisfaction(), namedType.getLabel().getKey());
-        Assert.assertNull(rootEdge.getLabel().getInjectionPoint().getAttributes().getQualifier());
-        Assert.assertTrue(rootEdge.getLabel().getInjectionPoint().getAttributes().getAttributes().isEmpty());
+        Assert.assertEquals(NamedType.class, namedType.getLabel().getSatisfaction().getErasedType());
+        Assert.assertEquals(NamedType.class, rootEdge.getDesire().getDesiredType());
+        Assert.assertEquals(rootEdge.getDesire().getSatisfaction(), namedType.getLabel().getSatisfaction());
+        Assert.assertNull(rootEdge.getDesire().getInjectionPoint().getAttributes().getQualifier());
+        Assert.assertTrue(rootEdge.getDesire().getInjectionPoint().getAttributes().getAttributes().isEmpty());
         
         Assert.assertEquals(1, read.getOutgoingEdges(namedType).size());
-        Edge<Pair<Satisfaction, CachePolicy>, Desire> nameEdge = read.getOutgoingEdges(namedType).iterator().next();
-        Node<Pair<Satisfaction, CachePolicy>> string = nameEdge.getTail();
+        Edge nameEdge = read.getOutgoingEdges(namedType).iterator().next();
+        Node string = nameEdge.getTail();
         
-        Assert.assertEquals(String.class, string.getLabel().getKey().getErasedType());
-        Assert.assertEquals(String.class, nameEdge.getLabel().getDesiredType());
-        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getInjectionPoint().getAttributes().getQualifier());
-        Assert.assertTrue(nameEdge.getLabel().getInjectionPoint().getAttributes().getAttributes().isEmpty());
+        Assert.assertEquals(String.class, string.getLabel().getSatisfaction().getErasedType());
+        Assert.assertEquals(String.class, nameEdge.getDesire().getDesiredType());
+        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getDesire().getInjectionPoint().getAttributes().getQualifier());
+        Assert.assertTrue(nameEdge.getDesire().getInjectionPoint().getAttributes().getAttributes().isEmpty());
         
-        Assert.assertTrue(string.getLabel().getKey() instanceof InstanceSatisfaction);
-        Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel().getKey()).getInstance());
+        Assert.assertTrue(string.getLabel().getSatisfaction() instanceof InstanceSatisfaction);
+        Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel().getSatisfaction()).getInstance());
     }
     
     @After
@@ -180,17 +139,16 @@ public class SerializationTest {
         GRAPH_FILE.delete();
     }
     
-    private <N, E> void write(Graph<N, E> g) throws IOException {
+    private <N, E> void write(Graph g) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(GRAPH_FILE));
         out.writeObject(g);
         out.flush();
         out.close();
     }
     
-    @SuppressWarnings("unchecked")
-    private <N, E> Graph<N, E> read() throws IOException, ClassNotFoundException {
+    private Graph read() throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(GRAPH_FILE));
-        Graph<N, E> g = (Graph<N, E>) in.readObject();
+        Graph g = (Graph) in.readObject();
         in.close();
         return g;
     }

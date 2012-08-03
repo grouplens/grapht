@@ -22,6 +22,8 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import org.grouplens.grapht.spi.CachedSatisfaction;
+
 
 /**
  * <p>
@@ -38,25 +40,25 @@ import javax.annotation.Nullable;
  * @see Graph
  * @author Michael Ludwig <mludwig@cs.umn.edu
  */
-public class Node<T> implements Serializable {
+public class Node implements Serializable {
     private static final long serialVersionUID = 1L;
     
     // "final"
-    private T label;
+    private CachedSatisfaction label;
     
     /**
      * Create a new Node that uses the specified label instance.
      * 
      * @param label The label instance to store with this node
      */
-    public Node(@Nullable T label) {
+    public Node(@Nullable CachedSatisfaction label) {
         this.label = label;
     }
     
     /**
      * @return The current label instance of the Node, which can be null
      */
-    public @Nullable T getLabel() {
+    public @Nullable CachedSatisfaction getLabel() {
         return label;
     }
     

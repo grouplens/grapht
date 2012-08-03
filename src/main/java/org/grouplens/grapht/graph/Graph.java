@@ -29,6 +29,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.grouplens.grapht.spi.CachedSatisfaction;
+import org.grouplens.grapht.spi.Desire;
+
 
 /**
  * Graph is a utility class for composing Nodes and Edges into a usable graph,
@@ -39,20 +42,20 @@ import javax.annotation.Nullable;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Graph<N, E> implements Serializable {
+public class Graph implements Serializable {
     private static final long serialVersionUID = 1L;
     
     // The outgoing key set is used to represent the set of nodes in the graph,
     // although it should hold that the incoming key set is equivalent
-    private Map<Node<N>, Set<Edge<N, E>>> outgoing; // edge.head == key
-    private Map<Node<N>, Set<Edge<N, E>>> incoming; // edge.tail == key
+    private Map<Node, Set<Edge>> outgoing; // edge.head == key
+    private Map<Node, Set<Edge>> incoming; // edge.tail == key
     
     /**
      * Create an empty graph with no nodes or edges.
      */
     public Graph() {
-        outgoing = new HashMap<Node<N>, Set<Edge<N, E>>>();
-        incoming = new HashMap<Node<N>, Set<Edge<N, E>>>();
+        outgoing = new HashMap<Node, Set<Edge>>();
+        incoming = new HashMap<Node, Set<Edge>>();
     }
     
     /**
@@ -67,13 +70,13 @@ public class Graph<N, E> implements Serializable {
      * @param root The designated root node (depth = 0)
      * @return An ordered list, topographically sorted
      */
-    public List<Node<N>> sort(Node<N> root) {
-        List<Node<N>> sorted = new ArrayList<Node<N>>();
-        topographicalSort(root, new HashSet<Node<N>>(), sorted);
+    public List<Node> sort(Node root) {
+        List<Node> sorted = new ArrayList<Node>();
+        topographicalSort(root, new HashSet<Node>(), sorted);
         return sorted;
     }
     
-    private void topographicalSort(Node<N> n, Set<Node<N>> visited, List<Node<N>> sortedResult) {
+    private void topographicalSort(Node n, Set<Node> visited, List<Node> sortedResult) {
         if (visited.contains(n)) {
             // we've already visited this node, no need to walk it again
             return;
@@ -83,9 +86,9 @@ public class Graph<N, E> implements Serializable {
         visited.add(n);
         
         // visit each node on its outgoing edges
-        Set<Edge<N, E>> out = outgoing.get(n);
+        Set<Edge> out = outgoing.get(n);
         if (out != null) {
-            for (Edge<N, E> e: out) {
+            for (Edge e: out) {
                 topographicalSort(e.getTail(), visited, sortedResult);
             }
         }
@@ -101,8 +104,8 @@ public class Graph<N, E> implements Serializable {
      * 
      * @return The nodes in the graph
      */
-    public Set<Node<N>> getNodes() {
-        return new HashSet<Node<N>>(outgoing.keySet());
+    public Set<Node> getNodes() {
+        return new HashSet<Node>(outgoing.keySet());
     }
 
     /**
@@ -114,8 +117,8 @@ public class Graph<N, E> implements Serializable {
      * @param label The label to match
      * @return A node with a matching label, or null if no node exists
      */
-    public Node<N> getNode(@Nullable N label) {
-        for (Node<N> node: outgoing.keySet()) {
+    public Node getNode(@Nullable CachedSatisfaction label) {
+        for (Node node: outgoing.keySet()) {
             if (node.getLabel() == null) {
                 if (label == null) {
                     return node;
@@ -140,7 +143,7 @@ public class Graph<N, E> implements Serializable {
      * @param label The label to match on outgoing edges of head
      * @return The edge leaving head with the given label, or null
      */
-    public Edge<N, E> getOutgoingEdge(Node<N> head, @Nullable E label) {
+    public Edge getOutgoingEdge(Node head, @Nullable List<Desire> label) {
         return getEdge(outgoing.get(head), label);
     }
 
@@ -155,22 +158,71 @@ public class Graph<N, E> implements Serializable {
      * @param label The label to match on outgoing edges of tail
      * @return The edge entering tail with the given label, or null
      */
-    public Edge<N, E> getIncomingEdge(Node<N> tail, @Nullable E label) {
+    public Edge getIncomingEdge(Node tail, @Nullable List<Desire> label) {
         return getEdge(incoming.get(tail), label);
     }
     
-    private Edge<N, E> getEdge(Set<Edge<N, E>> edges, E label) {
+    private Edge getEdge(Set<Edge> edges, List<Desire> label) {
         if (edges == null) {
             return null;
         }
         
-        for (Edge<N, E> e: edges) {
+        for (Edge e: edges) {
             if (e.getLabel() == null) {
                 if (label == null) {
                     return e;
                 }
             } else {
                 if (e.getLabel().equals(label)) {
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Return the first encountered outgoing edge of <tt>head</tt> that has its
+     * first Desire {@link Object#equals(Object) equal} to <tt>desire</tt>. If
+     * multiple edges leaving the head node start with the same desire, only the
+     * first is returned. This should be used as a convenience where uniqueness
+     * is guaranteed, or is not important.
+     * 
+     * @param head The head node for all outgoing edges searched
+     * @param desire The first Desire to match on outgoing edges of head
+     * @return The edge leaving head starting with the given desire, or null
+     */
+    public Edge getOutgoingEdge(Node head, @Nullable Desire desire) {
+        return getEdge(outgoing.get(head), desire);
+    }
+
+    /**
+     * Return the first encountered incoming edge of <tt>tail</tt> that has its
+     * first Desire {@link Object#equals(Object) equal} to <tt>desire</tt>. If
+     * multiple edges entering the tail node start with the same desire, only
+     * the first is returned. This should be used as a convenience where
+     * uniqueness is guaranteed, or is not important.
+     * 
+     * @param tail The tail node for all incoming edges searched
+     * @param desire The first Desire to match on outgoing edges of tail
+     * @return The edge entering tail with the given label, or null
+     */
+    public Edge getIncomingEdge(Node tail, @Nullable Desire desire) {
+        return getEdge(incoming.get(tail), desire);
+    }
+    
+    private Edge getEdge(Set<Edge> edges, Desire label) {
+        if (edges == null) {
+            return null;
+        }
+        
+        for (Edge e: edges) {
+            if (e.getDesire() == null) {
+                if (label == null) {
+                    return e;
+                }
+            } else {
+                if (e.getDesire().equals(label)) {
                     return e;
                 }
             }
@@ -188,14 +240,14 @@ public class Graph<N, E> implements Serializable {
      * @return All edges connecting the head to the tail
      * @throws NullPointerException if head or tail are null
      */
-    public Set<Edge<N, E>> getEdges(Node<N> head, Node<N> tail) {
+    public Set<Edge> getEdges(Node head, Node tail) {
         if (head == null || tail == null)
             throw new NullPointerException("Head and tail nodes cannot be null");
         
-        Set<Edge<N, E>> outgoingEdges = outgoing.get(head);
+        Set<Edge> outgoingEdges = outgoing.get(head);
         if (outgoingEdges != null) {
-            Set<Edge<N, E>> connected = new HashSet<Edge<N, E>>();
-            for (Edge<N, E> o: outgoingEdges) {
+            Set<Edge> connected = new HashSet<Edge>();
+            for (Edge o: outgoingEdges) {
                 if (o.getTail().equals(tail)) {
                     // found a connecting edge
                     connected.add(o);
@@ -226,12 +278,12 @@ public class Graph<N, E> implements Serializable {
      *         not in the graph
      * @throws NullPointerException if node is null
      */
-    public Set<Edge<N, E>> getOutgoingEdges(Node<N> node) {
+    public Set<Edge> getOutgoingEdges(Node node) {
         if (node == null)
             throw new NullPointerException("Node cannot be null");
         
-        Set<Edge<N, E>> edges = outgoing.get(node);
-        return (edges == null ? null : new HashSet<Edge<N, E>>(edges));
+        Set<Edge> edges = outgoing.get(node);
+        return (edges == null ? null : new HashSet<Edge>(edges));
     }
 
     /**
@@ -251,12 +303,12 @@ public class Graph<N, E> implements Serializable {
      *         not in the graph
      * @throws NullPointerException if node is null
      */
-    public Set<Edge<N, E>> getIncomingEdges(Node<N> node) {
+    public Set<Edge> getIncomingEdges(Node node) {
         if (node == null)
             throw new NullPointerException("Node cannot be null");
         
-        Set<Edge<N, E>> edges = incoming.get(node);
-        return (edges == null ? null : new HashSet<Edge<N, E>>(edges));
+        Set<Edge> edges = incoming.get(node);
+        return (edges == null ? null : new HashSet<Edge>(edges));
     }
 
     /**
@@ -268,14 +320,14 @@ public class Graph<N, E> implements Serializable {
      * @return True if the graph was modified as a result of this method call
      * @throws NullPointerException if node is null
      */
-    public boolean addNode(Node<N> node) {
+    public boolean addNode(Node node) {
         if (node == null)
             throw new NullPointerException("Node cannot be null");
         
         if (!outgoing.containsKey(node)) {
             // add the node, with 0 outgoing and incoming edges
-            outgoing.put(node, new HashSet<Edge<N, E>>());
-            incoming.put(node, new HashSet<Edge<N, E>>());
+            outgoing.put(node, new HashSet<Edge>());
+            incoming.put(node, new HashSet<Edge>());
             
             return true;
         } else
@@ -292,21 +344,21 @@ public class Graph<N, E> implements Serializable {
      * @return True if the graph was modified as a result of this method call
      * @throws NullPointerException if node is null
      */
-    public boolean removeNode(Node<N> node) {
+    public boolean removeNode(Node node) {
         if (node == null)
             throw new NullPointerException("Node cannot be null");
         
         // remove the node and all outgoing edges from graph
-        Set<Edge<N, E>> outgoingEdges = outgoing.remove(node);
+        Set<Edge> outgoingEdges = outgoing.remove(node);
         if (outgoingEdges != null) {
             // remove outgoing edges from incoming graph as well
-            for (Edge<N, E> o: outgoingEdges)
+            for (Edge o: outgoingEdges)
                 incoming.get(o.getTail()).remove(o);
             
             // remove the node and all incoming edges from the graph
             // - here we assume it was in the graph
-            Set<Edge<N, E>> incomingEdges = incoming.remove(node);
-            for (Edge<N, E> i: incomingEdges)
+            Set<Edge> incomingEdges = incoming.remove(node);
+            for (Edge i: incomingEdges)
                 outgoing.get(i.getHead()).remove(i);
             
             return true;
@@ -333,17 +385,17 @@ public class Graph<N, E> implements Serializable {
      * @return True if the graph was modified as a result of this method call
      * @throws NullPointerException if oldNode or newNode is null
      */
-    public boolean replaceNode(Node<N> oldNode, Node<N> newNode) {
+    public boolean replaceNode(Node oldNode, Node newNode) {
         if (oldNode == null || newNode == null)
             throw new NullPointerException("Nodes cannot be null");
         
-        Set<Edge<N, E>> oldOutgoingEdges = outgoing.remove(oldNode);
+        Set<Edge> oldOutgoingEdges = outgoing.remove(oldNode);
         if (oldOutgoingEdges != null) {
             // create new edges from the new node to the original tail node,
             // and remove old outgoing edges from incoming graph
-            Set<Edge<N, E>> newOutgoingEdges = new HashSet<Edge<N, E>>();
-            for (Edge<N, E> old: oldOutgoingEdges) {
-                Edge<N, E> newEdge = new Edge<N, E>(newNode, old.getTail(), old.getLabel());
+            Set<Edge> newOutgoingEdges = new HashSet<Edge>();
+            for (Edge old: oldOutgoingEdges) {
+                Edge newEdge = new Edge(newNode, old.getTail(), old.getLabel());
                 newOutgoingEdges.add(newEdge);
                 incoming.get(old.getTail()).remove(old);
                 incoming.get(old.getTail()).add(newEdge);
@@ -354,12 +406,12 @@ public class Graph<N, E> implements Serializable {
             
             
             // like with removeNode() we assume incoming contains the node now
-            Set<Edge<N, E>> oldIncomingEdges = incoming.remove(oldNode);
+            Set<Edge> oldIncomingEdges = incoming.remove(oldNode);
             // create new edges from the original tail node to the new node
             // and remove old incoming edges from the outgoing graph
-            Set<Edge<N, E>> newIncomingEdges = new HashSet<Edge<N, E>>();
-            for (Edge<N, E> old: oldIncomingEdges) {
-                Edge<N, E> newEdge = new Edge<N, E>(old.getHead(), newNode, old.getLabel());
+            Set<Edge> newIncomingEdges = new HashSet<Edge>();
+            for (Edge old: oldIncomingEdges) {
+                Edge newEdge = new Edge(old.getHead(), newNode, old.getLabel());
                 newIncomingEdges.add(newEdge);
                 outgoing.get(old.getHead()).remove(old);
                 outgoing.get(old.getHead()).add(newEdge);
@@ -385,7 +437,7 @@ public class Graph<N, E> implements Serializable {
      * @return True if the graph was modified as a result of this method call
      * @throws NullPointerException if edge is null
      */
-    public boolean addEdge(Edge<N, E> edge) {
+    public boolean addEdge(Edge edge) {
         if (edge == null)
             throw new NullPointerException("Edge cannot be null");
         
@@ -412,11 +464,11 @@ public class Graph<N, E> implements Serializable {
      * @return True if the graph was modified as a result of this method call
      * @throws NullPointerException if edge is null
      */
-    public boolean removeEdge(Edge<N, E> edge) {
+    public boolean removeEdge(Edge edge) {
         if (edge == null)
             throw new NullPointerException("Edge cannot be null");
         
-        Set<Edge<N, E>> outgoingEdges = outgoing.get(edge.getHead());
+        Set<Edge> outgoingEdges = outgoing.get(edge.getHead());
         if (outgoingEdges != null) {
             // remove the edge from both outgoing and incoming
             if (outgoingEdges.remove(edge)) {
@@ -440,17 +492,17 @@ public class Graph<N, E> implements Serializable {
      * @return The edges that were removed
      * @throws NullPointerException if head or tail are null
      */
-    public Set<Edge<N, E>> removeEdges(Node<N> head, Node<N> tail) {
+    public Set<Edge> removeEdges(Node head, Node tail) {
         if (head == null || tail == null)
             throw new NullPointerException("Head and tail nodes cannot be null");
         
-        Set<Edge<N, E>> outgoingEdges = outgoing.get(head);
+        Set<Edge> outgoingEdges = outgoing.get(head);
         if (outgoingEdges != null) {
-            Set<Edge<N, E>> removed = new HashSet<Edge<N, E>>();
+            Set<Edge> removed = new HashSet<Edge>();
 
             // clone set so we can call removeEdge() without ConcurrentModificationExceptions
-            outgoingEdges = new HashSet<Edge<N, E>>(outgoingEdges);
-            for (Edge<N, E> o: outgoingEdges) {
+            outgoingEdges = new HashSet<Edge>(outgoingEdges);
+            for (Edge o: outgoingEdges) {
                 if (o.getTail().equals(tail)) {
                     // found the edge so remove it
                     removeEdge(o);
@@ -487,19 +539,19 @@ public class Graph<N, E> implements Serializable {
      * @return The new edge, or null if oldEdge was not in this graph
      * @throws NullPointerException if oldEdge is null
      */
-    public Edge<N, E> updateEdgeLabel(Edge<N, E> oldEdge, E newLabel) {
+    public Edge updateEdgeLabel(Edge oldEdge, List<Desire> newLabel) {
         if (oldEdge == null)
             throw new NullPointerException("Old edge cannot be null");
         
-        Set<Edge<N, E>> outgoingEdges = outgoing.get(oldEdge.getHead());
+        Set<Edge> outgoingEdges = outgoing.get(oldEdge.getHead());
         if (outgoingEdges != null) {
             if (outgoingEdges.remove(oldEdge)) {
                 // the old edge was in the graph so replace it
-                Edge<N, E> newEdge = new Edge<N, E>(oldEdge.getHead(), oldEdge.getTail(), newLabel);
+                Edge newEdge = new Edge(oldEdge.getHead(), oldEdge.getTail(), newLabel);
                 outgoingEdges.add(newEdge);
                 
                 // now we replace the incoming edge as well, but we assume it exists
-                Set<Edge<N, E>> incomingEdges = incoming.get(oldEdge.getTail());
+                Set<Edge> incomingEdges = incoming.get(oldEdge.getTail());
                 incomingEdges.remove(oldEdge);
                 incomingEdges.add(newEdge);
                 
