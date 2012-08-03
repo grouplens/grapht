@@ -141,9 +141,9 @@ public class SerializationTest {
         b.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
         b.getRootContext().bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build()).to("hello world");
         
-        DependencySolver solver = new DependencySolver(Arrays.asList(b.getFunction(RuleSet.EXPLICIT), 
-                                                                     b.getFunction(RuleSet.INTERMEDIATE_TYPES), 
-                                                                     b.getFunction(RuleSet.SUPER_TYPES), 
+        DependencySolver solver = new DependencySolver(Arrays.asList(b.build(RuleSet.EXPLICIT),
+                                                                     b.build(RuleSet.INTERMEDIATE_TYPES),
+                                                                     b.build(RuleSet.SUPER_TYPES),
                                                                      new DefaultDesireBindingFunction(b.getSPI())), 100);
         solver.resolve(b.getSPI().desire(null, NamedType.class, false));
         

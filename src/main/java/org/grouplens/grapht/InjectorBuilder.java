@@ -134,17 +134,17 @@ public class InjectorBuilder implements Context {
         BindingFunction[] functions;
         if (enableProviderInjection) {
             functions = new BindingFunction[] { 
-                builder.getFunction(RuleSet.EXPLICIT),
-                builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
-                builder.getFunction(RuleSet.SUPER_TYPES),
+                builder.build(RuleSet.EXPLICIT),
+                builder.build(RuleSet.INTERMEDIATE_TYPES),
+                builder.build(RuleSet.SUPER_TYPES),
                 new ProviderBindingFunction(builder.getSPI()), // insert extra provider injection
                 new DefaultDesireBindingFunction(builder.getSPI()) 
             };
         } else {
             functions = new BindingFunction[] { 
-                builder.getFunction(RuleSet.EXPLICIT),
-                builder.getFunction(RuleSet.INTERMEDIATE_TYPES),
-                builder.getFunction(RuleSet.SUPER_TYPES),
+                builder.build(RuleSet.EXPLICIT),
+                builder.build(RuleSet.INTERMEDIATE_TYPES),
+                builder.build(RuleSet.SUPER_TYPES),
                 new DefaultDesireBindingFunction(builder.getSPI()) 
             };
         }

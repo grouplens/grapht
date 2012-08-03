@@ -30,6 +30,7 @@ import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.solver.SolverException;
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.MockInjectionPoint;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
@@ -50,6 +51,9 @@ import org.grouplens.grapht.spi.reflect.types.TypeA;
 import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
 import org.junit.Test;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 public class ReflectionDesireTest {
     private static <T extends Annotation> Attributes qualifier(Class<T> qtype) {
@@ -128,6 +132,20 @@ public class ReflectionDesireTest {
         
         Assert.assertNull(dflt);
     }
+
+    /**
+     * If we have a nullable injection point, and restrict the desire to a class, we
+     * should throw out the null satisfaction (and recompute it, if appropriate) based
+     * on the restricted type.
+     */
+    @Test
+    public void testRestrictNullableDesire() throws NoSuchMethodException, SolverException {
+        List<ReflectionDesire> desires = ReflectionDesire.getDesires(ReqB.class);
+        Assert.assertEquals(1, desires.size());
+        ReflectionDesire desire = desires.get(0);
+        Desire restricted = desire.restrict(TypeB.class);
+        Assert.assertNotNull(restricted);
+    }
     
     private ReflectionDesire getDefaultDesire(Object methodOrCtorParam, List<ReflectionDesire>  desires) throws SolverException {
         BindingResult result = null;
@@ -159,4 +177,11 @@ public class ReflectionDesireTest {
     public static class B extends A { }
     
     public static class C { }
+
+    public static class ReqB {
+        @Inject
+        public void setB(@Nullable InterfaceB foo) {
+            /* do nothing */
+        }
+    }
 }
