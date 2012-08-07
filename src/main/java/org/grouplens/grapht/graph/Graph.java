@@ -42,7 +42,7 @@ import org.grouplens.grapht.spi.Desire;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Graph implements Serializable {
+public class Graph implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
     
     // The outgoing key set is used to represent the set of nodes in the graph,
@@ -561,5 +561,27 @@ public class Graph implements Serializable {
         
         // if we've gotten here, the old edge was not in the graph
         return null;
+    }
+
+    /**
+     * Make a copy of this graph.
+     * @return A copy of the graph.
+     */
+    public Graph clone() {
+        Graph g2;
+        try {
+            g2 = (Graph) super.clone();
+        } catch (CloneNotSupportedException ex) {
+            throw new RuntimeException("cannot clone graph", ex);
+        }
+        g2.outgoing = new HashMap<Node, Set<Edge>>(outgoing.size());
+        for (Map.Entry<Node,Set<Edge>> e: outgoing.entrySet()) {
+            g2.outgoing.put(e.getKey(), new HashSet<Edge>(e.getValue()));
+        }
+        g2.incoming = new HashMap<Node, Set<Edge>>(incoming.size());
+        for (Map.Entry<Node,Set<Edge>> e: incoming.entrySet()) {
+            g2.incoming.put(e.getKey(), new HashSet<Edge>(e.getValue()));
+        }
+        return g2;
     }
 }
