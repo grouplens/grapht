@@ -564,7 +564,8 @@ public class Graph implements Serializable, Cloneable {
     }
 
     /**
-     * Make a copy of this graph.
+     * Make a copy of this graph. The resulting copy uses the same node and edge
+     * objects, but can be mutated without affecting the original graph.
      * @return A copy of the graph.
      */
     public Graph clone() {
