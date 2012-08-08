@@ -85,6 +85,12 @@ public class NullSatisfaction implements Satisfaction, Externalizable {
     }
 
     @Override
+    public boolean hasInstance() {
+        // Null satisfactions have instances, just null ones.
+        return true;
+    }
+
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return new InstanceProvider(null);

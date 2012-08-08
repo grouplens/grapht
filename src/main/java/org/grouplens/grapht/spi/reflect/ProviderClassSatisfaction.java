@@ -94,6 +94,11 @@ public class ProviderClassSatisfaction implements Satisfaction, Externalizable {
     }
 
     @Override
+    public boolean hasInstance() {
+        return false;
+    }
+
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Provider<?> makeProvider(ProviderSource dependencies) {
         // we have to use the raw type because we don't have enough information,

@@ -82,6 +82,11 @@ public class MockSatisfaction implements Satisfaction {
     }
 
     @Override
+    public boolean hasInstance() {
+        return true;
+    }
+
+    @Override
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return provider;
     }

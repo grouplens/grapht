@@ -63,6 +63,16 @@ public interface Satisfaction extends Serializable {
      * @return The class object for this satisfaction's type.
      */
     Class<?> getErasedType();
+
+    /**
+     * Query whether this satisfaction already has an instance to return. If
+     * true, then this satisfaction's provider will just return an instance
+     * that is already in existence; if false, then its provider may create
+     * new instances.
+     *
+     * @return whether the satisfaction already has an instance.
+     */
+    boolean hasInstance();
     
     /**
      * Get the default cache policy for instances created by this satisfaction.

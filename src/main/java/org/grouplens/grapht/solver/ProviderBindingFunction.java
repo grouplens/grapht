@@ -124,6 +124,11 @@ public class ProviderBindingFunction implements BindingFunction {
         }
 
         @Override
+        public boolean hasInstance() {
+            return false;
+        }
+
+        @Override
         public Provider<?> makeProvider(ProviderSource dependencies) {
             Provider<?> trueProvider = dependencies.apply(providedDesire);
             
