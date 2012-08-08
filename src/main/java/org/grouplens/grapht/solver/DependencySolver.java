@@ -89,7 +89,7 @@ public class DependencySolver {
         deferredNodes = new ArrayDeque<DeferredResult>();
         
         graph = new Graph();
-        root = new Node(null);
+        root = new Node();
         graph.addNode(root);
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
@@ -125,7 +125,7 @@ public class DependencySolver {
             
             // before any deferred nodes are processed, we use a synthetic root
             // and null original desire since nothing produced this root
-            deferredNodes.add(new DeferredResult(new Node(null), null, new InjectionContext()));
+            deferredNodes.add(new DeferredResult(new Node(), null, new InjectionContext()));
             
             while(!deferredNodes.isEmpty()) {
                 DeferredResult treeRoot = deferredNodes.poll();

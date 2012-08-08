@@ -38,6 +38,17 @@ public class CachedSatisfaction implements Serializable {
     private CachePolicy cachePolicy;
     
     /**
+     * Create a new CachedSatisfaction wrapping the given satisfaction and the
+     * satisfaction's default cache policy.
+     * 
+     * @param satisfaction The satisfaction to wrap
+     * @throws NullPointerException if satisfaction is null
+     */
+    public CachedSatisfaction(Satisfaction satisfaction) {
+        this(satisfaction, satisfaction.getDefaultCachePolicy());
+    }
+    
+    /**
      * Create a new CachedSatisfaction wrapping the given satisfaction and cache
      * policy. Providers from the given satisfaction, used in conjunction with
      * this pair, must be wrapped to satisfy the chosen policy.

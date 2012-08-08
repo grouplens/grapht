@@ -82,7 +82,7 @@ public class SerializationTest {
         CachedSatisfaction rootLabel = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
         Graph g = new Graph();
         Node n1 = new Node(rootLabel);
-        Node n2 = new Node(null);
+        Node n2 = new Node();
         g.addEdge(new Edge(n1, n2, null));
         write(g);
         Graph read = read();

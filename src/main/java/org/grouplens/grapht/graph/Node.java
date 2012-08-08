@@ -22,7 +22,9 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
+import org.grouplens.grapht.spi.Satisfaction;
 
 
 /**
@@ -45,6 +47,36 @@ public class Node implements Serializable {
     
     // "final"
     private CachedSatisfaction label;
+    
+    /**
+     * Create a new Node with a null label.
+     */
+    public Node() {
+        this((CachedSatisfaction) null);
+    }
+    
+    /**
+     * Create a new Node that uses the given satisfaction and its default cache
+     * policy. If the satisfaction is null, the created CachedSatisfaction label
+     * will be null.
+     * 
+     * @param satisfaction The satisfaction attached to this node
+     */
+    public Node(@Nullable Satisfaction satisfaction) {
+        this((satisfaction == null ? null : new CachedSatisfaction(satisfaction)));
+    }
+    
+    /**
+     * Create a new Node that uses the given satisfaction and cache policy. If
+     * the satisfaction is null, the created CachedSatisfaction label will be
+     * null, irrespective of the cache policy.
+     * 
+     * @param satisfaction The satisfaction attached to this node
+     * @param policy The policy associated with the satisfaction
+     */
+    public Node(@Nullable Satisfaction satisfaction, @Nullable CachePolicy policy) {
+        this((satisfaction == null ? null : new CachedSatisfaction(satisfaction, policy)));
+    }
     
     /**
      * Create a new Node that uses the specified label instance.

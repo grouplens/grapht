@@ -91,6 +91,11 @@ public class InstanceSatisfaction implements Satisfaction, Externalizable {
     }
 
     @Override
+    public boolean hasInstance() {
+        return true;
+    }
+
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return new InstanceProvider(instance);
