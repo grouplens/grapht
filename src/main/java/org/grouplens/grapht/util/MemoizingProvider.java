@@ -33,8 +33,8 @@ public class MemoizingProvider<T> implements Provider<T> {
     // We track a boolean because this supports providing null instances, in
     // which case we can't just check against null to see if we've already
     // queried the base provider
-    private T cached;
-    private boolean invoked;
+    private volatile T cached;
+    private volatile boolean invoked;
     
     public MemoizingProvider(Provider<T> provider) {
         Preconditions.notNull("provider", provider);
@@ -46,8 +46,12 @@ public class MemoizingProvider<T> implements Provider<T> {
     @Override
     public T get() {
         if (!invoked) {
-            cached = wrapped.get();
-            invoked = true;
+            synchronized (this) {
+                if (!invoked) {
+                    cached = wrapped.get();
+                    invoked = true;
+                }
+            }
         }
         return cached;
     }
