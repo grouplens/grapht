@@ -55,14 +55,13 @@ public class DefaultInjector implements Injector {
     private final DependencySolver solver;
     private final Map<Node, Provider<?>> providerCache;
     
-    private final CachePolicy defaultPolicy;
 
     /**
      * <p>
      * Create a new DefaultInjector. The created resolver will use a max
      * dependency depth of 100 to estimate if there are cycles in the dependency
      * hierarchy. Bindings with a NO_PREFERENCE cache policy will be treated as
-     * MEMOIZED.
+     * NEW_INSTANCE.
      * 
      * @param spi The InjectSPI to use
      * @param functions The BindingFunctions to use, ordered with highest
@@ -118,8 +117,7 @@ public class DefaultInjector implements Injector {
         }
         
         this.spi = spi;
-        this.defaultPolicy = defaultPolicy;
-        solver = new DependencySolver(Arrays.asList(functions), maxDepth);
+        solver = new DependencySolver(Arrays.asList(functions), defaultPolicy, maxDepth);
         providerCache = new HashMap<Node, Provider<?>>();
     }
     
@@ -169,10 +167,6 @@ public class DefaultInjector implements Injector {
             Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node));
             
             CachePolicy policy = node.getLabel().getCachePolicy();
-            if (policy.equals(CachePolicy.NO_PREFERENCE)) {
-                policy = defaultPolicy;
-            }
-            
             if (policy.equals(CachePolicy.MEMOIZE)) {
                 // enforce memoization on providers for MEMOIZE policy
                 cached = new MemoizingProvider(raw);

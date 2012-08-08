@@ -103,7 +103,7 @@ public class SerializationTest {
         DependencySolver solver = new DependencySolver(Arrays.asList(b.build(RuleSet.EXPLICIT),
                                                                      b.build(RuleSet.INTERMEDIATE_TYPES),
                                                                      b.build(RuleSet.SUPER_TYPES),
-                                                                     new DefaultDesireBindingFunction(b.getSPI())), 100);
+                                                                     new DefaultDesireBindingFunction(b.getSPI())), CachePolicy.NO_PREFERENCE, 100);
         solver.resolve(b.getSPI().desire(null, NamedType.class, false));
         
         Graph g = solver.getGraph();
