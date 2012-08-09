@@ -35,8 +35,9 @@ import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by
@@ -46,6 +47,8 @@ import org.grouplens.grapht.util.Types;
  * @param <T> The bindings source's type
  */
 class BindingImpl<T> implements Binding<T> {
+    private static final Logger logger = LoggerFactory.getLogger(BindingImpl.class);
+    
     private final ContextImpl context;
     private final Class<T> sourceType;
     
@@ -118,16 +121,13 @@ class BindingImpl<T> implements Binding<T> {
     
     @Override
     public void to(Class<? extends T> impl) {
-        // If they provide us a concrete class, then we guarantee here that it 
-        // has a default ctor or an injectable ctor. 
-        //  - We could perform this logic in ReflectionDesire, but that gets 
-        //    problematic when creating injection points for types like String 
-        //    (which should be instantiable, but have no valid constructor).
-        boolean useSatisfaction = false;
-        if (Types.shouldBeInstantiable(impl)) {
-            Preconditions.isInstantiable(impl);
-            useSatisfaction = true;
+        if (logger.isWarnEnabled()) {
+            if (Types.shouldBeInstantiable(impl) && !Types.isInstantiable(impl)) {
+                logger.warn("Concrete type {} does not have an injectable or public default constructor, but probably should", impl);
+            }
         }
+        
+        boolean useSatisfaction = Types.isInstantiable(impl);
         
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();

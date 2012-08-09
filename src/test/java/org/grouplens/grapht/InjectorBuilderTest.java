@@ -246,8 +246,10 @@ public class InjectorBuilderTest {
     @Test(expected=InjectionException.class)
     public void testInjectorNoConstructor() throws Exception {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(ShouldWork.class).to(NotInjectable.class); // should fail
-        Assert.fail("Previous statement should have thrown an exception");
+        b.bind(ShouldWork.class).to(NotInjectable.class);
+        Injector i = b.build();
+        
+        i.getInstance(ShouldWork.class);
     }
     
     public static interface ShouldWork { }

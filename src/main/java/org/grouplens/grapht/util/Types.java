@@ -217,16 +217,20 @@ public final class Types {
     }
     
     /**
+     * <p>
      * Return true if the type is not abstract and not an interface. This will
      * return true essentially when the class "should" have a default
      * constructor or a constructor annotated with {@link Inject @Inject} to be
      * used properly.
+     * <p>
+     * As another special rule, if the input type is {@link Void}, false is
+     * returned because for most intents and purposes, it is not instantiable.
      * 
      * @param type The type to test
      * @return True if it should be instantiable
      */
     public static boolean shouldBeInstantiable(Class<?> type) {
-        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
+        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface() && !Void.class.equals(type);
     }
     
     /**
