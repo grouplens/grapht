@@ -242,4 +242,17 @@ public class InjectorBuilderTest {
         // it defines others that are not injectable).
         i.getInstance(NamedType.class);
     }
+    
+    @Test(expected=InjectionException.class)
+    public void testInjectorNoConstructor() throws Exception {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(ShouldWork.class).to(NotInjectable.class); // should fail
+        Assert.fail("Previous statement should have thrown an exception");
+    }
+    
+    public static interface ShouldWork { }
+    
+    public static class NotInjectable implements ShouldWork {
+        public NotInjectable(Object o) { }
+    }
 }

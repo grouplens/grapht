@@ -217,6 +217,19 @@ public final class Types {
     }
     
     /**
+     * Return true if the type is not abstract and not an interface. This will
+     * return true essentially when the class "should" have a default
+     * constructor or a constructor annotated with {@link Inject @Inject} to be
+     * used properly.
+     * 
+     * @param type The type to test
+     * @return True if it should be instantiable
+     */
+    public static boolean shouldBeInstantiable(Class<?> type) {
+        return !Modifier.isAbstract(type.getModifiers()) && !type.isInterface();
+    }
+    
+    /**
      * Return true if the array of Annotations contains an Annotation with a
      * simple name of 'Nullable'. It does not matter which actual Nullable
      * annotation is present.
