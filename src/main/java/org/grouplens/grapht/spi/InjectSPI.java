@@ -20,6 +20,7 @@ package org.grouplens.grapht.spi;
 
 import java.lang.annotation.Annotation;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -58,7 +59,7 @@ public interface InjectSPI {
      * @return A satisfaction wrapping the given class type, capable of
      *         instantiating new instances
      */
-    Satisfaction satisfy(Class<?> type);
+    Satisfaction satisfy(@Nonnull Class<?> type);
     
     /**
      * Return a Satisfaction that satisfies the given type by explicitly
@@ -69,7 +70,7 @@ public interface InjectSPI {
      * @return A satisfaction wrapping the given class type, that satisfies with
      *         null values
      */
-    Satisfaction satisfyWithNull(Class<?> type);
+    Satisfaction satisfyWithNull(@Nonnull Class<?> type);
     
     /**
      * Return a Satisfaction that wraps the given instance, and can satisfy
@@ -79,7 +80,7 @@ public interface InjectSPI {
      * @param o The instance to wrap
      * @return A satisfaction wrapping the given instance
      */
-    Satisfaction satisfy(Object o);
+    Satisfaction satisfy(@Nonnull Object o);
     
     /**
      * Return a Satisfaction that wraps a Provider class, and can satisfy
@@ -91,7 +92,7 @@ public interface InjectSPI {
      * @return A satisfaction wrapping the given provider class, that creates
      *         instances of that provider type
      */
-    Satisfaction satisfyWithProvider(Class<? extends Provider<?>> providerType);
+    Satisfaction satisfyWithProvider(@Nonnull Class<? extends Provider<?>> providerType);
     
     /**
      * Return a Satisfaction that wraps the given Provider instance. The
@@ -101,7 +102,7 @@ public interface InjectSPI {
      * @param provider The provider to wrap
      * @return A satisfaction wrapping the given provider
      */
-    Satisfaction satisfyWithProvider(Provider<?> provider);
+    Satisfaction satisfyWithProvider(@Nonnull Provider<?> provider);
 
     /**
      * Create a Desire that wraps a synthetic InjectionPoint for the qualified

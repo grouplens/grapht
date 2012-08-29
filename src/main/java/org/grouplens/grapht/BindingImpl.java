@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
@@ -77,13 +78,13 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> withQualifier(Class<? extends Annotation> qualifier) {
+    public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
         QualifierMatcher q = context.getBuilder().getSPI().match(qualifier);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
     }
     
     @Override
-    public Binding<T> withQualifier(Annotation annot) {
+    public Binding<T> withQualifier(@Nonnull Annotation annot) {
         QualifierMatcher q = context.getBuilder().getSPI().match(annot);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
     }
@@ -95,7 +96,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> exclude(Class<?> exclude) {
+    public Binding<T> exclude(@Nonnull Class<?> exclude) {
         if (exclude == null) {
             throw new NullPointerException("Type cannot be null");
         }
@@ -120,7 +121,7 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public void to(Class<? extends T> impl) {
+    public void to(@Nonnull Class<? extends T> impl) {
         if (logger.isWarnEnabled()) {
             if (Types.shouldBeInstantiable(impl) && !Types.isInstantiable(impl)) {
                 logger.warn("Concrete type {} does not have an injectable or public default constructor, but probably should", impl);
@@ -159,7 +160,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void to(T instance) {
+    public void to(@Nonnull T instance) {
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
 
@@ -178,7 +179,7 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public void toProvider(Class<? extends Provider<? extends T>> provider) {
+    public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
@@ -194,7 +195,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void toProvider(Provider<? extends T> provider) {
+    public void toProvider(@Nonnull Provider<? extends T> provider) {
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
