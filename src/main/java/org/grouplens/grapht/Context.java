@@ -23,7 +23,6 @@ import java.lang.annotation.Annotation;
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
-import org.grouplens.grapht.annotation.Parameter;
 import org.grouplens.grapht.spi.ContextChain;
 
 /**
@@ -53,34 +52,6 @@ public interface Context {
      * @return A new binding in this context for type T
      */
     <T> Binding<T> bind(Class<T> type);
-
-    /**
-     * <p>
-     * Bind a parameter value. This is a convenience for creating a Binding
-     * using the proper primitive class or String of the parameter, specifying
-     * the given annotation as its qualifier, and binding it to the given
-     * instance.
-     * <p>
-     * As an example:
-     * 
-     * <pre>
-     * context.bind(IntFoo.class, 5);
-     * </pre>
-     * 
-     * is equivalent to:
-     * 
-     * <pre>
-     * context.bind(Integer.class).withQualifier(IntFoo.class).to(5);
-     * </pre>
-     * <p>
-     * If the qualifier annotation is annotated with {@link Parameter}, the
-     * parameter type is used in lieu of <code>value.getClass()</code>
-     * 
-     * @see Parameter
-     * @param param The parameter annotation
-     * @param value The instance that is bound
-     */
-    void bind(Class<? extends Annotation> param, Object value);
 
     /**
      * Create a new Context that extends the current context stack with the

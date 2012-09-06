@@ -18,20 +18,17 @@
  */
 package org.grouplens.grapht;
 
+import org.grouplens.grapht.annotation.DefaultDouble;
+import org.grouplens.grapht.annotation.DefaultInteger;
+import org.junit.Assert;
+import org.junit.Test;
+
+import javax.inject.Inject;
+import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-
-import org.grouplens.grapht.annotation.DefaultDouble;
-import org.grouplens.grapht.annotation.DefaultInteger;
-import org.grouplens.grapht.annotation.Parameter;
-import org.grouplens.grapht.annotation.Parameter.PrimitiveType;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class ParameterAnnotationTest {
     @Test
@@ -69,12 +66,19 @@ public class ParameterAnnotationTest {
         
         Assert.assertEquals(50.0, t.b, 0.00001);
     }
+
+    private static void bindDouble(Context ctx, Object obj) {
+        ctx.bind((Class) Double.class).withQualifier(DoubleParameter.class).to(obj);
+    }
+    private static void bindInt(Context ctx, Object obj) {
+        ctx.bind((Class) Integer.class).withQualifier(IntParameter.class).to(obj);
+    }
     
     @Test
     public void testDirectBinding() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(IntParameter.class, 50);
-        b.bind(DoubleParameter.class, 50.0);
+        bindInt(b, 50);
+        bindDouble(b, 50.0);
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50, t.a);
@@ -84,7 +88,7 @@ public class ParameterAnnotationTest {
     @Test
     public void testFromBigIntegerCoercion() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(IntParameter.class, BigInteger.valueOf(50));
+        bindInt(b, BigInteger.valueOf(50));
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50, t.a);
@@ -93,7 +97,7 @@ public class ParameterAnnotationTest {
     @Test
     public void testFromBigDecimalCoercion() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(DoubleParameter.class, new BigDecimal(50.34));
+        bindDouble(b, new BigDecimal(50.34));
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50.34, t.b, 0.00001);
@@ -102,7 +106,7 @@ public class ParameterAnnotationTest {
     @Test
     public void testFromLongCoercion() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(IntParameter.class, Long.valueOf(50));
+        bindInt(b, Long.valueOf(50));
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50, t.a);
@@ -111,7 +115,7 @@ public class ParameterAnnotationTest {
     @Test
     public void testFromFloatCoercion() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(DoubleParameter.class, Float.valueOf(50f));
+        bindDouble(b, Float.valueOf(50f));
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50.0, t.b, 0.00001);
@@ -120,7 +124,7 @@ public class ParameterAnnotationTest {
     @Test
     public void testFromByteCoercion() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(IntParameter.class, Byte.valueOf((byte) 50));
+        bindInt(b, Byte.valueOf((byte) 50));
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50, t.a);
@@ -129,19 +133,17 @@ public class ParameterAnnotationTest {
     @Test
     public void testDiscreteToFloatCoercion() {
         InjectorBuilder b = new InjectorBuilder();
-        b.bind(DoubleParameter.class, Integer.valueOf(50));
+        bindDouble(b, Integer.valueOf(50));
         Type t = b.build().getInstance(Type.class);
         
         Assert.assertEquals(50.0, t.b, 0.00001);
     }
 
-    @Parameter(PrimitiveType.INT)
     @DefaultInteger(0)
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface IntParameter { }
     
-    @Parameter(PrimitiveType.DOUBLE)
     @DefaultDouble(0.0)
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)

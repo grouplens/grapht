@@ -36,7 +36,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  * InjectorBuilder instances memoize their created objects.
  * </p>
  * <p>
- * Internally, it uses an {@link InjectorConfigurationBuilder} to accumulate
+ * Internally, it uses an {@link BindingFunctionBuilder} to accumulate
  * bind rules, a {@link DefaultInjector} to resolve dependencies, and the
  * {@link ReflectionInjectSPI} to access dependency information.
  * 
@@ -98,11 +98,6 @@ public class InjectorBuilder implements Context {
         return builder.getRootContext().bind(type);
     }
     
-    @Override
-    public void bind(Class<? extends Annotation> param, Object value) {
-        builder.getRootContext().bind(param, value);
-    }
-
     @Override
     public Context in(Class<?> type) {
         return builder.getRootContext().in(type);

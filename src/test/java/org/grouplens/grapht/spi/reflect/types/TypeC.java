@@ -91,7 +91,7 @@ public class TypeC {
     public int getIntValue() {
         return value;
     }
-    
+
     public InterfaceA getInterfaceA() {
         return a1;
     }

@@ -41,15 +41,7 @@ import org.grouplens.grapht.spi.reflect.ProviderClassSatisfaction;
 import org.grouplens.grapht.spi.reflect.ReflectionDesire;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.SetterInjectionPoint;
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.InterfaceB;
-import org.grouplens.grapht.spi.reflect.types.ParameterA;
-import org.grouplens.grapht.spi.reflect.types.ProviderA;
-import org.grouplens.grapht.spi.reflect.types.RoleA;
-import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
-import org.grouplens.grapht.spi.reflect.types.TypeC;
+import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Test;
 
 import javax.annotation.Nullable;

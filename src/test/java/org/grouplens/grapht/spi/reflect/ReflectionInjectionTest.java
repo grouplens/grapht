@@ -35,17 +35,7 @@ import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
-import org.grouplens.grapht.spi.reflect.types.CycleA;
-import org.grouplens.grapht.spi.reflect.types.CycleB;
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.InterfaceB;
-import org.grouplens.grapht.spi.reflect.types.ParameterA;
-import org.grouplens.grapht.spi.reflect.types.ProviderA;
-import org.grouplens.grapht.spi.reflect.types.RoleA;
-import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
-import org.grouplens.grapht.spi.reflect.types.TypeC;
+import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -164,7 +154,7 @@ public class ReflectionInjectionTest {
         TypeB b = new TypeB();
         
         BindingFunctionBuilder bindRules = new BindingFunctionBuilder(spi, false);
-        bindRules.getRootContext().bind(ParameterA.class, 10);
+        bindRules.getRootContext().bind(Integer.class).withQualifier(ParameterA.class).to(10);
         bindRules.getRootContext().bind(InterfaceA.class).withQualifier(RoleA.class).to(PrimeA.class);
         bindRules.getRootContext().bind(InterfaceB.class).withQualifier(RoleD.class).to(PrimeB.class);
         bindRules.getRootContext().bind(TypeA.class).to(a);
