@@ -167,9 +167,14 @@ public class ReflectionDesire implements Desire, Externalizable {
 
         // try and find a satisfaction
         if (satisfaction == null) {
-            if (Types.isInstantiable(desiredType)) {
-                satisfaction = new ClassSatisfaction(desiredType);
+            if (Types.shouldBeInstantiable(desiredType)) {
+                if (Types.isInstantiable(desiredType)) {
+                    satisfaction = new ClassSatisfaction(desiredType);
+                } // else don't satisfy this, even if the injection point is null
             } else if (injectPoint.isNullable()) {
+                // we only default to null if the injection point depended on
+                // an interface. if they ask for a concrete type, it's a bug
+                // for that type not to be injectable
                 satisfaction = new NullSatisfaction(desiredType);
             }
         }

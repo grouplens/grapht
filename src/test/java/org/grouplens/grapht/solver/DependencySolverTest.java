@@ -48,7 +48,7 @@ import org.junit.Test;
 
 public class DependencySolverTest {
     private DependencySolver createSolver(Map<ContextChain, Collection<BindRule>> rules) {
-        return new DependencySolver(Arrays.<BindingFunction>asList(new RuleBasedBindingFunction(rules)), 100);
+        return new DependencySolver(Arrays.<BindingFunction>asList(new RuleBasedBindingFunction(rules)), CachePolicy.NO_PREFERENCE, 100);
     }
     
     // bypass synthetic root and return node that resolves the desire 

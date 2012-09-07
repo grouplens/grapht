@@ -20,6 +20,7 @@ package org.grouplens.grapht.spi.reflect;
 
 import java.lang.annotation.Annotation;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -70,27 +71,27 @@ public class ReflectionInjectSPI implements InjectSPI {
     }
 
     @Override
-    public Satisfaction satisfy(Class<?> type) {
+    public Satisfaction satisfy(@Nonnull Class<?> type) {
         return new ClassSatisfaction(type);
     }
 
     @Override
-    public Satisfaction satisfyWithNull(Class<?> type) {
+    public Satisfaction satisfyWithNull(@Nonnull Class<?> type) {
         return new NullSatisfaction(type);
     }
 
     @Override
-    public Satisfaction satisfy(Object o) {
+    public Satisfaction satisfy(@Nonnull Object o) {
         return new InstanceSatisfaction(o);
     }
 
     @Override
-    public Satisfaction satisfyWithProvider(Class<? extends Provider<?>> providerType) {
+    public Satisfaction satisfyWithProvider(@Nonnull Class<? extends Provider<?>> providerType) {
         return new ProviderClassSatisfaction(providerType);
     }
 
     @Override
-    public Satisfaction satisfyWithProvider(Provider<?> provider) {
+    public Satisfaction satisfyWithProvider(@Nonnull Provider<?> provider) {
         return new ProviderInstanceSatisfaction(provider);
     }
 }

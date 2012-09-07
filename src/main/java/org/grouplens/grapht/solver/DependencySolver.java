@@ -60,6 +60,8 @@ public class DependencySolver {
     private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);
     
     private final int maxDepth;
+    private final CachePolicy defaultPolicy;
+
     private final List<BindingFunction> functions;
     
     private final Graph graph;
@@ -77,14 +79,16 @@ public class DependencySolver {
      * @throws IllegalArgumentException if maxDepth is less than 1
      * @throws NullPointerException if bindFunctions is null
      */
-    public DependencySolver(List<BindingFunction> bindFunctions, int maxDepth) {
+    public DependencySolver(List<BindingFunction> bindFunctions, CachePolicy defaultPolicy, int maxDepth) {
         Preconditions.notNull("bindFunctions", bindFunctions);
+        Preconditions.notNull("defaultPolicy", defaultPolicy);
         if (maxDepth <= 0) {
             throw new IllegalArgumentException("Max depth must be at least 1");
         }
         
         this.functions = bindFunctions;
         this.maxDepth = maxDepth;
+        this.defaultPolicy = defaultPolicy;
         
         deferredNodes = new ArrayDeque<DeferredResult>();
         
@@ -320,9 +324,12 @@ public class DependencySolver {
                 context.recordDesire(currentDesire);
                 logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
                 
-                // update cache policy if the final type is marked as a singleton
+                // update cache policy if a specific policy hasn't yet been selected
                 if (policy.equals(CachePolicy.NO_PREFERENCE)) {
                     policy = currentDesire.getSatisfaction().getDefaultCachePolicy();
+                    if (policy.equals(CachePolicy.NO_PREFERENCE)) {
+                        policy = defaultPolicy;
+                    }
                 }
                 
                 return new Resolution(currentDesire.getSatisfaction(), policy, context.getPriorDesires(), defer);

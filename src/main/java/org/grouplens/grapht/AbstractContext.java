@@ -16,15 +16,17 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect.types;
+package org.grouplens.grapht;
 
-import org.grouplens.grapht.annotation.DefaultInteger;
+import java.lang.annotation.Annotation;
 
-import javax.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-@Qualifier
-@DefaultInteger(5)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ParameterA { }
+/**
+ * Implementations of convenience methods on {@link Context}.
+ */
+public abstract class AbstractContext implements Context {
+    @Override
+    public <T> Binding<T> bind(Class<? extends Annotation> qual,
+                               Class<T> type) {
+        return bind(type).withQualifier(qual);
+    }
+}

@@ -18,13 +18,21 @@
  */
 package org.grouplens.grapht.spi.reflect.types;
 
-import org.grouplens.grapht.annotation.DefaultInteger;
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
-import javax.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+/**
+ * Type that accepts null.
+ */
+public class TypeN2 {
+    private InterfaceA object;
 
-@Qualifier
-@DefaultInteger(5)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ParameterA { }
+    @Inject
+    public TypeN2(InterfaceA obj) {
+        object = obj;
+    }
+
+    public InterfaceA getObject() {
+        return object;
+    }
+}

@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
@@ -36,15 +38,19 @@ import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Types;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by
- * {@link InjectorConfigurationBuilder}.
+ * {@link BindingFunctionBuilder}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  * @param <T> The bindings source's type
  */
 class BindingImpl<T> implements Binding<T> {
+    private static final Logger logger = LoggerFactory.getLogger(BindingImpl.class);
+    
     private final ContextImpl context;
     private final Class<T> sourceType;
     
@@ -73,13 +79,13 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> withQualifier(Class<? extends Annotation> qualifier) {
+    public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
         QualifierMatcher q = context.getBuilder().getSPI().match(qualifier);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
     }
     
     @Override
-    public Binding<T> withQualifier(Annotation annot) {
+    public Binding<T> withQualifier(@Nonnull Annotation annot) {
         QualifierMatcher q = context.getBuilder().getSPI().match(annot);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
     }
@@ -91,7 +97,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> exclude(Class<?> exclude) {
+    public Binding<T> exclude(@Nonnull Class<?> exclude) {
         if (exclude == null) {
             throw new NullPointerException("Type cannot be null");
         }
@@ -116,7 +122,13 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public void to(Class<? extends T> impl) {
+    public void to(@Nonnull Class<? extends T> impl) {
+        if (logger.isWarnEnabled()) {
+            if (Types.shouldBeInstantiable(impl) && !Types.isInstantiable(impl)) {
+                logger.warn("Concrete type {} does not have an injectable or public default constructor, but probably should", impl);
+            }
+        }
+        
         boolean useSatisfaction = Types.isInstantiable(impl);
         
         ContextChain chain = context.getContextChain();
@@ -149,7 +161,11 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void to(T instance) {
+    public void to(@Nullable T instance) {
+        if (instance == null) {
+            toNull();
+            return;
+        }
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
 
@@ -168,7 +184,7 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public void toProvider(Class<? extends Provider<? extends T>> provider) {
+    public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
@@ -184,7 +200,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void toProvider(Provider<? extends T> provider) {
+    public void toProvider(@Nonnull Provider<? extends T> provider) {
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
@@ -196,6 +212,30 @@ class BindingImpl<T> implements Binding<T> {
             }
         } else {
             config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+        }
+    }
+
+    @Override
+    public void toNull() {
+        toNull(sourceType);
+    }
+
+    @Override
+    public void toNull(Class<? extends T> type) {
+        ContextChain chain = context.getContextChain();
+        BindingFunctionBuilder config = context.getBuilder();
+
+        Satisfaction s = config.getSPI().satisfyWithNull(type);
+
+        if (config.getGenerateRules()) {
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                config.addBindRule(e.getValue(), chain,
+                                   new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+            }
+        } else {
+            config.addBindRule(RuleSet.EXPLICIT, chain,
+                               new BindRule(sourceType, s, cachePolicy, qualifier, true));
         }
     }
     

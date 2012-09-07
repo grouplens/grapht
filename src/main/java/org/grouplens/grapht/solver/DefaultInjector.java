@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.InjectionException;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
+@ThreadSafe
 public class DefaultInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
     
@@ -55,14 +57,13 @@ public class DefaultInjector implements Injector {
     private final DependencySolver solver;
     private final Map<Node, Provider<?>> providerCache;
     
-    private final CachePolicy defaultPolicy;
 
     /**
      * <p>
      * Create a new DefaultInjector. The created resolver will use a max
      * dependency depth of 100 to estimate if there are cycles in the dependency
      * hierarchy. Bindings with a NO_PREFERENCE cache policy will be treated as
-     * MEMOIZED.
+     * NEW_INSTANCE.
      * 
      * @param spi The InjectSPI to use
      * @param functions The BindingFunctions to use, ordered with highest
@@ -118,8 +119,7 @@ public class DefaultInjector implements Injector {
         }
         
         this.spi = spi;
-        this.defaultPolicy = defaultPolicy;
-        solver = new DependencySolver(Arrays.asList(functions), maxDepth);
+        solver = new DependencySolver(Arrays.asList(functions), defaultPolicy, maxDepth);
         providerCache = new HashMap<Node, Provider<?>>();
     }
     
@@ -138,27 +138,32 @@ public class DefaultInjector implements Injector {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getInstance(Annotation qualifier, Class<T> type) {
-        Desire desire = spi.desire(qualifier, type, false);
-        
-        // check if the desire is already in the graph
-        Edge resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
-        
-        // The edge is only non-null if getInstance() has been called before,
-        // it may be present in the graph at a deeper node. If that's the case
-        // it will be properly merged after regenerating the graph at the root context.
-        if (resolved == null) {
-            logger.info("Must resolve desire: {}", desire);
-            try {
-                solver.resolve(desire);
-            } catch(SolverException e) {
-                throw new InjectionException(type, null, e);
+        // All Provider cache access, graph resolution, etc. occur
+        // within this exclusive lock so we know everything is thread safe
+        // albeit in a non-optimal way.
+        synchronized(this) {
+            Desire desire = spi.desire(qualifier, type, false);
+
+            // check if the desire is already in the graph
+            Edge resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
+
+            // The edge is only non-null if getInstance() has been called before,
+            // it may be present in the graph at a deeper node. If that's the case
+            // it will be properly merged after regenerating the graph at the root context.
+            if (resolved == null) {
+                logger.info("Must resolve desire: {}", desire);
+                try {
+                    solver.resolve(desire);
+                } catch(SolverException e) {
+                    throw new InjectionException(type, null, e);
+                }
+                resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
             }
-            resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
+
+            // Check if the provider for the resolved node is in our cache
+            Node resolvedNode = resolved.getTail();
+            return (T) getProvider(resolvedNode).get();
         }
-        
-        // Check if the provider for the resolved node is in our cache
-        Node resolvedNode = resolved.getTail();
-        return (T) getProvider(resolvedNode).get();
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -169,10 +174,6 @@ public class DefaultInjector implements Injector {
             Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node));
             
             CachePolicy policy = node.getLabel().getCachePolicy();
-            if (policy.equals(CachePolicy.NO_PREFERENCE)) {
-                policy = defaultPolicy;
-            }
-            
             if (policy.equals(CachePolicy.MEMOIZE)) {
                 // enforce memoization on providers for MEMOIZE policy
                 cached = new MemoizingProvider(raw);

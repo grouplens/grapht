@@ -20,6 +20,8 @@ package org.grouplens.grapht;
 
 import java.lang.annotation.Annotation;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 
@@ -59,9 +61,8 @@ public interface Binding<T> {
      * 
      * @param qualifier The Qualifier that must match
      * @return A newly configured Binding
-     * @throws NullPointerException if qualifier is null
      */
-    Binding<T> withQualifier(Class<? extends Annotation> qualifier);
+    Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier);
     
     /**
      * <p>
@@ -72,9 +73,8 @@ public interface Binding<T> {
      * 
      * @param annot The annotation instance to match
      * @return A newly configured Binding
-     * @throws NullPointerException if annot is null
      */
-    Binding<T> withQualifier(Annotation annot);
+    Binding<T> withQualifier(@Nonnull Annotation annot);
     
     /**
      * <p>
@@ -97,7 +97,7 @@ public interface Binding<T> {
      * @param exclude The type to exclude from automated rule generation
      * @return A newly configured Binding
      */
-    Binding<T> exclude(Class<?> exclude);
+    Binding<T> exclude(@Nonnull Class<?> exclude);
     
     /**
      * Configure the binding so that a shared instance is always used when
@@ -128,7 +128,7 @@ public interface Binding<T> {
      * 
      * @param impl The implementation type
      */
-    void to(Class<? extends T> impl);
+    void to(@Nonnull Class<? extends T> impl);
 
     /**
      * Complete this binding by specifying an instance to use. The instance will
@@ -136,9 +136,10 @@ public interface Binding<T> {
      * changes, any cache policy assigned by {@link #shared()} or
      * {@link #unshared()} is effectively ignored.
      * 
-     * @param instance The instance to use
+     * @param instance The instance to use. If {@code null}, binds explicitly to
+     *                 null.
      */
-    void to(T instance);
+    void to(@Nullable T instance);
 
     /**
      * Complete this binding by specifying a Provider class to be instantiated
@@ -147,7 +148,7 @@ public interface Binding<T> {
      * 
      * @param provider The provider type that will satisfy this binding
      */
-    void toProvider(Class<? extends Provider<? extends T>> provider);
+    void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider);
 
     /**
      * Complete this binding by specifying a Provider instance that will be used
@@ -155,5 +156,20 @@ public interface Binding<T> {
      * 
      * @param provider The provider instance
      */
-    void toProvider(Provider<? extends T> provider);
+    void toProvider(@Nonnull Provider<? extends T> provider);
+
+
+    /**
+     * Complete this binding by explicitly binding to {@code null}. The resulting
+     * bindings may not create an instantiable graph, as non-nullable injection points
+     * still require a non-null instance.
+     */
+    void toNull();
+
+    /**
+     * Complete this binding by explicitly binding to {@code null} with a type.
+     * @param type The type of {@code null} to bind.
+     * @see #toNull()
+     */
+    void toNull(Class<? extends T> type);
 }
