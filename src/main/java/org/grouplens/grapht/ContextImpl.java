@@ -33,7 +33,7 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-class ContextImpl implements Context {
+class ContextImpl extends AbstractContext {
     private final ContextChain context;
     
     private final BindingFunctionBuilder config;

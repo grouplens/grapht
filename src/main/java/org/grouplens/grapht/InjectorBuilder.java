@@ -42,7 +42,7 @@ import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InjectorBuilder implements Context {
+public class InjectorBuilder extends AbstractContext {
     private final BindingFunctionBuilder builder;
     private CachePolicy cachePolicy;
     private boolean enableProviderInjection;

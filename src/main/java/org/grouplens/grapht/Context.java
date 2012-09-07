@@ -54,6 +54,17 @@ public interface Context {
     <T> Binding<T> bind(Class<T> type);
 
     /**
+     * Start a new binding for a qualified type. A shortcut for
+     * {@code bind(type).withQualifier(qual)}.
+     * @param qual The type's qualifier.
+     * @param type The type to bind.
+     * @param <T> The type to bind.
+     * @return A new binding in this context for T with qualifier qual.
+     * @see Binding#withQualifier(Class)
+     */
+    <T> Binding<T> bind(Class<? extends Annotation> qual, Class<T> type);
+
+    /**
      * Create a new Context that extends the current context stack with the
      * given class type. This matches with the default {@link Qualifier}. This is equivalent
      * to <code>in(null, type);</code>
