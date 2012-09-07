@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by
- * {@link InjectorConfigurationBuilder}.
+ * {@link BindingFunctionBuilder}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  * @param <T> The bindings source's type
@@ -160,7 +161,11 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void to(@Nonnull T instance) {
+    public void to(@Nullable T instance) {
+        if (instance == null) {
+            toNull();
+            return;
+        }
         ContextChain chain = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
 
@@ -207,6 +212,30 @@ class BindingImpl<T> implements Binding<T> {
             }
         } else {
             config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+        }
+    }
+
+    @Override
+    public void toNull() {
+        toNull(sourceType);
+    }
+
+    @Override
+    public void toNull(Class<? extends T> type) {
+        ContextChain chain = context.getContextChain();
+        BindingFunctionBuilder config = context.getBuilder();
+
+        Satisfaction s = config.getSPI().satisfyWithNull(type);
+
+        if (config.getGenerateRules()) {
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                config.addBindRule(e.getValue(), chain,
+                                   new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+            }
+        } else {
+            config.addBindRule(RuleSet.EXPLICIT, chain,
+                               new BindRule(sourceType, s, cachePolicy, qualifier, true));
         }
     }
     

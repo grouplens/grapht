@@ -21,6 +21,7 @@ package org.grouplens.grapht;
 import java.lang.annotation.Annotation;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 
@@ -135,9 +136,10 @@ public interface Binding<T> {
      * changes, any cache policy assigned by {@link #shared()} or
      * {@link #unshared()} is effectively ignored.
      * 
-     * @param instance The instance to use
+     * @param instance The instance to use. If {@code null}, binds explicitly to
+     *                 null.
      */
-    void to(@Nonnull T instance);
+    void to(@Nullable T instance);
 
     /**
      * Complete this binding by specifying a Provider class to be instantiated
@@ -155,4 +157,19 @@ public interface Binding<T> {
      * @param provider The provider instance
      */
     void toProvider(@Nonnull Provider<? extends T> provider);
+
+
+    /**
+     * Complete this binding by explicitly binding to {@code null}. The resulting
+     * bindings may not create an instantiable graph, as non-nullable injection points
+     * still require a non-null instance.
+     */
+    void toNull();
+
+    /**
+     * Complete this binding by explicitly binding to {@code null} with a type.
+     * @param type The type of {@code null} to bind.
+     * @see #toNull()
+     */
+    void toNull(Class<? extends T> type);
 }

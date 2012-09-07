@@ -22,17 +22,7 @@ import javax.inject.Named;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.reflect.types.CycleA;
-import org.grouplens.grapht.spi.reflect.types.CycleB;
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.InterfaceB;
-import org.grouplens.grapht.spi.reflect.types.NamedType;
-import org.grouplens.grapht.spi.reflect.types.RoleA;
-import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
-import org.grouplens.grapht.spi.reflect.types.TypeC;
-import org.grouplens.grapht.spi.reflect.types.TypeD;
+import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -250,6 +240,24 @@ public class InjectorBuilderTest {
         Injector i = b.build();
         
         i.getInstance(ShouldWork.class);
+    }
+
+    @Test
+    public void testNullBinding() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(InterfaceA.class).toNull();
+        Injector i = b.build();
+        TypeN n = i.getInstance(TypeN.class);
+        Assert.assertNotNull(n);
+        Assert.assertNull(n.getObject());
+    }
+
+    @Test(expected=InjectionException.class)
+    public void testBadNullBinding() {
+        InjectorBuilder b = new InjectorBuilder();
+        b.bind(InterfaceA.class).toNull();
+        Injector i = b.build();
+        i.getInstance(TypeN2.class);
     }
     
     public static interface ShouldWork { }

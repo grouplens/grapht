@@ -39,6 +39,7 @@ See [closed issues](issues-0.4) for more details.
 * Add basic thread safety for injectors
 * Add more error detection
 * Add convenience method to bind qualified types
+* Allow explicit null bindings to be created
 
 [issues-0.4]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.4.0
 
