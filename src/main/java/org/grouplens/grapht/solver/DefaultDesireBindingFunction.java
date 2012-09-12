@@ -20,12 +20,7 @@ package org.grouplens.grapht.solver;
 
 import java.lang.annotation.Annotation;
 
-import org.grouplens.grapht.annotation.DefaultBoolean;
-import org.grouplens.grapht.annotation.DefaultDouble;
-import org.grouplens.grapht.annotation.DefaultImplementation;
-import org.grouplens.grapht.annotation.DefaultInteger;
-import org.grouplens.grapht.annotation.DefaultProvider;
-import org.grouplens.grapht.annotation.DefaultString;
+import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
@@ -91,6 +86,11 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                                              CachePolicy.NO_PREFERENCE, false, false);
                 }
             }
+            DefaultNull dnull = annotType.getAnnotation(DefaultNull.class);
+            if (dnull != null) {
+                return new BindingResult(desire.restrict(spi.satisfyWithNull(desire.getDesiredType())),
+                                         CachePolicy.NO_PREFERENCE, false, true);
+            }
         }
         
         // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
@@ -109,6 +109,12 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                 return new BindingResult(desire.restrict(impl.value()), 
                                          CachePolicy.NO_PREFERENCE, false, false);
             }
+        }
+
+        DefaultNull dnull = desire.getDesiredType().getAnnotation(DefaultNull.class);
+        if (dnull != null) {
+            return new BindingResult(desire.restrict(spi.satisfyWithNull(desire.getDesiredType())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
         }
         
         // There are no annotations on the {@link Qualifier} or the type that indicate a
