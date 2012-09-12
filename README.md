@@ -31,6 +31,10 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
+### 0.4.1
+
+* Add `DefaultNull` annotation and support for it.
+
 ### 0.4.0
 
 See [closed issues](issues-0.4) for more details.
