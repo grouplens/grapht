@@ -438,7 +438,7 @@ public class Graph implements Serializable, Cloneable {
         if (!oldEdge.getHead().equals(newEdge.getHead())) {
             throw new IllegalArgumentException("new edge has different head node");
         }
-        if (!oldEdge.getTail().equals(newEdge.getHead())) {
+        if (!oldEdge.getTail().equals(newEdge.getTail())) {
             throw new IllegalArgumentException("new edge has different tail node");
         }
 
