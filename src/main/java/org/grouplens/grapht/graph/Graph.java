@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.Preconditions;
 
 
 /**
@@ -422,6 +423,36 @@ public class Graph implements Serializable, Cloneable {
             return true;
         } else {
             // oldNode was not in this graph, so do nothing
+            return false;
+        }
+    }
+
+    /**
+     * Replace an edge in the graph.
+     * @param oldEdge The edge to replace.
+     * @param newEdge The new edge.
+     * @return {@code true} iff the graph has been modified as a result of the call.
+     * @throws IllegalArgumentException if the edges do not have the same head & tail nodes
+     */
+    public boolean replaceEdge(Edge oldEdge, Edge newEdge) {
+        if (!oldEdge.getHead().equals(newEdge.getHead())) {
+            throw new IllegalArgumentException("new edge has different head node");
+        }
+        if (!oldEdge.getTail().equals(newEdge.getHead())) {
+            throw new IllegalArgumentException("new edge has different tail node");
+        }
+
+        Set<Edge> out = outgoing.get(oldEdge.getHead());
+        Set<Edge> in = incoming.get(oldEdge.getTail());
+        if (out.contains(oldEdge)) {
+            assert in.contains(oldEdge);
+            out.remove(oldEdge);
+            out.add(newEdge);
+            in.remove(oldEdge);
+            in.add(newEdge);
+            return true;
+        } else {
+            assert !in.contains(oldEdge);
             return false;
         }
     }
