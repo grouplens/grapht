@@ -10,7 +10,7 @@
     <groupId>org.grouplens.grapht</groupId>
     <name>Graph-based dependency injector</name>
     <description>Dependency injector utilizing graphs to track and analyze depencies.</description>
-    <url>http://bitbucket.org/grouplens/grapht</url>
+    <url>http://lenskit.grouplens.org/grapht</url>
 
     <organization>
         <name>GroupLens Research</name>
@@ -32,6 +32,17 @@
         <developerConnection>scm:hg:https://bitbucket.org/grouplens/grapht</developerConnection>
         <url>https://bitbucket.org/grouplens/grapht</url>
     </scm>
+
+  <properties>
+    <grapht.web.path>scp://medusa.cs.umn.edu/web/lenskit.grouplens.org/grapht</grapht.web.path>
+  </properties>
+
+  <distributionManagement>
+    <site>
+      <id>grouplens.org</id>
+      <url>${grapht.web.path}</url>
+    </site>
+  </distributionManagement>
 
     <build>
         <pluginManagement>
@@ -89,6 +100,34 @@
                     </execution>
                 </executions>
             </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>3.1</version>
+            <configuration>
+              <reportPlugins>
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-project-info-reports-plugin</artifactId>
+                  <version>2.5</version>
+                  <reports>
+                    <report>index</report>
+                    <report>dependencies</report>
+                    <reports>issue-tracking</reports>
+                    <reports>scm</reports>
+                    <reports>summary</reports>
+                  </reports>
+                </plugin>
+
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
+                  <version>2.9</version>
+                </plugin>
+              </reportPlugins>
+            </configuration>
+          </plugin>
         </plugins>
     </build>
 
