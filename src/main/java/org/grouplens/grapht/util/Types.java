@@ -18,24 +18,18 @@
  */
 package org.grouplens.grapht.util;
 
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Static helper methods for working with types.
@@ -45,6 +39,12 @@ import javax.inject.Provider;
  */
 public final class Types {
     private Types() {}
+
+    private static final Class<?>[] PRIMITIVE_TYPES = {
+        boolean.class, char.class,
+        byte.class, short.class, int.class, long.class,
+        double.class, float.class
+    };
     
     /**
      * Create a parameterized type wrapping the given class and type arguments.
@@ -250,6 +250,22 @@ public final class Types {
         }
         return false;
     }
+
+    /**
+     * Load a class by name, even if it is a primitive type..
+     * @param name The name of the class.
+     * @return The class.
+     * @throws ClassNotFoundException
+     */
+    @Nonnull
+    private static Class<?> classByName(@Nonnull String name) throws ClassNotFoundException {
+        for (Class<?> cls: PRIMITIVE_TYPES) {
+            if (cls.getName().equals(name)) {
+                return cls;
+            }
+        }
+        return Class.forName(name);
+    }
     
     /**
      * Read in a Class from the given ObjectInput. This is only compatible with
@@ -267,8 +283,8 @@ public final class Types {
         String typeName = in.readUTF();
         int arrayCount = in.readInt();
         int hash = in.readInt();
-        
-        Class<?> baseType = Class.forName(typeName);
+
+        Class<?> baseType = classByName(typeName);
         if (hash != hash(baseType)) {
             throw new IOException("Class definition changed since serialization: " + typeName);
         }
