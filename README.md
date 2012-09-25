@@ -31,6 +31,10 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
+### 0.4.2
+
+* Fix serialization of primitive types in graphs
+
 ### 0.4.1
 
 * Add `DefaultNull` annotation and support for it.
