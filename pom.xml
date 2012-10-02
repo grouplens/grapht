@@ -10,7 +10,7 @@
     <groupId>org.grouplens.grapht</groupId>
     <name>Graph-based dependency injector</name>
     <description>Dependency injector utilizing graphs to track and analyze depencies.</description>
-    <url>http://lenskit.grouplens.org/grapht</url>
+    <url>http://dev.grouplens.org/grapht</url>
 
     <organization>
         <name>GroupLens Research</name>
@@ -34,7 +34,7 @@
     </scm>
 
   <properties>
-    <grapht.web.path>scp://medusa.cs.umn.edu/web/lenskit.grouplens.org/grapht</grapht.web.path>
+    <grapht.web.path>scpexe://medusa.cs.umn.edu/srv/www/grapht</grapht.web.path>
   </properties>
 
   <distributionManagement>
@@ -105,6 +105,13 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-site-plugin</artifactId>
             <version>3.1</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh-external</artifactId>
+                <version>2.2</version>
+              </dependency>
+            </dependencies>
             <configuration>
               <reportPlugins>
                 <plugin>
