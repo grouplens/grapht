@@ -299,7 +299,7 @@ public final class Types {
     /**
      * <p>
      * Write the Class to the given ObjectOutput. When the class type is not an
-     * array, its canonical name is written as a UTF string, and a false boolean
+     * array, its name is written as a UTF string, and a false boolean
      * to record that it's not an array. When it is an array type, the canonical
      * name of its component type is written as a UTF string, and then a true
      * boolean value.
@@ -318,7 +318,7 @@ public final class Types {
             baseType = baseType.getComponentType();
         }
         
-        out.writeUTF(baseType.getCanonicalName());
+        out.writeUTF(baseType.getName());
         out.writeInt(arrayCount);
         out.writeInt(hash(baseType));
     }
