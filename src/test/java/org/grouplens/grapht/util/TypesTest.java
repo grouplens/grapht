@@ -21,7 +21,7 @@ package org.grouplens.grapht.util;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -68,4 +68,19 @@ public class TypesTest {
         // finally, throw an illegal argument exception
         Types.erase(param);
     }
+
+    @Test
+    public void testWriteInnerClass() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutput oo = new ObjectOutputStream(out);
+        Types.writeClass(oo, Inner.class);
+        oo.close();
+        byte[] bytes = out.toByteArray();
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ObjectInput oin = new ObjectInputStream(in);
+        Class<?> cls = Types.readClass(oin);
+        assertThat(cls, equalTo((Class) Inner.class));
+    }
+
+    public static class Inner {}
 }
