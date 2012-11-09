@@ -18,6 +18,9 @@
  */
 package org.grouplens.grapht.util;
 
+import org.grouplens.grapht.annotation.DefaultImplementation;
+import org.grouplens.grapht.annotation.DefaultProvider;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -188,8 +191,8 @@ public final class Types {
     
     /**
      * Return true if the type is not abstract and not an interface, and has
-     * a constructor annotated with {@link Inject}, or its only constructor
-     * is the default constructor.
+     * a constructor annotated with {@link Inject}, its only constructor
+     * is the default constructor, or it delegates via {@link DefaultProvider}.
      * 
      * @param type A class type
      * @return True if the class type is instantiable
@@ -210,6 +213,12 @@ public final class Types {
                 && type.getConstructors()[0].getParameterTypes().length == 0) {
                 return true;
             }
+
+            if (type.getAnnotation(DefaultProvider.class) != null) {
+                // REVIEW do we want to check more deeply to see if provider is instantiable?
+                return true;
+            }
+            // REVIEW Do we want to check for DefaultImplementation? Weird, but not impossible.
         }
         
         // no constructor available
