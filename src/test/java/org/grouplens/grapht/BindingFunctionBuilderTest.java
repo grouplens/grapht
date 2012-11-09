@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +46,8 @@ import org.grouplens.grapht.spi.reflect.types.TypeC;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 public class BindingFunctionBuilderTest {
     private InjectSPI spi;
@@ -284,6 +287,19 @@ public class BindingFunctionBuilderTest {
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.build(RuleSet.SUPER_TYPES)).getRules());
         assertEqualBindings(interTypes, ((RuleBasedBindingFunction) builder.build(RuleSet.INTERMEDIATE_TYPES)).getRules());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRejectInvalidBinding() {
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        // need to go to raw types so we don't get type-check errors
+        try {
+            builder.getRootContext().bind((Class) OutputStream.class).to(String.class);
+            fail("binding should have thrown an exception");
+        } catch (InvalidBindingException e) {
+            /* no-op */
+        }
     }
     
     private void assertEqualBindings(Map<ContextChain, Collection<BindRule>> expected, Map<ContextChain, Collection<BindRule>> actual) {
