@@ -37,6 +37,7 @@ import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.ContextChain;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +124,7 @@ class BindingImpl<T> implements Binding<T> {
     
     @Override
     public void to(@Nonnull Class<? extends T> impl) {
+        Preconditions.isAssignable(sourceType, impl);
         if (logger.isWarnEnabled()) {
             if (Types.shouldBeInstantiable(impl) && !Types.isInstantiable(impl)) {
                 logger.warn("Concrete type {} does not have an injectable or public default constructor, but probably should", impl);

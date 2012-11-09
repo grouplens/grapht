@@ -45,6 +45,7 @@ import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.grouplens.grapht.spi.reflect.types.TypeC;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
@@ -296,6 +297,20 @@ public class BindingFunctionBuilderTest {
         // need to go to raw types so we don't get type-check errors
         try {
             builder.getRootContext().bind((Class) OutputStream.class).to(String.class);
+            fail("binding should have thrown an exception");
+        } catch (InvalidBindingException e) {
+            /* no-op */
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Ignore("not yet sure how to do the type check")
+    @Test
+    public void testRejectInvalidInstanceBinding() {
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        // need to go to raw types so we don't get type-check errors
+        try {
+            builder.getRootContext().bind((Class) OutputStream.class).to("wombat");
             fail("binding should have thrown an exception");
         } catch (InvalidBindingException e) {
             /* no-op */

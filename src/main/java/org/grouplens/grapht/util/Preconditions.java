@@ -49,7 +49,7 @@ public final class Preconditions {
             throw new InvalidBindingException(impl, "Type is not assignable to " + source);
         }
     }
-    
+
     public static void notNull(String name, Object value) {
         if (value == null) {
             throw new NullPointerException(name + " cannot be null");
