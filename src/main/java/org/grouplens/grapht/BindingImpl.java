@@ -32,6 +32,8 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
+import org.grouplens.grapht.annotation.DefaultImplementation;
+import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.ContextChain;
@@ -126,7 +128,10 @@ class BindingImpl<T> implements Binding<T> {
     public void to(@Nonnull Class<? extends T> impl) {
         Preconditions.isAssignable(sourceType, impl);
         if (logger.isWarnEnabled()) {
-            if (Types.shouldBeInstantiable(impl) && !Types.isInstantiable(impl)) {
+            if (Types.shouldBeInstantiable(impl)
+                    && !Types.isInstantiable(impl)
+                    && impl.getAnnotation(DefaultProvider.class) == null
+                    && impl.getAnnotation(DefaultImplementation.class) == null) {
                 logger.warn("Concrete type {} does not have an injectable or public default constructor, but probably should", impl);
             }
         }
