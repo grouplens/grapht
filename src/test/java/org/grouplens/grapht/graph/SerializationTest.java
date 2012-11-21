@@ -91,7 +91,7 @@ public class SerializationTest {
         n1 = read.getNode(rootLabel);
         n2 = read.getNode(null);
         Assert.assertEquals(1, read.getEdges(n1, n2).size());
-        Assert.assertEquals(null, read.getEdges(n1, n2).iterator().next().getLabel());
+        Assert.assertEquals(null, read.getEdges(n1, n2).iterator().next().getDesireChain());
     }
     
     @Test

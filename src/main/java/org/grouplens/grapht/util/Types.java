@@ -18,20 +18,25 @@
  */
 package org.grouplens.grapht.util;
 
-import org.grouplens.grapht.annotation.DefaultProvider;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Static helper methods for working with types.

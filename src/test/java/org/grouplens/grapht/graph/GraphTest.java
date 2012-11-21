@@ -300,7 +300,7 @@ public class GraphTest {
         
         Assert.assertEquals(head, newEdge.getHead());
         Assert.assertEquals(tail, newEdge.getTail());
-        Assert.assertEquals(payload2, newEdge.getLabel());
+        Assert.assertEquals(payload2, newEdge.getDesireChain());
         
         Assert.assertFalse(graph.getOutgoingEdges(head).contains(toBeReplaced));
         Assert.assertTrue(graph.getOutgoingEdges(head).contains(newEdge));

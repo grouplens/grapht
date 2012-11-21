@@ -43,7 +43,7 @@ public class EdgeTest {
         
         Assert.assertEquals(head, edge.getHead());
         Assert.assertEquals(tail, edge.getTail());
-        Assert.assertEquals(ep, edge.getLabel());
+        Assert.assertEquals(ep, edge.getDesireChain());
     }
     
     @Test

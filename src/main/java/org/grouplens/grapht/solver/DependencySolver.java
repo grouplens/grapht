@@ -177,9 +177,9 @@ public class DependencySolver {
                     // there can be at most one edge with this label in the merged
                     // graph because this is at the root context, and there is no
                     // way to cause their configurations to diverge
-                    if (graph.getOutgoingEdge(this.root, oldEdge.getLabel()) ==  null) {
+                    if (graph.getOutgoingEdge(this.root, oldEdge.getDesireChain()) ==  null) {
                         // this desire is not in the merged graph
-                        graph.addEdge(new Edge(this.root, newTail, oldEdge.getLabel()));
+                        graph.addEdge(new Edge(this.root, newTail, oldEdge.getDesireChain()));
                     }
                 }
             } else {
@@ -218,7 +218,7 @@ public class DependencySolver {
                         // add the edge with the new head and the previously merged tail
                         // List<Desire> is downsized to the first Desire, too
                         Node filtered = mergedMap.get(dep.getTail());
-                        graph.addEdge(new Edge(newNode, filtered, dep.getLabel()));
+                        graph.addEdge(new Edge(newNode, filtered, dep.getDesireChain()));
                     }
 
                     // if the original node was in the defer queue, insert
