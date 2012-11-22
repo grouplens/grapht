@@ -168,12 +168,13 @@ public class Graph implements Serializable, Cloneable {
         }
         
         for (Edge e: edges) {
-            if (e.getDesireChain() == null) {
+            List<Desire> theChain = e.getDesireChain();
+            if (theChain == null) {
                 if (label == null) {
                     return e;
                 }
             } else {
-                if (e.getDesireChain().equals(label)) {
+                if (theChain.equals(label)) {
                     return e;
                 }
             }

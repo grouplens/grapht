@@ -33,7 +33,7 @@ import org.grouplens.grapht.spi.Desire;
  * and the tail. An Edge is used when representing a directional graph,
  * connecting any two nodes within the graph. Thus, an edge from X to Y is
  * different from an edge from Y to X. Additionally, the edge stores a
- * domain-specific label representing the information between the head and tail
+ * desire representing the goal linking the head and tail.
  * node.
  * <p>
  * Edges use instance equality, regardless of how their labels might implement
@@ -55,7 +55,7 @@ public class Edge implements Serializable {
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and
-     * ending at <tt>tail</tt>. The provided label is the sequence of Desires
+     * ending at <tt>tail</tt>. The provided list of Desires is the sequence of Desires
      * followed by binding functions to reach the tail with the edge between the
      * two nodes.
      * 
@@ -103,12 +103,13 @@ public class Edge implements Serializable {
     }
 
     /**
-     * Get the chain of labels associated with this edge. This may be null if no
-     * label was assigned to the edge
+     * Get the chain of desires associated with this edge. This may be null if no
+     * desire was assigned to the edge.
      * 
-     * @return The chain of labels on this edge
+     * @return The chain of desires on this edge
      * @deprecated  Use {@link #getDesireChain}.
      */
+    @Deprecated
     public @Nullable List<Desire> getLabel() {
         return desires;
     }
