@@ -55,6 +55,8 @@ public class ContextOverrideTest {
      */
     @Test
     public void testNullDeepConcrete() {
+        // this can be with or without the context
+        // use context to match target use in LensKit
         build.in(COuter.class)
              .bind(Plug.class)
              .toNull();
