@@ -62,6 +62,7 @@ public class ContextOverrideTest {
              .toNull();
         build.in(CInner.class)
              .bind(Plug.class)
+             .finalBinding()  // fixes the problem!
              .to(Plug.class);
         Injector inj = build.build();
 
