@@ -24,7 +24,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.grouplens.grapht.spi.ContextChain;
+import org.grouplens.grapht.spi.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 
@@ -34,11 +34,11 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 class ContextImpl extends AbstractContext {
-    private final ContextChain context;
+    private final ElementChainContextMatcher context;
     
     private final BindingFunctionBuilder config;
     
-    public ContextImpl(BindingFunctionBuilder config, ContextChain context) {
+    public ContextImpl(BindingFunctionBuilder config, ElementChainContextMatcher context) {
         this.config = config;
         this.context = context;
     }
@@ -50,7 +50,7 @@ class ContextImpl extends AbstractContext {
     /**
      * @return The context chain of this context
      */
-    public ContextChain getContextChain() {
+    public ElementChainContextMatcher getContextChain() {
         return context;
     }
     
@@ -79,6 +79,6 @@ class ContextImpl extends AbstractContext {
         
         List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
         nextChain.add(nextMatcher);
-        return new ContextImpl(config, new ContextChain(nextChain));
+        return new ContextImpl(config, new ElementChainContextMatcher(nextChain));
     }
 }

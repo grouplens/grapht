@@ -30,45 +30,45 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * ContextChain represents a list of ContextMatchers. ContextMatchers can match
- * a single node within a context, and a ContextChain can match an entire
- * context. A ContextChain matches a context if its context matchers match a
+ * ElementChainContextMatcher represents a list of ContextMatchers. ContextMatchers can match
+ * a single node within a context, and a ElementChainContextMatcher can match an entire
+ * context. A ElementChainContextMatcher matches a context if its context matchers match a
  * subsequence of the nodes within the context.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ContextChain implements Externalizable {
+public class ElementChainContextMatcher implements Externalizable {
     // "final"
     private List<ContextElementMatcher> elementMatchers;
 
     /**
-     * Create a new ContextChain representing the empty context without any
+     * Create a new ElementChainContextMatcher representing the empty context without any
      * matchers.
      */
-    public ContextChain() {
+    public ElementChainContextMatcher() {
         this(new ArrayList<ContextElementMatcher>());
     }
 
     /**
-     * Create a new ContextChain with the given context matchers. The var-args
+     * Create a new ElementChainContextMatcher with the given context matchers. The var-args
      * parameter forms a list in the order the arguments are passed in.
      * Arguments should not be null.
      * 
      * @param elementMatchers The var-args of matchers to use in this chain
      */
-    public ContextChain(ContextElementMatcher... elementMatchers) {
+    public ElementChainContextMatcher(ContextElementMatcher... elementMatchers) {
         this(Arrays.asList(elementMatchers));
     }
     
     /**
-     * Create a new ContextChain that matches the given sequence of
-     * ContextMatchers. The list is copied so the created ContextChain is
+     * Create a new ElementChainContextMatcher that matches the given sequence of
+     * ContextMatchers. The list is copied so the created ElementChainContextMatcher is
      * immutable. The list should not contain any null elements.
      * 
      * @param matchers The matcher list this chain represents
      * @throws NullPointerException if matchers is null
      */
-    public ContextChain(List<? extends ContextElementMatcher> matchers) {
+    public ElementChainContextMatcher(List<? extends ContextElementMatcher> matchers) {
         this.elementMatchers = new ArrayList<ContextElementMatcher>(matchers);
     }
     
@@ -89,7 +89,7 @@ public class ContextChain implements Externalizable {
      * the contexts, with respect to the matcher's
      * {@link ContextElementMatcher#matches(Pair) match()} method.
      * <p>
-     * Given this definition, a ContextChain with no elementMatchers will match every
+     * Given this definition, a ElementChainContextMatcher with no elementMatchers will match every
      * real context.
      * 
      * @param nodes The current context
@@ -125,9 +125,9 @@ public class ContextChain implements Externalizable {
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ContextChain))
+        if (!(o instanceof ElementChainContextMatcher))
             return false;
-        return ((ContextChain) o).elementMatchers.equals(elementMatchers);
+        return ((ElementChainContextMatcher) o).elementMatchers.equals(elementMatchers);
     }
     
     @Override
@@ -137,7 +137,7 @@ public class ContextChain implements Externalizable {
     
     @Override
     public String toString() {
-        return "ContextChain(" + elementMatchers.toString() + ")";
+        return "ElementChainContextMatcher(" + elementMatchers.toString() + ")";
     }
 
     @Override

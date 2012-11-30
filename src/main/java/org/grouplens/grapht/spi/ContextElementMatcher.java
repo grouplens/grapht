@@ -38,9 +38,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * ContextElementMatcher matches nodes that are sub-types of the type the matcher was
  * configured with.
  * <p>
- * ContextMatchers are composed into a list with {@link ContextChain} to
+ * ContextMatchers are composed into a list with {@link ElementChainContextMatcher} to
  * parallel the composing of nodes and {@link Qualifier}s into the dependency
- * context list. The ContextChain can then be used to determine if the list of
+ * context list. The ElementChainContextMatcher can then be used to determine if the list of
  * ContextMatchers applies to any given dependency context.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>

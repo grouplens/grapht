@@ -36,7 +36,7 @@ import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.ContextChain;
+import org.grouplens.grapht.spi.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
@@ -138,29 +138,29 @@ class BindingImpl<T> implements Binding<T> {
         
         boolean useSatisfaction = Types.isInstantiable(impl);
         
-        ContextChain chain = context.getContextChain();
+        ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
 
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(impl);
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
                 if (useSatisfaction) {
-                    config.addBindRule(e.getValue(), chain, 
+                    config.addBindRule(e.getValue(), matcher,
                                        new BindRule(e.getKey(), config.getSPI().satisfy(impl), 
                                                     cachePolicy, qualifier, terminate));
                 } else {
-                    config.addBindRule(e.getValue(), chain,
+                    config.addBindRule(e.getValue(), matcher,
                                        new BindRule(e.getKey(), impl, 
                                                     cachePolicy, qualifier, terminate));
                 }
             }
         } else {
             if (useSatisfaction) {
-                config.addBindRule(RuleSet.EXPLICIT, chain, 
+                config.addBindRule(RuleSet.EXPLICIT, matcher,
                                    new BindRule(sourceType, config.getSPI().satisfy(impl), 
                                                 cachePolicy, qualifier, terminate));
             } else {
-                config.addBindRule(RuleSet.EXPLICIT, chain,
+                config.addBindRule(RuleSet.EXPLICIT, matcher,
                                    new BindRule(sourceType, impl, 
                                                 cachePolicy, qualifier, terminate));
             }
@@ -173,7 +173,7 @@ class BindingImpl<T> implements Binding<T> {
             toNull();
             return;
         }
-        ContextChain chain = context.getContextChain();
+        ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
 
         // Apply some type coercing if we're dealing with primitive types
@@ -183,42 +183,42 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(coerced.getClass());
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), chain, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                config.addBindRule(e.getValue(), matcher, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher, new BindRule(sourceType, s, cachePolicy, qualifier, true));
         }
     }
     
     @Override
     public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
-        ContextChain chain = context.getContextChain();
+        ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
         
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), chain, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                config.addBindRule(e.getValue(), matcher, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher, new BindRule(sourceType, s, cachePolicy, qualifier, true));
         }
     }
 
     @Override
     public void toProvider(@Nonnull Provider<? extends T> provider) {
-        ContextChain chain = context.getContextChain();
+        ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
 
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), chain, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                config.addBindRule(e.getValue(), matcher, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, chain, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher, new BindRule(sourceType, s, cachePolicy, qualifier, true));
         }
     }
 
@@ -229,7 +229,7 @@ class BindingImpl<T> implements Binding<T> {
 
     @Override
     public void toNull(Class<? extends T> type) {
-        ContextChain chain = context.getContextChain();
+        ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
 
         Satisfaction s = config.getSPI().satisfyWithNull(type);
@@ -237,11 +237,11 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), chain,
+                config.addBindRule(e.getValue(), matcher,
                                    new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, chain,
+            config.addBindRule(RuleSet.EXPLICIT, matcher,
                                new BindRule(sourceType, s, cachePolicy, qualifier, true));
         }
     }

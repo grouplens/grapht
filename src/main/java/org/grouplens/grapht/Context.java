@@ -23,8 +23,6 @@ import java.lang.annotation.Annotation;
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
-import org.grouplens.grapht.spi.ContextChain;
-
 /**
  * <p>
  * Context is the main entry point for configuring bind rules using the fluent
@@ -38,7 +36,7 @@ import org.grouplens.grapht.spi.ContextChain;
  * creating bindings, the context stack can be configured by calling
  * {@link #in(Class)} or {@link #in(Class, Class)}.
  * 
- * @see ContextChain
+ * @see org.grouplens.grapht.spi.ElementChainContextMatcher
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface Context {

@@ -30,13 +30,13 @@ import org.junit.Test;
 public class ContextChainTest {
     @Test
     public void testEmptyChainEmptyContextSuccess() throws Exception {
-        // Test that an empty ContextChain matches an empty context
+        // Test that an empty ElementChainContextMatcher matches an empty context
         doTest(new Class<?>[0], new Class<?>[0], true);
     }
     
     @Test
     public void testEmptyChainNonEmptyContextSuccess() throws Exception {
-        // Test that an empty ContextChain matches contexts that have any nodes
+        // Test that an empty ElementChainContextMatcher matches contexts that have any nodes
         doTest(new Class<?>[0], new Class<?>[] { A.class }, true);
         doTest(new Class<?>[0], new Class<?>[] { A.class, B.class }, true);
         doTest(new Class<?>[0], new Class<?>[] { A.class, Ap.class }, true);
@@ -45,7 +45,7 @@ public class ContextChainTest {
     
     @Test
     public void testEqualChainContextSuccess() throws Exception {
-        // Test that a ContextChain equaling the context matches
+        // Test that a ElementChainContextMatcher equaling the context matches
         doTest(new Class<?>[] { A.class }, new Class<?>[] { A.class }, true);
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[] { A.class, B.class }, true);
         doTest(new Class<?>[] { A.class, B.class, C.class }, new Class<?>[] { A.class, B.class, C.class }, true);
@@ -53,7 +53,7 @@ public class ContextChainTest {
     
     @Test
     public void testSubstringChainSuccess() throws Exception {
-        // Test that a ContextChain that is a substring (front/middle/end)
+        // Test that a ElementChainContextMatcher that is a substring (front/middle/end)
         // matches the context
         doTest(new Class<?>[] { A.class }, new Class<?>[] { A.class, B.class, C.class }, true);
         doTest(new Class<?>[] { B.class }, new Class<?>[] { A.class, B.class, C.class }, true);
@@ -67,7 +67,7 @@ public class ContextChainTest {
     
     @Test
     public void testSubsequenceChainSuccess() throws Exception {
-        // Test that a ContextChain that is a subsequence (with elements 
+        // Test that a ElementChainContextMatcher that is a subsequence (with elements
         // separated in the context) matches the context
         doTest(new Class<?>[] { A.class, C.class }, new Class<?>[] { A.class, B.class, C.class, Ap.class, Bp.class, Cp.class }, true);
         doTest(new Class<?>[] { A.class, Ap.class }, new Class<?>[] { A.class, B.class, C.class, Ap.class, Bp.class, Cp.class }, true);
@@ -81,7 +81,7 @@ public class ContextChainTest {
     
     @Test
     public void testMatcherInheritenceSuccess() throws Exception {
-        // Test that a ContextChain that has supertypes of the context
+        // Test that a ElementChainContextMatcher that has supertypes of the context
         // is still matched
         doTest(new Class<?>[] { A.class }, new Class<?>[] { Ap.class }, true);
 
@@ -92,14 +92,14 @@ public class ContextChainTest {
     
     @Test
     public void testNonEmptyChainEmptyContextFail() throws Exception {
-        // Test that a non-empty ContextChain fails to match an empty context
+        // Test that a non-empty ElementChainContextMatcher fails to match an empty context
         doTest(new Class<?>[] { A.class }, new Class<?>[0], false);
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[0], false);
     }
     
     @Test
     public void testNonSubsequenceFail() throws Exception {
-        // Test that a ContextChain that is not a subsequence fails to match
+        // Test that a ElementChainContextMatcher that is not a subsequence fails to match
         doTest(new Class<?>[] { A.class }, new Class<?>[] { B.class }, false);
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[] { B.class, A.class }, false);
         doTest(new Class<?>[] { B.class, A.class, C.class }, new Class<?> [] { C.class, B.class, A.class }, false);
@@ -108,7 +108,7 @@ public class ContextChainTest {
     
     @Test
     public void testSuperstringFail() throws Exception {
-        // Test that a ContextChain that is the context plus additional matchers
+        // Test that a ElementChainContextMatcher that is the context plus additional matchers
         // fails to match the context
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[] { A.class }, false);
         doTest(new Class<?>[] { A.class, B.class, C.class }, new Class<?>[] { A.class, C.class }, false);
@@ -120,7 +120,7 @@ public class ContextChainTest {
         for (Class<?> type: chainTypes) {
             elementMatchers.add(new MockContextElementMatcher(type));
         }
-        ContextChain chain = new ContextChain(elementMatchers);
+        ElementChainContextMatcher chain = new ElementChainContextMatcher(elementMatchers);
         
         List<Pair<Satisfaction, Attributes>> context = new ArrayList<Pair<Satisfaction, Attributes>>();
         for (Class<?> type: contextTypes) {

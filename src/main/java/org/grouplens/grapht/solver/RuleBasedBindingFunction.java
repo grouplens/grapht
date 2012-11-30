@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * BindingFunction that uses BindRules created by the fluent API to bind desires
  * to other desires or satisfactions.
  * <p>
- * For more details on context management, see {@link ContextChain},
+ * For more details on context management, see {@link org.grouplens.grapht.spi.ElementChainContextMatcher},
  * {@link org.grouplens.grapht.spi.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
  * context to activate and select BindRules. A number of rules are used to order
  * applicable BindRules and choose the best. When any of these rules rely on the
@@ -76,18 +76,18 @@ public class RuleBasedBindingFunction implements BindingFunction {
     
     private static final Logger logger = LoggerFactory.getLogger(RuleBasedBindingFunction.class);
     
-    private final Map<ContextChain, Collection<BindRule>> rules;
+    private final Map<ElementChainContextMatcher, Collection<BindRule>> rules;
     
-    public RuleBasedBindingFunction(Map<ContextChain, Collection<BindRule>> rules) {
+    public RuleBasedBindingFunction(Map<ElementChainContextMatcher, Collection<BindRule>> rules) {
         Preconditions.notNull("rules", rules);
         
-        this.rules = Collections.unmodifiableMap(new HashMap<ContextChain, Collection<BindRule>>(rules));
+        this.rules = Collections.unmodifiableMap(new HashMap<ElementChainContextMatcher, Collection<BindRule>>(rules));
     }
     
     /**
      * @return The rules used by this BindingFunction
      */
-    public Map<ContextChain, Collection<BindRule>> getRules() {
+    public Map<ElementChainContextMatcher, Collection<BindRule>> getRules() {
         return rules;
     }
     
@@ -100,8 +100,8 @@ public class RuleBasedBindingFunction implements BindingFunction {
         }
         
         // collect all bind rules that apply to this desire
-        List<Pair<ContextChain, BindRule>> validRules = new ArrayList<Pair<ContextChain, BindRule>>();
-        for (ContextChain chain: rules.keySet()) {
+        List<Pair<ElementChainContextMatcher, BindRule>> validRules = new ArrayList<Pair<ElementChainContextMatcher, BindRule>>();
+        for (ElementChainContextMatcher chain: rules.keySet()) {
             if (chain.matches(context.getTypePath())) {
                 // the context applies to the current context, so go through all
                 // bind rules within it and record those that match the desire
@@ -116,7 +116,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
         
         if (!validRules.isEmpty()) {
             // we have a bind rule to apply
-            Comparator<Pair<ContextChain, BindRule>> ordering = Ordering.from(new ContextClosenessComparator(context.getTypePath()))
+            Comparator<Pair<ElementChainContextMatcher, BindRule>> ordering = Ordering.from(new ContextClosenessComparator(context.getTypePath()))
                                                                         .compound(new ContextLengthComparator())
                                                                         .compound(new TypeDeltaComparator(context.getTypePath()))
                                                                         .compound(new BindRuleComparator());
@@ -152,12 +152,12 @@ public class RuleBasedBindingFunction implements BindingFunction {
     }
     
     /*
-     * A Comparator that orders Pair<ContextChain, BindRule> based on the
+     * A Comparator that orders Pair<ContextMatcher, BindRule> based on the
      * BindRule's qualifier matcher ordering
      */
-    private static class BindRuleComparator implements Comparator<Pair<ContextChain, BindRule>> {
+    private static class BindRuleComparator implements Comparator<Pair<ElementChainContextMatcher, BindRule>> {
         @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+        public int compare(Pair<ElementChainContextMatcher, BindRule> o1, Pair<ElementChainContextMatcher, BindRule> o2) {
             return o1.getRight().getQualifier().compareTo(o2.getRight().getQualifier());
         }
     }
@@ -169,7 +169,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
      * This comparator assumes that both context chains are the same length,
      * and that they match the exact same nodes in the context.
      */
-    private static class TypeDeltaComparator implements Comparator<Pair<ContextChain, BindRule>> {
+    private static class TypeDeltaComparator implements Comparator<Pair<ElementChainContextMatcher, BindRule>> {
         private final List<Pair<Satisfaction, Attributes>> context;
         
         public TypeDeltaComparator(List<Pair<Satisfaction, Attributes>> context) {
@@ -177,7 +177,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
         }
         
         @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+        public int compare(Pair<ElementChainContextMatcher, BindRule> o1, Pair<ElementChainContextMatcher, BindRule> o2) {
             int lastIndex1 = o1.getLeft().getContexts().size() - 1;
             int lastIndex2 = o2.getLeft().getContexts().size() - 1;
             
@@ -223,9 +223,9 @@ public class RuleBasedBindingFunction implements BindingFunction {
     /*
      * A Comparator that compares rules based on how long the matching contexts are.
      */
-    private static class ContextLengthComparator implements Comparator<Pair<ContextChain, BindRule>> {
+    private static class ContextLengthComparator implements Comparator<Pair<ElementChainContextMatcher, BindRule>> {
         @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+        public int compare(Pair<ElementChainContextMatcher, BindRule> o1, Pair<ElementChainContextMatcher, BindRule> o2) {
             int l1 = o1.getLeft().getContexts().size();
             int l2 = o2.getLeft().getContexts().size();
             // select longer contexts over shorter (i.e. longer < shorter)
@@ -237,7 +237,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
      * A Comparator that compares rules based on how close a context matcher chain is to the
      * end of the current context.
      */
-    private static class ContextClosenessComparator implements Comparator<Pair<ContextChain, BindRule>> {
+    private static class ContextClosenessComparator implements Comparator<Pair<ElementChainContextMatcher, BindRule>> {
         private final List<Pair<Satisfaction, Attributes>> context;
         
         public ContextClosenessComparator(List<Pair<Satisfaction, Attributes>> context) {
@@ -245,7 +245,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
         }
         
         @Override
-        public int compare(Pair<ContextChain, BindRule> o1, Pair<ContextChain, BindRule> o2) {
+        public int compare(Pair<ElementChainContextMatcher, BindRule> o1, Pair<ElementChainContextMatcher, BindRule> o2) {
             int lastIndex1 = o1.getLeft().getContexts().size() - 1;
             int lastIndex2 = o2.getLeft().getContexts().size() - 1;
             
