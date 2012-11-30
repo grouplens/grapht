@@ -34,20 +34,20 @@ import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ReflectionContextMatcherTest {
+public class ReflectionContextElementMatcherTest {
     @Test
     public void testEquals() {
         InjectSPI spi = new ReflectionInjectSPI();
         
-        ReflectionContextMatcher m1 = new ReflectionContextMatcher(A.class);
-        ReflectionContextMatcher m2 = new ReflectionContextMatcher(B.class);
-        ReflectionContextMatcher m3 = new ReflectionContextMatcher(A.class, spi.match(RoleA.class));
-        ReflectionContextMatcher m4 = new ReflectionContextMatcher(A.class, spi.match(RoleB.class));
+        ReflectionContextElementMatcher m1 = new ReflectionContextElementMatcher(A.class);
+        ReflectionContextElementMatcher m2 = new ReflectionContextElementMatcher(B.class);
+        ReflectionContextElementMatcher m3 = new ReflectionContextElementMatcher(A.class, spi.match(RoleA.class));
+        ReflectionContextElementMatcher m4 = new ReflectionContextElementMatcher(A.class, spi.match(RoleB.class));
         
-        Assert.assertEquals(m1, new ReflectionContextMatcher(A.class));
-        Assert.assertEquals(m2, new ReflectionContextMatcher(B.class));
-        Assert.assertEquals(m3, new ReflectionContextMatcher(A.class, spi.match(RoleA.class)));
-        Assert.assertEquals(m4, new ReflectionContextMatcher(A.class, spi.match(RoleB.class)));
+        Assert.assertEquals(m1, new ReflectionContextElementMatcher(A.class));
+        Assert.assertEquals(m2, new ReflectionContextElementMatcher(B.class));
+        Assert.assertEquals(m3, new ReflectionContextElementMatcher(A.class, spi.match(RoleA.class)));
+        Assert.assertEquals(m4, new ReflectionContextElementMatcher(A.class, spi.match(RoleB.class)));
         
         Assert.assertFalse(m1.equals(m2));
         Assert.assertFalse(m2.equals(m3));
@@ -106,7 +106,7 @@ public class ReflectionContextMatcherTest {
                                                                                     }
         });
         
-        ReflectionContextMatcher cm = new ReflectionContextMatcher(matcherType, mr);
+        ReflectionContextElementMatcher cm = new ReflectionContextElementMatcher(matcherType, mr);
         Assert.assertEquals(expected, cm.matches(node));
     }
     

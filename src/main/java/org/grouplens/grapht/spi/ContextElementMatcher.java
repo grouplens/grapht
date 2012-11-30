@@ -26,7 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * <p>
- * ContextMatcher represents a "pattern" that can match an element within the
+ * ContextElementMatcher represents a "pattern" that can match an element within the
  * dependency context created as a Resolver follows a dependency hierarchy. The
  * dependency context is an ordered list of Nodes and the Roles of the Desires
  * that the Nodes satisfy. The top-level Node can be thought of as the root Node
@@ -35,7 +35,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * <p>
  * ContextMatchers can match or apply to these nodes and {@link Qualifier}s
  * within a dependency context. As an example, the reflection based
- * ContextMatcher matches nodes that are sub-types of the type the matcher was
+ * ContextElementMatcher matches nodes that are sub-types of the type the matcher was
  * configured with.
  * <p>
  * ContextMatchers are composed into a list with {@link ContextChain} to
@@ -45,9 +45,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public interface ContextMatcher extends Serializable {
+public interface ContextElementMatcher extends Serializable {
     /**
-     * Return true if this ContextMatcher matches or applies to the given
+     * Return true if this ContextElementMatcher matches or applies to the given
      * Satisfaction and Qualifier.
      * 
      * @param n The node and attributes in the current dependency context

@@ -20,17 +20,17 @@ package org.grouplens.grapht.spi;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public class MockContextMatcher implements ContextMatcher {
+public class MockContextElementMatcher implements ContextElementMatcher {
     private static final long serialVersionUID = 1L;
 
     private final Class<?> type;
     private final MockQualifierMatcher qualifier;
     
-    public MockContextMatcher(Class<?> type) {
+    public MockContextElementMatcher(Class<?> type) {
         this(type, MockQualifierMatcher.any());
     }
     
-    public MockContextMatcher(Class<?> type, MockQualifierMatcher qualifier) {
+    public MockContextElementMatcher(Class<?> type, MockQualifierMatcher qualifier) {
         this.type = type;
         this.qualifier = qualifier;
 

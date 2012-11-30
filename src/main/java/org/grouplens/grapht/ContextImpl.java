@@ -25,7 +25,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
+import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
@@ -75,9 +75,9 @@ class ContextImpl extends AbstractContext {
     }
     
     private Context in(QualifierMatcher q, Class<?> type) {
-        ContextMatcher nextMatcher = config.getSPI().context(q, type);
+        ContextElementMatcher nextMatcher = config.getSPI().context(q, type);
         
-        List<ContextMatcher> nextChain = new ArrayList<ContextMatcher>(context.getContexts());
+        List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
         nextChain.add(nextMatcher);
         return new ContextImpl(config, new ContextChain(nextChain));
     }

@@ -28,7 +28,7 @@ import javax.inject.Qualifier;
 /**
  * <p>
  * QualifierMatcher encapsulates the logic used to determine if a BindRule or
- * ContextMatcher match a particular Qualifier. Common qualifier matching rules
+ * ContextElementMatcher match a particular Qualifier. Common qualifier matching rules
  * are:
  * <ol>
  * <li>Any qualifier</li>

@@ -116,11 +116,11 @@ public class ContextChainTest {
     }
     
     private void doTest(Class<?>[] chainTypes, Class<?>[] contextTypes, boolean expectedMatch) throws Exception {
-        List<ContextMatcher> matchers = new ArrayList<ContextMatcher>();
+        List<ContextElementMatcher> elementMatchers = new ArrayList<ContextElementMatcher>();
         for (Class<?> type: chainTypes) {
-            matchers.add(new MockContextMatcher(type));
+            elementMatchers.add(new MockContextElementMatcher(type));
         }
-        ContextChain chain = new ContextChain(matchers);
+        ContextChain chain = new ContextChain(elementMatchers);
         
         List<Pair<Satisfaction, Attributes>> context = new ArrayList<Pair<Satisfaction, Attributes>>();
         for (Class<?> type: contextTypes) {

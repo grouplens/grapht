@@ -33,7 +33,7 @@ import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
 import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
+import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
@@ -126,7 +126,7 @@ public class BindingFunctionBuilder implements Cloneable {
         intermediateRules = new HashMap<ContextChain, Collection<BindRule>>();
         superRules = new HashMap<ContextChain, Collection<BindRule>>();
         
-        root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
+        root = new ContextImpl(this, new ContextChain(new ArrayList<ContextElementMatcher>()));
     }
     
     private BindingFunctionBuilder(BindingFunctionBuilder clone) {
@@ -136,7 +136,7 @@ public class BindingFunctionBuilder implements Cloneable {
         manualRules = deepCloneRules(clone.manualRules);
         intermediateRules = deepCloneRules(clone.intermediateRules);
         superRules = deepCloneRules(clone.superRules);
-        root = new ContextImpl(this, new ContextChain(new ArrayList<ContextMatcher>()));
+        root = new ContextImpl(this, new ContextChain(new ArrayList<ContextElementMatcher>()));
     }
     
     @Override

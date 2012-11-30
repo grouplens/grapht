@@ -116,16 +116,16 @@ public interface InjectSPI {
     Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable);
     
     /**
-     * Create a ContextMatcher that matches the given context formed by a
-     * Qualifier and a type. The created ContextMatcher must be
+     * Create a ContextElementMatcher that matches the given context formed by a
+     * Qualifier and a type. The created ContextElementMatcher must be
      * compatible with the BindRules, Desires, and Satisfactions created by this
      * InjectSPI.
      * 
      * @param qualifier The qualifier matcher
      * @param type The type of the context
-     * @return A ContextMatcher representing the qualifier and type
+     * @return A ContextElementMatcher representing the qualifier and type
      */
-    ContextMatcher context(QualifierMatcher qualifier, Class<?> type);
+    ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type);
     
     /**
      * Create a QualifierMatcher that matches the given annotation type. This

@@ -26,22 +26,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.InjectionPoint;
-import org.grouplens.grapht.spi.MockInjectionPoint;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.NullSatisfaction;
-import org.grouplens.grapht.spi.reflect.ProviderClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ProviderInstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionContextMatcher;
-import org.grouplens.grapht.spi.reflect.ReflectionDesire;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.ContextElementMatcher;
+import org.grouplens.grapht.spi.reflect.*;
+import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.spi.reflect.types.InterfaceA;
 import org.grouplens.grapht.spi.reflect.types.ProviderA;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
@@ -66,11 +54,11 @@ public class BindRuleTest {
     @SuppressWarnings("unchecked")
     public void testContextMatcherComparator() throws Exception {
         InjectSPI spi = new ReflectionInjectSPI();
-        ContextMatcher cm1 = new ReflectionContextMatcher(TypeB.class, spi.matchAny()); // type dist = 0, annot dist = 0
-        ContextMatcher cm2 = new ReflectionContextMatcher(TypeA.class, spi.match(RoleD.class)); // type dist = 1, annot dist = 0
-        ContextMatcher cm3 = new ReflectionContextMatcher(TypeA.class, spi.matchAny()); // type dist = 1, annot dist = 1
+        ContextElementMatcher cm1 = new ReflectionContextElementMatcher(TypeB.class, spi.matchAny()); // type dist = 0, annot dist = 0
+        ContextElementMatcher cm2 = new ReflectionContextElementMatcher(TypeA.class, spi.match(RoleD.class)); // type dist = 1, annot dist = 0
+        ContextElementMatcher cm3 = new ReflectionContextElementMatcher(TypeA.class, spi.matchAny()); // type dist = 1, annot dist = 1
         
-        List<ContextMatcher> cms = new ArrayList<ContextMatcher>();
+        List<ContextElementMatcher> cms = new ArrayList<ContextElementMatcher>();
         cms.add(cm3);
         cms.add(cm1);
         cms.add(cm2);
@@ -80,7 +68,7 @@ public class BindRuleTest {
         Constructor<?> ctor = comparatorType.getConstructor(Class.class);
         ctor.setAccessible(true);
         
-        Collections.sort(cms, (Comparator<ContextMatcher>) ctor.newInstance(TypeB.class));
+        Collections.sort(cms, (Comparator<ContextElementMatcher>) ctor.newInstance(TypeB.class));
         Assert.assertEquals(cm1, cms.get(0));
         Assert.assertEquals(cm2, cms.get(1));
         Assert.assertEquals(cm3, cms.get(2));

@@ -39,14 +39,14 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class ContextChain implements Externalizable {
     // "final"
-    private List<ContextMatcher> matchers;
+    private List<ContextElementMatcher> elementMatchers;
 
     /**
      * Create a new ContextChain representing the empty context without any
      * matchers.
      */
     public ContextChain() {
-        this(new ArrayList<ContextMatcher>());
+        this(new ArrayList<ContextElementMatcher>());
     }
 
     /**
@@ -54,10 +54,10 @@ public class ContextChain implements Externalizable {
      * parameter forms a list in the order the arguments are passed in.
      * Arguments should not be null.
      * 
-     * @param contextMatchers The var-args of matchers to use in this chain
+     * @param elementMatchers The var-args of matchers to use in this chain
      */
-    public ContextChain(ContextMatcher... contextMatchers) {
-        this(Arrays.asList(contextMatchers));
+    public ContextChain(ContextElementMatcher... elementMatchers) {
+        this(Arrays.asList(elementMatchers));
     }
     
     /**
@@ -68,15 +68,15 @@ public class ContextChain implements Externalizable {
      * @param matchers The matcher list this chain represents
      * @throws NullPointerException if matchers is null
      */
-    public ContextChain(List<? extends ContextMatcher> matchers) {
-        this.matchers = new ArrayList<ContextMatcher>(matchers);
+    public ContextChain(List<? extends ContextElementMatcher> matchers) {
+        this.elementMatchers = new ArrayList<ContextElementMatcher>(matchers);
     }
     
     /**
      * @return An unmodifiable list of the context matchers in this chain
      */
-    public List<ContextMatcher> getContexts() {
-        return Collections.unmodifiableList(matchers);
+    public List<ContextElementMatcher> getContexts() {
+        return Collections.unmodifiableList(elementMatchers);
     }
 
     /**
@@ -85,11 +85,11 @@ public class ContextChain implements Externalizable {
      * context represented by the ordered list of Satisfaction and Roles. The
      * start of the context represents the root of the dependency path.
      * <p>
-     * This returns true if the sequence of context matchers is a subsequence of
+     * This returns true if the sequence of context elementMatchers is a subsequence of
      * the contexts, with respect to the matcher's
-     * {@link ContextMatcher#matches(Pair) match()} method.
+     * {@link ContextElementMatcher#matches(Pair) match()} method.
      * <p>
-     * Given this definition, a ContextChain with no matchers will match every
+     * Given this definition, a ContextChain with no elementMatchers will match every
      * real context.
      * 
      * @param nodes The current context
@@ -97,7 +97,7 @@ public class ContextChain implements Externalizable {
      */
     public boolean matches(List<Pair<Satisfaction, Attributes>> nodes) {
         int i = 0;
-        for (ContextMatcher cm: matchers) {
+        for (ContextElementMatcher cm: elementMatchers) {
             boolean found = false;
             // search forward in the list of nodes for the
             // first node to match the current matcher
@@ -119,7 +119,7 @@ public class ContextChain implements Externalizable {
         }
         
         // we've found matching nodes for every context matcher,
-        // in the same order as context matchers
+        // in the same order as context elementMatchers
         return true;
     }
     
@@ -127,23 +127,23 @@ public class ContextChain implements Externalizable {
     public boolean equals(Object o) {
         if (!(o instanceof ContextChain))
             return false;
-        return ((ContextChain) o).matchers.equals(matchers);
+        return ((ContextChain) o).elementMatchers.equals(elementMatchers);
     }
     
     @Override
     public int hashCode() {
-        return matchers.hashCode();
+        return elementMatchers.hashCode();
     }
     
     @Override
     public String toString() {
-        return "ContextChain(" + matchers.toString() + ")";
+        return "ContextChain(" + elementMatchers.toString() + ")";
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(matchers.size());
-        for (ContextMatcher m: matchers) {
+        out.writeInt(elementMatchers.size());
+        for (ContextElementMatcher m: elementMatchers) {
             out.writeObject(m);
         }
     }
@@ -151,9 +151,9 @@ public class ContextChain implements Externalizable {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         int count = in.readInt();
-        matchers = new ArrayList<ContextMatcher>(count);
+        elementMatchers = new ArrayList<ContextElementMatcher>(count);
         for (int i = 0; i < count; i++) {
-            matchers.add((ContextMatcher) in.readObject());
+            elementMatchers.add((ContextElementMatcher) in.readObject());
         }
     }
 }

@@ -29,13 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionContextMatcher;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.ContextElementMatcher;
+import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -47,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * to other desires or satisfactions.
  * <p>
  * For more details on context management, see {@link ContextChain},
- * {@link ContextMatcher}, and {@link QualifierMatcher}. This function uses the
+ * {@link org.grouplens.grapht.spi.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
  * context to activate and select BindRules. A number of rules are used to order
  * applicable BindRules and choose the best. When any of these rules rely on the
  * current dependency context, the deepest node in the context has the most
@@ -193,8 +189,8 @@ public class RuleBasedBindingFunction implements BindingFunction {
                 }
                 
                 Pair<Satisfaction, Attributes> currentNode = context.get(i);
-                ContextMatcher m1 = o1.getLeft().getContexts().get(lastIndex1 - matcher);
-                ContextMatcher m2 = o2.getLeft().getContexts().get(lastIndex2 - matcher);
+                ContextElementMatcher m1 = o1.getLeft().getContexts().get(lastIndex1 - matcher);
+                ContextElementMatcher m2 = o2.getLeft().getContexts().get(lastIndex2 - matcher);
                 
                 boolean match1 = m1.matches(currentNode);
                 boolean match2 = m2.matches(currentNode);
@@ -282,7 +278,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
         }
     }
     
-    private static class ContextMatcherComparator implements Comparator<ContextMatcher> {
+    private static class ContextMatcherComparator implements Comparator<ContextElementMatcher> {
         private final Class<?> type;
         
         public ContextMatcherComparator(Class<?> type) {
@@ -290,9 +286,9 @@ public class RuleBasedBindingFunction implements BindingFunction {
         }
         
         @Override
-        public int compare(ContextMatcher o1, ContextMatcher o2) {
-            ReflectionContextMatcher cm1 = (ReflectionContextMatcher) o1;
-            ReflectionContextMatcher cm2 = (ReflectionContextMatcher) o2;
+        public int compare(ContextElementMatcher o1, ContextElementMatcher o2) {
+            ReflectionContextElementMatcher cm1 = (ReflectionContextElementMatcher) o1;
+            ReflectionContextElementMatcher cm2 = (ReflectionContextElementMatcher) o2;
             
             // #1 - order by type distance, select the matcher that is closest
             int td1 = Types.getTypeDistance(type, cm1.getMatchedType());

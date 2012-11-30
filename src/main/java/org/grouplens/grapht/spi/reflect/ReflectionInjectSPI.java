@@ -25,11 +25,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.ContextElementMatcher;
 
 /**
  * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It
@@ -41,8 +38,8 @@ import org.grouplens.grapht.spi.Satisfaction;
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public ContextMatcher context(QualifierMatcher qualifier, Class<?> type) {
-        return new ReflectionContextMatcher(type, qualifier);
+    public ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type) {
+        return new ReflectionContextElementMatcher(type, qualifier);
     }
     
     @Override

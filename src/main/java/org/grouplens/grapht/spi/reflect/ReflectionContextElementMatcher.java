@@ -27,42 +27,42 @@ import javax.inject.Qualifier;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.ContextMatcher;
+import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 /**
- * ReflectionContextMatcher is a ContextMatcher that matches nodes if the node's
+ * ReflectionContextElementMatcher is a ContextElementMatcher that matches nodes if the node's
  * type inherits from the matcher's type and if the node's {@link Qualifier}
  * matches the configured {@link QualifierMatcher}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionContextMatcher implements ContextMatcher, Externalizable {
+public class ReflectionContextElementMatcher implements ContextElementMatcher, Externalizable {
     // "final"
     private Class<?> type;
     private QualifierMatcher qualifier;
     
     /**
-     * Create a ReflectionContextMatcher that matches the given type 
+     * Create a ReflectionContextElementMatcher that matches the given type
      * and any qualifier.
      * 
      * @param type The type to match
      * @throws NullPointerException if type is null
      */
-    public ReflectionContextMatcher(Class<?> type) {
+    public ReflectionContextElementMatcher(Class<?> type) {
         this(type, Qualifiers.matchAny());
     }
     
     /**
      * Constructor required by {@link Externalizable}.
      */
-    public ReflectionContextMatcher() { }
+    public ReflectionContextElementMatcher() { }
 
     /**
-     * Create a ReflectionContextMatcher that matches the given type and the
+     * Create a ReflectionContextElementMatcher that matches the given type and the
      * given {@link Qualifier}.
      * 
      * @param type The type to match
@@ -70,7 +70,7 @@ public class ReflectionContextMatcher implements ContextMatcher, Externalizable 
      *            matched
      * @throws NullPointerException if type or qualifier is null
      */
-    public ReflectionContextMatcher(Class<?> type, QualifierMatcher qualifier) {
+    public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier) {
         Preconditions.notNull("type", type);
         Preconditions.notNull("qualifier matcher", qualifier);
 
@@ -105,10 +105,10 @@ public class ReflectionContextMatcher implements ContextMatcher, Externalizable 
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ReflectionContextMatcher)) {
+        if (!(o instanceof ReflectionContextElementMatcher)) {
             return false;
         }
-        ReflectionContextMatcher r = (ReflectionContextMatcher) o;
+        ReflectionContextElementMatcher r = (ReflectionContextElementMatcher) o;
         return r.type.equals(type) && r.qualifier.equals(qualifier);
     }
     
