@@ -168,12 +168,13 @@ public class Graph implements Serializable, Cloneable {
         }
         
         for (Edge e: edges) {
-            if (e.getLabel() == null) {
+            List<Desire> theChain = e.getDesireChain();
+            if (theChain == null) {
                 if (label == null) {
                     return e;
                 }
             } else {
-                if (e.getLabel().equals(label)) {
+                if (theChain.equals(label)) {
                     return e;
                 }
             }
@@ -395,7 +396,7 @@ public class Graph implements Serializable, Cloneable {
             // and remove old outgoing edges from incoming graph
             Set<Edge> newOutgoingEdges = new HashSet<Edge>();
             for (Edge old: oldOutgoingEdges) {
-                Edge newEdge = new Edge(newNode, old.getTail(), old.getLabel());
+                Edge newEdge = new Edge(newNode, old.getTail(), old.getDesireChain());
                 newOutgoingEdges.add(newEdge);
                 incoming.get(old.getTail()).remove(old);
                 incoming.get(old.getTail()).add(newEdge);
@@ -411,7 +412,7 @@ public class Graph implements Serializable, Cloneable {
             // and remove old incoming edges from the outgoing graph
             Set<Edge> newIncomingEdges = new HashSet<Edge>();
             for (Edge old: oldIncomingEdges) {
-                Edge newEdge = new Edge(old.getHead(), newNode, old.getLabel());
+                Edge newEdge = new Edge(old.getHead(), newNode, old.getDesireChain());
                 newIncomingEdges.add(newEdge);
                 outgoing.get(old.getHead()).remove(old);
                 outgoing.get(old.getHead()).add(newEdge);
