@@ -22,22 +22,24 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.solver.InjectionContext;
+import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
+import org.grouplens.grapht.util.Types;
 
 /**
- * ElementChainContextMatcher represents a list of ContextMatchers. ContextMatchers can match
- * a single node within a context, and a ElementChainContextMatcher can match an entire
- * context. A ElementChainContextMatcher matches a context if its context matchers match a
+ * ElementChainContextMatcher represents a list of {@link ContextElementMatcher}s.
+ * Context element matchers can match a single node within a context, and an
+ * ElementChainContextMatcher can match an entire context. An
+ * ElementChainContextMatcher matches a context if its element matchers match a
  * subsequence of the nodes within the context.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ElementChainContextMatcher implements Externalizable {
+public class ElementChainContextMatcher implements ContextMatcher, Externalizable {
     // "final"
     private List<ContextElementMatcher> elementMatchers;
 
@@ -92,42 +94,40 @@ public class ElementChainContextMatcher implements Externalizable {
      * Given this definition, a ElementChainContextMatcher with no elementMatchers will match every
      * real context.
      * 
-     * @param nodes The current context
+     * @param context The current context
      * @return True if this chain matches
      */
-    public boolean matches(List<Pair<Satisfaction, Attributes>> nodes) {
-        int i = 0;
-        for (ContextElementMatcher cm: elementMatchers) {
-            boolean found = false;
-            // search forward in the list of nodes for the
-            // first node to match the current matcher
-            for (int j = i; j < nodes.size(); j++) {
-                if (cm.matches(nodes.get(j))) {
-                    // node found, so record the next starting index
-                    found = true;
-                    i = j + 1;
-                    break;
-                }
-            }
-            
-            if (!found) {
-                // no matching context element was found
-                // FIXME: this is a greedy algorithm, can it be proven to always
-                // be valid given that this is not equality but inheritence checking?
-                return false;
+    public ContextMatch matches(InjectionContext context) {
+        List<Pair<Satisfaction, Attributes>> nodes = context.getTypePath();
+
+        // ei is the index of the current matcher. also, number of unmatched matchers - 1
+        int ei = elementMatchers.size() - 1;
+        // matched element indexes, reversed (matches[0] is index of match of last element matcher).
+        int[] matches = new int[elementMatchers.size()];
+        // walk backwards through both lists, scanning for match
+        for (int ni = nodes.size() - 1; ni >= 0 && ei >= 0; ni--) {
+            ContextElementMatcher em = elementMatchers.get(ei);
+            if (em.matches(nodes.get(ni))) {
+                matches[matches.length - ei - 1] = ni;
+                ei -= 1;
             }
         }
-        
-        // we've found matching nodes for every context matcher,
-        // in the same order as context elementMatchers
-        return true;
+
+        if (ei < 0) {
+            // we matched all matchers
+            return new Match(elementMatchers, context, matches);
+        } else {
+            return null;
+        }
     }
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ElementChainContextMatcher))
+        if (!(o instanceof ElementChainContextMatcher)) {
             return false;
-        return ((ElementChainContextMatcher) o).elementMatchers.equals(elementMatchers);
+        } else {
+            return ((ElementChainContextMatcher) o).elementMatchers.equals(elementMatchers);
+        }
     }
     
     @Override
@@ -154,6 +154,103 @@ public class ElementChainContextMatcher implements Externalizable {
         elementMatchers = new ArrayList<ContextElementMatcher>(count);
         for (int i = 0; i < count; i++) {
             elementMatchers.add((ContextElementMatcher) in.readObject());
+        }
+    }
+
+    private static class Match implements ContextMatch {
+        private List<ContextElementMatcher> matchers;
+        private InjectionContext context;
+        private int[] matches;
+
+        /**
+         * Construct a new match.
+         *
+         * @param eltMatchers The matchers.
+         * @param ctx The matched context.
+         * @param ms The indexes of the element matches, in reverse order.
+         */
+        public Match(List<ContextElementMatcher> eltMatchers, InjectionContext ctx, int[] ms) {
+            if (eltMatchers.size() != ms.length) {
+                throw new IllegalArgumentException("mismatched match array");
+            }
+            matchers = eltMatchers;
+            context = ctx;
+            matches = ms;
+        }
+
+        /**
+         * Compare two matches.
+         *
+         * @param other The other matcher. Must be an element chain matcher of the same context.
+         * @return The comparison result.
+         */
+        public int compareTo(ContextMatch other) {
+            // FIXME Make this work with non-chain matchers
+            if (!(other instanceof Match)) {
+                throw new IllegalArgumentException("cannot compare across matcher types");
+            }
+
+            Match m = (Match) other;
+
+            if (!m.context.equals(context)) {
+                throw new IllegalArgumentException("cannot compare across matched contexts");
+            }
+
+            CompareToBuilder ctb = new CompareToBuilder();
+            final int sz = context.getTypePath().size();
+
+            // compare by closeness and length, reversed
+            // if m.matches is greater, it is closer to end, so we want it first
+            // if m.matches is shorter, it is lower priority, so we want this first
+            ctb.append(m.matches, matches);
+
+            if (ctb.toComparison() != 0) {
+                return ctb.toComparison();
+            }
+
+            List<Pair<Satisfaction, Attributes>> path = context.getTypePath();
+
+            // compare matcher type closeness from end to beginning
+            assert matches.length == m.matches.length; // or we have problems
+            for (int i = matches.length - 1; i >= 0; i--) {
+                int mi = matches.length - i - 1;
+                assert matches[mi] == m.matches[mi];
+
+                ContextElementMatcher mine = matchers.get(i);
+                ContextElementMatcher theirs = matchers.get(i);
+                // and they both should jolly well match
+                assert mine.matches(path.get(matches[mi]));
+                assert theirs.matches(path.get(m.matches[mi]));
+
+                Class<?> type = path.get(matches[mi]).getLeft().getErasedType();
+                ctb.append(mine, theirs, new ElementMatcherComparator(type));
+            }
+
+            return ctb.toComparison();
+        }
+    }
+
+    private static class ElementMatcherComparator implements Comparator<ContextElementMatcher> {
+        private final Class<?> type;
+
+        public ElementMatcherComparator(Class<?> type) {
+            this.type = type;
+        }
+
+        @Override
+        public int compare(ContextElementMatcher o1, ContextElementMatcher o2) {
+            ReflectionContextElementMatcher cm1 = (ReflectionContextElementMatcher) o1;
+            ReflectionContextElementMatcher cm2 = (ReflectionContextElementMatcher) o2;
+
+            // #1 - order by type distance, select the matcher that is closest
+            int td1 = Types.getTypeDistance(type, cm1.getMatchedType());
+            int td2 = Types.getTypeDistance(type, cm2.getMatchedType());
+            if (td1 != td2) {
+                return td1 - td2;
+            }
+
+            // #2 - order by qualifier priority
+            return cm1.getMatchedQualifier().compareTo(cm2.getMatchedQualifier());
         }
     }
 }

@@ -32,6 +32,7 @@ import java.util.Set;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
+import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
@@ -73,9 +74,9 @@ public class BindingFunctionBuilder implements Cloneable {
     private final Set<Class<?>> defaultExcludes;
     private final boolean generateRules;
     
-    private final Map<ElementChainContextMatcher, Collection<BindRule>> manualRules;
-    private final Map<ElementChainContextMatcher, Collection<BindRule>> intermediateRules; // "generated"
-    private final Map<ElementChainContextMatcher, Collection<BindRule>> superRules; // "generated"
+    private final Map<ContextMatcher, Collection<BindRule>> manualRules;
+    private final Map<ContextMatcher, Collection<BindRule>> intermediateRules; // "generated"
+    private final Map<ContextMatcher, Collection<BindRule>> superRules; // "generated"
 
     /**
      * Create a new InjectorConfigurationBuilder that uses a
@@ -122,9 +123,9 @@ public class BindingFunctionBuilder implements Cloneable {
         defaultExcludes.add(Externalizable.class);
         defaultExcludes.add(Cloneable.class);
         
-        manualRules = new HashMap<ElementChainContextMatcher, Collection<BindRule>>();
-        intermediateRules = new HashMap<ElementChainContextMatcher, Collection<BindRule>>();
-        superRules = new HashMap<ElementChainContextMatcher, Collection<BindRule>>();
+        manualRules = new HashMap<ContextMatcher, Collection<BindRule>>();
+        intermediateRules = new HashMap<ContextMatcher, Collection<BindRule>>();
+        superRules = new HashMap<ContextMatcher, Collection<BindRule>>();
         
         root = new ContextImpl(this, new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()));
     }
@@ -215,7 +216,7 @@ public class BindingFunctionBuilder implements Cloneable {
     }
     
     void addBindRule(RuleSet set, ElementChainContextMatcher context, BindRule rule) {
-        Map<ElementChainContextMatcher, Collection<BindRule>> map = getMap(set);
+        Map<ContextMatcher, Collection<BindRule>> map = getMap(set);
         
         Collection<BindRule> inContext = map.get(context);
         if (inContext == null) {
@@ -230,15 +231,15 @@ public class BindingFunctionBuilder implements Cloneable {
         return Collections.unmodifiableSet(defaultExcludes);
     }
     
-    private static Map<ElementChainContextMatcher, Collection<BindRule>> deepCloneRules(Map<ElementChainContextMatcher, Collection<BindRule>> bindRules) {
-        Map<ElementChainContextMatcher, Collection<BindRule>> rules = new HashMap<ElementChainContextMatcher, Collection<BindRule>>();
-        for (Entry<ElementChainContextMatcher, Collection<BindRule>> e: bindRules.entrySet()) {
+    private static Map<ContextMatcher, Collection<BindRule>> deepCloneRules(Map<ContextMatcher, Collection<BindRule>> bindRules) {
+        Map<ContextMatcher, Collection<BindRule>> rules = new HashMap<ContextMatcher, Collection<BindRule>>();
+        for (Entry<ContextMatcher, Collection<BindRule>> e: bindRules.entrySet()) {
             rules.put(e.getKey(), new ArrayList<BindRule>(e.getValue()));
         }
         return rules;
     }
     
-    private Map<ElementChainContextMatcher, Collection<BindRule>> getMap(RuleSet set) {
+    private Map<ContextMatcher, Collection<BindRule>> getMap(RuleSet set) {
         switch(set) {
         case EXPLICIT:
             return manualRules;

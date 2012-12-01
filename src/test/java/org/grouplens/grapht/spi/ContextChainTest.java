@@ -18,14 +18,16 @@
  */
 package org.grouplens.grapht.spi;
 
+import org.grouplens.grapht.solver.InjectionContext;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 public class ContextChainTest {
     @Test
@@ -121,13 +123,15 @@ public class ContextChainTest {
             elementMatchers.add(new MockContextElementMatcher(type));
         }
         ElementChainContextMatcher chain = new ElementChainContextMatcher(elementMatchers);
-        
-        List<Pair<Satisfaction, Attributes>> context = new ArrayList<Pair<Satisfaction, Attributes>>();
+
+        InjectionContext context = new InjectionContext();
         for (Class<?> type: contextTypes) {
-            context.add(Pair.<Satisfaction, Attributes>of(new MockSatisfaction(type, new ArrayList<Desire>()), new AttributesImpl()));
+            MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
+            context = context.push(sat, new AttributesImpl());
         }
-        
-        Assert.assertEquals(expectedMatch, chain.matches(context));
+
+        assertThat(chain.matches(context),
+                   expectedMatch ? notNullValue() : nullValue());
     }
     
     private static class A {}

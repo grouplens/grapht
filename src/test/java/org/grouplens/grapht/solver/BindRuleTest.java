@@ -18,29 +18,20 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.reflect.*;
+import org.grouplens.grapht.spi.reflect.types.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.ContextElementMatcher;
-import org.grouplens.grapht.spi.reflect.*;
-import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.ProviderA;
-import org.grouplens.grapht.spi.reflect.types.RoleA;
-import org.grouplens.grapht.spi.reflect.types.RoleB;
-import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
-import org.grouplens.grapht.spi.reflect.types.TypeC;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class BindRuleTest {
     private ReflectionInjectSPI spi;
@@ -64,7 +55,8 @@ public class BindRuleTest {
         cms.add(cm2);
         
         // grab this from the internals of RuleBasedBindingFunction
-        Class<?> comparatorType = Class.forName("org.grouplens.grapht.solver.RuleBasedBindingFunction$ContextMatcherComparator");
+        // FIXME Move this to a more appropriate location now that the CM comparator is moved
+        Class<?> comparatorType = Class.forName("org.grouplens.grapht.spi.ElementChainContextMatcher$ElementMatcherComparator");
         Constructor<?> ctor = comparatorType.getConstructor(Class.class);
         ctor.setAccessible(true);
         
