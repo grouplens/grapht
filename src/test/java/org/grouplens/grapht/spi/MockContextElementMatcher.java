@@ -25,19 +25,33 @@ public class MockContextElementMatcher implements ContextElementMatcher {
 
     private final Class<?> type;
     private final MockQualifierMatcher qualifier;
-    
+    private final boolean anchored;
+
     public MockContextElementMatcher(Class<?> type) {
         this(type, MockQualifierMatcher.any());
     }
     
     public MockContextElementMatcher(Class<?> type, MockQualifierMatcher qualifier) {
+        this(type, qualifier, false);
+    }
+
+    public MockContextElementMatcher(Class<?> type, boolean anchored) {
+        this(type, MockQualifierMatcher.any(), anchored);
+    }
+
+    public MockContextElementMatcher(Class<?> type, MockQualifierMatcher qualifier, boolean anchored) {
         this.type = type;
         this.qualifier = qualifier;
-
+        this.anchored = anchored;
     }
     
     @Override
     public boolean matches(Pair<Satisfaction, Attributes> n) {
         return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight().getQualifier());
+    }
+
+    @Override
+    public boolean isAnchored() {
+        return anchored;
     }
 }

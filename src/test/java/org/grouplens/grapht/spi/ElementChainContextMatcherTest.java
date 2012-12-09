@@ -116,6 +116,46 @@ public class ElementChainContextMatcherTest {
         doTest(new Class<?>[] { A.class, B.class, C.class }, new Class<?>[] { A.class, C.class }, false);
         doTest(new Class<?>[] { A.class, B.class, C.class}, new Class<?>[] { A.class, B.class }, false);
     }
+
+    @Test
+    public void testAnchoredElementMatchers() {
+        List<ContextElementMatcher> matchers = new ArrayList<ContextElementMatcher>();
+        matchers.add(new MockContextElementMatcher(A.class, true));
+        ContextMatcher matcher = new ElementChainContextMatcher(matchers);
+        assertThat(matcher.matches(makeContext()),
+                   nullValue());
+        assertThat(matcher.matches(makeContext(A.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(B.class, A.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(A.class, B.class)),
+                   nullValue());
+    }
+
+    @Test
+    public void testAnchoredAndUnanchored() {
+        List<ContextElementMatcher> matchers = new ArrayList<ContextElementMatcher>();
+        matchers.add(new MockContextElementMatcher(A.class, true));
+        matchers.add(new MockContextElementMatcher(B.class));
+        ContextMatcher matcher = new ElementChainContextMatcher(matchers);
+        assertThat(matcher.matches(makeContext()),
+                   nullValue());
+        assertThat(matcher.matches(makeContext(A.class, B.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(A.class, B.class, C.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(A.class, C.class, B.class)),
+                   nullValue());
+    }
+
+    private InjectionContext makeContext(Class<?>... types) {
+        InjectionContext context = new InjectionContext();
+        for (Class<?> type: types) {
+            MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
+            context = context.push(sat, new AttributesImpl());
+        }
+        return context;
+    }
     
     private void doTest(Class<?>[] chainTypes, Class<?>[] contextTypes, boolean expectedMatch) throws Exception {
         List<ContextElementMatcher> elementMatchers = new ArrayList<ContextElementMatcher>();
@@ -124,11 +164,7 @@ public class ElementChainContextMatcherTest {
         }
         ElementChainContextMatcher chain = new ElementChainContextMatcher(elementMatchers);
 
-        InjectionContext context = new InjectionContext();
-        for (Class<?> type: contextTypes) {
-            MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
-            context = context.push(sat, new AttributesImpl());
-        }
+        InjectionContext context = makeContext(contextTypes);
 
         assertThat(chain.matches(context),
                    expectedMatch ? notNullValue() : nullValue());

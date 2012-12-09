@@ -97,19 +97,32 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
      * @param context The current context
      * @return True if this chain matches
      */
+    @Override
     public ContextMatch matches(InjectionContext context) {
         List<Pair<Satisfaction, Attributes>> nodes = context.getTypePath();
 
-        // ei is the index of the current matcher. also, number of unmatched matchers - 1
-        int ei = elementMatchers.size() - 1;
+        /* Walk backwards through both lists, scanning for a match. At the end,
+         * we'll check the anchor counters to see if there was one. */
         // matched element indexes, reversed (matches[0] is index of match of last element matcher).
         int[] matches = new int[elementMatchers.size()];
-        // walk backwards through both lists, scanning for match
-        for (int ni = nodes.size() - 1; ni >= 0 && ei >= 0; ni--) {
+        // ei is the index of the current matcher. also, number of unmatched matchers - 1
+        int ei = elementMatchers.size() - 1;
+        // ni is the index of the current noe
+        int ni = nodes.size() - 1;
+        // step very, very carefully
+        while (ni >= 0 && ei >= 0) {
             ContextElementMatcher em = elementMatchers.get(ei);
             if (em.matches(nodes.get(ni))) {
+                // we have a match, advance both counters
                 matches[matches.length - ei - 1] = ni;
-                ei -= 1;
+                ei--;
+                ni--;
+            } else if (em.isAnchored()) {
+                // no match, but em is anchored. So skip the rest of the nodes, no match.
+                ni = -1;
+            } else {
+                // no match,but em is not anchored. therefore, check next node
+                ni--;
             }
         }
 
@@ -184,6 +197,7 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
          * @param other The other matcher. Must be an element chain matcher of the same context.
          * @return The comparison result.
          */
+        @Override
         public int compareTo(ContextMatch other) {
             // FIXME Make this work with non-chain matchers
             if (!(other instanceof Match)) {

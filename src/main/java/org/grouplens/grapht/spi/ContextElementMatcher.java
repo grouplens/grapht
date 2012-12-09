@@ -55,4 +55,13 @@ public interface ContextElementMatcher extends Serializable {
      *         otherwise
      */
     boolean matches(Pair<Satisfaction, Attributes> n);
+
+    /**
+     * Query whether this element matcher is anchored. Anchored matchers must
+     * match immediately (scanning from the end of the context); unanchored
+     * matchers can be matched at first opportunity.
+     *
+     * @return {@code true} if this context matcher is anchored.
+     */
+    boolean isAnchored();
 }

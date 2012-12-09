@@ -102,6 +102,11 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, E
         
         return false;
     }
+
+    @Override
+    public boolean isAnchored() {
+        return false;
+    }
     
     @Override
     public boolean equals(Object o) {
