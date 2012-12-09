@@ -29,7 +29,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-public class ContextChainTest {
+public class ElementChainContextMatcherTest {
     @Test
     public void testEmptyChainEmptyContextSuccess() throws Exception {
         // Test that an empty ElementChainContextMatcher matches an empty context
