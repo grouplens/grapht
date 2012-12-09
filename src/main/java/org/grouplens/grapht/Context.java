@@ -94,4 +94,42 @@ public interface Context {
      * @return A new Context with a longer context stack
      */
     Context in(@Nullable Annotation qualifier, Class<?> type);
+
+    /**
+     * Create a new Context that extends the current context stack with the given class type as an
+     * anchored match. This matches with the default {@link Qualifier}. This is equivalent to
+     * <code>at(null, type);</code>
+     *
+     * @param type The type to extend this context by
+     * @return A new Context with a longer context stack
+     * @see #at(Class, Class)
+     */
+    Context at(Class<?> type);
+
+    /**
+     * Create a new Context that extends the current context stack with the given class and {@link
+     * Qualifier} annotation as an anchored match. If the qualifier is null, the default or null
+     * qualifier is used.
+     * <p>
+     * Unlike {@link #in(Class,Class)}, this match is <em>anchored</em> &mdash; that is, it only
+     * matches at the end of a context chain.  Context is matched if it ends with this or,
+     * if further context is opened inside this context, if the inner context matches immediately.
+     * </p>
+     *
+     * @param qualifier The qualifier type that must be matched along with the type
+     * @param type      The type to extend this context by
+     * @return A new Context with a longer context stack
+     */
+    Context at(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+
+    /**
+     * Create a new Context that extends the current context stack with the given class, qualified
+     * by the specific Annotation instance. as an anchored match. If the qualifier is null, the
+     * default or null qualifier is used.
+     *
+     * @param qualifier The qualifier instance that must be matched along with the type
+     * @param type      The type to extend this context by
+     * @return A new Context with a longer context stack
+     */
+    Context at(@Nullable Annotation qualifier, Class<?> type);
 }

@@ -38,8 +38,8 @@ import org.grouplens.grapht.spi.ContextElementMatcher;
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type) {
-        return new ReflectionContextElementMatcher(type, qualifier);
+    public ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type, boolean anchored) {
+        return new ReflectionContextElementMatcher(type, qualifier, anchored);
     }
     
     @Override

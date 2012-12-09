@@ -96,6 +96,30 @@ public class ContextOverrideTest {
         assertThat(out.inner.plug, instanceOf(Plug.class));
     }
 
+    /**
+     * Test bindings with a null, and a deeper context using a binding, with
+     * an anchored matcher.
+     */
+    @Test
+    public void testNullDeepConcreteAnchored() {
+        // immediate binding should allow inner to get a plug
+        build.at(COuter.class)
+             .bind(Plug.class)
+             .toNull();
+        Injector inj = build.build();
+
+        CInner in = inj.getInstance(CInner.class);
+        assertThat(in, notNullValue());
+        assertThat(in.plug, notNullValue());
+
+        COuter out = inj.getInstance(COuter.class);
+        assertThat(out, notNullValue());
+        assertThat(out.plug, nullValue());
+        assertThat(out.inner, notNullValue());
+        assertThat(out.inner.plug, notNullValue());
+        assertThat(out.inner.plug, instanceOf(Plug.class));
+    }
+
     @DefaultImplementation(PlugA.class)
     public static interface IPlug {}
     public static class PlugA implements IPlug {}

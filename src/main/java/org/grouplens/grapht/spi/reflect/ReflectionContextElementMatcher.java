@@ -44,9 +44,10 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, E
     // "final"
     private Class<?> type;
     private QualifierMatcher qualifier;
-    
+    private boolean anchored;
+
     /**
-     * Create a ReflectionContextElementMatcher that matches the given type
+     * Create an unanchored ReflectionContextElementMatcher that matches the given type
      * and any qualifier.
      * 
      * @param type The type to match
@@ -55,29 +56,43 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, E
     public ReflectionContextElementMatcher(Class<?> type) {
         this(type, Qualifiers.matchAny());
     }
-    
+
+    /**
+     * Create an unanchored ReflectionContextElementMatcher that matches the given type and the
+     * given {@link Qualifier}.
+     *
+     * @param type      The type to match
+     * @param qualifier The QualifierMatcher that determines how qualifiers are matched
+     * @throws NullPointerException if type or qualifier is null
+     */
+    public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier) {
+        this(type, qualifier, false);
+    }
+
     /**
      * Constructor required by {@link Externalizable}.
      */
     public ReflectionContextElementMatcher() { }
 
     /**
-     * Create a ReflectionContextElementMatcher that matches the given type and the
-     * given {@link Qualifier}.
-     * 
-     * @param type The type to match
-     * @param qualifier The QualifierMatcher that determines how qualifiers are
-     *            matched
+     * Create a ReflectionContextElementMatcher that matches the given type and the given {@link
+     * Qualifier}.
+     *
+     * @param type      The type to match
+     * @param qualifier The QualifierMatcher that determines how qualifiers are matched
+     * @param anchored  Whether the element matcher is anchored (see {@link #isAnchored()})
      * @throws NullPointerException if type or qualifier is null
      */
-    public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier) {
+    public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier,
+                                           boolean anchored) {
         Preconditions.notNull("type", type);
         Preconditions.notNull("qualifier matcher", qualifier);
 
         this.type = type;
         this.qualifier = qualifier;
+        this.anchored = anchored;
     }
-    
+
     /**
      * @return The type matched by this matcher
      */
@@ -105,7 +120,7 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, E
 
     @Override
     public boolean isAnchored() {
-        return false;
+        return anchored;
     }
     
     @Override

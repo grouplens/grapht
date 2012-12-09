@@ -161,9 +161,9 @@ public class BindingFunctionBuilderTest {
         Map<ContextMatcher, Collection<BindRule>> expected = new HashMap<ContextMatcher, Collection<BindRule>>();
         expected.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
                      Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
-        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.context(spi.matchAny(), TypeC.class))),
+        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.context(spi.matchAny(), TypeC.class, false))),
                      Arrays.asList(new BindRule(InterfaceA.class, spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
-        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.context(spi.match(RoleD.class), TypeC.class))),
+        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.context(spi.match(RoleD.class), TypeC.class, false))),
                      Arrays.asList(new BindRule(InterfaceB.class, spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());

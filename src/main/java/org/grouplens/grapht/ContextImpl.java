@@ -61,21 +61,36 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context in(Class<?> type) {
-        return in(config.getSPI().matchAny(), type);
+        return in(config.getSPI().matchAny(), type, false);
     }
 
     @Override
     public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        return in(config.getSPI().match(qualifier), type);
+        return in(config.getSPI().match(qualifier), type, false);
     }
     
     @Override
     public Context in(@Nullable Annotation annot, Class<?> type) {
-        return in(config.getSPI().match(annot), type);
+        return in(config.getSPI().match(annot), type, false);
+    }
+
+    @Override
+    public Context at(Class<?> type) {
+        return in(config.getSPI().matchAny(), type, true);
+    }
+
+    @Override
+    public Context at(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
+        return in(config.getSPI().match(qualifier), type, true);
+    }
+
+    @Override
+    public Context at(@Nullable Annotation annot, Class<?> type) {
+        return in(config.getSPI().match(annot), type, true);
     }
     
-    private Context in(QualifierMatcher q, Class<?> type) {
-        ContextElementMatcher nextMatcher = config.getSPI().context(q, type);
+    private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
+        ContextElementMatcher nextMatcher = config.getSPI().context(q, type, anchored);
         
         List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
         nextChain.add(nextMatcher);

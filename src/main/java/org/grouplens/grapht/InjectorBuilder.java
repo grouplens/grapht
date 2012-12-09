@@ -113,6 +113,21 @@ public class InjectorBuilder extends AbstractContext {
         return builder.getRootContext().in(annot, type);
     }
 
+    @Override
+    public Context at(Class<?> type) {
+        return builder.getRootContext().at(type);
+    }
+
+    @Override
+    public Context at(Class<? extends Annotation> qualifier, Class<?> type) {
+        return builder.getRootContext().at(qualifier, type);
+    }
+
+    @Override
+    public Context at(Annotation annot, Class<?> type) {
+        return builder.getRootContext().at(annot, type);
+    }
+
     /**
      * Apply a module to the root context of this InjectorBuilder (i.e.
      * {@link Module#bind(Context)}).
