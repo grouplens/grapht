@@ -52,4 +52,13 @@ public interface QualifierMatcher extends Comparable<QualifierMatcher>, Serializ
      * @return True if matched
      */
     boolean matches(@Nullable Annotation q);
+
+    /**
+     * Get the priority of this matcher. Lower priority values have precedence in selecting
+     * the final bind rule. All Grapht matchers have priorities of at least 0; negative
+     * priority values are reserved for custom extensions.
+     *
+     * @return The priority.
+     */
+    int getPriority();
 }

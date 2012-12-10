@@ -102,22 +102,23 @@ public final class Qualifiers {
 
         @Override
         public int compareTo(QualifierMatcher o) {
-            Integer p1 = TYPE_PRIORITIES.get(getClass());
-            Integer p2 = TYPE_PRIORITIES.get(o.getClass());
-            
-            if (p2 == null) {
+            if (o == null) {
                 // other type is unknown, so push it to the front
                 return 1;
+            } else {
+                // lower priorities sort lower (higher precedence)
+                return getPriority() - o.getPriority();
             }
-            
-            // otherwise compare based on priorities, where a higher priority
-            // puts the matcher near the front
-            return p2 - p1;
         }
     }
     
     private static class AnyMatcher extends AbstractMatcher {
         private static final long serialVersionUID = 1L;
+
+        @Override
+        public int getPriority() {
+            return 2;
+        }
 
         @Override
         public boolean matches(Annotation q) {
@@ -145,6 +146,11 @@ public final class Qualifiers {
     
     private static class NullMatcher extends AbstractMatcher {
         private static final long serialVersionUID = 1L;
+
+        @Override
+        public int getPriority() {
+            return 0;
+        }
         
         @Override
         public boolean matches(Annotation q) {
@@ -185,7 +191,12 @@ public final class Qualifiers {
          */
         @SuppressWarnings("unused")
         public AnnotationClassMatcher() { }
-        
+
+        @Override
+        public int getPriority() {
+            return 1;
+        }
+
         @Override
         public boolean matches(Annotation q) {
             Class<? extends Annotation> qtype = (q == null ? null : q.annotationType());
@@ -237,7 +248,12 @@ public final class Qualifiers {
          */
         @SuppressWarnings("unused")
         public AnnotationMatcher() { }
-        
+
+        @Override
+        public int getPriority() {
+            return 0;
+        }
+
         @Override
         public boolean matches(Annotation q) {
             return annot.equals(q);
