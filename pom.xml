@@ -221,7 +221,7 @@
                       </execution>
                       <execution>
                         <id>cobertura-instrument</id>
-                        <phase>process-classes</phase>
+                        <phase>process-test-classes</phase>
                         <goals><goal>instrument</goal></goals>
                       </execution>
                     </executions>
