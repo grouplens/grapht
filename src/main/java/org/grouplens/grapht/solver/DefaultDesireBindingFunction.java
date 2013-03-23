@@ -45,81 +45,94 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     
     @Override
     public BindingResult bind(InjectionContext context, Desire desire) throws SolverException {
+        BindingResult result = null;
+
         Annotation qualifier = desire.getInjectionPoint().getAttributes().getQualifier();
 
         // Only use qualifier defaults if this is the first desire 
         // (i.e. the desire that declared any qualifier) 
         if (context.getPriorDesires().isEmpty() && qualifier != null) {
             Class<? extends Annotation> annotType = qualifier.annotationType();
-            DefaultDouble dfltDouble = annotType.getAnnotation(DefaultDouble.class);
-            if (dfltDouble != null) {
-                return new BindingResult(desire.restrict(spi.satisfy(dfltDouble.value())),
-                                         CachePolicy.NO_PREFERENCE, false, true);
-            }
-            DefaultInteger dfltInt = annotType.getAnnotation(DefaultInteger.class);
-            if (dfltInt != null) {
-                return new BindingResult(desire.restrict(spi.satisfy(dfltInt.value())),
-                                         CachePolicy.NO_PREFERENCE, false, true);
-            }
-            DefaultBoolean dfltBool = annotType.getAnnotation(DefaultBoolean.class);
-            if (dfltBool != null) {
-                return new BindingResult(desire.restrict(spi.satisfy(dfltBool.value())),
-                                         CachePolicy.NO_PREFERENCE, false, true);
-            }
-            DefaultString dfltStr = annotType.getAnnotation(DefaultString.class);
-            if (dfltStr != null) {
-                return new BindingResult(desire.restrict(spi.satisfy(dfltStr.value())),
-                                         CachePolicy.NO_PREFERENCE, false, true);
-            }
-            DefaultProvider provided = annotType.getAnnotation(DefaultProvider.class);
-            if (provided != null) {
-                return new BindingResult(desire.restrict(spi.satisfyWithProvider(provided.value())),
-                                         CachePolicy.NO_PREFERENCE, false, true);
-            }
-            DefaultImplementation impl = annotType.getAnnotation(DefaultImplementation.class);
-            if (impl != null) {
-                if (Types.isInstantiable(impl.value())) {
-                    return new BindingResult(desire.restrict(spi.satisfy(impl.value())),
-                                             CachePolicy.NO_PREFERENCE, false, false);
-                } else {
-                    return new BindingResult(desire.restrict(impl.value()), 
-                                             CachePolicy.NO_PREFERENCE, false, false);
-                }
-            }
-            DefaultNull dnull = annotType.getAnnotation(DefaultNull.class);
-            if (dnull != null) {
-                return new BindingResult(desire.restrict(spi.satisfyWithNull(desire.getDesiredType())),
-                                         CachePolicy.NO_PREFERENCE, false, true);
+
+            result = getDefaultValue(desire, annotType);
+            if (result == null) {
+                result = getAnnotatedDefault(desire, annotType);
             }
         }
         
         // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
         // source has not been disabled.
-        DefaultProvider provided = desire.getDesiredType().getAnnotation(DefaultProvider.class);
-        if (provided != null) {
-            return new BindingResult(desire.restrict(spi.satisfyWithProvider(provided.value())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
-        }
-        DefaultImplementation impl = desire.getDesiredType().getAnnotation(DefaultImplementation.class);
-        if (impl != null) {
-            if (Types.isInstantiable(impl.value())) {
-                return new BindingResult(desire.restrict(spi.satisfy(impl.value())),
-                                         CachePolicy.NO_PREFERENCE, false, false);
-            } else {
-                return new BindingResult(desire.restrict(impl.value()), 
-                                         CachePolicy.NO_PREFERENCE, false, false);
-            }
-        }
-
-        DefaultNull dnull = desire.getDesiredType().getAnnotation(DefaultNull.class);
-        if (dnull != null) {
-            return new BindingResult(desire.restrict(spi.satisfyWithNull(desire.getDesiredType())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+        if (result == null) {
+            result = getAnnotatedDefault(desire, desire.getDesiredType());
         }
         
         // There are no annotations on the {@link Qualifier} or the type that indicate a
         // default binding or value, or the defaults have been disabled,
         // so we return null
+        return result;
+    }
+
+    /**
+     * Get a default value (double, integer, string, etc.).
+     * @param desire The desire to satisfy.
+     * @param type The class to scan for annotations.
+     * @return The binding result, or {@code null} if there are no relevant annotations.
+     */
+    private BindingResult getDefaultValue(Desire desire, Class<?> type) {
+        // FIXME Check whether the annotation type is actually relevant for the desire
+        DefaultDouble dfltDouble = type.getAnnotation(DefaultDouble.class);
+        if (dfltDouble != null) {
+            return new BindingResult(desire.restrict(spi.satisfy(dfltDouble.value())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
+        }
+        DefaultInteger dfltInt = type.getAnnotation(DefaultInteger.class);
+        if (dfltInt != null) {
+            return new BindingResult(desire.restrict(spi.satisfy(dfltInt.value())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
+        }
+        DefaultBoolean dfltBool = type.getAnnotation(DefaultBoolean.class);
+        if (dfltBool != null) {
+            return new BindingResult(desire.restrict(spi.satisfy(dfltBool.value())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
+        }
+        DefaultString dfltStr = type.getAnnotation(DefaultString.class);
+        if (dfltStr != null) {
+            return new BindingResult(desire.restrict(spi.satisfy(dfltStr.value())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
+        }
+        return null;
+    }
+
+    /**
+     * Get the default from annotations on the class, if present.
+     *
+     * @param type The type to scan for annotations.
+     * @return A binding result, or {@code null} if no usable annotations are present.
+     */
+    private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
+        DefaultProvider provided = type.getAnnotation(DefaultProvider.class);
+        if (provided != null) {
+            return new BindingResult(desire.restrict(spi.satisfyWithProvider(provided.value())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
+        }
+
+        DefaultImplementation impl = type.getAnnotation(DefaultImplementation.class);
+        if (impl != null) {
+            if (Types.isInstantiable(impl.value())) {
+                return new BindingResult(desire.restrict(spi.satisfy(impl.value())),
+                                         CachePolicy.NO_PREFERENCE, false, false);
+            } else {
+                return new BindingResult(desire.restrict(impl.value()),
+                                         CachePolicy.NO_PREFERENCE, false, false);
+            }
+        }
+
+        DefaultNull dnull = type.getAnnotation(DefaultNull.class);
+        if (dnull != null) {
+            return new BindingResult(desire.restrict(spi.satisfyWithNull(desire.getDesiredType())),
+                                     CachePolicy.NO_PREFERENCE, false, true);
+        }
+
         return null;
     }
 }
