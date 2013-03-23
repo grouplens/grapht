@@ -50,7 +50,8 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         Annotation qualifier = desire.getInjectionPoint().getAttributes().getQualifier();
 
         // Only use qualifier defaults if this is the first desire 
-        // (i.e. the desire that declared any qualifier) 
+        // (i.e. the desire that declared any qualifier)
+        // REVIEW If it is not the first desire, can a qualifier exist?
         if (context.getPriorDesires().isEmpty() && qualifier != null) {
             Class<? extends Annotation> annotType = qualifier.annotationType();
 
