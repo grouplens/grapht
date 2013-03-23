@@ -89,4 +89,15 @@ public class DefaultBindingsTest {
         assertThat(a, notNullValue());
         assertThat(a, instanceOf(CPropDftProvider.class));
     }
+
+    /**
+     * Test that the DefaultImplementation annotation overrides META-INF.
+     */
+    @Test
+    public void testPreemptDefaultImplementation() {
+        Injector inj = b.build();
+        IPreemptDftImpl a = inj.getInstance(IPreemptDftImpl.class);
+        assertThat(a, notNullValue());
+        assertThat(a, instanceOf(CPreemptDftImplA.class));
+    }
 }
