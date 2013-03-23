@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -44,6 +46,9 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     private static final String META_INF_DEFAULTS = "/META-INF/grapht/defaults/";
     private final Logger logger = LoggerFactory.getLogger(DefaultDesireBindingFunction.class);
     private final InjectSPI spi;
+
+    private final Map<Class<?>, BindingResult> metaInfCache =
+            new HashMap<Class<?>, BindingResult>();
     
     public DefaultDesireBindingFunction(InjectSPI spi) {
         Preconditions.notNull("spi", spi);
@@ -151,63 +156,67 @@ public class DefaultDesireBindingFunction implements BindingFunction {
 
     @SuppressWarnings("unchecked")
     private BindingResult getMetaInfDefault(Desire desire, Class<?> type) throws SolverException {
-        // TODO Cache these lookups
+        synchronized (metaInfCache) {
+            if (metaInfCache.containsKey(type)) {
+                return metaInfCache.get(type);
+            }
+        }
+
+        BindingResult result = null;
         String resourceName = META_INF_DEFAULTS + type.getCanonicalName() + ".properties";
         logger.debug("searching for defaults in {}", resourceName);
         InputStream istr = getClass().getResourceAsStream(resourceName);
-        if (istr == null) {
-            return null;
-        }
 
-        Properties props;
-        try {
-            props = new Properties();
-            props.load(istr);
-        } catch (IOException e) {
-            logger.warn("error reading from {}: {}", resourceName, e);
-            return null;
-        } finally {
+        if (istr != null) {
+            Properties props;
             try {
-                istr.close();
+                props = new Properties();
+                props.load(istr);
             } catch (IOException e) {
-                logger.error("error closing {}: {}", resourceName, e);
-                // REVIEW Fail with error, or throw an exception?
+                throw new SolverException("error reading " + resourceName, e);
+            } finally {
+                try {
+                    istr.close();
+                } catch (IOException e) {
+                    logger.error("error closing {}: {}", resourceName, e);
+                }
+            }
+
+            String providerName = props.getProperty("provider");
+            if (providerName != null) {
+                try {
+                    // TODO Support configurable class loaders
+                    // REVIEW Do we want to use this, or the current thread's class loader?
+                    @SuppressWarnings("rawtypes")
+                    Class providerClass = Class.forName(providerName);
+                    logger.debug("found provider {} for {}", providerName, type);
+                    // QUESTION: why should the last parameter be true?
+                    result = new BindingResult(desire.restrict(spi.satisfyWithProvider(providerClass)),
+                                               CachePolicy.NO_PREFERENCE, false, true);
+                } catch (ClassNotFoundException e) {
+                    throw new SolverException("cannot find default provider for " + type, e);
+                }
+            }
+
+            String implName = props.getProperty("implementation");
+            if (implName != null) {
+                try {
+                    // TODO Support configurable class loaders
+                    // REVIEW Do we want to use this, or the current thread's class loader?
+                    @SuppressWarnings("rawtypes")
+                    Class implClass = Class.forName(implName);
+                    logger.debug("found implementation {} for {}", implName, type);
+                    // QUESTION: why should the last parameter be true?
+                    result = new BindingResult(desire.restrict(spi.satisfy(implClass)),
+                                               CachePolicy.NO_PREFERENCE, false, false);
+                } catch (ClassNotFoundException e) {
+                    throw new SolverException("cannot find default implementation for " + type, e);
+                }
             }
         }
-
-        String providerName = props.getProperty("provider");
-        if (providerName != null) {
-            try {
-                // TODO Support configurable class loaders
-                // REVIEW Do we want to use this, or the current thread's class loader?
-                @SuppressWarnings("rawtypes")
-                Class providerClass = Class.forName(providerName);
-                logger.debug("found provider {} for {}", providerName, type);
-                // QUESTION: why should the last parameter be true?
-                return new BindingResult(desire.restrict(spi.satisfyWithProvider(providerClass)),
-                                         CachePolicy.NO_PREFERENCE, false, true);
-            } catch (ClassNotFoundException e) {
-                throw new SolverException("cannot find default provider for " + type, e);
-            }
+        synchronized (metaInfCache) {
+            metaInfCache.put(type, result);
         }
-
-        String implName = props.getProperty("implementation");
-        if (implName != null) {
-            try {
-                // TODO Support configurable class loaders
-                // REVIEW Do we want to use this, or the current thread's class loader?
-                @SuppressWarnings("rawtypes")
-                Class implClass = Class.forName(implName);
-                logger.debug("found implementation {} for {}", implName, type);
-                // QUESTION: why should the last parameter be true?
-                return new BindingResult(desire.restrict(spi.satisfy(implClass)),
-                                         CachePolicy.NO_PREFERENCE, false, false);
-            } catch (ClassNotFoundException e) {
-                throw new SolverException("cannot find default implementation for " + type, e);
-            }
-        }
-
-        // no default
-        return null;
+        return result;
     }
 }
