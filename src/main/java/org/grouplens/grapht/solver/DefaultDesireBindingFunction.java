@@ -18,14 +18,19 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.lang.annotation.Annotation;
-
 import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.util.Properties;
 
 /**
  * A binding function that looks for {@link DefaultImplementation} or
@@ -36,6 +41,8 @@ import org.grouplens.grapht.util.Types;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class DefaultDesireBindingFunction implements BindingFunction {
+    private static final String META_INF_DEFAULTS = "/META-INF/grapht/defaults/";
+    private final Logger logger = LoggerFactory.getLogger(DefaultDesireBindingFunction.class);
     private final InjectSPI spi;
     
     public DefaultDesireBindingFunction(InjectSPI spi) {
@@ -65,6 +72,11 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         // source has not been disabled.
         if (result == null) {
             result = getAnnotatedDefault(desire, desire.getDesiredType());
+        }
+
+        // Last-ditch, try to get a default from META-INF
+        if (result == null) {
+            result = getMetaInfDefault(desire, desire.getDesiredType());
         }
         
         // There are no annotations on the {@link Qualifier} or the type that indicate a
@@ -134,6 +146,68 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
 
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private BindingResult getMetaInfDefault(Desire desire, Class<?> type) throws SolverException {
+        // TODO Cache these lookups
+        String resourceName = META_INF_DEFAULTS + type.getCanonicalName() + ".properties";
+        logger.debug("searching for defaults in {}", resourceName);
+        InputStream istr = getClass().getResourceAsStream(resourceName);
+        if (istr == null) {
+            return null;
+        }
+
+        Properties props;
+        try {
+            props = new Properties();
+            props.load(istr);
+        } catch (IOException e) {
+            logger.warn("error reading from {}: {}", resourceName, e);
+            return null;
+        } finally {
+            try {
+                istr.close();
+            } catch (IOException e) {
+                logger.error("error closing {}: {}", resourceName, e);
+                // REVIEW Fail with error, or throw an exception?
+            }
+        }
+
+        String providerName = props.getProperty("provider");
+        if (providerName != null) {
+            try {
+                // TODO Support configurable class loaders
+                // REVIEW Do we want to use this, or the current thread's class loader?
+                @SuppressWarnings("rawtypes")
+                Class providerClass = Class.forName(providerName);
+                logger.debug("found provider {} for {}", providerName, type);
+                // QUESTION: why should the last parameter be true?
+                return new BindingResult(desire.restrict(spi.satisfyWithProvider(providerClass)),
+                                         CachePolicy.NO_PREFERENCE, false, true);
+            } catch (ClassNotFoundException e) {
+                throw new SolverException("cannot find default provider for " + type, e);
+            }
+        }
+
+        String implName = props.getProperty("implementation");
+        if (implName != null) {
+            try {
+                // TODO Support configurable class loaders
+                // REVIEW Do we want to use this, or the current thread's class loader?
+                @SuppressWarnings("rawtypes")
+                Class implClass = Class.forName(implName);
+                logger.debug("found implementation {} for {}", implName, type);
+                // QUESTION: why should the last parameter be true?
+                return new BindingResult(desire.restrict(spi.satisfy(implClass)),
+                                         CachePolicy.NO_PREFERENCE, false, false);
+            } catch (ClassNotFoundException e) {
+                throw new SolverException("cannot find default implementation for " + type, e);
+            }
+        }
+
+        // no default
         return null;
     }
 }

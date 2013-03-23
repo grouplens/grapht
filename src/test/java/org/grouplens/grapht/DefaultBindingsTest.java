@@ -55,4 +55,38 @@ public class DefaultBindingsTest {
         assertThat(a, notNullValue());
         assertThat(a, instanceOf(CDftProvider.class));
     }
+
+    @Test
+    public void testPropDefaultImplementation() {
+        Injector inj = b.build();
+        IPropDftImpl a = inj.getInstance(IPropDftImpl.class);
+        assertThat(a, notNullValue());
+        assertThat(a, instanceOf(CPropDftImplA.class));
+    }
+
+    @Test
+    public void testPropOverrideDefaultImplementation() {
+        b.bind(IPropDftImpl.class).to(CPropDftImplB.class);
+        Injector inj = b.build();
+        IPropDftImpl a = inj.getInstance(IPropDftImpl.class);
+        assertThat(a, notNullValue());
+        assertThat(a, instanceOf(CPropDftImplB.class));
+    }
+
+    @Test
+    public void testPropDefaultProvider() {
+        Injector inj = b.build();
+        IPropDftProvider a = inj.getInstance(IPropDftProvider.class);
+        assertThat(a, notNullValue());
+        assertThat(a, instanceOf(PPropDftProvider.Impl.class));
+    }
+
+    @Test
+    public void testPropOverrideDefaultProvider() {
+        b.bind(IPropDftProvider.class).to(CPropDftProvider.class);
+        Injector inj = b.build();
+        IPropDftProvider a = inj.getInstance(IPropDftProvider.class);
+        assertThat(a, notNullValue());
+        assertThat(a, instanceOf(CPropDftProvider.class));
+    }
 }
