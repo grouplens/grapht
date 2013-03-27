@@ -151,9 +151,10 @@ public final class Types {
             // if child does not extend from the parent, return -1
             return -1;
         }
-        
+
         // at this point we can assume at some point a superclass of child
         // will equal parent
+        // FIXME This does not correctly handle the case where child is an interface (#53)
         int distance = 0;
         while(!child.equals(parent)) {
             distance++;

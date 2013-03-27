@@ -115,6 +115,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
 
             if (validRules.size() > 1) {
                 // must check if other rules are equal to the first
+                // we find the whole list of dupes for error reporting purposes
                 List<BindRule> topRules = new ArrayList<BindRule>();
                 topRules.add(validRules.get(0).getRight());
                 for (int i = 1; i < validRules.size(); i++) {
