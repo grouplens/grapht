@@ -60,17 +60,17 @@ class ContextImpl extends AbstractContext {
     }
 
     @Override
-    public Context in(Class<?> type) {
+    public Context within(Class<?> type) {
         return in(config.getSPI().matchAny(), type, false);
     }
 
     @Override
-    public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
+    public Context within(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
         return in(config.getSPI().match(qualifier), type, false);
     }
     
     @Override
-    public Context in(@Nullable Annotation annot, Class<?> type) {
+    public Context within(@Nullable Annotation annot, Class<?> type) {
         return in(config.getSPI().match(annot), type, false);
     }
 

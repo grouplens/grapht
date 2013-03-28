@@ -99,18 +99,18 @@ public class InjectorBuilder extends AbstractContext {
     }
     
     @Override
-    public Context in(Class<?> type) {
-        return builder.getRootContext().in(type);
+    public Context within(Class<?> type) {
+        return builder.getRootContext().within(type);
     }
 
     @Override
-    public Context in(Class<? extends Annotation> qualifier, Class<?> type) {
-        return builder.getRootContext().in(qualifier, type);
+    public Context within(Class<? extends Annotation> qualifier, Class<?> type) {
+        return builder.getRootContext().within(qualifier, type);
     }
     
     @Override
-    public Context in(Annotation annot, Class<?> type) {
-        return builder.getRootContext().in(annot, type);
+    public Context within(Annotation annot, Class<?> type) {
+        return builder.getRootContext().within(annot, type);
     }
 
     @Override

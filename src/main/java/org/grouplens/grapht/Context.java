@@ -63,37 +63,55 @@ public interface Context {
     <T> Binding<T> bind(Class<? extends Annotation> qual, Class<T> type);
 
     /**
+     * @deprecated Use {@link #within(Class)}.
+     */
+    @Deprecated
+    Context in(Class<?> type);
+
+    /**
+     * @deprecated Use {@link #within(Class, Class)}.
+     */
+    @Deprecated
+    Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+
+    /**
+     * @deprecated Use {@link #within(Annotation, Class)}.
+     */
+    @Deprecated
+    Context in(@Nullable Annotation qualifier, Class<?> type);
+
+    /**
      * Create a new Context that extends the current context stack with the
      * given class type. This matches with the default {@link Qualifier}. This is equivalent
-     * to <code>in(null, type);</code>
-     * 
+     * to <code>within(null, type);</code>
+     *
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(Class<?> type);
-    
+    Context within(Class<?> type);
+
     /**
      * Create a new Context that extends the current context stack with the
      * given class and {@link Qualifier} annotation. If the qualifier is null,
      * the default or null qualifier is used.
-     * 
+     *
      * @param qualifier The qualifier type that must be matched along with the type
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
-    
+    Context within(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+
     /**
      * Create a new Context that extends the current context stack with the
      * given class, qualified by the specific Annotation instance. If the
      * qualifier is null, the default or null qualifier is used.
-     * 
+     *
      * @param qualifier The qualifier instance that must be matched along with
      *            the type
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(@Nullable Annotation qualifier, Class<?> type);
+    Context within(@Nullable Annotation qualifier, Class<?> type);
 
     /**
      * Create a new Context that extends the current context stack with the given class type as an
