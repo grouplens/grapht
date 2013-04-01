@@ -184,6 +184,7 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
          * @param ctx The matched context.
          * @param ms The indexes of the element matches, in reverse order.
          */
+        @SuppressWarnings("PMD.ArrayIsStoredDirectly")
         private Match(List<ContextElementMatcher> eltMatchers, InjectionContext ctx, int[] ms) {
             if (eltMatchers.size() != ms.length) {
                 throw new IllegalArgumentException("mismatched match array");
