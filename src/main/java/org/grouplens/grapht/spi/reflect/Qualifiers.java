@@ -18,10 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
@@ -233,22 +230,16 @@ public final class Qualifiers {
         }
     }
     
-    private static class AnnotationMatcher extends AbstractMatcher implements Externalizable {
-        // "final"
-        private Annotation annot;
+    private static class AnnotationMatcher extends AbstractMatcher implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final Annotation annotation;
         
         public AnnotationMatcher(Annotation annot) {
             Preconditions.notNull("annotation", annot);
             Preconditions.isQualifier(annot.annotationType());
-            this.annot = annot;
+            annotation = annot;
         }
         
-        /**
-         * Constructor required by {@link Externalizable}.
-         */
-        @SuppressWarnings("unused")
-        public AnnotationMatcher() { }
-
         @Override
         public int getPriority() {
             return 0;
@@ -256,35 +247,23 @@ public final class Qualifiers {
 
         @Override
         public boolean matches(Annotation q) {
-            return annot.equals(q);
+            return annotation.equals(q);
         }
         
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof AnnotationMatcher)) {
-                return false;
-            }
-            return ((AnnotationMatcher) o).annot.equals(annot);
+            return (o instanceof AnnotationMatcher)
+                   && ((AnnotationMatcher) o).annotation.equals(annotation);
         }
         
         @Override
         public int hashCode() {
-            return annot.hashCode();
+            return annotation.hashCode();
         }
         
         @Override
         public String toString() {
-            return annot.toString();
-        }
-        
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            annot = (Annotation) in.readObject();
-        }
-        
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(annot);
+            return annotation.toString();
         }
     }
 }
