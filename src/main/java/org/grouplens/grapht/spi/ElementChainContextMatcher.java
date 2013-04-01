@@ -25,6 +25,8 @@ import java.io.ObjectOutput;
 import java.util.*;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
@@ -182,7 +184,7 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
          * @param ctx The matched context.
          * @param ms The indexes of the element matches, in reverse order.
          */
-        public Match(List<ContextElementMatcher> eltMatchers, InjectionContext ctx, int[] ms) {
+        private Match(List<ContextElementMatcher> eltMatchers, InjectionContext ctx, int[] ms) {
             if (eltMatchers.size() != ms.length) {
                 throw new IllegalArgumentException("mismatched match array");
             }
@@ -211,7 +213,6 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
             }
 
             CompareToBuilder ctb = new CompareToBuilder();
-            final int sz = context.getTypePath().size();
 
             // compare by closeness and length, reversed
             // if m.matches is greater, it is closer to end, so we want it first
@@ -241,6 +242,31 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
             }
 
             return ctb.toComparison();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            } else if (o instanceof Match) {
+                Match om = (Match) o;
+                EqualsBuilder eqb = new EqualsBuilder();
+                // matches is derived from matchers and context
+                return eqb.append(matchers, om.matchers)
+                          .append(context, om.context)
+                          .isEquals();
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            HashCodeBuilder hcb = new HashCodeBuilder();
+            // matches is derived from matchers and context
+            return hcb.append(matchers)
+                      .append(context)
+                      .build();
         }
     }
 
