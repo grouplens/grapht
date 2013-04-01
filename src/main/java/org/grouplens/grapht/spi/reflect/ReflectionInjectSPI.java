@@ -18,15 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.spi.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.ContextElementMatcher;
+import java.lang.annotation.Annotation;
 
 /**
  * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It

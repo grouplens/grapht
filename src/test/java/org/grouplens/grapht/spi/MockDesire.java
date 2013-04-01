@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.lang.annotation.Annotation;
-
 import org.grouplens.grapht.spi.reflect.SimpleInjectionPoint;
+
+import java.lang.annotation.Annotation;
 
 /**
  * MockDesire is a simple Desire implementation for use within certain types of

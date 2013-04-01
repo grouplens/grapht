@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-
 import org.grouplens.grapht.util.Preconditions;
+
+import java.io.Serializable;
 
 /**
  * CachedSatisfaction is the pairing of a {@link Satisfaction} and

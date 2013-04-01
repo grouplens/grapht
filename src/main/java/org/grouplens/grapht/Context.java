@@ -18,10 +18,9 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
-
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
 
 /**
  * <p>

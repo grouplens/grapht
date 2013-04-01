@@ -18,8 +18,8 @@
  */
 package org.grouplens.grapht.util;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -30,8 +30,8 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("rawtypes")
 public class TypesTest {

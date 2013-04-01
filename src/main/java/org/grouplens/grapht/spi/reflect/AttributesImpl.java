@@ -18,13 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import org.grouplens.grapht.annotation.Attribute;
+import org.grouplens.grapht.spi.Attributes;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.grouplens.grapht.annotation.Attribute;
-import org.grouplens.grapht.spi.Attributes;
 
 /**
  * Basic implementation of {@link Attributes} based on the {@link Annotation}

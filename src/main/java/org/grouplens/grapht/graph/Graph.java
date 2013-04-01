@@ -18,19 +18,12 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
 
 /**

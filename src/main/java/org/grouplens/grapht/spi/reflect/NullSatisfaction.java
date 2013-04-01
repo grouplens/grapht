@@ -18,17 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
@@ -36,6 +25,16 @@ import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the

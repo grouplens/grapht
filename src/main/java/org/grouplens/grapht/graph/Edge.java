@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht.graph;
 
+import org.grouplens.grapht.spi.Desire;
+
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.grouplens.grapht.spi.Desire;
 
 /**
  * <p>

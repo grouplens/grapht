@@ -18,25 +18,16 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Qualifier;
-
 import junit.framework.Assert;
-
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
 import org.grouplens.grapht.graph.Node;
 import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.junit.Test;
+
+import javax.inject.Qualifier;
+import java.util.*;
 
 public class DependencySolverTest {
     private DependencySolver createSolver(Map<ContextMatcher, Collection<BindRule>> rules) {

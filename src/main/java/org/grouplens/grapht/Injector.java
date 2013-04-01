@@ -18,11 +18,10 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.spi.InjectSPI;
 
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.spi.InjectSPI;
+import java.lang.annotation.Annotation;
 
 /**
  * <p>

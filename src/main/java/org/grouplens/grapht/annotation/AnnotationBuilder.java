@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.annotation;
 
+import javax.inject.Named;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -26,8 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.inject.Named;
 
 /**
  * <p>

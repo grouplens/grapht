@@ -18,6 +18,12 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.util.InstanceProvider;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
+
+import javax.inject.Provider;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -26,17 +32,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.InstanceProvider;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 /**
  * <p>

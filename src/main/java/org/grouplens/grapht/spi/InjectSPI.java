@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+import java.lang.annotation.Annotation;
 
 /**
  * InjectSPI is a service provider interface for accessing and creating the

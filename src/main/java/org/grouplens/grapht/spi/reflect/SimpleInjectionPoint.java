@@ -18,20 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
+
+import javax.annotation.Nullable;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
-
-import javax.annotation.Nullable;
-
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.InjectionPoint;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 /**
  * SimpleInjectionPoint is a synthetic injection point used for

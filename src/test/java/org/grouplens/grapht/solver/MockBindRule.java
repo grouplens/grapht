@@ -18,13 +18,13 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.MockQualifierMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MockBindRule is a simple implementation of BindRule where the matching

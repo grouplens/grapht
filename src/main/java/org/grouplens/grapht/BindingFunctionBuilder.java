@@ -18,25 +18,19 @@
  */
 package org.grouplens.grapht;
 
-import java.io.Externalizable;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
+import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.ElementChainContextMatcher;
-import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+
+import java.io.Externalizable;
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * BindingFunctionBuilder provides a convenient access to the fluent API and

@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.solver.BindRule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.solver.BindRule;
+import java.lang.annotation.Annotation;
 
 /**
  * Binding is part of the fluent API used for configuring an {@link Injector}.

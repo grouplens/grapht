@@ -18,17 +18,16 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
+
+import javax.inject.Qualifier;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.inject.Qualifier;
-
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 /**
  * Utilities related to Qualifier implementations.

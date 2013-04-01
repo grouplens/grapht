@@ -18,17 +18,17 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.InjectionPoint;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.

@@ -18,18 +18,17 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import junit.framework.Assert;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class GraphTest {
     @Test

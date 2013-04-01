@@ -18,20 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.*;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
 
 
 /**

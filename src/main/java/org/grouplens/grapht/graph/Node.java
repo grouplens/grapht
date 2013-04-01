@@ -18,13 +18,12 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.io.Serializable;
-
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Satisfaction;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
 
 
 /**
