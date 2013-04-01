@@ -25,10 +25,7 @@ import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nullable;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
@@ -38,11 +35,11 @@ import java.lang.reflect.Member;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
-    // "final"
-    private transient Attributes attrs;
-    private Class<?> type;
-    private boolean nullable;
+public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = 1L;
+    private final Attributes attrs;
+    private final Class<?> type;
+    private final boolean nullable;
     
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Preconditions.notNull("type", type);
@@ -54,11 +51,6 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
         this.type = type;
         this.nullable = nullable;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public SimpleInjectionPoint() { }
     
     @Override
     public Class<?> getErasedType() {
@@ -104,20 +96,51 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
         String q = (attrs.getQualifier() == null ? "" : attrs.getQualifier() + ":");
         return q + type.getSimpleName();
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        type = Types.readClass(in);
-        nullable = in.readBoolean();
 
-        Annotation qualifier = (Annotation) in.readObject();
-        attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
+    private Object writeReplace() {
+        // REVIEW Why do we only write the qualifier? Compatibility?
+        return new SerialProxy(type, nullable, attrs.getQualifier());
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, type);
-        out.writeBoolean(nullable);
-        out.writeObject(attrs.getQualifier());
+
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("Serialization proxy required");
+    }
+
+    /**
+     * Serialization proxy for the Serialization Proxy Pattern.
+     */
+    private static class SerialProxy implements Externalizable {
+        private static final long serialVersionUID = 1L;
+        private Class<?> type;
+        private boolean nullable;
+        @Nullable
+        private Annotation qualifier;
+
+        private SerialProxy(Class<?> t, boolean isNullable, @Nullable Annotation qual) {
+            type = t;
+            nullable = isNullable;
+            qualifier = qual;
+        }
+
+        public SerialProxy() {}
+
+        public Object readResolve() {
+            return new SimpleInjectionPoint(qualifier, type, nullable);
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            // REVIEW Why do we need Types.readClass?
+            type = Types.readClass(in);
+            nullable = in.readBoolean();
+            qualifier = (Annotation) in.readObject();
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            Types.writeClass(out, type);
+            out.writeBoolean(nullable);
+            out.writeObject(qualifier);
+        }
     }
 }
