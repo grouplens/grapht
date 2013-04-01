@@ -306,11 +306,9 @@ public final class Types {
     
     /**
      * <p>
-     * Write the Class to the given ObjectOutput. When the class type is not an
-     * array, its name is written as a UTF string, and a false boolean
-     * to record that it's not an array. When it is an array type, the canonical
-     * name of its component type is written as a UTF string, and then a true
-     * boolean value.
+     * Write the Class to the given ObjectOutput.  The class is written as a UTF-8 string
+     * of its full name, followed by an array depth as an integer.  Non-arrays have
+     * depth of 0, arrays of non-arrays have depth of 1, etc.
      * <p>
      * The class can be decoded by calling {@link #readClass(ObjectInput)}.
      * 
