@@ -18,10 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -44,9 +41,9 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ProviderInstanceSatisfaction implements Satisfaction, Externalizable {
-    // "final"
-    private Provider<?> provider;
+public class ProviderInstanceSatisfaction implements Satisfaction, Serializable {
+    private static final long serialVersionUID = 1L;
+    private final Provider<?> provider;
 
     /**
      * Create a new satisfaction that wraps the given Provider instance.
@@ -58,11 +55,6 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Externalizabl
         Preconditions.notNull("provider", provider);
         this.provider = provider;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ProviderInstanceSatisfaction() { }
     
     @Override
     public CachePolicy getDefaultCachePolicy() {
@@ -103,10 +95,8 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Externalizabl
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ProviderInstanceSatisfaction)) {
-            return false;
-        }
-        return ((ProviderInstanceSatisfaction) o).provider.equals(provider);
+        return (o instanceof ProviderInstanceSatisfaction)
+               && ((ProviderInstanceSatisfaction) o).provider.equals(provider);
     }
     
     @Override
@@ -117,15 +107,5 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Externalizabl
     @Override
     public String toString() {
         return "ProviderInstance(" + provider + ")";
-    }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        provider = (Provider<?>) in.readObject();
-    }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(provider);
     }
 }
