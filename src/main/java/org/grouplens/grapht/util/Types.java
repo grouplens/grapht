@@ -279,7 +279,9 @@ public final class Types {
      * @throws IOException if an IO error occurs
      * @throws ClassNotFoundException if the class can no longer be found at
      *             runtime
+     * @deprecated Serialize a {@link ClassProxy} instead.
      */
+    @Deprecated
     public static Class<?> readClass(ObjectInput in) throws IOException, ClassNotFoundException {
         String typeName = in.readUTF();
         int arrayCount = in.readInt();
@@ -308,7 +310,9 @@ public final class Types {
      * @param out The stream to write to
      * @param cls The class type to encode
      * @throws IOException if an IO error occurs
+     * @deprecated Serialize a {@link ClassProxy} instead.
      */
+    @Deprecated
     public static void writeClass(ObjectOutput out, Class<?> cls) throws IOException {
         int arrayCount = 0;
         Class<?> baseType = cls;
