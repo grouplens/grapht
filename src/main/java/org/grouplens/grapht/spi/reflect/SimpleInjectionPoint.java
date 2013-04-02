@@ -21,6 +21,7 @@ package org.grouplens.grapht.spi.reflect;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
@@ -98,7 +99,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     }
 
     private Object writeReplace() {
-        // REVIEW Why do we only write the qualifier? Compatibility?
+        // REVIEW Why do we only write the qualifier?
         return new SerialProxy(type, nullable, attrs.getQualifier());
     }
 
@@ -109,38 +110,27 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     /**
      * Serialization proxy for the Serialization Proxy Pattern.
      */
-    private static class SerialProxy implements Externalizable {
+    private static class SerialProxy implements Serializable {
         private static final long serialVersionUID = 1L;
-        private Class<?> type;
+        private ClassProxy type;
         private boolean nullable;
         @Nullable
         private Annotation qualifier;
 
         private SerialProxy(Class<?> t, boolean isNullable, @Nullable Annotation qual) {
-            type = t;
+            type = ClassProxy.forClass(t);
             nullable = isNullable;
             qualifier = qual;
         }
 
         public SerialProxy() {}
 
-        public Object readResolve() {
-            return new SimpleInjectionPoint(qualifier, type, nullable);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            // REVIEW Why do we need Types.readClass?
-            type = Types.readClass(in);
-            nullable = in.readBoolean();
-            qualifier = (Annotation) in.readObject();
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            Types.writeClass(out, type);
-            out.writeBoolean(nullable);
-            out.writeObject(qualifier);
+        public Object readResolve() throws ObjectStreamException {
+            try {
+                return new SimpleInjectionPoint(qualifier, type.resolve(), nullable);
+            } catch (ClassNotFoundException e) {
+                throw new InvalidObjectException("cannot resolve class " + type.getClassName());
+            }
         }
     }
 }
