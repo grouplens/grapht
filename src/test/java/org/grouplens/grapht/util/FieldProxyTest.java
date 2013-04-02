@@ -42,23 +42,7 @@ public class FieldProxyTest {
      * deserializing it.
      */
     private FieldProxy roundTrip(Field fld) throws IOException, ClassNotFoundException {
-        // make a proxy
         FieldProxy proxy = FieldProxy.forField(fld);
-
-        // serialize the proxy
-        ByteArrayOutputStream str = new ByteArrayOutputStream();
-        ObjectOutput oout = new ObjectOutputStream(str);
-        oout.writeObject(proxy);
-        oout.close();
-        byte[] bytes = str.toByteArray();
-
-        // read the proxy back in
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        ObjectInput oin = new ObjectInputStream(in);
-        try {
-            return (FieldProxy) oin.readObject();
-        } finally {
-            oin.close();
-        }
+        return TestUtils.serializeRoundTrip(proxy);
     }
 }

@@ -126,8 +126,6 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
             qualifier = qual;
         }
 
-        public SerialProxy() {}
-
         public Object readResolve() throws ObjectStreamException {
             try {
                 return new SimpleInjectionPoint(qualifier, type.resolve(), nullable);

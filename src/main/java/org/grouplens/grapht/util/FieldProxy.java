@@ -20,6 +20,11 @@ public class FieldProxy implements Serializable {
         fieldType = type;
     }
 
+    @Override
+    public String toString() {
+        return String.format("FieldProxy(%s of %s)", fieldName, declaringClass.getClassName());
+    }
+
     public Field resolve() throws ClassNotFoundException, NoSuchFieldException {
         if (field == null) {
             Class<?> cls = declaringClass.resolve();

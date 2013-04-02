@@ -57,24 +57,8 @@ public class ClassProxyTest {
      * deserializing it.
      */
     private ClassProxy roundTrip(Class<?> cls) throws IOException, ClassNotFoundException {
-        // make a proxy
         ClassProxy proxy = ClassProxy.forClass(cls);
-
-        // serialize the proxy
-        ByteArrayOutputStream str = new ByteArrayOutputStream();
-        ObjectOutput oout = new ObjectOutputStream(str);
-        oout.writeObject(proxy);
-        oout.close();
-        byte[] bytes = str.toByteArray();
-
-        // read the proxy back in
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        ObjectInput oin = new ObjectInputStream(in);
-        try {
-            return (ClassProxy) oin.readObject();
-        } finally {
-            oin.close();
-        }
+        return TestUtils.serializeRoundTrip(proxy);
     }
 
     @Test

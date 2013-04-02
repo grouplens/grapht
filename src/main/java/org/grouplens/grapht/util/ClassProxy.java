@@ -53,6 +53,11 @@ public final class ClassProxy implements Serializable {
         return className;
     }
 
+    @Override
+    public String toString() {
+        return "Proxy(" + className + ")";
+    }
+
     /**
      * Resolve a class proxy to a class.
      * @return The class represented by this proxy.
