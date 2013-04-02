@@ -98,7 +98,13 @@ public final class ClassProxy implements Serializable {
      */
     public Class<?> resolve() throws ClassNotFoundException {
         if (theClass == null) {
-            theClass = ClassUtils.getClass(className);
+            Class<?> cls = ClassUtils.getClass(className);
+            byte[] check = checksumClass(cls);
+            if (Arrays.equals(check, checksum)) {
+                theClass = cls;
+            } else {
+                throw new ClassNotFoundException("checksum mismatch for " + cls.getName());
+            }
         }
         return theClass;
     }
