@@ -43,6 +43,12 @@ public class FieldProxy implements Serializable {
         return String.format("FieldProxy(%s of %s)", fieldName, declaringClass.getClassName());
     }
 
+    /**
+     * Resolve this proxy into a {@link Field} instance.
+     * @return The {@link Field} represented by this proxy.
+     * @throws ClassNotFoundException If the proxy's declaring type cannot be resolved.
+     * @throws NoSuchFieldException If the field does not exist on the declaring type.
+     */
     public Field resolve() throws ClassNotFoundException, NoSuchFieldException {
         if (field == null) {
             Class<?> cls = declaringClass.resolve();
@@ -52,6 +58,11 @@ public class FieldProxy implements Serializable {
         return field;
     }
 
+    /**
+     * Construct a proxy for a field.
+     * @param field The field to proxy.
+     * @return The field proxy representing {@code field}.
+     */
     public static FieldProxy forField(Field field) {
         FieldProxy proxy = new FieldProxy(ClassProxy.forClass(field.getDeclaringClass()),
                                           field.getName(),
