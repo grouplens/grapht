@@ -53,7 +53,10 @@ public class FieldProxy implements Serializable {
         if (field == null) {
             Class<?> cls = declaringClass.resolve();
             field = cls.getDeclaredField(fieldName);
-            // REVIEW Original code verified the field type. Is this necessary?
+        }
+        // REVIEW Do we want to test equality or assignability?
+        if (!field.getType().equals(fieldType.resolve())) {
+            throw new NoSuchFieldException("type mismatch on " + field.toString());
         }
         return field;
     }
