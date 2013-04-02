@@ -41,7 +41,7 @@ public class ClassProxy implements Serializable {
     private final String className;
     private volatile transient Class<?> theClass;
 
-    public ClassProxy(String name) {
+    private ClassProxy(String name) {
         className = name;
     }
 
@@ -56,6 +56,7 @@ public class ClassProxy implements Serializable {
     /**
      * Resolve a class proxy to a class.
      * @return The class represented by this proxy.
+     * @throws ClassNotFoundException if the class represented by this proxy cannot be found.
      */
     public Class<?> resolve() throws ClassNotFoundException {
         if (theClass == null) {
