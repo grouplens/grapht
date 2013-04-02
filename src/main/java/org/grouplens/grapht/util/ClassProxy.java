@@ -19,7 +19,9 @@
 package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 
@@ -39,6 +41,7 @@ public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
 
     private final String className;
+    @Nullable
     private transient volatile Class<?> theClass;
 
     private ClassProxy(String name) {
@@ -56,6 +59,23 @@ public final class ClassProxy implements Serializable {
     @Override
     public String toString() {
         return "Proxy(" + className + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof ClassProxy) {
+            ClassProxy op = (ClassProxy) o;
+            return className.equals(op.className);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return className.hashCode();
     }
 
     /**

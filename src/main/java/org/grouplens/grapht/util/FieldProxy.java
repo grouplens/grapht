@@ -18,19 +18,24 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
  * Proxy class for serializing fields.
  */
-public class FieldProxy implements Serializable {
+public final class FieldProxy implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ClassProxy declaringClass;
     private final String fieldName;
     private final ClassProxy fieldType;
-    private transient Field field;
+    @Nullable
+    private transient volatile Field field;
+    private transient volatile int hash;
 
     private FieldProxy(ClassProxy cls, String n, ClassProxy type) {
         declaringClass = cls;
@@ -41,6 +46,33 @@ public class FieldProxy implements Serializable {
     @Override
     public String toString() {
         return String.format("FieldProxy(%s of %s)", fieldName, declaringClass.getClassName());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof FieldProxy) {
+            // REVIEW Do we want to resolve & check fields for equality?
+            FieldProxy op = (FieldProxy) o;
+            return declaringClass.equals(op.declaringClass)
+                    && fieldName.equals(op.fieldName)
+                    && fieldType.equals(op.fieldType);
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        if (hash == 0) {
+            HashCodeBuilder hcb = new HashCodeBuilder();
+            hash = hcb.append(declaringClass)
+                      .append(fieldName)
+                      .append(fieldType)
+                      .hashCode();
+        }
+        return hash;
     }
 
     /**
