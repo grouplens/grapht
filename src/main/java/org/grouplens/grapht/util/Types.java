@@ -384,64 +384,6 @@ public final class Types {
         }
     }
     
-    /**
-     * Read in a Method from the given ObjectInput. This is only compatible with
-     * methods serialized {@link #writeMethod(ObjectOutput, Method)}. Because
-     * Method is not Serializable, this must be used instead of
-     * {@link ObjectInput#readObject()}.
-     * 
-     * @param in The stream to read from
-     * @return The next method encoded in the stream
-     * @throws IOException If an IO error occurs or if the method no longer
-     *             exists
-     * @throws ClassNotFoundException if the declaring class of the method
-     *             cannot be found at runtime
-     * @deprecated Serialize a {@link MethodProxy} instead.
-     */
-    @Deprecated
-    public static Method readMethod(ObjectInput in) throws IOException, ClassNotFoundException {
-        Class<?> declaring = readClass(in);
-        String name = in.readUTF();
-        
-        Class<?>[] args = new Class<?>[in.readInt()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = readClass(in);
-        }
-        
-        try {
-            return declaring.getDeclaredMethod(name, args);
-        } catch (NoSuchMethodException e) {
-            throw new IOException("Method no longer exists", e);
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Method to the given ObjectOutput. Because Method is not
-     * Serializable, it is encoded to the stream as its declaring class, its
-     * name as a UTF string, the number of parameters, and then the parameter
-     * classes in their defined order. All classes are written to the stream
-     * using {@link #writeClass(ObjectOutput, Class)}.
-     * <p>
-     * The method can be decoded by calling {@link #readMethod(ObjectInput)}.
-     * 
-     * @param out The output stream to write to
-     * @param m The method to serialize
-     * @throws IOException if an IO error occurs
-     * @deprecated Serialize a {@link MethodProxy} instead.
-     */
-    @Deprecated
-    public static void writeMethod(ObjectOutput out, Method m) throws IOException {
-        writeClass(out, m.getDeclaringClass());
-        out.writeUTF(m.getName());
-        
-        Class<?>[] args = m.getParameterTypes();
-        out.writeInt(args.length);
-        for (int i = 0; i < args.length; i++) {
-            writeClass(out, args[i]);
-        }
-    }
-    
     private static int hash(Class<?> type) {
         // convert to a string, both for lexigraphical ordering
         // and to combine into a hash

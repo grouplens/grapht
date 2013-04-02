@@ -105,23 +105,23 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     private static class SerialProxy implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        FieldProxy proxy;
+        private final FieldProxy field;
 
         public SerialProxy(Field f) {
-            proxy = FieldProxy.forField(f);
+            field = FieldProxy.forField(f);
         }
 
         private Object readResolve() throws InvalidObjectException {
             try {
-                return new FieldInjectionPoint(proxy.resolve());
+                return new FieldInjectionPoint(field.resolve());
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex =
-                        new InvalidObjectException("no class for field " + proxy.toString());
+                        new InvalidObjectException("no class for field " + field.toString());
                 ex.initCause(e);
                 throw ex;
             } catch (NoSuchFieldException e) {
                 InvalidObjectException ex =
-                        new InvalidObjectException("no such field " + proxy.toString());
+                        new InvalidObjectException("no such field " + field.toString());
                 ex.initCause(e);
                 throw ex;
             }

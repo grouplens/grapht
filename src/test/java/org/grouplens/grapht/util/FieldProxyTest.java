@@ -47,7 +47,7 @@ public class FieldProxyTest {
     }
 
     @Test
-    public void testSerializeArrayField() throws NoSuchFieldException, ClassNotFoundException, IOException {
+    public void testSerializePrimitiveField() throws NoSuchFieldException, ClassNotFoundException, IOException {
         Field f = TestClass.class.getDeclaredField("bar");
         FieldProxy proxy = roundTrip(f);
         assertThat(proxy.resolve(), equalTo(f));
