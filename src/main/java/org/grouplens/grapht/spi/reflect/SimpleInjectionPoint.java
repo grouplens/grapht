@@ -23,10 +23,12 @@ import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 
@@ -39,9 +41,9 @@ import java.lang.reflect.Member;
 public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = 1L;
     // fields marked as transient since direct serialization is disabled
-    private transient final Attributes attrs;
-    private transient final Class<?> type;
-    private transient final boolean nullable;
+    private final transient Attributes attrs;
+    private final transient Class<?> type;
+    private final transient boolean nullable;
     
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Preconditions.notNull("type", type);
@@ -115,7 +117,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         private static final long serialVersionUID = 1L;
         private ClassProxy type;
         private boolean nullable;
-        @Nullable
+        @Nullable @SuppressWarnings("SE_BAD_FIELD")
         private Annotation qualifier;
 
         private SerialProxy(Class<?> t, boolean isNullable, @Nullable Annotation qual) {

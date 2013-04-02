@@ -39,7 +39,7 @@ public class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
 
     private final String className;
-    private volatile transient Class<?> theClass;
+    private transient volatile Class<?> theClass;
 
     private ClassProxy(String name) {
         className = name;
