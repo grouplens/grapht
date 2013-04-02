@@ -18,21 +18,14 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -173,12 +166,20 @@ public final class Types {
      *             Provider
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
-        try {
-            return Types.box(providerClass.getMethod("get").getReturnType());
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class does not implement get()");
+        Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
+        assert(bindings.keySet().size() == 1);
+        Type providedType = bindings.entrySet().iterator().next().getValue();
+        if(providedType instanceof TypeVariable<?>){
+            Type[] bounds = ((TypeVariable) providedType).getBounds();
+            if(bounds.length == 1){
+                return TypeUtils.getRawType(bounds[0], null);
+            }
+            else {
+                throw new IllegalArgumentException("Too many bounds on provider type");
+            }
+        }
+        else{
+            return TypeUtils.getRawType(providedType, null);
         }
     }
 
