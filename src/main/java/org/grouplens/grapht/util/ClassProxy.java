@@ -35,7 +35,7 @@ import java.io.Serializable;
  * @author Michael Ekstrand
  */
 @Immutable
-public class ClassProxy implements Serializable {
+public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
 
     private final String className;
