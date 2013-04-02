@@ -442,60 +442,6 @@ public final class Types {
         }
     }
     
-    /**
-     * Read in a Field from the given ObjectInput. This is only compatible with
-     * methods serialized {@link #writeField(ObjectOutput, Field)}. Because
-     * Method is not Serializable, this must be used instead of
-     * {@link ObjectInput#readObject()}.
-     * 
-     * @param in The stream to read from
-     * @return The next field encoded in the stream
-     * @throws IOException If an IO error occurs or if the field no longer
-     *             exists
-     * @throws ClassNotFoundException if the declaring class of the field cannot
-     *             be found at runtime
-     * @deprecated Serialize a {@link FieldProxy} instead.
-     */
-    @Deprecated
-    public static Field readField(ObjectInput in) throws IOException, ClassNotFoundException {
-        Class<?> declaring = readClass(in);
-        String name = in.readUTF();
-        
-        Class<?> fieldType = readClass(in);
-        
-        Field f;
-        try {
-            f = declaring.getDeclaredField(name);
-            if (f.getType().equals(fieldType)) {
-                throw new IOException("Field type changed from " + fieldType + " to " + f.getType());
-            }
-            return f;
-        } catch (NoSuchFieldException e) {
-            throw new IOException("Field no longer exists", e);
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Field to the given ObjectOutput. Because Field is not
-     * Serializable, it is encoded to the stream as its declaring class, its
-     * name as a UTF string, and its type. All classes are written to the stream
-     * using {@link #writeClass(ObjectOutput, Class)}.
-     * <p>
-     * The method can be decoded by calling {@link #readField(ObjectInput)}.
-     * 
-     * @param out The output stream to write to
-     * @param f The field to serialize
-     * @throws IOException if an IO error occurs
-     * @deprecated Serialize a {@link FieldProxy} instead.
-     */
-    @Deprecated
-    public static void writeField(ObjectOutput out, Field f) throws IOException {
-        writeClass(out, f.getDeclaringClass());
-        out.writeUTF(f.getName());
-        writeClass(out, f.getType());
-    }
-    
     private static int hash(Class<?> type) {
         // convert to a string, both for lexigraphical ordering
         // and to combine into a hash
