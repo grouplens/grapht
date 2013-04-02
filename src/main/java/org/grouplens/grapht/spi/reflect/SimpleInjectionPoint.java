@@ -102,7 +102,6 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     }
 
     private Object writeReplace() {
-        // REVIEW Why do we only write the qualifier?
         return new SerialProxy(type, nullable, attrs.getQualifier());
     }
 
