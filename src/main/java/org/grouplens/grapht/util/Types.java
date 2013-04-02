@@ -340,7 +340,9 @@ public final class Types {
      *             cannot be found at runtime
      * @throws NoSuchMethodException if the constructor no longer exists in the
      *             loaded class definition
+     * @deprecated Serialize a {@link ConstructorProxy} instead.
      */
+    @Deprecated
     public static Constructor<?> readConstructor(ObjectInput in) throws IOException, ClassNotFoundException {
         Class<?> declaring = readClass(in);
         Class<?>[] args = new Class<?>[in.readInt()];
@@ -369,7 +371,9 @@ public final class Types {
      * @param out The output stream to write to
      * @param ctor The constructor to serialize
      * @throws IOException if an IO error occurs
+     * @deprecated Serialize a {@link ConstructorProxy} instead.
      */
+    @Deprecated
     public static void writeConstructor(ObjectOutput out, Constructor<?> ctor) throws IOException {
         writeClass(out, ctor.getDeclaringClass());
         
@@ -392,7 +396,9 @@ public final class Types {
      *             exists
      * @throws ClassNotFoundException if the declaring class of the method
      *             cannot be found at runtime
+     * @deprecated Serialize a {@link MethodProxy} instead.
      */
+    @Deprecated
     public static Method readMethod(ObjectInput in) throws IOException, ClassNotFoundException {
         Class<?> declaring = readClass(in);
         String name = in.readUTF();
@@ -422,7 +428,9 @@ public final class Types {
      * @param out The output stream to write to
      * @param m The method to serialize
      * @throws IOException if an IO error occurs
+     * @deprecated Serialize a {@link MethodProxy} instead.
      */
+    @Deprecated
     public static void writeMethod(ObjectOutput out, Method m) throws IOException {
         writeClass(out, m.getDeclaringClass());
         out.writeUTF(m.getName());
@@ -446,7 +454,9 @@ public final class Types {
      *             exists
      * @throws ClassNotFoundException if the declaring class of the field cannot
      *             be found at runtime
+     * @deprecated Serialize a {@link FieldProxy} instead.
      */
+    @Deprecated
     public static Field readField(ObjectInput in) throws IOException, ClassNotFoundException {
         Class<?> declaring = readClass(in);
         String name = in.readUTF();
@@ -477,7 +487,9 @@ public final class Types {
      * @param out The output stream to write to
      * @param f The field to serialize
      * @throws IOException if an IO error occurs
+     * @deprecated Serialize a {@link FieldProxy} instead.
      */
+    @Deprecated
     public static void writeField(ObjectOutput out, Field f) throws IOException {
         writeClass(out, f.getDeclaringClass());
         out.writeUTF(f.getName());
