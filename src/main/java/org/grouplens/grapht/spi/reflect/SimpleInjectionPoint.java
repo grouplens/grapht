@@ -38,9 +38,10 @@ import java.lang.reflect.Member;
  */
 public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = 1L;
-    private final Attributes attrs;
-    private final Class<?> type;
-    private final boolean nullable;
+    // fields marked as transient since direct serialization is disabled
+    private transient final Attributes attrs;
+    private transient final Class<?> type;
+    private transient final boolean nullable;
     
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Preconditions.notNull("type", type);
