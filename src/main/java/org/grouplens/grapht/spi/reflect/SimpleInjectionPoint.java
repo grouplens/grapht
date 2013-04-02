@@ -130,7 +130,10 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
             try {
                 return new SimpleInjectionPoint(qualifier, type.resolve(), nullable);
             } catch (ClassNotFoundException e) {
-                throw new InvalidObjectException("cannot resolve class " + type.getClassName());
+                InvalidObjectException ex =
+                        new InvalidObjectException("cannot resolve class " + type.getClassName());
+                ex.initCause(e);
+                throw ex;
             }
         }
     }

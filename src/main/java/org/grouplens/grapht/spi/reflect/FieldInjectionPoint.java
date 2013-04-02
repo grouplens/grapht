@@ -115,9 +115,15 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
             try {
                 return new FieldInjectionPoint(proxy.resolve());
             } catch (ClassNotFoundException e) {
-                throw new InvalidObjectException("no class for field " + proxy.toString());
+                InvalidObjectException ex =
+                        new InvalidObjectException("no class for field " + proxy.toString());
+                ex.initCause(e);
+                throw ex;
             } catch (NoSuchFieldException e) {
-                throw new InvalidObjectException("no such field " + proxy.toString());
+                InvalidObjectException ex =
+                        new InvalidObjectException("no such field " + proxy.toString());
+                ex.initCause(e);
+                throw ex;
             }
         }
     }
