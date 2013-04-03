@@ -34,7 +34,7 @@ import java.io.*;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public final class BindRuleImpl implements BindRule, Serializable {
+final class BindRuleImpl implements BindRule, Serializable {
     private static final long serialVersionUID = -1L;
 
     private final Satisfaction satisfaction;

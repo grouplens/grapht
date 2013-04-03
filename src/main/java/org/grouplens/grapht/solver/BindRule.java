@@ -26,6 +26,8 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  * BindRule is a partial function from desire to desire that acts as a binding.
  * The {@link RuleBasedBindingFunction} takes a collection of BindRules grouped
  * into their activating contexts to form a {@link BindingFunction}.
+ *
+ * @see {@link BindRules}
  */
 public interface BindRule {
     /**
