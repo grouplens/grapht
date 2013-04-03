@@ -135,7 +135,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
         private final int index;
 
         public SerialProxy(Constructor ctor, int idx) {
-            constructor = ConstructorProxy.forConstructor(ctor);
+            constructor = ConstructorProxy.of(ctor);
             index = idx;
         }
 

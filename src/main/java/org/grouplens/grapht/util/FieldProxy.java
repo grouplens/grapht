@@ -98,10 +98,10 @@ public final class FieldProxy implements Serializable {
      * @param field The field to proxy.
      * @return The field proxy representing {@code field}.
      */
-    public static FieldProxy forField(Field field) {
-        FieldProxy proxy = new FieldProxy(ClassProxy.forClass(field.getDeclaringClass()),
+    public static FieldProxy of(Field field) {
+        FieldProxy proxy = new FieldProxy(ClassProxy.of(field.getDeclaringClass()),
                                           field.getName(),
-                                          ClassProxy.forClass(field.getType()));
+                                          ClassProxy.of(field.getType()));
         proxy.field = field;
         return proxy;
     }

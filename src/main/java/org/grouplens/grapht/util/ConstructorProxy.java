@@ -114,14 +114,14 @@ public final class ConstructorProxy implements Serializable {
      * @param constructor The constructor to proxy.
      * @return The constructor proxy representing {@code constructor}.
      */
-    public static ConstructorProxy forConstructor(Constructor constructor) {
+    public static ConstructorProxy of(Constructor constructor) {
         Class<?>[] ptypes = constructor.getParameterTypes();
         ClassProxy[] proxies = new ClassProxy[ptypes.length];
         for (int i = ptypes.length - 1; i >= 0; i--) {
-            proxies[i] = ClassProxy.forClass(ptypes[i]);
+            proxies[i] = ClassProxy.of(ptypes[i]);
         }
         ConstructorProxy proxy =
-                new ConstructorProxy(ClassProxy.forClass(constructor.getDeclaringClass()),
+                new ConstructorProxy(ClassProxy.of(constructor.getDeclaringClass()),
                                      proxies);
         proxy.constructor = constructor;
         return proxy;

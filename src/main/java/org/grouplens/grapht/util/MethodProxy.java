@@ -120,13 +120,13 @@ public final class MethodProxy implements Serializable {
      * @param method The method to proxy.
      * @return The method proxy representing {@code method}.
      */
-    public static MethodProxy forMethod(Method method) {
+    public static MethodProxy of(Method method) {
         Class<?>[] ptypes = method.getParameterTypes();
         ClassProxy[] proxies = new ClassProxy[ptypes.length];
         for (int i = ptypes.length - 1; i >= 0; i--) {
-            proxies[i] = ClassProxy.forClass(ptypes[i]);
+            proxies[i] = ClassProxy.of(ptypes[i]);
         }
-        MethodProxy proxy = new MethodProxy(ClassProxy.forClass(method.getDeclaringClass()),
+        MethodProxy proxy = new MethodProxy(ClassProxy.of(method.getDeclaringClass()),
                                           method.getName(), proxies);
         proxy.method = method;
         return proxy;

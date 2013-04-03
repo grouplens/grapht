@@ -35,7 +35,7 @@ public class FieldProxyTest {
     @Test
     public void testBasicField() throws NoSuchFieldException, ClassNotFoundException {
         Field f = TestClass.class.getDeclaredField("foo");
-        FieldProxy proxy = FieldProxy.forField(f);
+        FieldProxy proxy = FieldProxy.of(f);
         assertThat(proxy.resolve(), equalTo(f));
     }
 
@@ -60,7 +60,7 @@ public class FieldProxyTest {
      * deserializing it.
      */
     private FieldProxy roundTrip(Field fld) throws IOException, ClassNotFoundException {
-        FieldProxy proxy = FieldProxy.forField(fld);
+        FieldProxy proxy = FieldProxy.of(fld);
         return TestUtils.serializeRoundTrip(proxy);
     }
 }

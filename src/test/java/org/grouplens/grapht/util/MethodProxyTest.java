@@ -40,7 +40,7 @@ public class MethodProxyTest {
     @Test
     public void testBasicMethod() throws NoSuchMethodException, ClassNotFoundException {
         Method f = TestClass.class.getDeclaredMethod("foo", String.class);
-        MethodProxy proxy = MethodProxy.forMethod(f);
+        MethodProxy proxy = MethodProxy.of(f);
         assertThat(proxy.resolve(), equalTo(f));
     }
 
@@ -72,7 +72,7 @@ public class MethodProxyTest {
      * deserializing it.
      */
     private MethodProxy roundTrip(Method fld) throws IOException, ClassNotFoundException {
-        MethodProxy proxy = MethodProxy.forMethod(fld);
+        MethodProxy proxy = MethodProxy.of(fld);
         return TestUtils.serializeRoundTrip(proxy);
     }
 }

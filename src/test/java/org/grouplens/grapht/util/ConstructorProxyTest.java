@@ -22,8 +22,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -39,7 +37,7 @@ public class ConstructorProxyTest {
     @Test
     public void testBasicConstructor() throws NoSuchMethodException, ClassNotFoundException {
         Constructor f = TestClass.class.getDeclaredConstructor();
-        ConstructorProxy proxy = ConstructorProxy.forConstructor(f);
+        ConstructorProxy proxy = ConstructorProxy.of(f);
         assertThat(proxy.resolve(), equalTo(f));
     }
 
@@ -71,7 +69,7 @@ public class ConstructorProxyTest {
      * deserializing it.
      */
     private ConstructorProxy roundTrip(Constructor fld) throws IOException, ClassNotFoundException {
-        ConstructorProxy proxy = ConstructorProxy.forConstructor(fld);
+        ConstructorProxy proxy = ConstructorProxy.of(fld);
         return TestUtils.serializeRoundTrip(proxy);
     }
 }

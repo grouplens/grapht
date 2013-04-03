@@ -127,7 +127,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
         private final MethodProxy method;
         private final int parameterIndex;
         public SerialProxy(Method m, int pidx) {
-            method = MethodProxy.forMethod(m);
+            method = MethodProxy.of(m);
             parameterIndex = pidx;
         }
 

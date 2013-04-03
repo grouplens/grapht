@@ -108,7 +108,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
         private static final long serialVersionUID = 1L;
         private final MethodProxy method;
         public SerialProxy(Method m) {
-            method = MethodProxy.forMethod(m);
+            method = MethodProxy.of(m);
         }
 
         private Object readResolve() throws ObjectStreamException {

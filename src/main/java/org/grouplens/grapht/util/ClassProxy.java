@@ -79,6 +79,7 @@ public final class ClassProxy implements Serializable {
         if (o == this) {
             return true;
         } else if (o instanceof ClassProxy) {
+            // REVIEW Do we want to classes to check for equality?
             ClassProxy op = (ClassProxy) o;
             return className.equals(op.className);
         } else {
@@ -114,7 +115,7 @@ public final class ClassProxy implements Serializable {
      * @param cls The class.
      * @return The class proxy.
      */
-    public static ClassProxy forClass(Class<?> cls) {
+    public static ClassProxy of(Class<?> cls) {
         ClassProxy proxy = new ClassProxy(cls.getName(), checksumClass(cls));
         proxy.theClass = cls;
         return proxy;

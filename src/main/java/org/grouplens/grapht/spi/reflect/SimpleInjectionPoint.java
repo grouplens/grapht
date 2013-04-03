@@ -120,7 +120,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         private Annotation qualifier;
 
         private SerialProxy(Class<?> t, boolean isNullable, @Nullable Annotation qual) {
-            type = ClassProxy.forClass(t);
+            type = ClassProxy.of(t);
             nullable = isNullable;
             qualifier = qual;
         }

@@ -108,7 +108,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
         private final FieldProxy field;
 
         public SerialProxy(Field f) {
-            field = FieldProxy.forField(f);
+            field = FieldProxy.of(f);
         }
 
         private Object readResolve() throws InvalidObjectException {

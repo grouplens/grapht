@@ -30,21 +30,21 @@ import static org.junit.Assert.assertThat;
 public class ClassProxyTest {
     @Test
     public void testBasicProxy() throws ClassNotFoundException {
-        ClassProxy proxy = ClassProxy.forClass(String.class);
+        ClassProxy proxy = ClassProxy.of(String.class);
         assertThat(proxy.getClassName(), equalTo("java.lang.String"));
         assertThat(proxy.resolve(), equalTo((Class) String.class));
     }
 
     @Test
     public void testPrimitiveProxy() throws ClassNotFoundException {
-        ClassProxy proxy = ClassProxy.forClass(int.class);
+        ClassProxy proxy = ClassProxy.of(int.class);
         assertThat(proxy.getClassName(), equalTo("int"));
         assertThat(proxy.resolve(), equalTo((Class) int.class));
     }
 
     @Test
     public void testArrayProxy() throws ClassNotFoundException {
-        ClassProxy proxy = ClassProxy.forClass(String[].class);
+        ClassProxy proxy = ClassProxy.of(String[].class);
         assertThat(proxy.getClassName(), equalTo("[Ljava.lang.String;"));
         assertThat(proxy.resolve(),
                    equalTo((Class) Array.newInstance(String.class, 0).getClass()));
@@ -57,7 +57,7 @@ public class ClassProxyTest {
      * deserializing it.
      */
     private ClassProxy roundTrip(Class<?> cls) throws IOException, ClassNotFoundException {
-        ClassProxy proxy = ClassProxy.forClass(cls);
+        ClassProxy proxy = ClassProxy.of(cls);
         return TestUtils.serializeRoundTrip(proxy);
     }
 
