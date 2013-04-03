@@ -22,14 +22,15 @@ import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.inject.Inject;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -40,7 +41,9 @@ import java.util.*;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionDesire implements Desire, Externalizable {
+public class ReflectionDesire implements Desire, Serializable {
+    private static final long serialVersionUID = -1L;
+
     /**
      * Return a list of desires that must satisfied in order to instantiate the
      * given type.
@@ -111,10 +114,9 @@ public class ReflectionDesire implements Desire, Externalizable {
         return Collections.unmodifiableList(desires);
     }
     
-    // all are "final"
-    private Class<?> desiredType;
-    private InjectionPoint injectPoint;
-    private Satisfaction satisfaction;
+    private final transient Class<?> desiredType;
+    private final transient InjectionPoint injectPoint;
+    private final transient Satisfaction satisfaction;
 
     /**
      * Create a ReflectionDesire that immediately wraps the given
@@ -157,6 +159,7 @@ public class ReflectionDesire implements Desire, Externalizable {
 
         // try and find a satisfaction
         if (satisfaction == null) {
+            // FIXME Defer this so we don't serialize pre-computed satisfactions
             if (Types.shouldBeInstantiable(desiredType)) {
                 if (Types.isInstantiable(desiredType)) {
                     satisfaction = new ClassSatisfaction(desiredType);
@@ -173,12 +176,7 @@ public class ReflectionDesire implements Desire, Externalizable {
         this.injectPoint = injectPoint;
         this.satisfaction = satisfaction;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ReflectionDesire() { }
-    
+
     @Override
     public Class<?> getDesiredType() {
         return desiredType;
@@ -229,21 +227,44 @@ public class ReflectionDesire implements Desire, Externalizable {
     public String toString() {
         return "Desire(" + desiredType.getSimpleName() + ", " + injectPoint + ")";
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        desiredType = Types.readClass(in);
-        
-        injectPoint = (InjectionPoint) in.readObject();
-        satisfaction = (Satisfaction) in.readObject();
+
+    private Object writeReplace() {
+        return new SerialProxy(desiredType, injectPoint, satisfaction);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, desiredType);
-        
-        out.writeObject(injectPoint);
-        out.writeObject(satisfaction);
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("must use serialization proxy");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final InjectionPoint injectionPoint;
+        private final ClassProxy desiredType;
+        private final Satisfaction satisfaction;
+
+        public SerialProxy(Class<?> type, InjectionPoint ip, Satisfaction sat) {
+            injectionPoint = ip;
+            desiredType = ClassProxy.of(type);
+            satisfaction = sat;
+        }
+
+        @SuppressWarnings("unchecked")
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new ReflectionDesire(desiredType.resolve(),
+                                            injectionPoint,
+                                            satisfaction);
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex = new InvalidObjectException("cannot resolve " + desiredType);
+                ex.initCause(e);
+                throw ex;
+            } catch (InvalidBindingException e) {
+                InvalidObjectException ex = new InvalidObjectException("invalid binding");
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
     
     /*

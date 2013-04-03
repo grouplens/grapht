@@ -23,14 +23,14 @@ import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 import javax.inject.Qualifier;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * ReflectionContextElementMatcher is a ContextElementMatcher that matches nodes if the node's
@@ -39,11 +39,12 @@ import java.io.ObjectOutput;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ReflectionContextElementMatcher implements ContextElementMatcher, Externalizable {
-    // "final"
-    private Class<?> type;
-    private QualifierMatcher qualifier;
-    private boolean anchored;
+public class ReflectionContextElementMatcher implements ContextElementMatcher, Serializable {
+    private static final long serialVersionUID = -1L;
+
+    private final transient Class<?> type;
+    private final transient QualifierMatcher qualifier;
+    private final transient boolean anchored;
 
     /**
      * Create an unanchored ReflectionContextElementMatcher that matches the given type
@@ -67,11 +68,6 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, E
     public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier) {
         this(type, qualifier, false);
     }
-
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ReflectionContextElementMatcher() { }
 
     /**
      * Create a ReflectionContextElementMatcher that matches the given type and the given {@link
@@ -140,16 +136,39 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, E
     public String toString() {
         return "Context(" + qualifier + ":" + type.getSimpleName() + ")";
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        type = Types.readClass(in);
-        qualifier = (QualifierMatcher) in.readObject();
+
+    private Object writeReplace() {
+        return new SerialProxy(type, qualifier, anchored);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, type);
-        out.writeObject(qualifier);
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("must use serialization proxy");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final ClassProxy type;
+        private final QualifierMatcher qualifier;
+        private final boolean anchored;
+
+        public SerialProxy(Class<?> t, QualifierMatcher qual, boolean anch) {
+            type = ClassProxy.of(t);
+            qualifier = qual;
+            anchored = anch;
+        }
+
+        @SuppressWarnings("unchecked")
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new ReflectionContextElementMatcher(type.resolve(),
+                                                           qualifier,
+                                                           anchored);
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex = new InvalidObjectException("cannot resolve " + type);
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }
