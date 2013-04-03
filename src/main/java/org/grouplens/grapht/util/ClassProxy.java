@@ -56,6 +56,7 @@ public final class ClassProxy implements Serializable {
     @Nullable
     private transient volatile Class<?> theClass;
 
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     private ClassProxy(String name, byte[] cksum) {
         className = name;
         checksum = cksum;

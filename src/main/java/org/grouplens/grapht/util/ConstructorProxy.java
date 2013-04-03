@@ -39,6 +39,7 @@ public final class ConstructorProxy implements Serializable {
     @Nullable
     private transient volatile String stringRepr;
 
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     private ConstructorProxy(ClassProxy cls, ClassProxy[] ptypes) {
         declaringClass = cls;
         parameterTypes = ptypes;

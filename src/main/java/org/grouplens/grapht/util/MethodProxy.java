@@ -40,6 +40,7 @@ public final class MethodProxy implements Serializable {
     @Nullable
     private transient volatile String stringRepr;
 
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     private MethodProxy(ClassProxy cls, String names, ClassProxy[] ptypes) {
         declaringClass = cls;
         methodName = names;
