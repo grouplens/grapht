@@ -38,6 +38,9 @@ import javax.inject.Provider;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public final class Types {
+
+    private static final TypeVariable<?> PROVIDER_TYPE_VAR =Provider.class.getTypeParameters()[0];
+
     private Types() {}
 
     private static final Class<?>[] PRIMITIVE_TYPES = {
@@ -167,11 +170,10 @@ public final class Types {
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
-        final TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
-        if(!bindings.containsKey(providerTypeVar)){
+        if(!bindings.containsKey(PROVIDER_TYPE_VAR)){
             throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
         }
-        final Class<?> inferredType = TypeUtils.getRawType(bindings.get(providerTypeVar), null);
+        final Class<?> inferredType = TypeUtils.getRawType(bindings.get(PROVIDER_TYPE_VAR), null);
         try{
             final Class<?> observedType = providerClass.getMethod("get").getReturnType();
             if(inferredType.isAssignableFrom(observedType)) {
