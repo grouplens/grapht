@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht;
 
+import org.grouplens.grapht.solver.BindRuleImpl;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;

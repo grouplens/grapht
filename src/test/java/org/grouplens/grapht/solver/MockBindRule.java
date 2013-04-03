@@ -33,9 +33,7 @@ import java.util.Map;
  * 
  * @author Michael Ludwig
  */
-public class MockBindRule extends BindRule {
-    private static final long serialVersionUID = 1L;
-    
+public class MockBindRule implements BindRule {
     private final Map<Desire, Desire> bindings;
     private boolean terminate;
     private CachePolicy policy;
@@ -88,16 +86,6 @@ public class MockBindRule extends BindRule {
     @Override
     public QualifierMatcher getQualifier() {
         return MockQualifierMatcher.any();
-    }
-    
-    @Override
-    public int hashCode() {
-        return System.identityHashCode(this);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        return this == o;
     }
     
     @Override
