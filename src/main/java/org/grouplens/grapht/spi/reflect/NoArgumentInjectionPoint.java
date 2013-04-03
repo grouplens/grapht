@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = -1L;
     private final transient Method method;
 
     /**

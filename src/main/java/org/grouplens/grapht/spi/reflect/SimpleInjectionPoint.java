@@ -39,7 +39,7 @@ import java.lang.reflect.Member;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1L;
     // fields marked as transient since direct serialization is disabled
     private final transient Attributes attrs;
     private final transient Class<?> type;

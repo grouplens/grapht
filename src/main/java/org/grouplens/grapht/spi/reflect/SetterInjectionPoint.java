@@ -34,7 +34,7 @@ import java.lang.reflect.Type;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class SetterInjectionPoint implements InjectionPoint, Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1L;
     // transient because we use a serialization proxy
     private final transient Method setter;
     private final transient int parameter;
