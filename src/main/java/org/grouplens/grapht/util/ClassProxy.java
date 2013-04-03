@@ -20,7 +20,6 @@ package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -149,7 +148,7 @@ public final class ClassProxy implements Serializable {
 
         Collections.sort(members);
 
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
