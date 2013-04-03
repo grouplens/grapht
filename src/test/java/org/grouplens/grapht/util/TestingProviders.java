@@ -14,7 +14,7 @@ public class TestingProviders {
     /*
      * The simplest form of provider. This has no generics or anything else sophisticated.
      */
-    public static class SimpleProvider implements Provider<Target>{
+    public static class SimpleProvider implements Provider<Object>{
         public Target get(){
             return null;
         }

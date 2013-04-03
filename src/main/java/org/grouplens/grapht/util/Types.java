@@ -168,10 +168,20 @@ public final class Types {
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
         final TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
-        if(bindings.containsKey(providerTypeVar)){
-            return TypeUtils.getRawType(bindings.get(providerTypeVar), null);
+        if(!bindings.containsKey(providerTypeVar)){
+            throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
         }
-        throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
+        final Class<?> inferredType = TypeUtils.getRawType(bindings.get(providerTypeVar), null);
+        try{
+            final Class<?> observedType = providerClass.getMethod("get").getReturnType();
+            if(inferredType.isAssignableFrom(observedType)) {
+                return observedType;
+            } else {
+                return inferredType;
+            }
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class does not implement get()");
+        }
     }
 
     /**
