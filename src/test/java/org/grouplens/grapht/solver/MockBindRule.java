@@ -79,7 +79,7 @@ public class MockBindRule implements BindRule {
     }
 
     @Override
-    public boolean terminatesChain() {
+    public boolean isTerminal() {
         return terminate;
     }
     

@@ -38,7 +38,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
     private static final long serialVersionUID = -1L;
 
     private final Satisfaction satisfaction;
-    private final boolean terminateChain;
+    private final boolean terminal;
     
     private final QualifierMatcher qualifier;
     private final Class<?> depType;
@@ -55,11 +55,11 @@ public final class BindRuleImpl implements BindRule, Serializable {
      * @param satisfaction The Satisfaction used by applied desires
      * @param policy The CachePolicy for nodes created by this bind rule
      * @param qualifier The Qualifier the bind rule applies to
-     * @param terminateChain True if the bind rule is a terminating rule
+     * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()}).
      * @throws NullPointerException if arguments are null
      */
     public BindRuleImpl(Class<?> depType, Satisfaction satisfaction, CachePolicy policy,
-                        QualifierMatcher qualifier, boolean terminateChain) {
+                        QualifierMatcher qualifier, boolean terminal) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
@@ -70,7 +70,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
         this.implType = satisfaction.getErasedType();
         this.policy = policy;
         this.depType = Types.box(depType);
-        this.terminateChain = terminateChain;
+        this.terminal = terminal;
         
         // verify that the satisfaction produces proper types
         Preconditions.isAssignable(this.depType, this.implType);
@@ -85,11 +85,11 @@ public final class BindRuleImpl implements BindRule, Serializable {
      * @param implType The implementation type that is bound
      * @param policy The CachePolicy for nodes created by this bind rule
      * @param qualifier The Qualifier the bind rule applies to
-     * @param terminateChain True if the bind rule is a terminating rule
+     * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()})
      * @throws NullPointerException if arguments are null
      */
     public BindRuleImpl(Class<?> depType, Class<?> implType, CachePolicy policy,
-                        QualifierMatcher qualifier, boolean terminateChain) {
+                        QualifierMatcher qualifier, boolean terminal) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("implementation type", implType);
         Preconditions.notNull("policy", policy);
@@ -100,7 +100,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
         this.implType = Types.box(implType);
         this.policy = policy;
         this.depType = Types.box(depType);
-        this.terminateChain = terminateChain;
+        this.terminal = terminal;
         
         // verify that implType extends depType
         Preconditions.isAssignable(this.depType, this.implType);
@@ -127,8 +127,8 @@ public final class BindRuleImpl implements BindRule, Serializable {
     }
 
     @Override
-    public boolean terminatesChain() {
-        return terminateChain;
+    public boolean isTerminal() {
+        return terminal;
     }
     
     @Override
@@ -151,7 +151,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
         BindRuleImpl r = (BindRuleImpl) o;
         return r.depType.equals(depType) &&
                r.implType.equals(implType) &&
-               r.terminateChain == terminateChain &&
+               r.terminal == terminal &&
                r.qualifier.equals(qualifier) &&
                r.policy.equals(policy) &&
                (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction));
@@ -161,7 +161,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
     public int hashCode() {
         int result = 17;
 
-        result += 31 * result + (terminateChain ? 1 : 0);
+        result += 31 * result + (terminal ? 1 : 0);
         result += 31 * result + depType.hashCode();
         result += 31 * result + implType.hashCode();
         result += 31 * result + qualifier.hashCode();
@@ -181,7 +181,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
     }
 
     private Object writeReplace() {
-        return new SerialProxy(satisfaction, terminateChain, qualifier,
+        return new SerialProxy(satisfaction, terminal, qualifier,
                                depType, implType, policy);
     }
 

@@ -51,13 +51,13 @@ public interface BindRule {
     Desire apply(Desire desire);
 
     /**
-     * Query whether this rule is terminal.
+     * Query whether this rule is terminal.  Terminal rules have no further lookup
+     * applied in order to find the final binding target.
      *
      * @return True if this should be the last bind rule applied to the desire
      *         chain when attempting to find a satisfaction
-     * @todo Rename this to {@code isTerminal}.
      */
-    boolean terminatesChain();
+    boolean isTerminal();
 
     /**
      * @param desire The input desire

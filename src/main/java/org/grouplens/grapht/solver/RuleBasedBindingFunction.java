@@ -136,7 +136,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
             
             logger.debug("Applying rule: {} to desire: {}", selectedRule, desire);
             return new BindingResult(selectedRule.apply(desire), selectedRule.getCachePolicy(),
-                                     false, selectedRule.terminatesChain());
+                                     false, selectedRule.isTerminal());
         }
         
         // No rule to apply, so return null to delegate to the next binding function
