@@ -72,19 +72,6 @@ public class TypesTest {
         Types.erase(param);
     }
 
-    @Test
-    public void testWriteInnerClass() throws IOException, ClassNotFoundException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ObjectOutput oo = new ObjectOutputStream(out);
-        Types.writeClass(oo, Inner.class);
-        oo.close();
-        byte[] bytes = out.toByteArray();
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        ObjectInput oin = new ObjectInputStream(in);
-        Class<?> cls = Types.readClass(oin);
-        assertThat(cls, equalTo((Class) Inner.class));
-    }
-
     private void testProvidedType(Class<? extends Provider<?>> cls){
         Class<?> result = Types.getProvidedType(TestingProviders.SimpleProvider.class);
         assertThat(result, equalTo((Class) TestingProviders.Target.class));

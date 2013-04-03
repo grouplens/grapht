@@ -23,12 +23,9 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Map;
 
 /**
  * Static helper methods for working with types.
@@ -264,98 +261,5 @@ public final class Types {
             }
         }
         return Class.forName(name);
-    }
-    
-    /**
-     * Read in a Class from the given ObjectInput. This is only compatible with
-     * classes that were serialized with
-     * {@link #writeClass(ObjectOutput, Class)}. Although Class is Serializable,
-     * this guarantees a simple structure within a file.
-     * 
-     * @param in The stream to read from
-     * @return The next Class encoded in the stream
-     * @throws IOException if an IO error occurs
-     * @throws ClassNotFoundException if the class can no longer be found at
-     *             runtime
-     * @deprecated Serialize a {@link ClassProxy} instead.
-     */
-    @Deprecated
-    public static Class<?> readClass(ObjectInput in) throws IOException, ClassNotFoundException {
-        String typeName = in.readUTF();
-        int arrayCount = in.readInt();
-        int hash = in.readInt();
-
-        Class<?> baseType = classByName(typeName);
-        if (hash != hash(baseType)) {
-            throw new IOException("Class definition changed since serialization: " + typeName);
-        }
-        
-        if (arrayCount > 0) {
-            return Array.newInstance(baseType, new int[arrayCount]).getClass();
-        } else {
-            return baseType;
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Class to the given ObjectOutput.  The class is written as a UTF-8 string
-     * of its full name, followed by an array depth as an integer.  Non-arrays have
-     * depth of 0, arrays of non-arrays have depth of 1, etc.
-     * <p>
-     * The class can be decoded by calling {@link #readClass(ObjectInput)}.
-     * 
-     * @param out The stream to write to
-     * @param cls The class type to encode
-     * @throws IOException if an IO error occurs
-     * @deprecated Serialize a {@link ClassProxy} instead.
-     */
-    @Deprecated
-    public static void writeClass(ObjectOutput out, Class<?> cls) throws IOException {
-        int arrayCount = 0;
-        Class<?> baseType = cls;
-        while(baseType.isArray()) {
-            arrayCount++;
-            baseType = baseType.getComponentType();
-        }
-        
-        out.writeUTF(baseType.getName());
-        out.writeInt(arrayCount);
-        out.writeInt(hash(baseType));
-    }
-    
-    private static int hash(Class<?> type) {
-        // convert to a string, both for lexigraphical ordering
-        // and to combine into a hash
-        List<String> ctors = new ArrayList<String>();
-        for (Constructor<?> c: type.getDeclaredConstructors()) {
-            ctors.add(c.getName() + ":" + Arrays.toString(c.getParameterTypes()));
-        }
-        List<String> methods = new ArrayList<String>();
-        for (Method m: type.getDeclaredMethods()) {
-            methods.add(m.getName() + ":" + Arrays.toString(m.getParameterTypes()));
-        }
-        List<String> fields = new ArrayList<String>();
-        for (Field f: type.getDeclaredFields()) {
-            fields.add(f.getName() + ":" + f.getType().getName());
-        }
-        
-        // impose a consistent ordering
-        Collections.sort(ctors);
-        Collections.sort(methods);
-        Collections.sort(fields);
-        
-        StringBuilder sb = new StringBuilder();
-        for (String c: ctors) {
-            sb.append(c);
-        }
-        for (String m: methods) {
-            sb.append(m);
-        }
-        for (String f: fields) {
-            sb.append(f);
-        }
-        
-        return sb.toString().hashCode();
     }
 }
