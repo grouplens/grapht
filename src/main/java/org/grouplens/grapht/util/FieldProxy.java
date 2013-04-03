@@ -53,7 +53,6 @@ public final class FieldProxy implements Serializable {
         if (o == this) {
             return true;
         } else if (o instanceof FieldProxy) {
-            // REVIEW Do we want to resolve & check fields for equality?
             FieldProxy op = (FieldProxy) o;
             return declaringClass.equals(op.declaringClass)
                     && fieldName.equals(op.fieldName)

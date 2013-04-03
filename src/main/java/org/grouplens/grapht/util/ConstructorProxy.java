@@ -71,7 +71,6 @@ public final class ConstructorProxy implements Serializable {
         if (o == this) {
             return true;
         } else if (o instanceof ConstructorProxy) {
-            // REVIEW Do we want to resolve & check constructors for equality?
             ConstructorProxy op = (ConstructorProxy) o;
             return declaringClass.equals(op.declaringClass)
                     && Arrays.deepEquals(parameterTypes, op.parameterTypes);

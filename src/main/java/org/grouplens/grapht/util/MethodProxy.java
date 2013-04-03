@@ -75,7 +75,6 @@ public final class MethodProxy implements Serializable {
         if (o == this) {
             return true;
         } else if (o instanceof MethodProxy) {
-            // REVIEW Do we want to resolve & check methods for equality?
             MethodProxy op = (MethodProxy) o;
             return declaringClass.equals(op.declaringClass)
                     && methodName.equals(op.methodName)

@@ -79,7 +79,6 @@ public final class ClassProxy implements Serializable {
         if (o == this) {
             return true;
         } else if (o instanceof ClassProxy) {
-            // REVIEW Do we want to classes to check for equality?
             ClassProxy op = (ClassProxy) o;
             return className.equals(op.className);
         } else {
