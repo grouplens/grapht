@@ -19,15 +19,15 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 import javax.inject.Qualifier;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Utilities related to Qualifier implementations.
@@ -80,20 +80,7 @@ public final class Qualifiers {
         return new AnnotationMatcher(annot);
     }
     
-    // These priorities specify that:
-    // AnyMatcher < AnnotationClassMatcher < NullMatcher == AnnotationMatcher
-    private static final Map<Class<? extends QualifierMatcher>, Integer> TYPE_PRIORITIES;
-    static {
-        Map<Class<? extends QualifierMatcher>, Integer> tp = new HashMap<Class<? extends QualifierMatcher>, Integer>();
-        tp.put(AnyMatcher.class, 0);
-        tp.put(AnnotationClassMatcher.class, 1);
-        tp.put(NullMatcher.class, 2);
-        tp.put(AnnotationMatcher.class, 2);
-        
-        TYPE_PRIORITIES = Collections.unmodifiableMap(tp);
-    }
-    
-    private static abstract class AbstractMatcher implements QualifierMatcher {
+    private abstract static class AbstractMatcher implements QualifierMatcher {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -123,10 +110,7 @@ public final class Qualifiers {
         
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof AnyMatcher)) {
-                return false;
-            }
-            return true;
+            return o instanceof AnyMatcher;
         }
         
         @Override
@@ -155,10 +139,7 @@ public final class Qualifiers {
         
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof NullMatcher)) {
-                return false;
-            }
-            return true;
+            return o instanceof NullMatcher;
         }
         
         @Override
@@ -172,9 +153,9 @@ public final class Qualifiers {
         }
     }
     
-    private static class AnnotationClassMatcher extends AbstractMatcher implements Externalizable {
-        // "final"
-        private Class<? extends Annotation> type;
+    private static class AnnotationClassMatcher extends AbstractMatcher {
+        private static final long serialVersionUID = -1L;
+        private final Class<? extends Annotation> type;
         
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
             Preconditions.notNull("type", type);
@@ -182,12 +163,6 @@ public final class Qualifiers {
             this.type = type;
         }
         
-        /**
-         * Constructor required by {@link Externalizable}.
-         */
-        @SuppressWarnings("unused")
-        public AnnotationClassMatcher() { }
-
         @Override
         public int getPriority() {
             return 1;
@@ -201,10 +176,8 @@ public final class Qualifiers {
         
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof AnnotationClassMatcher)) {
-                return false;
-            }
-            return ((AnnotationClassMatcher) o).type.equals(type);
+            return o instanceof AnnotationClassMatcher
+                   && ((AnnotationClassMatcher) o).type.equals(type);
         }
         
         @Override
@@ -216,21 +189,44 @@ public final class Qualifiers {
         public String toString() {
             return type.toString();
         }
-        
-        @Override
-        @SuppressWarnings("unchecked")
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            type = (Class<? extends Annotation>) Types.readClass(in);
+
+        private Object writeReplace() {
+            return new SerialProxy(type);
         }
-        
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            Types.writeClass(out, type);
+
+        private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+            throw new InvalidObjectException("must use serialization proxy");
+        }
+
+        private static class SerialProxy implements Serializable {
+            private static final long serialVersionUID = 1L;
+
+            private final ClassProxy type;
+
+            public SerialProxy(Class<?> cls) {
+                type = ClassProxy.of(cls);
+            }
+
+            private Object readResolve() throws ObjectStreamException {
+                try {
+                    return new AnnotationClassMatcher(type.resolve().asSubclass(Annotation.class));
+                } catch (ClassNotFoundException e) {
+                    InvalidObjectException ex = new InvalidObjectException("cannot resolve " + type);
+                    ex.initCause(e);
+                    throw ex;
+                } catch (ClassCastException e) {
+                    InvalidObjectException ex =
+                            new InvalidObjectException("class " + type + " not an annotation");
+                    ex.initCause(e);
+                    throw ex;
+                }
+            }
         }
     }
     
     private static class AnnotationMatcher extends AbstractMatcher implements Serializable {
         private static final long serialVersionUID = 1L;
+
         private final Annotation annotation;
         
         public AnnotationMatcher(Annotation annot) {
