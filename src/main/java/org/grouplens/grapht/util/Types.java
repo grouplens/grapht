@@ -326,64 +326,6 @@ public final class Types {
         out.writeInt(hash(baseType));
     }
     
-    /**
-     * Read in a Constructor from the given ObjectInput. This is only compatible
-     * with constructors serialized
-     * {@link #writeConstructor(ObjectOutput, Constructor)}. Because Constructor
-     * is not Serializable, this must be used instead of
-     * {@link ObjectInput#readObject()}.
-     * 
-     * @param in The stream to read from
-     * @return The next constructor encoded in the stream
-     * @throws IOException if an IO error occurs
-     * @throws ClassNotFoundException if the declaring class of the constructor
-     *             cannot be found at runtime
-     * @throws NoSuchMethodException if the constructor no longer exists in the
-     *             loaded class definition
-     * @deprecated Serialize a {@link ConstructorProxy} instead.
-     */
-    @Deprecated
-    public static Constructor<?> readConstructor(ObjectInput in) throws IOException, ClassNotFoundException {
-        Class<?> declaring = readClass(in);
-        Class<?>[] args = new Class<?>[in.readInt()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = readClass(in);
-        }
-        
-        try {
-            return declaring.getDeclaredConstructor(args);
-        } catch (NoSuchMethodException e) {
-            throw new IOException("Constructor no longer exists", e);
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Constructor to the given ObjectOutput. Because Constructor is
-     * not Serializable, it is encoded to the stream as its declaring class, the
-     * number of parameters, and then the parameter classes in their defined
-     * order. All classes are written to the stream using
-     * {@link #writeClass(ObjectOutput, Class)}.
-     * <p>
-     * The constructor can be decoded by calling
-     * {@link #readConstructor(ObjectInput)}.
-     * 
-     * @param out The output stream to write to
-     * @param ctor The constructor to serialize
-     * @throws IOException if an IO error occurs
-     * @deprecated Serialize a {@link ConstructorProxy} instead.
-     */
-    @Deprecated
-    public static void writeConstructor(ObjectOutput out, Constructor<?> ctor) throws IOException {
-        writeClass(out, ctor.getDeclaringClass());
-        
-        Class<?>[] args = ctor.getParameterTypes();
-        out.writeInt(args.length);
-        for (int i = 0; i < args.length; i++) {
-            writeClass(out, args[i]);
-        }
-    }
-    
     private static int hash(Class<?> type) {
         // convert to a string, both for lexigraphical ordering
         // and to combine into a hash

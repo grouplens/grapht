@@ -20,13 +20,13 @@ package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.ConstructorProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 
@@ -36,43 +36,39 @@ import java.lang.reflect.Type;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ConstructorParameterInjectionPoint implements InjectionPoint, Externalizable {
-    // "final"
-    private transient Attributes attributes;
-    private Constructor<?> ctor;
-    private int parameter;
+public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = -1L;
+
+    // transient because of serialization proxy
+    private final transient Constructor<?> constructor;
+    private final transient int paramIndex;
+    private final transient Attributes attributes;
 
     /**
-     * Create a ConstructorParameterInjectionPoint that wraps the given
-     * parameter index for the given constructor, ctor.
-     * 
+     * Create a ConstructorParameterInjectionPoint that wraps the given parameter index for the
+     * given constructor, ctor.
+     *
      * @param ctor The constructor to wrap
-     * @param parameter The parameter index of this injection point within
-     *            ctor's parameters
-     * @throws NullPointerException if ctor is null
-     * @throws IndexOutOfBoundsException if parameter is not a valid index into
-     *             the constructor's parameters
+     * @param pidx The parameter index of this injection point within ctor's parameters
+     * @throws NullPointerException      if {@code ctor} is null
+     * @throws IndexOutOfBoundsException if {@code pidx} is not a valid index into the constructor's
+     *                                   parameters
      */
-    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int parameter) {
+    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int pidx) {
         Preconditions.notNull("constructor", ctor);
-        Preconditions.inRange(parameter, 0, ctor.getParameterTypes().length);
-        
-        this.attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
-        this.ctor = ctor;
-        this.parameter = parameter;
+        Preconditions.inRange(pidx, 0, ctor.getParameterTypes().length);
+
+        constructor = ctor;
+        paramIndex = pidx;
+        attributes = new AttributesImpl(ctor.getParameterAnnotations()[pidx]);
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ConstructorParameterInjectionPoint() { }
 
     /**
      * @return The constructor wrapped by this injection point
      */
     @Override
     public Constructor<?> getMember() {
-        return ctor;
+        return constructor;
     }
     
     /**
@@ -80,22 +76,22 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Exter
      *         constructor's parameters
      */
     public int getParameterIndex() {
-        return parameter;
+        return paramIndex;
     }
     
     @Override
     public boolean isNullable() {
-        return Types.hasNullableAnnotation(ctor.getParameterAnnotations()[parameter]);
+        return Types.hasNullableAnnotation(constructor.getParameterAnnotations()[paramIndex]);
     }
     
     @Override
     public Type getType() {
-        return Types.box(ctor.getGenericParameterTypes()[parameter]);
+        return Types.box(constructor.getGenericParameterTypes()[paramIndex]);
     }
 
     @Override
     public Class<?> getErasedType() {
-        return Types.box(ctor.getParameterTypes()[parameter]);
+        return Types.box(constructor.getParameterTypes()[paramIndex]);
     }
     
     @Override
@@ -109,32 +105,54 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Exter
             return false;
         }
         ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) o;
-        return cp.ctor.equals(ctor) && cp.parameter == parameter;
+        return cp.constructor.equals(constructor) && cp.paramIndex == paramIndex;
     }
     
     @Override
     public int hashCode() {
-        return ctor.hashCode() ^ (37 * 17 * parameter);
+        return constructor.hashCode() ^ (37 * 17 * paramIndex);
     }
     
     @Override
     public String toString() {
         String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
-        String p = ctor.getParameterTypes()[parameter].getSimpleName();
-        return ctor.getDeclaringClass().getSimpleName() + "(" + parameter + ", " + q + p + ")";
+        String p = constructor.getParameterTypes()[paramIndex].getSimpleName();
+        return constructor.getDeclaringClass().getSimpleName() + "(" + paramIndex + ", " + q + p + ")";
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        ctor = Types.readConstructor(in);
-        parameter = in.readInt();
-        
-        attributes = new AttributesImpl(ctor.getParameterAnnotations()[parameter]);
+
+    private Object writeReplace() {
+        return new SerialProxy(constructor, paramIndex);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeConstructor(out, ctor);
-        out.writeInt(parameter);
+
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("Serialization proxy required");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final ConstructorProxy constructor;
+        private final int index;
+
+        public SerialProxy(Constructor ctor, int idx) {
+            constructor = ConstructorProxy.forConstructor(ctor);
+            index = idx;
+        }
+
+        private Object readResolve() throws InvalidObjectException {
+            try {
+                return new ConstructorParameterInjectionPoint(constructor.resolve(), index);
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("no class for " + constructor.toString());
+                ex.initCause(e);
+                throw ex;
+            } catch (NoSuchMethodException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("cannot resolve " + constructor.toString());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }
