@@ -21,6 +21,11 @@ public class TestingProviders {
     }
     /*****************************************************************************/
 
+    /*
+     * Creates the situation that TypedProviders are most needed.
+     *
+     * The Provider is parametrized over a type variable which is subject to type erasure
+     */
     public static abstract class AbstractProvider<T> implements Provider<T>{
         public T get(){
             return null;
@@ -34,6 +39,9 @@ public class TestingProviders {
 
    /*****************************************************************************/
 
+   /*
+    * Same as the above, instead of abstract classes, provider is found up the interface hierarchy.
+    */
    public static interface InterfaceProvider<T> extends Provider<T>{}
 
    public static interface InterfaceProvider2<T> extends InterfaceProvider<T>{}
@@ -52,6 +60,9 @@ public class TestingProviders {
 
     /*****************************************************************************/
 
+    /*
+     * These are Providers with unbound type variables. These are **not** supported.
+     */
     public static class BoundedProvider<T extends Target> implements Provider<T>{
         public T get(){
             return null;
@@ -67,14 +78,6 @@ public class TestingProviders {
 
     public static class MultiBoundProvider<T extends Target & Cloneable> implements Provider<T>{
         public T get(){
-            return null;
-        }
-    }
-
-    /*****************************************************************************/
-
-    public static class GenericProvider<T> implements Provider<GenericTarget<T>>{
-        public GenericTarget<T> get(){
             return null;
         }
     }
