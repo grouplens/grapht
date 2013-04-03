@@ -34,6 +34,9 @@ import java.util.Map;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public final class Types {
+
+    private static final TypeVariable<?> PROVIDER_TYPE_VAR =Provider.class.getTypeParameters()[0];
+
     private Types() {}
 
     private static final Class<?>[] PRIMITIVE_TYPES = {
@@ -163,11 +166,20 @@ public final class Types {
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
-        final TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
-        if(bindings.containsKey(providerTypeVar)){
-            return TypeUtils.getRawType(bindings.get(providerTypeVar), null);
+        if(!bindings.containsKey(PROVIDER_TYPE_VAR)){
+            throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
         }
-        throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
+        final Class<?> inferredType = TypeUtils.getRawType(bindings.get(PROVIDER_TYPE_VAR), null);
+        try{
+            final Class<?> observedType = providerClass.getMethod("get").getReturnType();
+            if(inferredType.isAssignableFrom(observedType)) {
+                return observedType;
+            } else {
+                return inferredType;
+            }
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class does not implement get()");
+        }
     }
 
     /**
