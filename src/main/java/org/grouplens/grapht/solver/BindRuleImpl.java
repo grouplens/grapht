@@ -118,6 +118,7 @@ public final class BindRuleImpl implements BindRule, Serializable {
     
     @Override
     public Desire apply(Desire desire) {
+        // TODO Separate bind rules into different classes based on sat vs. type targets
         if (satisfaction != null) {
             return desire.restrict(satisfaction);
         } else {
