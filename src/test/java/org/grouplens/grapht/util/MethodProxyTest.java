@@ -52,7 +52,7 @@ public class MethodProxyTest {
     }
 
     @Test
-    public void testSerializeArrayMethod() throws NoSuchMethodException, ClassNotFoundException, IOException {
+    public void testSerializeNullaryMethod() throws NoSuchMethodException, ClassNotFoundException, IOException {
         Method f = TestClass.class.getDeclaredMethod("bar");
         MethodProxy proxy = roundTrip(f);
         assertThat(proxy.resolve(), equalTo(f));

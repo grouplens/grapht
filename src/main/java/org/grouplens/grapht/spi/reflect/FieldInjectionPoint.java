@@ -116,12 +116,12 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
                 return new FieldInjectionPoint(field.resolve());
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex =
-                        new InvalidObjectException("no class for field " + field.toString());
+                        new InvalidObjectException("no class for " + field.toString());
                 ex.initCause(e);
                 throw ex;
             } catch (NoSuchFieldException e) {
                 InvalidObjectException ex =
-                        new InvalidObjectException("no such field " + field.toString());
+                        new InvalidObjectException("cannot resolve " + field.toString());
                 ex.initCause(e);
                 throw ex;
             }

@@ -136,12 +136,12 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
                 return new SetterInjectionPoint(method.resolve(), parameterIndex);
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex =
-                        new InvalidObjectException("no class for field " + method.toString());
+                        new InvalidObjectException("no class for " + method.toString());
                 ex.initCause(e);
                 throw ex;
             } catch (NoSuchMethodException e) {
                 InvalidObjectException ex =
-                        new InvalidObjectException("no such field " + method.toString());
+                        new InvalidObjectException("cannot resolve " + method.toString());
                 ex.initCause(e);
                 throw ex;
             }

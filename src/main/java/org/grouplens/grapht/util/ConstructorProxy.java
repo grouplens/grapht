@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nullable;
@@ -37,6 +36,8 @@ public final class ConstructorProxy implements Serializable {
     @Nullable
     private transient volatile Constructor constructor;
     private transient volatile int hash;
+    @Nullable
+    private transient volatile String stringRepr;
 
     private ConstructorProxy(ClassProxy cls, ClassProxy[] ptypes) {
         declaringClass = cls;
@@ -45,8 +46,23 @@ public final class ConstructorProxy implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("proxy for %s(%s)", declaringClass.getClassName(),
-                             StringUtils.join(parameterTypes));
+        if (stringRepr == null) {
+            StringBuilder bld = new StringBuilder();
+            bld.append("proxy of ")
+               .append(declaringClass.getClassName())
+               .append("(");
+            boolean first = true;
+            for (ClassProxy p: parameterTypes) {
+                if (!first) {
+                    bld.append(", ");
+                }
+                bld.append(p.getClassName());
+                first = false;
+            }
+            bld.append(")");
+            stringRepr = bld.toString();
+        }
+        return stringRepr;
     }
 
     @Override

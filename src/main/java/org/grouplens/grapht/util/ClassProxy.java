@@ -71,7 +71,7 @@ public final class ClassProxy implements Serializable {
 
     @Override
     public String toString() {
-        return "Proxy(" + className + ")";
+        return "proxy of " + className;
     }
 
     @Override

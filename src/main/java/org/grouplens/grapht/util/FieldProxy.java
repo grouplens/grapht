@@ -45,7 +45,7 @@ public final class FieldProxy implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("FieldProxy(%s of %s)", fieldName, declaringClass.getClassName());
+        return String.format("proxy of %s.%s", declaringClass.getClassName(), fieldName);
     }
 
     @Override

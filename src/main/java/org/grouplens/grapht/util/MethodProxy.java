@@ -37,6 +37,8 @@ public final class MethodProxy implements Serializable {
     @Nullable
     private transient volatile Method method;
     private transient volatile int hash;
+    @Nullable
+    private transient volatile String stringRepr;
 
     private MethodProxy(ClassProxy cls, String names, ClassProxy[] ptypes) {
         declaringClass = cls;
@@ -46,7 +48,25 @@ public final class MethodProxy implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("MethodProxy(%s of %s)", methodName, declaringClass.getClassName());
+        if (stringRepr == null) {
+            StringBuilder bld = new StringBuilder();
+            bld.append("proxy of ")
+               .append(declaringClass.getClassName())
+               .append(".")
+               .append(methodName)
+               .append("(");
+            boolean first = true;
+            for (ClassProxy p: parameterTypes) {
+                if (!first) {
+                    bld.append(", ");
+                }
+                bld.append(p.getClassName());
+                first = false;
+            }
+            bld.append(")");
+            stringRepr = bld.toString();
+        }
+        return stringRepr;
     }
 
     @Override
