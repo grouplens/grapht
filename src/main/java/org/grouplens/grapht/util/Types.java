@@ -167,20 +167,11 @@ public final class Types {
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
-        assert(bindings.keySet().size() == 1);
-        Type providedType = bindings.entrySet().iterator().next().getValue();
-        if(providedType instanceof TypeVariable<?>){
-            Type[] bounds = ((TypeVariable) providedType).getBounds();
-            if(bounds.length == 1){
-                return TypeUtils.getRawType(bounds[0], null);
-            }
-            else {
-                throw new IllegalArgumentException("Too many bounds on provider type");
-            }
+        if(bindings.isEmpty()){
+            throw new IllegalArgumentException("Class " + providerClass.getName() + " has unbound type variables");
         }
-        else{
-            return TypeUtils.getRawType(providedType, null);
-        }
+        TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
+        return TypeUtils.getRawType(bindings.get(providerTypeVar), null);
     }
 
     /**
