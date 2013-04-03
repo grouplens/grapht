@@ -44,8 +44,7 @@ import java.io.Serializable;
 public class Node implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    // "final"
-    private CachedSatisfaction label;
+    private final CachedSatisfaction label;
     
     /**
      * Create a new Node with a null label.

@@ -46,11 +46,10 @@ import java.util.List;
 public class Edge implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    // "final"
-    private Node head;
-    private Node tail;
-    
-    private List<Desire> desires;
+    private final Node head;
+    private final Node tail;
+    // FIXME Deserialize the list of desires correctly
+    private final List<Desire> desires;
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and

@@ -33,9 +33,8 @@ import java.io.Serializable;
 public class CachedSatisfaction implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    // "final"
-    private Satisfaction satisfaction;
-    private CachePolicy cachePolicy;
+    private final Satisfaction satisfaction;
+    private final CachePolicy cachePolicy;
     
     /**
      * Create a new CachedSatisfaction wrapping the given satisfaction and the

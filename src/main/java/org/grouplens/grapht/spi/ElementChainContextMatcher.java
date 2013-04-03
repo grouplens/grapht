@@ -26,10 +26,7 @@ import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.util.Types;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -41,9 +38,11 @@ import java.util.*;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ElementChainContextMatcher implements ContextMatcher, Externalizable {
-    // "final"
-    private List<ContextElementMatcher> elementMatchers;
+public class ElementChainContextMatcher implements ContextMatcher, Serializable {
+    private static final long serialVersionUID = 1L;
+
+    // FIXME Deserialize element matchers correctly
+    private final List<ContextElementMatcher> elementMatchers;
 
     /**
      * Create a new ElementChainContextMatcher representing the empty context without any
@@ -153,23 +152,6 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
     @Override
     public String toString() {
         return "ElementChainContextMatcher(" + elementMatchers.toString() + ")";
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(elementMatchers.size());
-        for (ContextElementMatcher m: elementMatchers) {
-            out.writeObject(m);
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        int count = in.readInt();
-        elementMatchers = new ArrayList<ContextElementMatcher>(count);
-        for (int i = 0; i < count; i++) {
-            elementMatchers.add((ContextElementMatcher) in.readObject());
-        }
     }
 
     private static class Match implements ContextMatch {
