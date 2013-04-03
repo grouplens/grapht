@@ -18,7 +18,10 @@
  */
 package org.grouplens.grapht.annotation;
 
+import org.grouplens.grapht.util.ClassProxy;
+
 import javax.inject.Named;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -615,13 +618,32 @@ public final class AnnotationBuilder<T extends Annotation> {
      * defined in the annotation definition. A new AnnotationProxy instance
      * should be created for each proxy annotation.
      */
-    private static class AnnotationProxy<T extends Annotation> implements InvocationHandler {
-        private final Class<T> annotType;
+    private static class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serializable {
+        private static final long serialVersionUID = 1L;
+        private final ClassProxy annotationType;
         private final Map<String, Object> attributes;
+        private transient Class<T> cachedType;
         
-        public AnnotationProxy(Class<T> annotType, Map<String, Object> attributes) {
-            this.annotType = annotType;
-            this.attributes = Collections.unmodifiableMap(new HashMap<String, Object>(attributes));
+        public AnnotationProxy(Class<T> type, Map<String, Object> attrs) {
+            annotationType = ClassProxy.of(type);
+            cachedType = type;
+            attributes = Collections.unmodifiableMap(new HashMap<String, Object>(attrs));
+        }
+
+        @SuppressWarnings("unchecked")
+        private void readObject(ObjectInputStream in) throws ObjectStreamException {
+            try {
+                in.defaultReadObject();
+                cachedType = (Class<T>) annotationType.resolve();
+            } catch (IOException e) {
+                ObjectStreamException ex = new StreamCorruptedException("IO exception");
+                ex.initCause(e);
+                throw ex;
+            } catch (ClassNotFoundException e) {
+                ObjectStreamException ex = new InvalidObjectException("IO exception");
+                ex.initCause(e);
+                throw ex;
+            }
         }
         
         @Override
@@ -665,18 +687,18 @@ public final class AnnotationBuilder<T extends Annotation> {
         }
         
         private Class<? extends Annotation> proxyAnnotationType() {
-            return annotType;
+            return cachedType;
         }
         
         private String proxyToString(Object o) {
             StringBuilder sb = new StringBuilder("@");
-            sb.append(annotType.getName());
+            sb.append(cachedType.getName());
             sb.append('(');
             
             boolean first = true;
             // the declared methods on an Annotation definition
             // are the attributes considered in the hash code
-            for (Method attr: annotType.getDeclaredMethods()) {
+            for (Method attr: cachedType.getDeclaredMethods()) {
                 try {
                     if (first) {
                         first = false;
@@ -712,7 +734,7 @@ public final class AnnotationBuilder<T extends Annotation> {
             
             // the declared methods on an Annotation definition
             // are the attributes considered in the hash code
-            for (Method attr: annotType.getDeclaredMethods()) {
+            for (Method attr: cachedType.getDeclaredMethods()) {
                 try {
                     Object value = attr.invoke(proxy);
 
@@ -735,13 +757,13 @@ public final class AnnotationBuilder<T extends Annotation> {
         }
         
         private boolean proxyEquals(Object o1, Object o2) {
-            if (!annotType.isInstance(o2)) {
+            if (!cachedType.isInstance(o2)) {
                 return false;
             }
             
             // the declared methods on an Annotation definition
             // are the attributes considered in the hash code
-            for (Method attr: annotType.getDeclaredMethods()) {
+            for (Method attr: cachedType.getDeclaredMethods()) {
                 try {
                     Object v1 = attr.invoke(o1);
                     Object v2 = attr.invoke(o2);
