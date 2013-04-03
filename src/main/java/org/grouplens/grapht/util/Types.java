@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -26,10 +28,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Static helper methods for working with types.
@@ -166,13 +165,12 @@ public final class Types {
      *             Provider
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
-        try {
-            return Types.box(providerClass.getMethod("get").getReturnType());
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class does not implement get()");
+        Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
+        final TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
+        if(bindings.containsKey(providerTypeVar)){
+            return TypeUtils.getRawType(bindings.get(providerTypeVar), null);
         }
+        throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
     }
 
     /**

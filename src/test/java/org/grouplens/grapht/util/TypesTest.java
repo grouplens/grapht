@@ -20,6 +20,7 @@ package org.grouplens.grapht.util;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import static org.junit.Assert.fail;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -32,6 +33,8 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+
+import javax.inject.Provider;
 
 @SuppressWarnings("rawtypes")
 public class TypesTest {
@@ -82,5 +85,58 @@ public class TypesTest {
         assertThat(cls, equalTo((Class) Inner.class));
     }
 
+    private void testProvidedType(Class<? extends Provider<?>> cls){
+        Class<?> result = Types.getProvidedType(TestingProviders.SimpleProvider.class);
+        assertThat(result, equalTo((Class) TestingProviders.Target.class));
+    }
+
+    @Test
+    public void testSimpleProvider(){
+        testProvidedType(TestingProviders.SimpleProvider.class);
+    }
+
+    @Test
+    public void testAbstractProvider(){
+        testProvidedType(TestingProviders.SubtypedProvider.class);
+        testProvidedType(TestingProviders.SubtypedProvider2.class);
+    }
+
+    @Test
+    public void testInterfaceProvider(){
+        testProvidedType(TestingProviders.ImplementedProvider.class);
+        testProvidedType(TestingProviders.ImplementedProvider2.class);
+    }
+
+    @Test
+    public void testBoundedProvider(){
+        Class<?> cls = new TestingProviders.BoundedProvider<TestingProviders.Target>().getClass();
+        try{
+            Types.getProvidedType((Class<? extends Provider<?>>) cls);
+            fail("getProvidedType didn't throw an IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e){
+            // This is the correct behavior
+        }
+        cls = new TestingProviders.UnboundedProvider<TestingProviders.Target>().getClass();
+        try{
+            Types.getProvidedType((Class<? extends Provider<?>>) cls);
+            fail("getProvidedType didn't throw an IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e){
+            // This is the correct behavior
+        }
+    }
+
+    @Test
+    public void testMultiBoundProvider(){
+        Class<?> cls = new TestingProviders.MultiBoundProvider<TestingProviders.Target>().getClass();
+        try{
+            Types.getProvidedType((Class<? extends Provider<?>>) cls);
+            fail("getProvidedType didn't throw an IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e){
+            // This is the correct behavior
+        }
+    }
     public static class Inner {}
 }
