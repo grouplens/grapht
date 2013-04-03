@@ -18,9 +18,10 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.IOException;
 import java.lang.reflect.Array;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -58,7 +59,7 @@ public class ClassProxyTest {
      */
     private ClassProxy roundTrip(Class<?> cls) throws IOException, ClassNotFoundException {
         ClassProxy proxy = ClassProxy.of(cls);
-        return TestUtils.serializeRoundTrip(proxy);
+        return SerializationUtils.clone(proxy);
     }
 
     @Test

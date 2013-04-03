@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -73,6 +74,6 @@ public class MethodProxyTest {
      */
     private MethodProxy roundTrip(Method fld) throws IOException, ClassNotFoundException {
         MethodProxy proxy = MethodProxy.of(fld);
-        return TestUtils.serializeRoundTrip(proxy);
+        return SerializationUtils.clone(proxy);
     }
 }

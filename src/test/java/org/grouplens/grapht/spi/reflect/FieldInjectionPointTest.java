@@ -18,15 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.grouplens.grapht.util.TestUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class FieldInjectionPointTest {
@@ -50,7 +48,7 @@ public class FieldInjectionPointTest {
     @Test
     public void testSerialize() throws NoSuchFieldException, IOException, ClassNotFoundException {
         FieldInjectionPoint fip = new FieldInjectionPoint(getClass().getDeclaredField("foo"));
-        FieldInjectionPoint fip2 = TestUtils.serializeRoundTrip(fip);
+        FieldInjectionPoint fip2 = SerializationUtils.clone(fip);
         assertThat(fip2, equalTo(fip));
         assertThat(fip2, not(sameInstance(fip)));
     }

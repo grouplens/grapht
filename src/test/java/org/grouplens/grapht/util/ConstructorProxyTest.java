@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -70,6 +71,6 @@ public class ConstructorProxyTest {
      */
     private ConstructorProxy roundTrip(Constructor fld) throws IOException, ClassNotFoundException {
         ConstructorProxy proxy = ConstructorProxy.of(fld);
-        return TestUtils.serializeRoundTrip(proxy);
+        return SerializationUtils.clone(proxy);
     }
 }
