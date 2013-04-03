@@ -167,11 +167,11 @@ public final class Types {
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
-        if(bindings.isEmpty()){
-            throw new IllegalArgumentException("Class " + providerClass.getName() + " has unbound type variables");
+        final TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
+        if(bindings.containsKey(providerTypeVar)){
+            return TypeUtils.getRawType(bindings.get(providerTypeVar), null);
         }
-        TypeVariable<?> providerTypeVar = Provider.class.getTypeParameters()[0];
-        return TypeUtils.getRawType(bindings.get(providerTypeVar), null);
+        throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
     }
 
     /**
