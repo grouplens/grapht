@@ -87,8 +87,8 @@ public class MockSatisfaction implements Satisfaction {
     }
 
     @Override
-    public boolean isNull() {
-        return false;
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        throw new UnsupportedOperationException("cannot visit the mock satisfaction");
     }
 
     @Override

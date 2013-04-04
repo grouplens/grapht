@@ -75,12 +75,14 @@ public interface Satisfaction extends Serializable {
     boolean hasInstance();
 
     /**
-     * Query whether this satisfaction is a null satisfaction.  Null satisfactions
-     * always return null.
+     * Visit the satisfaction. This method invokes the appropriate method on the
+     * provided visitor to report information on itself.
      *
-     * @return {@code true} if the satisfaction is a null satisfaction.
+     * @param visitor The visitor object.
+     * @param <T> The type returned from the visitor.
+     * @return The return value from the invoked visitor method.
      */
-    boolean isNull();
+    <T> T visit(SatisfactionVisitor<T> visitor);
     
     /**
      * Get the default cache policy for instances created by this satisfaction.

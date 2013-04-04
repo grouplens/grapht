@@ -29,10 +29,7 @@ import java.util.List;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.*;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
@@ -97,8 +94,8 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Externalizabl
     }
 
     @Override
-    public boolean isNull() {
-        return false;
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        return visitor.visitProviderInstance(provider);
     }
 
     @Override
