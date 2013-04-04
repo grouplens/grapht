@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht;
 
+import org.grouplens.grapht.solver.BindRule;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -87,7 +89,7 @@ public interface Binding<T> {
 
     /**
      * Exclude the provided type from being matched when examining injection
-     * points. Bindings can generate multiple {@link org.grouplens.grapht.solver.BindRuleImpl BindRules} for
+     * points. Bindings can generate multiple {@link BindRule BindRules} for
      * super and sub types. Excluded classes for a binding will not have
      * BindRules generated for them.
      * 
