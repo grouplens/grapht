@@ -28,11 +28,31 @@ import org.grouplens.grapht.spi.Satisfaction;
 public final class BindRules {
     private BindRules() {}
 
+    /**
+     * Construct a new bind rule that binds a dependency to a satisfaction.
+     *
+     * @param depType      The dependency type.
+     * @param satisfaction The satisfaction.
+     * @param policy       The cache policy.
+     * @param qualifier    The qualifier matcher to match the dependency type.
+     * @param terminal     Whether this binding is terminal.
+     * @return A new bind rule.
+     */
     public static BindRule toSatisfaction(Class<?> depType, Satisfaction satisfaction, CachePolicy policy,
                                           QualifierMatcher qualifier, boolean terminal) {
         return new BindRuleImpl(depType, satisfaction, policy, qualifier, terminal);
     }
 
+    /**
+     * Construct a new bind rule that binds a dependency to a class.
+     *
+     * @param depType   The dependency type.
+     * @param implType  The implementation type to use.
+     * @param policy    The cache policy.
+     * @param qualifier The qualifier matcher to match the dependency type.
+     * @param terminal  Whether this binding is terminal.
+     * @return A new bind rule.
+     */
     public static BindRule toClass(Class<?> depType, Class<?> implType, CachePolicy policy,
                                    QualifierMatcher qualifier, boolean terminal) {
         return new BindRuleImpl(depType, implType, policy, qualifier, terminal);
