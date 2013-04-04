@@ -129,6 +129,11 @@ public class ProviderBindingFunction implements BindingFunction {
         }
 
         @Override
+        public boolean isNull() {
+            return false;
+        }
+
+        @Override
         public Provider<?> makeProvider(ProviderSource dependencies) {
             Provider<?> trueProvider = dependencies.apply(providedDesire);
             

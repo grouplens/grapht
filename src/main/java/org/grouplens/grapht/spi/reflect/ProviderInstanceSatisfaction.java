@@ -97,6 +97,11 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Externalizabl
     }
 
     @Override
+    public boolean isNull() {
+        return false;
+    }
+
+    @Override
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return provider;
     }

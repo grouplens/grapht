@@ -91,6 +91,11 @@ public class ClassSatisfaction implements Satisfaction, Externalizable {
     }
 
     @Override
+    public boolean isNull() {
+        return false;
+    }
+
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return new InjectionProviderImpl(type, getDependencies(), dependencies);

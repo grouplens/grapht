@@ -73,6 +73,14 @@ public interface Satisfaction extends Serializable {
      * @return whether the satisfaction already has an instance.
      */
     boolean hasInstance();
+
+    /**
+     * Query whether this satisfaction is a null satisfaction.  Null satisfactions
+     * always return null.
+     *
+     * @return {@code true} if the satisfaction is a null satisfaction.
+     */
+    boolean isNull();
     
     /**
      * Get the default cache policy for instances created by this satisfaction.
