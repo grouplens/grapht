@@ -630,6 +630,12 @@ public final class AnnotationBuilder<T extends Annotation> {
             attributes = Collections.unmodifiableMap(new HashMap<String, Object>(attrs));
         }
 
+        /**
+         * Customized {@code readObject} implementation to ensure the cached type is resolved.
+         *
+         * @param in The stream.
+         * @throws ObjectStreamException If there is an error reading the object from the stream.
+         */
         @SuppressWarnings("unchecked")
         private void readObject(ObjectInputStream in) throws ObjectStreamException {
             try {
