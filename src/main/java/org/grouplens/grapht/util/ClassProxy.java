@@ -50,19 +50,13 @@ public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
 
     private final String className;
-    // checksum stored as 2 longs for serialization ease
-    private final long checkWord1;
-    private final long checkWord2;
+    private final long checksum;
     @Nullable
     private transient volatile WeakReference<Class<?>> theClass;
 
-    private ClassProxy(String name, ByteBuffer checksum) {
-        if (checksum.limit() != 16) {
-            throw new IllegalArgumentException("checksum array has wrong length");
-        }
+    private ClassProxy(String name, long check) {
         className = name;
-        checkWord1 = checksum.getLong();
-        checkWord2 = checksum.getLong();
+        checksum = check;
     }
 
     /**
@@ -105,10 +99,8 @@ public final class ClassProxy implements Serializable {
         Class<?> cls = ref == null ? null : ref.get();
         if (cls == null) {
             cls = ClassUtils.getClass(className);
-            ByteBuffer check = checksumClass(cls);
-            long w1 = check.getLong();
-            long w2 = check.getLong();
-            if (checkWord1 == w1 && checkWord2 == w2) {
+            long check = checksumClass(cls);
+            if (checksum == check) {
                 theClass = new WeakReference<Class<?>>(cls);
             } else {
                 throw new ClassNotFoundException("checksum mismatch for " + cls.getName());
@@ -140,11 +132,30 @@ public final class ClassProxy implements Serializable {
     /**
      * Compute a checksum for a class. These checksums are used to see if a class has changed
      * its definition since being serialized.
+     * <p>
+     * The checksum used here is not cryptographically strong. It is intended only as a sanity
+     * check to detect incompatible serialization, not to robustly prevent tampering. The
+     * checksum algorithm currently is to compute an MD5 checksum over class member signatures
+     * and XOR the lower and upper halves of the checksum.
+     * </p>
      *
      * @param type The class to checksum.
-     * @return A read-only byte buffer containing the class's checksum.
+     * @return The
      */
-    private static ByteBuffer checksumClass(Class<?> type) {
+    private static long checksumClass(Class<?> type) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("JVM does not support MD5");
+        }
+        checksumClass(type, digest);
+
+        ByteBuffer buf = ByteBuffer.wrap(digest.digest());
+        return buf.getLong() ^ buf.getLong();
+    }
+
+    private static void checksumClass(Class<?> type, MessageDigest digest) {
         // we compute a big hash of all the members of the class, and its superclasses.
 
         List<String> members = new ArrayList<String>();
@@ -163,20 +174,12 @@ public final class ClassProxy implements Serializable {
 
         Collections.sort(members);
 
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("JVM does not support MD5");
-        }
         Class<?> sup = type.getSuperclass();
         if (sup != null) {
-            digest.update(checksumClass(sup));
+            checksumClass(sup, digest);
         }
         for (String mem: members) {
             digest.update(mem.getBytes(UTF8));
         }
-
-        return ByteBuffer.wrap(digest.digest()).asReadOnlyBuffer();
     }
 }
