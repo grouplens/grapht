@@ -49,6 +49,7 @@ public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
 
     private final String className;
+    // FIXME Defensively copy the checksum array on deserialization
     private final byte[] checksum;
     @Nullable
     private transient volatile WeakReference<Class<?>> theClass;
