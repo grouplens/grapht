@@ -31,7 +31,7 @@ import java.io.Serializable;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class CachedSatisfaction implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
     private final Satisfaction satisfaction;
     private final CachePolicy cachePolicy;
