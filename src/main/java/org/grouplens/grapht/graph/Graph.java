@@ -41,6 +41,7 @@ public class Graph implements Serializable, Cloneable {
     // The outgoing key set is used to represent the set of nodes in the graph,
     // although it should hold that the incoming key set is equivalent
     private Map<Node, Set<Edge>> outgoing; // edge.head == key
+    // REVIEW Do we need to serialze both edges, or should we reconstruct one from the other?
     private Map<Node, Set<Edge>> incoming; // edge.tail == key
     
     /**
