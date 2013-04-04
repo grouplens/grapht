@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.QualifierMatcher;
@@ -45,6 +47,8 @@ final class BindRuleImpl implements BindRule, Serializable {
     private final Class<?> implType;
     
     private final CachePolicy policy;
+
+    private transient volatile int hashCode;
         
     /**
      * Create a bind rule that matches a desire when the desired type equals
@@ -145,33 +149,36 @@ final class BindRuleImpl implements BindRule, Serializable {
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof BindRuleImpl)) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof BindRuleImpl) {
+            EqualsBuilder eq = new EqualsBuilder();
+            BindRuleImpl or = (BindRuleImpl) o;
+            return eq.append(depType, or.depType)
+                    .append(implType, or.implType)
+                    .append(terminal, or.terminal)
+                    .append(qualifier, or.qualifier)
+                    .append(policy, or.policy)
+                    .append(satisfaction, or.satisfaction)
+                    .isEquals();
+        } else {
             return false;
         }
-        BindRuleImpl r = (BindRuleImpl) o;
-        return r.depType.equals(depType) &&
-               r.implType.equals(implType) &&
-               r.terminal == terminal &&
-               r.qualifier.equals(qualifier) &&
-               r.policy.equals(policy) &&
-               (r.satisfaction == null ? satisfaction == null : r.satisfaction.equals(satisfaction));
     }
     
     @Override
     public int hashCode() {
-        int result = 17;
-
-        result += 31 * result + (terminal ? 1 : 0);
-        result += 31 * result + depType.hashCode();
-        result += 31 * result + implType.hashCode();
-        result += 31 * result + qualifier.hashCode();
-        result += 31 * result + policy.hashCode();
-
-        if (satisfaction != null) {
-            result += 31 * result + satisfaction.hashCode(); 
+        if (hashCode == 0) {
+            HashCodeBuilder hcb = new HashCodeBuilder();
+            hashCode = hcb.append(terminal)
+                          .append(depType)
+                          .append(implType)
+                          .append(qualifier)
+                          .append(policy)
+                          .append(satisfaction)
+                          .toHashCode();
         }
-        
-        return result;
+        return hashCode;
     }
     
     @Override
