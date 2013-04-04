@@ -24,16 +24,14 @@ import org.apache.commons.lang3.StringUtils;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A serialization proxy for class instances.  This serializable class encapsulates a simple
@@ -53,7 +51,7 @@ public final class ClassProxy implements Serializable {
     private final String className;
     private final byte[] checksum;
     @Nullable
-    private transient volatile Class<?> theClass;
+    private transient volatile WeakReference<Class<?>> theClass;
 
     @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     private ClassProxy(String name, byte[] cksum) {
@@ -97,26 +95,35 @@ public final class ClassProxy implements Serializable {
      * @throws ClassNotFoundException if the class represented by this proxy cannot be found.
      */
     public Class<?> resolve() throws ClassNotFoundException {
-        if (theClass == null) {
-            Class<?> cls = ClassUtils.getClass(className);
+        WeakReference<Class<?>> ref = theClass;
+        Class<?> cls = ref == null ? null : ref.get();
+        if (cls == null) {
+            cls = ClassUtils.getClass(className);
             byte[] check = checksumClass(cls);
             if (Arrays.equals(check, checksum)) {
-                theClass = cls;
+                theClass = new WeakReference<Class<?>>(cls);
             } else {
                 throw new ClassNotFoundException("checksum mismatch for " + cls.getName());
             }
         }
-        return theClass;
+        return cls;
     }
+
+    private static final Map<Class<?>, ClassProxy> proxyCache = new WeakHashMap<Class<?>, ClassProxy>();
 
     /**
      * Construct a class proxy for a class.
+     *
      * @param cls The class.
      * @return The class proxy.
      */
-    public static ClassProxy of(Class<?> cls) {
-        ClassProxy proxy = new ClassProxy(cls.getName(), checksumClass(cls));
-        proxy.theClass = cls;
+    public static synchronized ClassProxy of(Class<?> cls) {
+        ClassProxy proxy = proxyCache.get(cls);
+        if (proxy == null) {
+            proxy = new ClassProxy(cls.getName(), checksumClass(cls));
+            proxy.theClass = new WeakReference<Class<?>>(cls);
+            proxyCache.put(cls, proxy);
+        }
         return proxy;
     }
 
