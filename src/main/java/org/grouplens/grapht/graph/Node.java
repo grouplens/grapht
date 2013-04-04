@@ -42,7 +42,7 @@ import java.io.Serializable;
  * @author Michael Ludwig <mludwig@cs.umn.edu
  */
 public class Node implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
     private final CachedSatisfaction label;
     
@@ -88,7 +88,8 @@ public class Node implements Serializable {
     /**
      * @return The current label instance of the Node, which can be null
      */
-    public @Nullable CachedSatisfaction getLabel() {
+    @Nullable
+    public CachedSatisfaction getLabel() {
         return label;
     }
     

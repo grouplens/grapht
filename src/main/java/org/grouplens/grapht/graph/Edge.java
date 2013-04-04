@@ -44,7 +44,7 @@ import java.util.List;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class Edge implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
     private final Node head;
     private final Node tail;
@@ -107,8 +107,9 @@ public class Edge implements Serializable {
      * @return The chain of desires on this edge
      * @deprecated  Use {@link #getDesireChain}.
      */
+    @Nullable
     @Deprecated
-    public @Nullable List<Desire> getLabel() {
+    public List<Desire> getLabel() {
         return desires;
     }
     
@@ -119,7 +120,8 @@ public class Edge implements Serializable {
      * 
      * @return The first or primary desire along this edge
      */
-    public @Nullable List<Desire> getDesireChain() {
+    @Nullable
+    public List<Desire> getDesireChain() {
         return desires;
     }
     
@@ -130,7 +132,8 @@ public class Edge implements Serializable {
      * 
      * @return The first or primary desire along this edge
      */
-    public @Nullable Desire getDesire() {
+    @Nullable
+    public Desire getDesire() {
         return (desires == null || desires.isEmpty() ? null : desires.get(0));
     }
     
