@@ -28,6 +28,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -49,15 +50,19 @@ public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
 
     private final String className;
-    // FIXME Defensively copy the checksum array on deserialization
-    private final byte[] checksum;
+    // checksum stored as 2 longs for serialization ease
+    private final long checkWord1;
+    private final long checkWord2;
     @Nullable
     private transient volatile WeakReference<Class<?>> theClass;
 
-    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
-    private ClassProxy(String name, byte[] cksum) {
+    private ClassProxy(String name, ByteBuffer checksum) {
+        if (checksum.limit() != 16) {
+            throw new IllegalArgumentException("checksum array has wrong length");
+        }
         className = name;
-        checksum = cksum;
+        checkWord1 = checksum.getLong();
+        checkWord2 = checksum.getLong();
     }
 
     /**
@@ -100,8 +105,10 @@ public final class ClassProxy implements Serializable {
         Class<?> cls = ref == null ? null : ref.get();
         if (cls == null) {
             cls = ClassUtils.getClass(className);
-            byte[] check = checksumClass(cls);
-            if (Arrays.equals(check, checksum)) {
+            ByteBuffer check = checksumClass(cls);
+            long w1 = check.getLong();
+            long w2 = check.getLong();
+            if (checkWord1 == w1 && checkWord2 == w2) {
                 theClass = new WeakReference<Class<?>>(cls);
             } else {
                 throw new ClassNotFoundException("checksum mismatch for " + cls.getName());
@@ -135,9 +142,9 @@ public final class ClassProxy implements Serializable {
      * its definition since being serialized.
      *
      * @param type The class to checksum.
-     * @return The class's checksum.
+     * @return A read-only byte buffer containing the class's checksum.
      */
-    private static byte[] checksumClass(Class<?> type) {
+    private static ByteBuffer checksumClass(Class<?> type) {
         // we compute a big hash of all the members of the class, and its superclasses.
 
         List<String> members = new ArrayList<String>();
@@ -170,6 +177,6 @@ public final class ClassProxy implements Serializable {
             digest.update(mem.getBytes(UTF8));
         }
 
-        return digest.digest();
+        return ByteBuffer.wrap(digest.digest()).asReadOnlyBuffer();
     }
 }
