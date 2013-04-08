@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,17 +34,14 @@ import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
 import org.grouplens.grapht.spi.*;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.InterfaceB;
-import org.grouplens.grapht.spi.reflect.types.ProviderA;
-import org.grouplens.grapht.spi.reflect.types.RoleD;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
-import org.grouplens.grapht.spi.reflect.types.TypeC;
+import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import javax.annotation.Nullable;
+import javax.inject.Provider;
 
 import static org.junit.Assert.fail;
 
@@ -145,6 +143,38 @@ public class BindingFunctionBuilderTest {
                      Arrays.asList(new BindRule(InterfaceA.class, spi.satisfyWithProvider(pa), CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testBindToWrongProvider() throws Exception {
+        // Test that we get an exception when binding to a provider of an incompatible type
+        // generics prevent this, but groovy bypasses it
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        try {
+            builder.getRootContext()
+                   .bind((Class) InterfaceA.class)
+                   .toProvider(ProviderC.class);
+            fail("binding to incompatible provider should throw exception");
+        } catch (InvalidBindingException e) {
+            /* expected */
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Ignore("currently throws IllegalArgument for generic provider")
+    @Test
+    public void testBindToBadProvider() throws Exception {
+        // Test that we get an exception when binding to a provider of an overly generic type
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        try {
+            builder.getRootContext()
+                   .bind((Class) InputStream.class)
+                    .toProvider(new InstanceProvider("foo"));
+            fail("binding to bad provider should throw exception");
+        } catch (InvalidBindingException e) {
+            /* expected */
+        }
     }
     
     @Test
@@ -327,4 +357,17 @@ public class BindingFunctionBuilderTest {
     
     // TypeBp is a TypeB, TypeA, InterfaceB, and InterfaceA
     public static class TypeBp extends TypeB { }
+
+    public static class InstanceProvider<T> implements Provider<T> {
+        private final T instance;
+
+        public InstanceProvider(T obj) {
+            instance = obj;
+        }
+
+        @Override
+        public T get() {
+            return instance;
+        }
+    }
 }
