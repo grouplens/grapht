@@ -31,6 +31,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
@@ -172,6 +174,12 @@ class BindingImpl<T> implements Binding<T> {
         if (instance == null) {
             toNull();
             return;
+        } else if (!(instance instanceof Number)
+                   && !ClassUtils.isPrimitiveWrapper(instance.getClass())
+                   && !sourceType.isInstance(instance)) {
+            String msg = String.format("%s is not an instance of %s",
+                                       instance, sourceType);
+            throw new InvalidBindingException(sourceType, msg);
         }
         ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();

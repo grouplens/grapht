@@ -331,7 +331,6 @@ public class BindingFunctionBuilderTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Ignore("not yet sure how to do the type check")
     @Test
     public void testRejectInvalidInstanceBinding() {
         BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
