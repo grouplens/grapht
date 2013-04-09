@@ -62,19 +62,23 @@ public interface Binding<T> {
      * @return A newly configured Binding
      */
     Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier);
-    
+
     /**
-     * <p>
-     * Configure the binding to match injection points that have been annotated
-     * with the exact annotation instance.
-     * <p>
-     * This will override any previous name or qualifier annotation.
-     * 
-     * @param annot The annotation instance to match
+     * Configure the binding to match injection points that have been annotated with the exact
+     * annotation instance.
+     *
+     * <p>This will override any previous name or qualifier annotation.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
+     * @param annot The annotation instance to match.
      * @return A newly configured Binding
      */
     Binding<T> withQualifier(@Nonnull Annotation annot);
-    
+
     /**
      * <p>
      * Configure the binding to only match injection points that have no

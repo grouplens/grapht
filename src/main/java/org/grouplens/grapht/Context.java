@@ -105,6 +105,11 @@ public interface Context {
      * given class, qualified by the specific Annotation instance. If the
      * qualifier is null, the default or null qualifier is used.
      *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
      * @param qualifier The qualifier instance that must be matched along with
      *            the type
      * @param type The type to extend this context by
@@ -143,6 +148,11 @@ public interface Context {
      * Create a new Context that extends the current context stack with the given class, qualified
      * by the specific Annotation instance. as an anchored match. If the qualifier is null, the
      * default or null qualifier is used.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
      *
      * @param qualifier The qualifier instance that must be matched along with the type
      * @param type      The type to extend this context by

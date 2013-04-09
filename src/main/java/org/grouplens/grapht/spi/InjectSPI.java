@@ -106,6 +106,11 @@ public interface InjectSPI {
     /**
      * Create a Desire that wraps a synthetic InjectionPoint for the qualified
      * type, that may or may not be satisfied by a null value.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
      * 
      * @param qualifier The qualifier on the synthetic injection point
      * @param type The desired type, and type of the injection point
@@ -138,6 +143,12 @@ public interface InjectSPI {
     /**
      * Create a QualifierMatcher that matches annotation instances equal to 
      * the given instance.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
      * @param annot The annotation instance to equal to
      * @return A QualifierMatcher matching the given annotation instance
      */
