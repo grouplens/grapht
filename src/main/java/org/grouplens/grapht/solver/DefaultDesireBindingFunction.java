@@ -185,7 +185,6 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             String providerName = props.getProperty("provider");
             if (providerName != null) {
                 try {
-                    // TODO Support configurable class loaders
                     // REVIEW Do we want to use this, or the current thread's class loader?
                     @SuppressWarnings("rawtypes")
                     Class providerClass = Class.forName(providerName);
@@ -201,12 +200,10 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             String implName = props.getProperty("implementation");
             if (implName != null) {
                 try {
-                    // TODO Support configurable class loaders
                     // REVIEW Do we want to use this, or the current thread's class loader?
                     @SuppressWarnings("rawtypes")
                     Class implClass = Class.forName(implName);
                     logger.debug("found implementation {} for {}", implName, type);
-                    // QUESTION: why should the last parameter be true?
                     result = new BindingResult(desire.restrict(spi.satisfy(implClass)),
                                                CachePolicy.NO_PREFERENCE, false, false);
                 } catch (ClassNotFoundException e) {
