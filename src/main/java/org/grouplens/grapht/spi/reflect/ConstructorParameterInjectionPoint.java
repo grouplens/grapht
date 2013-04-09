@@ -48,19 +48,19 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
      * Create a ConstructorParameterInjectionPoint that wraps the given parameter index for the
      * given constructor, ctor.
      *
-     * @param ctor The constructor to wrap
-     * @param pidx The parameter index of this injection point within ctor's parameters
+     * @param ctor   The constructor to wrap
+     * @param pIndex The parameter index of this injection point within ctor's parameters
      * @throws NullPointerException      if {@code ctor} is null
-     * @throws IndexOutOfBoundsException if {@code pidx} is not a valid index into the constructor's
-     *                                   parameters
+     * @throws IndexOutOfBoundsException if {@code pIndex} is not a valid index into the
+     *                                   constructor's parameters
      */
-    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int pidx) {
+    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int pIndex) {
         Preconditions.notNull("constructor", ctor);
-        Preconditions.inRange(pidx, 0, ctor.getParameterTypes().length);
+        Preconditions.inRange(pIndex, 0, ctor.getParameterTypes().length);
 
         constructor = ctor;
-        paramIndex = pidx;
-        attributes = new AttributesImpl(ctor.getParameterAnnotations()[pidx]);
+        paramIndex = pIndex;
+        attributes = new AttributesImpl(ctor.getParameterAnnotations()[pIndex]);
     }
 
     /**
