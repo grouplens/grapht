@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.annotation;
 
+import org.apache.commons.lang3.AnnotationUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.grouplens.grapht.util.ClassProxy;
 
 import java.io.*;
@@ -81,10 +83,10 @@ class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serial
         } else if (isToString(method)) {
             return proxyToString(proxy);
         } else if (attributes.containsKey(method.getName()) && method.getParameterTypes().length == 0) {
-            return AnnotationBuilder.copyAnnotationValue(attributes.get(method.getName()));
+            return copyAnnotationValue(attributes.get(method.getName()));
         } else {
             // fall back to the default
-            return AnnotationBuilder.copyAnnotationValue(method.getDefaultValue());
+            return copyAnnotationValue(method.getDefaultValue());
         }
         // wait() and other Object methods do not get sent to the InvocationHandler
         // so we don't have any other cases
@@ -115,166 +117,64 @@ class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serial
     }
 
     private String proxyToString(Object o) {
-        StringBuilder sb = new StringBuilder("@");
-        sb.append(cachedType.getName());
-        sb.append('(');
-
-        boolean first = true;
-        // the declared methods on an Annotation definition
-        // are the attributes considered in the hash code
-        for (Method attr: cachedType.getDeclaredMethods()) {
-            try {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-
-                sb.append(attr.getName());
-                sb.append('=');
-
-                Object value = attr.invoke(o);
-
-                if (attr.getReturnType().isArray()) {
-                    // the JVM prints out arrays nicely, so we might as well
-                    sb.append(arrayToString(value));
-                } else {
-                    sb.append(value);
-                }
-            } catch(Exception e) {
-                throw new RuntimeException("Unexpected exception", e);
-            }
-        }
-
-        sb.append(')');
-        return sb.toString();
+        return AnnotationUtils.toString((Annotation) o);
     }
 
     private int proxyHashCode(Object proxy) {
-        // Annotation hash code is the sum of the hashes of its members,
-        // where the member hash is (127 * name.hashCode()) ^ value.hashCode()
-
-        int hash = 0;
-
-        // the declared methods on an Annotation definition
-        // are the attributes considered in the hash code
-        for (Method attr: cachedType.getDeclaredMethods()) {
-            try {
-                Object value = attr.invoke(proxy);
-
-                // Annotation has specific instructions for the hash code of primitive
-                // types, but it amounts to boxing the type, which has already been
-                // done for us when members were placed in the attribute map
-
-                // special case for arrays, just as in proxyEquals()
-                int valueHash = (attr.getReturnType().isArray() ? arrayHashCode(value)
-                                                                : value.hashCode());
-                hash += (127 * attr.getName().hashCode()) ^ valueHash;
-            } catch (Exception e) {
-                // the method reflection should not fail, since Annotation
-                // methods must be public and take 0 arguments
-                throw new RuntimeException("Unexpected exception", e);
-            }
-        }
-
-        return hash;
+        return AnnotationUtils.hashCode((Annotation) proxy);
     }
 
     private boolean proxyEquals(Object o1, Object o2) {
-        if (!cachedType.isInstance(o2)) {
-            return false;
-        }
+        return cachedType.isInstance(o2)
+               && AnnotationUtils.equals((Annotation) o1, (Annotation) o2);
+    }
 
-        // the declared methods on an Annotation definition
-        // are the attributes considered in the hash code
-        for (Method attr: cachedType.getDeclaredMethods()) {
-            try {
-                Object v1 = attr.invoke(o1);
-                Object v2 = attr.invoke(o2);
-
-                if (v1.getClass().isArray()) {
-                    // Annotation mandates special equality behavior for arrays
-                    if (!arrayEquals(v1, v2)) {
-                        return false;
-                    }
-                } else {
-                    if (!v1.equals(v2)) {
-                        return false;
-                    }
-                }
-            } catch(Exception e) {
-                throw new RuntimeException("Unexpected exception", e);
+    /**
+     * Safe clone of an object.  If the object is an array, it is copied; otherwise, it is
+     * returned as-is.  This object is only applicable to valid annotation value types, which
+     * are all either arrays or immutable.
+     * @param o The annotation value.
+     * @return A copy of the value.
+     */
+    @SuppressWarnings("unchecked")
+    static Object copyAnnotationValue(Object o) {
+        if (o.getClass().isArray()) {
+            // make a shallow copy of the array
+            if (o instanceof boolean[]) {
+                boolean[] a = (boolean[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof byte[]) {
+                byte[] a = (byte[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof short[]) {
+                short[] a = (short[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof int[]) {
+                int[] a = (int[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof long[]) {
+                long[] a = (long[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof char[]) {
+                char[] a = (char[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof float[]) {
+                float[] a = (float[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else if (o instanceof double[]) {
+                double[] a = (double[]) o;
+                return Arrays.copyOf(a, a.length);
+            } else {
+                Object[] a = (Object[]) o;
+                return Arrays.copyOf(a, a.length, (Class<? extends Object[]>) o.getClass());
             }
-        }
-
-        // all attributes equal via Object.equals() or Arrays.equals()
-        return true;
-    }
-
-    private String arrayToString(Object o1) {
-        if (o1 instanceof boolean[]) {
-            return Arrays.toString((boolean[]) o1);
-        } else if (o1 instanceof byte[]) {
-            return Arrays.toString((byte[]) o1);
-        } else if (o1 instanceof short[]) {
-            return Arrays.toString((short[]) o1);
-        } else if (o1 instanceof int[]) {
-            return Arrays.toString((int[]) o1);
-        } else if (o1 instanceof long[]) {
-            return Arrays.toString((long[]) o1);
-        } else if (o1 instanceof char[]) {
-            return Arrays.toString((char[]) o1);
-        } else if (o1 instanceof float[]) {
-            return Arrays.toString((float[]) o1);
-        } else if (o1 instanceof double[]) {
-            return Arrays.toString((double[]) o1);
+        } else if (o instanceof String
+                   || o instanceof Annotation
+                   || ClassUtils.isPrimitiveOrWrapper(o.getClass())) {
+            // the value is immutable and a copy is not necessary
+            return o;
         } else {
-            return Arrays.toString((Object[]) o1);
-        }
-    }
-
-    private int arrayHashCode(Object o1) {
-        if (o1 instanceof boolean[]) {
-            return Arrays.hashCode((boolean[]) o1);
-        } else if (o1 instanceof byte[]) {
-            return Arrays.hashCode((byte[]) o1);
-        } else if (o1 instanceof short[]) {
-            return Arrays.hashCode((short[]) o1);
-        } else if (o1 instanceof int[]) {
-            return Arrays.hashCode((int[]) o1);
-        } else if (o1 instanceof long[]) {
-            return Arrays.hashCode((long[]) o1);
-        } else if (o1 instanceof char[]) {
-            return Arrays.hashCode((char[]) o1);
-        } else if (o1 instanceof float[]) {
-            return Arrays.hashCode((float[]) o1);
-        } else if (o1 instanceof double[]) {
-            return Arrays.hashCode((double[]) o1);
-        } else {
-            return Arrays.hashCode((Object[]) o1);
-        }
-    }
-
-    private boolean arrayEquals(Object o1, Object o2) {
-        // we assume that o1 and o2 have the same class type at this point
-        if (o1 instanceof boolean[]) {
-            return Arrays.equals((boolean[]) o1, (boolean[]) o2);
-        } else if (o1 instanceof byte[]) {
-            return Arrays.equals((byte[]) o1, (byte[]) o2);
-        } else if (o1 instanceof short[]) {
-            return Arrays.equals((short[]) o1, (short[]) o2);
-        } else if (o1 instanceof int[]) {
-            return Arrays.equals((int[]) o1, (int[]) o2);
-        } else if (o1 instanceof long[]) {
-            return Arrays.equals((long[]) o1, (long[]) o2);
-        } else if (o1 instanceof char[]) {
-            return Arrays.equals((char[]) o1, (char[]) o2);
-        } else if (o1 instanceof float[]) {
-            return Arrays.equals((float[]) o1, (float[]) o2);
-        } else if (o1 instanceof double[]) {
-            return Arrays.equals((double[]) o1, (double[]) o2);
-        } else {
-            return Arrays.equals((Object[]) o1, (Object[]) o2);
+            throw new IllegalArgumentException("not an annotation value");
         }
     }
 }

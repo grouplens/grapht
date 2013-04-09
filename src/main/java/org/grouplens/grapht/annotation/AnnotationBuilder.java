@@ -18,13 +18,10 @@
  */
 package org.grouplens.grapht.annotation;
 
-import org.apache.commons.lang3.ClassUtils;
-
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +47,8 @@ import java.util.Map;
  * This lets developers define attribute-based qualifiers easily without being
  * forced to provide an actual annotation implementation that can be used to
  * create instances.
+ * <p>The proxies returned by this builder are immutable and serializable, like
+ * those returned by {@link java.lang.reflect.AnnotatedElement}.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  * @param <T> The annotation type created
@@ -535,7 +534,7 @@ public final class AnnotationBuilder<T extends Annotation> {
             }
             
             // if valid, save for later
-            attributes.put(name, copyAnnotationValue(value));
+            attributes.put(name, AnnotationProxy.copyAnnotationValue(value));
             return this;
         } catch (SecurityException e) {
             throw new RuntimeException(e);
@@ -568,55 +567,5 @@ public final class AnnotationBuilder<T extends Annotation> {
         }
         return type.cast(Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { type }, 
                                                 new AnnotationProxy<T>(type, attributes)));
-    }
-
-    /**
-     * Safe clone of an object.  If the object is an array, it is copied; otherwise, it is
-     * returned as-is.  This object is only applicable to valid annotation value types, which
-     * are all either arrays or immutable.
-     * @param o The annotation value.
-     * @return A copy of the value.
-     */
-    @SuppressWarnings("unchecked")
-    static Object copyAnnotationValue(Object o) {
-        if (o.getClass().isArray()) {
-            // make a shallow copy of the array
-            if (o instanceof boolean[]) {
-                boolean[] a = (boolean[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof byte[]) {
-                byte[] a = (byte[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof short[]) {
-                short[] a = (short[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof int[]) {
-                int[] a = (int[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof long[]) {
-                long[] a = (long[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof char[]) {
-                char[] a = (char[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof float[]) {
-                float[] a = (float[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else if (o instanceof double[]) {
-                double[] a = (double[]) o;
-                return Arrays.copyOf(a, a.length);
-            } else {
-                Object[] a = (Object[]) o;
-                return Arrays.copyOf(a, a.length, (Class<? extends Object[]>) o.getClass());
-            }
-        } else if (o instanceof String
-                   || o instanceof Annotation
-                   || ClassUtils.isPrimitiveOrWrapper(o.getClass())) {
-            // the value is immutable and a copy is not necessary
-            // FIXME If the value is an annotation, it might have arrays
-            return o;
-        } else {
-            throw new IllegalArgumentException("not an annotation value");
-        }
     }
 }
