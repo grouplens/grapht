@@ -110,11 +110,15 @@ final class BindRuleImpl implements BindRule, Serializable {
         Preconditions.isAssignable(this.depType, this.implType);
     }
 
-    @Override
-    public QualifierMatcher getQualifier() {
+    /**
+     * Get the rule's qualifier matcher.
+     *
+     * @return The annotation {@link QualifierMatcher} matched by this bind rule.
+     */
+    public QualifierMatcher getQualifierMatcher() {
         return qualifier;
     }
-    
+
     @Override
     public CachePolicy getCachePolicy() {
         return policy;
@@ -145,6 +149,15 @@ final class BindRuleImpl implements BindRule, Serializable {
         
         // the type and {@link Qualifier}s are not a match, so return false
         return false;
+    }
+
+    @Override
+    public int compareTo(BindRule other) {
+        if (other instanceof BindRuleImpl) {
+            return qualifier.compareTo(((BindRuleImpl) other).qualifier);
+        } else {
+            throw new IllegalArgumentException("incompatible bind rule");
+        }
     }
     
     @Override

@@ -20,27 +20,23 @@ package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
  * BindRule is a partial function from desire to desire that acts as a binding.
  * The {@link RuleBasedBindingFunction} takes a collection of BindRules grouped
  * into their activating contexts to form a {@link BindingFunction}.
  *
+ * <p><b>Note:</b> this interface's ordering is inconsistent with {@link #equals(Object)}. See
+ * {@link #compareTo(BindRule)} for more details.
+ *
  * @see {@link BindRules}
  */
-public interface BindRule {
+public interface BindRule extends Comparable<BindRule> {
     /**
      * Get the rule's cache policy.
      * @return The CachePolicy to use for satisfactions created with this rule.
      */
     CachePolicy getCachePolicy();
-
-    /**
-     * Get the rule's qualifier matcher.
-     * @return The annotation {@link QualifierMatcher} matched by this bind rule.
-     */
-    QualifierMatcher getQualifier();
 
     /**
      * Apply this BindRule to the given Desire, and return a restricted and
@@ -67,4 +63,22 @@ public interface BindRule {
      *         {@link #apply(org.grouplens.grapht.spi.Desire)}
      */
     boolean matches(Desire desire);
+
+    /**
+     * Compare this bind rule to another. More-specific bind rules compare less than less-specific
+     * rules.
+     *
+     * <p><b>Note:</b> This implements an ordering inconsistent with {@link #equals(Object)}. Equal
+     * rules will compare the same (and implementations are required to enforce this), but unequal
+     * rules may compare equal to each other when compared with this method.
+     *
+     * @param other The bind rule to compare with.
+     * @return The comparison result.
+     * @throws IllegalArgumentException if called with an incompatible bind rule.  This should not
+     *                                  arise in practice, but if you implement your own bind rules
+     *                                  they will not be comparable with the ones provided by
+     *                                  Grapht.
+     */
+    @Override
+    int compareTo(BindRule other);
 }

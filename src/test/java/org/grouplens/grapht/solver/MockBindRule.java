@@ -83,11 +83,14 @@ public class MockBindRule implements BindRule {
         return terminate;
     }
     
-    @Override
     public QualifierMatcher getQualifier() {
         return MockQualifierMatcher.any();
     }
-    
+
+    public int compareTo(BindRule other) {
+        return getQualifier().compareTo(((MockBindRule) other).getQualifier());
+    }
+
     @Override
     public String toString() {
         return getClass() + "@" + Integer.toHexString(System.identityHashCode(this));

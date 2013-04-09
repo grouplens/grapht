@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.ContextMatch;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -43,19 +42,8 @@ import java.util.*;
  * influence. Put another way, if contexts were strings, they could be ordered
  * lexicographically from the right to the left.
  * <p>
- * When selecting BindRules to apply to a Desire, BindRules are ordered by the
- * following rules:
- * <ol>
- * <li>Context closeness - BindRules with a context matching chain closer to the
- * leaf nodes of the current dependency context are selected.</li>
- * <li>Context chain length - BindRules with a longer context chain are
- * selected.</li>
- * <li>Context chain type delta - BindRules are ordered by how close their
- * context matching chain is to the current dependency context.</li>
- * <li>Bind rule type delta - BindRules are lastly ordered by how well their
- * type matches a particular desire, as determined by
- * {@link Desire#ruleComparator()}.</li>
- * </ol>
+ * When selecting BindRules to apply to a Desire, BindRules are ordered first by
+ * {@linkplain ContextMatch context match}, then by the ordering defined by the bind rule itself.
  * <p>
  * A summary of these rules is that the best specified BindRule is applied,
  * where the context that the BindRule is activated in has more priority than
@@ -110,8 +98,8 @@ public class RuleBasedBindingFunction implements BindingFunction {
         
         if (!validRules.isEmpty()) {
             // we have a bind rule to apply
-            ContextBindRuleComparator ordering = new ContextBindRuleComparator();
-            Collections.sort(validRules, ordering);
+            // pair's ordering is suitable for sorting the bind rules
+            Collections.sort(validRules);
 
             if (validRules.size() > 1) {
                 // must check if other rules are equal to the first
@@ -119,7 +107,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
                 List<BindRule> topRules = new ArrayList<BindRule>();
                 topRules.add(validRules.get(0).getRight());
                 for (int i = 1; i < validRules.size(); i++) {
-                    if (ordering.compare(validRules.get(0), validRules.get(i)) == 0) {
+                    if (validRules.get(0).compareTo(validRules.get(i)) == 0) {
                         topRules.add(validRules.get(i).getRight());
                     }
                 }
@@ -141,19 +129,5 @@ public class RuleBasedBindingFunction implements BindingFunction {
         
         // No rule to apply, so return null to delegate to the next binding function
         return null;
-    }
-    
-    /*
-     * A Comparator that orders Pair<ContextMatch, BindRule> based on the
-     * context match and the BindRule's qualifier matcher ordering
-     */
-    private static class ContextBindRuleComparator implements Comparator<Pair<ContextMatch, BindRule>> {
-        @Override
-        public int compare(Pair<ContextMatch, BindRule> o1, Pair<ContextMatch, BindRule> o2) {
-            CompareToBuilder ctb = new CompareToBuilder();
-            ctb.append(o1.getLeft(), o2.getLeft());
-            ctb.append(o1.getRight().getQualifier(), o2.getRight().getQualifier());
-            return ctb.toComparison();
-        }
     }
 }
