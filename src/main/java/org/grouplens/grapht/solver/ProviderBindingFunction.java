@@ -18,25 +18,17 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.util.InstanceProvider;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
+
+import javax.inject.Provider;
+import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.InstanceProvider;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
 
 /**
  * <p>
@@ -96,8 +88,10 @@ public class ProviderBindingFunction implements BindingFunction {
      * Satisfaction implementation that provides a Provider, and has a single
      * dependency on the provided type.
      */
-    private static class ProviderInjectionSatisfaction implements Satisfaction, Externalizable {
-        private Desire providedDesire; // final
+    private static class ProviderInjectionSatisfaction implements Satisfaction, Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final Desire providedDesire;
         
         public ProviderInjectionSatisfaction(Desire providedDesire) {
             this.providedDesire = providedDesire;
@@ -137,16 +131,6 @@ public class ProviderBindingFunction implements BindingFunction {
             return new InstanceProvider<Provider<?>>(trueProvider);
         }
 
-        @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(providedDesire);
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            providedDesire = (Desire) in.readObject();
-        }
-        
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof ProviderInjectionSatisfaction)) {

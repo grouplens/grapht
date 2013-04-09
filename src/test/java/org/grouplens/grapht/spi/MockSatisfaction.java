@@ -18,11 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
+import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Provider;
 
 
 /**

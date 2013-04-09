@@ -18,22 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Type;
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.List;
 
 
 /**
@@ -42,9 +39,9 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ClassSatisfaction implements Satisfaction, Externalizable {    
-    // "final"
-    private Class<?> type;
+public class ClassSatisfaction implements Satisfaction, Serializable {
+    private static final long serialVersionUID = -1L;
+    private final transient Class<?> type;
 
     /**
      * Create a satisfaction wrapping the given class type.
@@ -59,11 +56,6 @@ public class ClassSatisfaction implements Satisfaction, Externalizable {
         this.type = Types.box(type);
         Preconditions.isInstantiable(this.type);
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ClassSatisfaction() { }
     
     @Override
     public CachePolicy getDefaultCachePolicy() {
@@ -114,13 +106,31 @@ public class ClassSatisfaction implements Satisfaction, Externalizable {
         return "Class(" + type.getSimpleName() + ")";
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, type);
+    private Object writeReplace() {
+        return new SerialProxy(type);
     }
 
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        type = Types.readClass(in);
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("must use serialization proxy");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final ClassProxy type;
+
+        public SerialProxy(Class<?> cls) {
+            type = ClassProxy.of(cls);
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new ClassSatisfaction(type.resolve());
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex = new InvalidObjectException("cannot resolve " + type);
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }

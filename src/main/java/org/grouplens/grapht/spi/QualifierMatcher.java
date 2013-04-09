@@ -18,11 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
 
 
 /**

@@ -18,9 +18,8 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.reflect.Member;
-
 import javax.annotation.Nullable;
+import java.lang.reflect.Member;
 
 /**
  * Thrown when an Injector fails to instantiate a requested object. In many ways

@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.solver.BindRule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.solver.BindRule;
+import java.lang.annotation.Annotation;
 
 /**
  * Binding is part of the fluent API used for configuring an {@link Injector}.
@@ -63,19 +62,23 @@ public interface Binding<T> {
      * @return A newly configured Binding
      */
     Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier);
-    
+
     /**
-     * <p>
-     * Configure the binding to match injection points that have been annotated
-     * with the exact annotation instance.
-     * <p>
-     * This will override any previous name or qualifier annotation.
-     * 
-     * @param annot The annotation instance to match
+     * Configure the binding to match injection points that have been annotated with the exact
+     * annotation instance.
+     *
+     * <p>This will override any previous name or qualifier annotation.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
+     * @param annot The annotation instance to match.
      * @return A newly configured Binding
      */
     Binding<T> withQualifier(@Nonnull Annotation annot);
-    
+
     /**
      * <p>
      * Configure the binding to only match injection points that have no

@@ -18,16 +18,6 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Arrays;
-
-import javax.inject.Named;
-
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
@@ -42,6 +32,10 @@ import org.grouplens.grapht.spi.reflect.types.NamedType;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.inject.Named;
+import java.io.*;
+import java.util.Arrays;
 
 public class SerializationTest {
     private static File GRAPH_FILE = new File("graph.dump");

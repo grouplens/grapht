@@ -1,4 +1,4 @@
-/*
+    /*
  * Grapht, an open source dependency injector.
  * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
@@ -18,19 +18,15 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
+
+import javax.annotation.Nullable;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.*;
 
 
 /**
@@ -42,8 +38,8 @@ import org.grouplens.grapht.spi.Desire;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Graph implements Serializable, Cloneable {
-    private static final long serialVersionUID = 1L;
+public final class Graph implements Serializable, Cloneable {
+    private static final long serialVersionUID = -1L;
     
     // The outgoing key set is used to represent the set of nodes in the graph,
     // although it should hold that the incoming key set is equivalent
@@ -585,5 +581,40 @@ public class Graph implements Serializable, Cloneable {
             g2.incoming.put(e.getKey(), new HashSet<Edge>(e.getValue()));
         }
         return g2;
+    }
+
+    private Object writeReplace() {
+        return new SerialProxy(incoming);
+    }
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("serialization proxy required");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final Set<Node> nodes;
+        private final Set<Edge> edges;
+
+        public SerialProxy(Map<Node,Set<Edge>> repr) {
+            nodes = new HashSet<Node>(repr.size());
+            edges = new HashSet<Edge>();
+            for (Map.Entry<Node,Set<Edge>> e: repr.entrySet()) {
+                nodes.add(e.getKey());
+                edges.addAll(e.getValue());
+            }
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            Graph g = new Graph();
+            for (Node n: nodes) {
+                g.addNode(n);
+            }
+            for (Edge e: edges) {
+                g.addEdge(e);
+            }
+            return g;
+        }
     }
 }

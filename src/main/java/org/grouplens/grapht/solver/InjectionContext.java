@@ -18,18 +18,14 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * <p>

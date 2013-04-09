@@ -18,10 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.Attributes;
@@ -33,6 +29,10 @@ import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
 
 public class ReflectionContextElementMatcherTest {
     @Test

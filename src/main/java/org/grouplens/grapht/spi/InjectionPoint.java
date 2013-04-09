@@ -18,11 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
-
-import javax.annotation.Nullable;
 
 
 /**

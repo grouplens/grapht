@@ -18,23 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Satisfaction implementation wrapping an instance. It has no dependencies, and
@@ -43,9 +39,9 @@ import org.grouplens.grapht.util.Preconditions;
  * @author Michael Ekstrand <ekstrand@cs.umn.edu>
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class InstanceSatisfaction implements Satisfaction, Externalizable {
-    // "final"
-    private Object instance;
+public class InstanceSatisfaction implements Satisfaction, Serializable {
+    private static final long serialVersionUID = 1L;
+    private final Object instance;
 
     /**
      * Create a new instance node wrapping an instance.
@@ -57,11 +53,6 @@ public class InstanceSatisfaction implements Satisfaction, Externalizable {
         Preconditions.notNull("instance", obj);
         instance = obj;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public InstanceSatisfaction() { }
     
     /**
      * @return The instance that satisfies this satisfaction
@@ -117,15 +108,5 @@ public class InstanceSatisfaction implements Satisfaction, Externalizable {
     @Override
     public String toString() {
         return "Instance(" + instance + ")";
-    }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        instance = in.readObject();
-    }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(instance);
     }
 }

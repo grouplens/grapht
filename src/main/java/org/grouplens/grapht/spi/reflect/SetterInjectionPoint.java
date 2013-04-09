@@ -18,33 +18,33 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
+import java.io.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class SetterInjectionPoint implements InjectionPoint, Externalizable {
-    // "final"
-    private Method setter;
-    private int parameter;
-    private transient Attributes attributes;
+public class SetterInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = -1L;
+    // transient because we use a serialization proxy
+    private final transient Method setter;
+    private final transient int parameter;
+    private final transient Attributes attributes;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
      * 
      * @param setter The setter method
+     * @param parameter The parameter index to apply
      */
     public SetterInjectionPoint(Method setter, int parameter) {
         Preconditions.notNull("setter method", setter);
@@ -54,11 +54,6 @@ public class SetterInjectionPoint implements InjectionPoint, Externalizable {
         this.setter = setter;
         this.parameter = parameter;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public SetterInjectionPoint() { }
     
     /**
      * @return The setter method wrapped by this injection point
@@ -119,17 +114,37 @@ public class SetterInjectionPoint implements InjectionPoint, Externalizable {
         return setter.getName() + "(" + parameter + ", " + q + p + ")";
     }
     
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        setter = Types.readMethod(in);
-        parameter = in.readInt();
-        
-        attributes = new AttributesImpl(setter.getParameterAnnotations()[parameter]);
+    private Object writeReplace() {
+        return new SerialProxy(setter, parameter);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeMethod(out, setter);
-        out.writeInt(parameter);
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("Serialization proxy required");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final MethodProxy method;
+        private final int parameterIndex;
+        public SerialProxy(Method m, int pidx) {
+            method = MethodProxy.of(m);
+            parameterIndex = pidx;
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new SetterInjectionPoint(method.resolve(), parameterIndex);
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("no class for " + method.toString());
+                ex.initCause(e);
+                throw ex;
+            } catch (NoSuchMethodException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("cannot resolve " + method.toString());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }

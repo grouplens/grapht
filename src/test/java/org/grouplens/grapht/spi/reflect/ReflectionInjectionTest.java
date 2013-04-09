@@ -18,11 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Provider;
-
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.Injector;
@@ -38,6 +33,10 @@ import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.inject.Provider;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReflectionInjectionTest {
     @Test

@@ -18,13 +18,13 @@
  */
 package org.grouplens.grapht;
 
-import javax.inject.Named;
-
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.inject.Named;
 
 public class InjectorBuilderTest {
     @Test

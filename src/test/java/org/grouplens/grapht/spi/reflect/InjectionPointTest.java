@@ -18,20 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
 import org.grouplens.grapht.spi.Attributes;
@@ -41,6 +27,19 @@ import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class InjectionPointTest {
     private static <T extends Annotation> Attributes qualifier(Class<T> qtype, boolean hasAttr) {

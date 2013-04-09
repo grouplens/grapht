@@ -18,33 +18,31 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 /**
  * FieldInjectionPoint is an injection point wrapping a field.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class FieldInjectionPoint implements InjectionPoint, Externalizable {
-    // "final"
-    private Field field;
-    
-    private transient Attributes attributes;
+public final class FieldInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = -1L;
+    // transient because we use a serialization proxy
+    private final transient Field field;
+    private final transient Attributes attributes;
     
     /**
      * Create an injection point wrapping the given field
      * 
-     * @param field
+     * @param field The field to inject
      * @throws NullPointerException if field is null
      */
     public FieldInjectionPoint(Field field) {
@@ -52,11 +50,6 @@ public class FieldInjectionPoint implements InjectionPoint, Externalizable {
         this.field = field;
         attributes = new AttributesImpl(field.getAnnotations());
     }
-    
-    /**
-     * Constructor required for {@link Externalizable}
-     */
-    public FieldInjectionPoint() { }
     
     @Override
     public Type getType() {
@@ -84,17 +77,6 @@ public class FieldInjectionPoint implements InjectionPoint, Externalizable {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeField(out, field);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        field = Types.readField(in);
-        attributes = new AttributesImpl(field.getAnnotations());
-    }
-    
-    @Override
     public boolean equals(Object o) {
         if (!(o instanceof FieldInjectionPoint)) {
             return false;
@@ -110,5 +92,39 @@ public class FieldInjectionPoint implements InjectionPoint, Externalizable {
     @Override
     public String toString() {
         return field.toString();
+    }
+
+    private Object writeReplace() {
+        return new SerialProxy(field);
+    }
+
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("Serialization proxy required");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final FieldProxy field;
+
+        public SerialProxy(Field f) {
+            field = FieldProxy.of(f);
+        }
+
+        private Object readResolve() throws InvalidObjectException {
+            try {
+                return new FieldInjectionPoint(field.resolve());
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("no class for " + field.toString());
+                ex.initCause(e);
+                throw ex;
+            } catch (NoSuchFieldException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("cannot resolve " + field.toString());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }
