@@ -159,7 +159,6 @@ public class ReflectionDesire implements Desire, Serializable {
 
         // try and find a satisfaction
         if (satisfaction == null) {
-            // FIXME Defer this so we don't serialize pre-computed satisfactions
             if (Types.shouldBeInstantiable(desiredType)) {
                 if (Types.isInstantiable(desiredType)) {
                     satisfaction = new ClassSatisfaction(desiredType);
