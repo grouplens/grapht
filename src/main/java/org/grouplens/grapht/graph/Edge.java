@@ -19,11 +19,10 @@
 package org.grouplens.grapht.graph;
 
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.FrozenList;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,8 +47,7 @@ public class Edge implements Serializable {
     
     private final Node head;
     private final Node tail;
-    // FIXME Deserialize the list of desires correctly
-    private final List<Desire> desires;
+    private final FrozenList<Desire> desires;
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and
@@ -74,7 +72,7 @@ public class Edge implements Serializable {
         // 2. guarantee our field is serializable
         // 3. make the returned instance unmodifiable
         if (label != null) {
-            this.desires = Collections.unmodifiableList(new ArrayList<Desire>(label));
+            this.desires = new FrozenList<Desire>(label);
         } else {
             this.desires = null;
         }
