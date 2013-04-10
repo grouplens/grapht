@@ -290,21 +290,18 @@ public class GraphTest {
         
         Edge toBeReplaced = new Edge(head, tail, payload1);
         Edge otherEdge = new Edge(head, tail, null);
+        Edge replacement = new Edge(head, tail, payload2);
         
         graph.addEdge(toBeReplaced);
         graph.addEdge(otherEdge);
-        
-        Edge newEdge = graph.updateEdgeLabel(toBeReplaced, payload2);
-        Assert.assertNotNull(newEdge);
-        
-        Assert.assertEquals(head, newEdge.getHead());
-        Assert.assertEquals(tail, newEdge.getTail());
-        Assert.assertEquals(payload2, newEdge.getDesireChain());
+
+        boolean rv = graph.replaceEdge(toBeReplaced, replacement);
+        Assert.assertTrue(rv);
         
         Assert.assertFalse(graph.getOutgoingEdges(head).contains(toBeReplaced));
-        Assert.assertTrue(graph.getOutgoingEdges(head).contains(newEdge));
+        Assert.assertTrue(graph.getOutgoingEdges(head).contains(replacement));
         Assert.assertFalse(graph.getIncomingEdges(tail).contains(toBeReplaced));
-        Assert.assertTrue(graph.getIncomingEdges(tail).contains(newEdge));
+        Assert.assertTrue(graph.getIncomingEdges(tail).contains(replacement));
     }
     
     @Test
@@ -317,7 +314,8 @@ public class GraphTest {
         graph.addEdge(new Edge(head, tail, null));
         
         Edge notInGraph = new Edge(tail, head, null);
-        Assert.assertNull(graph.updateEdgeLabel(notInGraph, null));
+        Edge replacement = new Edge(tail, head, null);
+        Assert.assertFalse(graph.replaceEdge(notInGraph, replacement));
         Assert.assertEquals(1, graph.getOutgoingEdges(head).size());
         Assert.assertEquals(1, graph.getIncomingEdges(tail).size());
         

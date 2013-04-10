@@ -41,6 +41,7 @@ See [closed issues][issues-0.5] for more details.
 * Add anchored context matchers (`at` matching) (#41)
 * Improve diagnostic warnings and validity checking
 * Rename `Edge.getLabel()` to `getDesireChain()`
+* Chage `Graph.updateEdgeLabel` to `replaceEdge`
 
 [issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
 

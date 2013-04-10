@@ -20,6 +20,7 @@ package org.grouplens.grapht.graph;
 
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.Preconditions;
 
 import javax.annotation.Nullable;
 import java.io.InvalidObjectException;
@@ -512,49 +513,43 @@ public final class Graph implements Serializable, Cloneable {
     }
 
     /**
-     * <p>
-     * Update the structure of this graph so that the provided old edge is
-     * replaced by a new edge that is created with the same head and tail nodes,
-     * but has the new label. The set of outgoing edges from the head node
-     * will be updated to no longer include the old edge and to include the new
-     * edge with the new label. The set of incoming edges to the tail node
-     * will be similarly updated.
-     * </p>
-     * <p>
-     * The newly created and added edge will be returned. Its head and tail will
-     * equal the head and tail of <tt>oldEdge</tt> and its label will be
-     * <tt>newLabel</tt>. If the old edge is not in this graph, then no new
-     * edge is added and null is returned.
-     * </p>
-     * 
+     * Replace an edge in the graph. The new edge must have the same head and tail as the old edge.
+     * The set of outgoing edges from the head node will be updated to no longer include the old
+     * edge and to include the new edge. The set of incoming edges to the tail node will be
+     * similarly updated.
+     *
      * @param oldEdge The old edge to remove and replace
-     * @param newLabel The new label for the new edge that is replacing
-     *            oldEdge
-     * @return The new edge, or null if oldEdge was not in this graph
-     * @throws NullPointerException if oldEdge is null
+     * @param newEdge The new edge that is replacing oldEdge
+     * @return {@code true} if the edge has been replace, {@code false} if it was not in the graph.
+     * @throws IllegalArgumentException if the new edge does not have the same nodes.
      */
-    public Edge updateEdgeLabel(Edge oldEdge, List<Desire> newLabel) {
-        if (oldEdge == null)
-            throw new NullPointerException("Old edge cannot be null");
-        
+    public boolean replaceEdge(Edge oldEdge, Edge newEdge) {
+        Preconditions.notNull("old edge", oldEdge);
+        Preconditions.notNull("new edge", newEdge);
+        if (!newEdge.getHead().equals(oldEdge.getHead())) {
+            throw new IllegalArgumentException("new edge has different head");
+        }
+        if (!newEdge.getTail().equals(oldEdge.getTail())) {
+            throw new IllegalArgumentException("new edge has different tail");
+        }
+
         Set<Edge> outgoingEdges = outgoing.get(oldEdge.getHead());
         if (outgoingEdges != null) {
             if (outgoingEdges.remove(oldEdge)) {
                 // the old edge was in the graph so replace it
-                Edge newEdge = new Edge(oldEdge.getHead(), oldEdge.getTail(), newLabel);
                 outgoingEdges.add(newEdge);
-                
+
                 // now we replace the incoming edge as well, but we assume it exists
                 Set<Edge> incomingEdges = incoming.get(oldEdge.getTail());
                 incomingEdges.remove(oldEdge);
                 incomingEdges.add(newEdge);
-                
-                return newEdge;
+
+                return true;
             }
         }
-        
+
         // if we've gotten here, the old edge was not in the graph
-        return null;
+        return false;
     }
 
     /**
