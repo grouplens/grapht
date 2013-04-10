@@ -18,11 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Qualifier;
-
-import org.apache.commons.lang3.tuple.Pair;
+import java.io.Serializable;
 
 /**
  * <p>

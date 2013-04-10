@@ -18,13 +18,13 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.MockQualifierMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MockBindRule is a simple implementation of BindRule where the matching
@@ -33,9 +33,7 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  * 
  * @author Michael Ludwig
  */
-public class MockBindRule extends BindRule {
-    private static final long serialVersionUID = 1L;
-    
+public class MockBindRule implements BindRule {
     private final Map<Desire, Desire> bindings;
     private boolean terminate;
     private CachePolicy policy;
@@ -81,25 +79,18 @@ public class MockBindRule extends BindRule {
     }
 
     @Override
-    public boolean terminatesChain() {
+    public boolean isTerminal() {
         return terminate;
     }
     
-    @Override
     public QualifierMatcher getQualifier() {
         return MockQualifierMatcher.any();
     }
-    
-    @Override
-    public int hashCode() {
-        return System.identityHashCode(this);
+
+    public int compareTo(BindRule other) {
+        return getQualifier().compareTo(((MockBindRule) other).getQualifier());
     }
-    
-    @Override
-    public boolean equals(Object o) {
-        return this == o;
-    }
-    
+
     @Override
     public String toString() {
         return getClass() + "@" + Integer.toHexString(System.identityHashCode(this));

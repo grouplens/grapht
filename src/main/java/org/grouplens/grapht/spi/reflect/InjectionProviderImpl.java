@@ -18,21 +18,20 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Provider;
-
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.ProviderSource;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Provider;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * InjectionProviderImpl is a Provider implementation capable of creating any

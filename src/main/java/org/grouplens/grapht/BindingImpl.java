@@ -18,23 +18,12 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
-import org.grouplens.grapht.solver.BindRule;
+import org.grouplens.grapht.solver.BindRules;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
@@ -43,6 +32,18 @@ import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Provider;
+import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * BindingImpl is the default implementation of Binding that is used by
@@ -101,9 +102,7 @@ class BindingImpl<T> implements Binding<T> {
 
     @Override
     public Binding<T> exclude(@Nonnull Class<?> exclude) {
-        if (exclude == null) {
-            throw new NullPointerException("Type cannot be null");
-        }
+        Preconditions.notNull("exclude type", exclude);
         Set<Class<?>> excludes = new HashSet<Class<?>>(excludeTypes);
         excludes.add(exclude);
         return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy, terminate);
@@ -146,23 +145,23 @@ class BindingImpl<T> implements Binding<T> {
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
                 if (useSatisfaction) {
                     config.addBindRule(e.getValue(), matcher,
-                                       new BindRule(e.getKey(), config.getSPI().satisfy(impl), 
-                                                    cachePolicy, qualifier, terminate));
+                                       BindRules.toSatisfaction(e.getKey(), qualifier, config.getSPI().satisfy(impl),
+                                                                cachePolicy, terminate));
                 } else {
                     config.addBindRule(e.getValue(), matcher,
-                                       new BindRule(e.getKey(), impl, 
-                                                    cachePolicy, qualifier, terminate));
+                                       BindRules.toClass(e.getKey(), qualifier, impl,
+                                                         cachePolicy, terminate));
                 }
             }
         } else {
             if (useSatisfaction) {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
-                                   new BindRule(sourceType, config.getSPI().satisfy(impl), 
-                                                cachePolicy, qualifier, terminate));
+                                   BindRules.toSatisfaction(sourceType, qualifier, config.getSPI().satisfy(impl),
+                                                            cachePolicy, terminate));
             } else {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
-                                   new BindRule(sourceType, impl, 
-                                                cachePolicy, qualifier, terminate));
+                                   BindRules.toClass(sourceType, qualifier, impl,
+                                                     cachePolicy, terminate));
             }
         }
     }
@@ -172,6 +171,12 @@ class BindingImpl<T> implements Binding<T> {
         if (instance == null) {
             toNull();
             return;
+        } else if (!(instance instanceof Number)
+                   && !ClassUtils.isPrimitiveWrapper(instance.getClass())
+                   && !sourceType.isInstance(instance)) {
+            String msg = String.format("%s is not an instance of %s",
+                                       instance, sourceType);
+            throw new InvalidBindingException(sourceType, msg);
         }
         ElementChainContextMatcher matcher = context.getContextChain();
         BindingFunctionBuilder config = context.getBuilder();
@@ -183,10 +188,12 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(coerced.getClass());
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                config.addBindRule(e.getValue(), matcher,
+                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher,
+                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
         }
     }
     
@@ -199,10 +206,12 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                config.addBindRule(e.getValue(), matcher,
+                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher,
+                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
         }
     }
 
@@ -215,10 +224,12 @@ class BindingImpl<T> implements Binding<T> {
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher, new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                config.addBindRule(e.getValue(), matcher,
+                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher, new BindRule(sourceType, s, cachePolicy, qualifier, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher,
+                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
         }
     }
 
@@ -238,11 +249,11 @@ class BindingImpl<T> implements Binding<T> {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
                 config.addBindRule(e.getValue(), matcher,
-                                   new BindRule(e.getKey(), s, cachePolicy, qualifier, true));
+                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
             }
         } else {
             config.addBindRule(RuleSet.EXPLICIT, matcher,
-                               new BindRule(sourceType, s, cachePolicy, qualifier, true));
+                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
         }
     }
     

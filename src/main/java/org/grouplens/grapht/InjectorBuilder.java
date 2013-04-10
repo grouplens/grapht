@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
-
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
@@ -27,6 +25,8 @@ import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+
+import java.lang.annotation.Annotation;
 
 /**
  * <p>

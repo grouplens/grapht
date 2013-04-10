@@ -18,14 +18,12 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.FrozenList;
 
 import javax.annotation.Nullable;
-
-import org.grouplens.grapht.spi.Desire;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -45,13 +43,11 @@ import org.grouplens.grapht.spi.Desire;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class Edge implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
-    // "final"
-    private Node head;
-    private Node tail;
-    
-    private List<Desire> desires;
+    private final Node head;
+    private final Node tail;
+    private final FrozenList<Desire> desires;
 
     /**
      * Create a new Edge between the two Nodes, source'ed at <tt>head</tt> and
@@ -76,7 +72,7 @@ public class Edge implements Serializable {
         // 2. guarantee our field is serializable
         // 3. make the returned instance unmodifiable
         if (label != null) {
-            this.desires = Collections.unmodifiableList(new ArrayList<Desire>(label));
+            this.desires = new FrozenList<Desire>(label);
         } else {
             this.desires = null;
         }
@@ -109,8 +105,9 @@ public class Edge implements Serializable {
      * @return The chain of desires on this edge
      * @deprecated  Use {@link #getDesireChain}.
      */
+    @Nullable
     @Deprecated
-    public @Nullable List<Desire> getLabel() {
+    public List<Desire> getLabel() {
         return desires;
     }
     
@@ -121,7 +118,8 @@ public class Edge implements Serializable {
      * 
      * @return The first or primary desire along this edge
      */
-    public @Nullable List<Desire> getDesireChain() {
+    @Nullable
+    public List<Desire> getDesireChain() {
         return desires;
     }
     
@@ -132,7 +130,8 @@ public class Edge implements Serializable {
      * 
      * @return The first or primary desire along this edge
      */
-    public @Nullable Desire getDesire() {
+    @Nullable
+    public Desire getDesire() {
         return (desires == null || desires.isEmpty() ? null : desires.get(0));
     }
     

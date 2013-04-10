@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.List;
+import org.grouplens.grapht.Injector;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import org.grouplens.grapht.Injector;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.List;
 
 
 /**

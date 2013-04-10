@@ -18,12 +18,11 @@
  */
 package org.grouplens.grapht.spi.reflect.types;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.grouplens.grapht.annotation.DefaultImplementation;
 
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.annotation.DefaultImplementation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 @Qualifier
 @DefaultImplementation(TypeB.class)

@@ -18,17 +18,16 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.*;
-
 import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.util.Types;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * ElementChainContextMatcher represents a list of {@link ContextElementMatcher}s.
@@ -39,9 +38,11 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ElementChainContextMatcher implements ContextMatcher, Externalizable {
-    // "final"
-    private List<ContextElementMatcher> elementMatchers;
+public class ElementChainContextMatcher implements ContextMatcher, Serializable {
+    private static final long serialVersionUID = 1L;
+
+    // FIXME Deserialize element matchers correctly
+    private final List<ContextElementMatcher> elementMatchers;
 
     /**
      * Create a new ElementChainContextMatcher representing the empty context without any
@@ -153,23 +154,6 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
         return "ElementChainContextMatcher(" + elementMatchers.toString() + ")";
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(elementMatchers.size());
-        for (ContextElementMatcher m: elementMatchers) {
-            out.writeObject(m);
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        int count = in.readInt();
-        elementMatchers = new ArrayList<ContextElementMatcher>(count);
-        for (int i = 0; i < count; i++) {
-            elementMatchers.add((ContextElementMatcher) in.readObject());
-        }
-    }
-
     private static class Match implements ContextMatch {
         private List<ContextElementMatcher> matchers;
         private InjectionContext context;
@@ -182,7 +166,8 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
          * @param ctx The matched context.
          * @param ms The indexes of the element matches, in reverse order.
          */
-        public Match(List<ContextElementMatcher> eltMatchers, InjectionContext ctx, int[] ms) {
+        @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+        private Match(List<ContextElementMatcher> eltMatchers, InjectionContext ctx, int[] ms) {
             if (eltMatchers.size() != ms.length) {
                 throw new IllegalArgumentException("mismatched match array");
             }
@@ -211,7 +196,6 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
             }
 
             CompareToBuilder ctb = new CompareToBuilder();
-            final int sz = context.getTypePath().size();
 
             // compare by closeness and length, reversed
             // if m.matches is greater, it is closer to end, so we want it first
@@ -241,6 +225,31 @@ public class ElementChainContextMatcher implements ContextMatcher, Externalizabl
             }
 
             return ctb.toComparison();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            } else if (o instanceof Match) {
+                Match om = (Match) o;
+                EqualsBuilder eqb = new EqualsBuilder();
+                // matches is derived from matchers and context
+                return eqb.append(matchers, om.matchers)
+                          .append(context, om.context)
+                          .isEquals();
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            HashCodeBuilder hcb = new HashCodeBuilder();
+            // matches is derived from matchers and context
+            return hcb.append(matchers)
+                      .append(context)
+                      .build();
         }
     }
 

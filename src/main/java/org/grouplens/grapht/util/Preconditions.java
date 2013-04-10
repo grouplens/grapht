@@ -18,12 +18,12 @@
  */
 package org.grouplens.grapht.util;
 
+import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.InvalidBindingException;
+import org.grouplens.grapht.spi.reflect.Qualifiers;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
-
-import org.grouplens.grapht.InvalidBindingException;
-import org.grouplens.grapht.InjectionException;
-import org.grouplens.grapht.spi.reflect.Qualifiers;
 
 /**
  * Utility to organize checks for common assertions, and to throw

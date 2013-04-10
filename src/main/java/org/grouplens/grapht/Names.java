@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht;
 
-import javax.inject.Named;
-
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+
+import javax.inject.Named;
 
 
 /**

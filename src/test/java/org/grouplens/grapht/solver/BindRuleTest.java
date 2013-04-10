@@ -71,20 +71,20 @@ public class BindRuleTest {
         // test various permutations of bind rule configurations
         TypeA instance = new TypeA();
         
-        BindRule b1 = new BindRule(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
-        BindRule b2 = new BindRule(TypeA.class, new InstanceSatisfaction(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
-        BindRule b3 = new BindRule(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleA.class), false);
+        BindRuleImpl b1 = new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
+        BindRuleImpl b2 = new BindRuleImpl(TypeA.class, new InstanceSatisfaction(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
+        BindRuleImpl b3 = new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleA.class), false);
         
-        Assert.assertEquals(b1, new BindRule(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false));
-        Assert.assertFalse(b1.equals(new BindRule(TypeA.class, TypeB.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
-        Assert.assertFalse(b1.equals(new BindRule(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
-        Assert.assertFalse(b1.equals(new BindRule(TypeA.class, TypeA.class, CachePolicy.NEW_INSTANCE, spi.matchAny(), false)));
+        Assert.assertEquals(b1, new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false));
+        Assert.assertFalse(b1.equals(new BindRuleImpl(TypeA.class, TypeB.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
+        Assert.assertFalse(b1.equals(new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), true)));
+        Assert.assertFalse(b1.equals(new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NEW_INSTANCE, spi.matchAny(), false)));
 
-        Assert.assertEquals(b2, new BindRule(TypeA.class, new InstanceSatisfaction(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false));
-        Assert.assertFalse(b2.equals(new BindRule(TypeA.class, new ProviderClassSatisfaction(ProviderA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
+        Assert.assertEquals(b2, new BindRuleImpl(TypeA.class, new InstanceSatisfaction(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false));
+        Assert.assertFalse(b2.equals(new BindRuleImpl(TypeA.class, new ProviderClassSatisfaction(ProviderA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false)));
         
-        Assert.assertEquals(b3, new BindRule(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleA.class), false));
-        Assert.assertFalse(b3.equals(new BindRule(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleD.class), false)));
+        Assert.assertEquals(b3, new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleA.class), false));
+        Assert.assertFalse(b3.equals(new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleD.class), false)));
     }
     
     @Test
@@ -131,7 +131,7 @@ public class BindRuleTest {
                              boolean expected) throws Exception {
         QualifierMatcher br = (bindRole == null ? spi.matchAny() : spi.match(bindRole));
         Annotation dr = (desireRole == null ? null : new AnnotationBuilder(desireRole).build());
-        BindRule rule = new BindRule(bindType, bindType, CachePolicy.NO_PREFERENCE, br, false);
+        BindRule rule = new BindRuleImpl(bindType, bindType, CachePolicy.NO_PREFERENCE, br, false);
             
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(desireType, dr, false));
         
@@ -151,7 +151,7 @@ public class BindRuleTest {
         Satisfaction satisfaction = (nullableSatisfaction ? new NullSatisfaction(TypeA.class) 
                                                           : new ClassSatisfaction(TypeA.class));
         
-        BindRule rule = new BindRule(TypeA.class, satisfaction, CachePolicy.NO_PREFERENCE, spi.matchAny(), true);
+        BindRule rule = new BindRuleImpl(TypeA.class, satisfaction, CachePolicy.NO_PREFERENCE, spi.matchAny(), true);
         ReflectionDesire desire = new ReflectionDesire(injectPoint);
         
         Assert.assertEquals(expected, rule.matches(desire));
@@ -159,7 +159,7 @@ public class BindRuleTest {
     
     @Test
     public void testSatisfiableClassBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRule(TypeA.class, spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false); 
+        BindRule rule = new BindRuleImpl(TypeA.class, spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -172,7 +172,7 @@ public class BindRuleTest {
     
     @Test
     public void testUnsatisfiableClassBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRule(InterfaceA.class, InterfaceA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false); 
+        BindRule rule = new BindRuleImpl(InterfaceA.class, InterfaceA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(InterfaceA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -185,7 +185,7 @@ public class BindRuleTest {
     @Test
     public void testInstanceBindRuleSuccess() throws Exception {
         TypeA instance = new TypeB();
-        BindRule rule = new BindRule(TypeA.class, spi.satisfy(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false); 
+        BindRule rule = new BindRuleImpl(TypeA.class, spi.satisfy(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -198,7 +198,7 @@ public class BindRuleTest {
     
     @Test
     public void testNullInstanceBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRule(TypeA.class, spi.satisfyWithNull(TypeA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false); 
+        BindRule rule = new BindRuleImpl(TypeA.class, spi.satisfyWithNull(TypeA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, true));
         
         Assert.assertTrue(rule.matches(desire));
@@ -210,7 +210,7 @@ public class BindRuleTest {
     
     @Test
     public void testProviderClassBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRule(TypeA.class, spi.satisfyWithProvider(ProviderA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false); 
+        BindRule rule = new BindRuleImpl(TypeA.class, spi.satisfyWithProvider(ProviderA.class), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -224,7 +224,7 @@ public class BindRuleTest {
     @Test
     public void testProviderInstanceBindRuleSuccess() throws Exception {
         ProviderA instance = new ProviderA();
-        BindRule rule = new BindRule(TypeA.class, spi.satisfyWithProvider(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
+        BindRule rule = new BindRuleImpl(TypeA.class, spi.satisfyWithProvider(instance), CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Desire applied = rule.apply(desire);

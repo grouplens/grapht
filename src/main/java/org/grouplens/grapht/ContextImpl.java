@@ -18,15 +18,14 @@
  */
 package org.grouplens.grapht;
 
+import org.grouplens.grapht.spi.ContextElementMatcher;
+import org.grouplens.grapht.spi.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.QualifierMatcher;
+
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
-import org.grouplens.grapht.spi.ContextElementMatcher;
-import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
  * ContextImpl is the basic implementation of Context.

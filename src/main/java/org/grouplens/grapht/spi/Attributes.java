@@ -18,13 +18,12 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
+import org.grouplens.grapht.annotation.Attribute;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.annotation.Attribute;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
 
 /**
  * Attributes contain additional annotations and metadata associated with an
