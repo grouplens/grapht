@@ -94,14 +94,15 @@ public final class Graph implements Serializable, Cloneable {
     }
 
     /**
-     * Return a mutable set of nodes currently within the graph. Future changes
-     * to the graph will not be reflected by the returned collection. Changes to
-     * the returned set will not affect the graph.
-     * 
+     * Return the set of nodes currently within the graph.
+     *
+     * This is an unmodifiable set view of the graph's set of nodes; changes in the graph will be
+     * reflected in this set.  If you need to modify the graph while traversing it, make a copy.
+     *
      * @return The nodes in the graph
      */
     public Set<Node> getNodes() {
-        return new HashSet<Node>(outgoing.keySet());
+        return Collections.unmodifiableSet(incoming.keySet());
     }
 
     /**
@@ -264,10 +265,8 @@ public final class Graph implements Serializable, Cloneable {
      * returned edges will have a head node equaling the input node.
      * </p>
      * <p>
-     * Future changes to the graph will not be reflected by the returned
-     * collection. Changes to the returned set will not affect the graph. A null
-     * set is returned if the node is not in the graph. An empty set is returned
-     * when the node is in the graph but has no outgoing edges.
+     * This is an unmodifiable view of the node's adjacency set; changes in the graph will be
+     * reflected in this set.  If you need to modify the graph while traversing it, make a copy.
      * </p>
      * 
      * @param node The query node
@@ -280,7 +279,7 @@ public final class Graph implements Serializable, Cloneable {
             throw new NullPointerException("Node cannot be null");
         
         Set<Edge> edges = outgoing.get(node);
-        return (edges == null ? null : new HashSet<Edge>(edges));
+        return (edges == null ? null : Collections.unmodifiableSet(edges));
     }
 
     /**
@@ -289,10 +288,8 @@ public final class Graph implements Serializable, Cloneable {
      * returned edges will have a tail node equaling the input node.
      * </p>
      * <p>
-     * Future changes to the graph will not be reflected by the returned
-     * collection. Changes to the returned set will not affect the graph. A null
-     * set is returned if the node is not in the graph. An empty set is returned
-     * when the node is in the graph but has no incoming edges.
+     * This is an unmodifiable view of the node's adjacency set; changes in the graph will be
+     * reflected in this set.  If you need to modify the graph while traversing it, make a copy.
      * </p>
      * 
      * @param node The query node
@@ -305,7 +302,7 @@ public final class Graph implements Serializable, Cloneable {
             throw new NullPointerException("Node cannot be null");
         
         Set<Edge> edges = incoming.get(node);
-        return (edges == null ? null : new HashSet<Edge>(edges));
+        return (edges == null ? null : Collections.unmodifiableSet(edges));
     }
 
     /**
