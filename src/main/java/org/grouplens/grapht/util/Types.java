@@ -145,7 +145,7 @@ public final class Types {
         Preconditions.notNull("parent class", parent);
 
         if (!parent.isAssignableFrom(child)) {
-            // unassignable class, return -1
+            // if child does not extend from the parent, return -1
             // REVIEW Do we want to do this, or throw IllegalArgumentException?
             return -1;
         } else if (child.equals(parent)) {
