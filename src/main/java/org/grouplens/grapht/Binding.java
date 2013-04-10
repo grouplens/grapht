@@ -117,7 +117,7 @@ public interface Binding<T> {
      * <p>It is permissible to have two bindings forming a chain, like
      * <code>A &rarr; B &rarr; C</code>. The {@code chained} parameter controls
      * whether the chain is followed.  If {@code chained == false} for the {@code A &rarr; B}
-     * binding, then the {@code B &arr; C} binding is not followed (and the {@code A &arr; B}
+     * binding, then the {@code B &rarr; C} binding is not followed (and the {@code A &rarr; B}
      * binding is called <emph>terminal</emph>).
      * 
      * @param impl The implementation type
