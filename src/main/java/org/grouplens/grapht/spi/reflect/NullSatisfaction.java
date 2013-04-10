@@ -18,10 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.*;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
@@ -80,6 +77,11 @@ public class NullSatisfaction implements Satisfaction, Serializable {
     public boolean hasInstance() {
         // Null satisfactions have instances, just null ones.
         return true;
+    }
+
+    @Override
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        return visitor.visitNull();
     }
 
     @Override

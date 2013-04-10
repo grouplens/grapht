@@ -122,6 +122,12 @@ public class ProviderBindingFunction implements BindingFunction {
             return false;
         }
 
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T visit(SatisfactionVisitor<T> visitor) {
+            return visitor.visitProviderClass((Class) InstanceProvider.class);
+        }
+
         @Override
         public Provider<?> makeProvider(ProviderSource dependencies) {
             Provider<?> trueProvider = dependencies.apply(providedDesire);

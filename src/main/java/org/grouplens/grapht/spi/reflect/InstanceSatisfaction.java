@@ -18,10 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.*;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 
@@ -84,6 +81,11 @@ public class InstanceSatisfaction implements Satisfaction, Serializable {
     @Override
     public boolean hasInstance() {
         return true;
+    }
+
+    @Override
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        return visitor.visitInstance(instance);
     }
 
     @Override
