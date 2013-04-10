@@ -31,6 +31,18 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
+### 0.5.0 (in progress)
+
+See [closed issues][issues-0.5] for more details.
+
+* Rewrite serialization logic to be more robust (#54)
+* Return immutable views rather than copies of sets from `Graph` (#58)
+* Be smarter about checking provider types (#35, #36)
+* Add anchored context matchers (`at` matching) (#41)
+* Improve diagnostic warnings and validity checking
+
+[issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
+
 ### 0.4.3
 
 * Fix serialization of inner classes
@@ -45,7 +57,7 @@ following to the dependencies section in your POM:
 
 ### 0.4.0
 
-See [closed issues](issues-0.4) for more details.
+See [closed issues][issues-0.4] for more details.
 
 * Remove `Parameter` anotation
 * Add basic thread safety for injectors
