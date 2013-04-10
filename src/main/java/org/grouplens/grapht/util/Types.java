@@ -25,7 +25,10 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Static helper methods for working with types.
@@ -136,23 +139,61 @@ public final class Types {
      * @param child The child type
      * @param parent The parent type
      * @return The type distance
-     * @throws NullPointerException if child or parent are null
      */
-    public static int getTypeDistance(Class<?> child, Class<?> parent) {
-        if (!parent.isAssignableFrom(child)) {
-            // if child does not extend from the parent, return -1
-            return -1;
-        }
+    public static int getTypeDistance(@Nonnull Class<?> child, @Nonnull Class<?> parent) {
+        Preconditions.notNull("child class", child);
+        Preconditions.notNull("parent class", parent);
 
-        // at this point we can assume at some point a superclass of child
-        // will equal parent
-        // FIXME This does not correctly handle the case where child is an interface (#53)
-        int distance = 0;
-        while(!child.equals(parent)) {
-            distance++;
-            child = child.getSuperclass();
+        if (!parent.isAssignableFrom(child)) {
+            // unassignable class, return -1
+            // REVIEW Do we want to do this, or throw IllegalArgumentException?
+            return -1;
+        } else if (child.equals(parent)) {
+            // fast-path same-node tests
+            return 0;
+        } else if (!parent.isInterface()) {
+            // if the parent is not an interface, we only need to follower superclasses
+            int distance = 0;
+            Class<?> cur = child;
+            while (!cur.equals(parent)) {
+                distance++;
+                cur = cur.getSuperclass();
+            }
+            return distance;
+        } else {
+            // worst case, do a breadth-first search for shortest path
+            Queue<Class<?>> workQueue = new ArrayDeque<Class<?>>();
+            Map<Class<?>,Integer> dMap = new HashMap<Class<?>, Integer>();
+            workQueue.add(child);
+            dMap.put(child, 0);
+
+            while (!workQueue.isEmpty()) {
+                final Class<?> current = workQueue.remove();
+                final int distance = dMap.get(current);
+                if (current.equals(parent)) {
+                    // we found the parent, done searching
+                    return distance;
+                }
+
+                Class<?> sup = current.getSuperclass();
+                if (sup != null) {
+                    // since Java has single inheritance, we will not have seen this class before
+                    workQueue.add(sup);
+                    dMap.put(sup, distance + 1);
+                }
+
+                for (Class<?> iface: current.getInterfaces()) {
+                    if (!dMap.containsKey(iface)) {
+                        workQueue.add(iface);
+                        dMap.put(iface, distance + 1);
+                    }
+                }
+            }
+
+            // if we got this far, the child does not extend the parent
+            // which is inconsistent with our previous assumption
+            throw new AssertionError("cannot find superclass");
         }
-        return distance;
     }
     
     /**

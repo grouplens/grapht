@@ -18,6 +18,10 @@
  */
 package org.grouplens.grapht.util;
 
+import org.grouplens.grapht.spi.reflect.types.InterfaceA;
+import org.grouplens.grapht.spi.reflect.types.InterfaceB;
+import org.grouplens.grapht.spi.reflect.types.TypeA;
+import org.grouplens.grapht.spi.reflect.types.TypeB;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import static org.junit.Assert.fail;
@@ -125,5 +129,42 @@ public class TypesTest {
             // This is the correct behavior
         }
     }
+
+    @Test
+    public void testSameClassDistance() {
+        assertThat(Types.getTypeDistance(String.class, String.class),
+                   equalTo(0));
+    }
+
+    @Test
+    public void testSubClassDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, TypeA.class),
+                   equalTo(1));
+    }
+
+    @Test
+    public void testInterfaceDistance() {
+        assertThat(Types.getTypeDistance(TypeA.class, InterfaceA.class),
+                   equalTo(1));
+    }
+
+    @Test
+    public void testTwoStepInterfaceDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, InterfaceA.class),
+                   equalTo(2));
+    }
+
+    @Test
+    public void testSecondInterfaceDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, InterfaceB.class),
+                   equalTo(1));
+    }
+
+    @Test
+    public void testBadTypeDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, String.class),
+                   equalTo(-1));
+    }
+
     public static class Inner {}
 }
