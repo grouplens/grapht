@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.solver.BindingResult;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;

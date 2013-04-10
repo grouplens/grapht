@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.graph;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;

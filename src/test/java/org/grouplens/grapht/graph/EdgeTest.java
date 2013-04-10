@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.graph;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.grouplens.grapht.spi.*;
 import org.junit.Test;
 

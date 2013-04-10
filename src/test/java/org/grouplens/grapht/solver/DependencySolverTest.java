@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.Edge;
 import org.grouplens.grapht.graph.Graph;
