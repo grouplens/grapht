@@ -40,6 +40,7 @@ See [closed issues][issues-0.5] for more details.
 * Be smarter about checking provider types (#35, #36)
 * Add anchored context matchers (`at` matching) (#41)
 * Improve diagnostic warnings and validity checking
+* Rename `Edge.getLabel()` to `getDesireChain()`
 
 [issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
 
