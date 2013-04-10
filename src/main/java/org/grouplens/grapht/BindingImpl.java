@@ -19,7 +19,6 @@
 package org.grouplens.grapht;
 
 import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
@@ -61,43 +60,41 @@ class BindingImpl<T> implements Binding<T> {
     private final Set<Class<?>> excludeTypes;
     
     private final QualifierMatcher qualifier;
-    private final boolean terminate;
-    
+
     private final CachePolicy cachePolicy;
     
     public BindingImpl(ContextImpl context, Class<T> type) {
         this(context, type, context.getBuilder().getDefaultExclusions(),
              context.getBuilder().getSPI().matchAny(), 
-             CachePolicy.NO_PREFERENCE, false);
+             CachePolicy.NO_PREFERENCE);
     }
     
     public BindingImpl(ContextImpl context, Class<T> type, 
                        Set<Class<?>> excludes, QualifierMatcher matcher, 
-                       CachePolicy cachePolicy, boolean terminateChain) {
+                       CachePolicy cachePolicy) {
         this.context = context;
         this.cachePolicy = cachePolicy;
         sourceType = type;
         excludeTypes = excludes;
         qualifier = matcher;
-        terminate = terminateChain;
     }
 
     @Override
     public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
         QualifierMatcher q = context.getBuilder().getSPI().match(qualifier);
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
     
     @Override
     public Binding<T> withQualifier(@Nonnull Annotation annot) {
         QualifierMatcher q = context.getBuilder().getSPI().match(annot);
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
     
     @Override
     public Binding<T> unqualified() {
         QualifierMatcher q = context.getBuilder().getSPI().matchNone();
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, terminate);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
 
     @Override
@@ -105,26 +102,21 @@ class BindingImpl<T> implements Binding<T> {
         Preconditions.notNull("exclude type", exclude);
         Set<Class<?>> excludes = new HashSet<Class<?>>(excludeTypes);
         excludes.add(exclude);
-        return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy, terminate);
+        return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy);
     }
     
     @Override
-    public Binding<T> finalBinding() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, cachePolicy, true);
-    }
-
-    @Override
     public Binding<T> shared() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.MEMOIZE, terminate);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.MEMOIZE);
     }
     
     @Override
     public Binding<T> unshared() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.NEW_INSTANCE, terminate);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.NEW_INSTANCE);
     }
     
     @Override
-    public void to(@Nonnull Class<? extends T> impl) {
+    public void to(@Nonnull Class<? extends T> impl, boolean chained) {
         Preconditions.isAssignable(sourceType, impl);
         if (logger.isWarnEnabled()) {
             if (Types.shouldBeInstantiable(impl)
@@ -146,24 +138,29 @@ class BindingImpl<T> implements Binding<T> {
                 if (useSatisfaction) {
                     config.addBindRule(e.getValue(), matcher,
                                        BindRules.toSatisfaction(e.getKey(), qualifier, config.getSPI().satisfy(impl),
-                                                                cachePolicy, terminate));
+                                                                cachePolicy, !chained));
                 } else {
                     config.addBindRule(e.getValue(), matcher,
                                        BindRules.toClass(e.getKey(), qualifier, impl,
-                                                         cachePolicy, terminate));
+                                                         cachePolicy, !chained));
                 }
             }
         } else {
             if (useSatisfaction) {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
                                    BindRules.toSatisfaction(sourceType, qualifier, config.getSPI().satisfy(impl),
-                                                            cachePolicy, terminate));
+                                                            cachePolicy, !chained));
             } else {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
                                    BindRules.toClass(sourceType, qualifier, impl,
-                                                     cachePolicy, terminate));
+                                                     cachePolicy, !chained));
             }
         }
+    }
+
+    @Override
+    public void to(@Nonnull Class<? extends T> impl) {
+        to(impl, true);
     }
 
     @Override

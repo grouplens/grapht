@@ -199,7 +199,7 @@ public class BindingFunctionBuilderTest {
         // Test that type-to-type bind rules are properly terminated
         BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
 
-        builder.getRootContext().bind(InterfaceA.class).finalBinding().to(TypeA.class);
+        builder.getRootContext().bind(InterfaceA.class).to(TypeA.class, false);
         
         // expected
         Map<ContextMatcher, Collection<BindRule>> expected = new HashMap<ContextMatcher, Collection<BindRule>>();
