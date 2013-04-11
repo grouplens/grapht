@@ -43,7 +43,9 @@ See [closed issues][issues-0.5] for more details.
 * Rename `Edge.getLabel()` to `getDesireChain()`
 * Change `Graph.updateEdgeLabel` to `replaceEdge`
 * Remove `Binding.finalBinding` in favor of boolean parameter on `to` (#46)
-* Add a visitor for satisfactions
+* Add a visitor for satisfactions (#33)
+* Add support for specifying default implementations and providers in properties files under the
+  `META-INF` directory (#51)
 
 [issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
 
