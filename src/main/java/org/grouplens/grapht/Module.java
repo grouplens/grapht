@@ -33,5 +33,5 @@ public interface Module {
      * 
      * @param ctx The root context
      */
-    public void bind(Context ctx);
+    void bind(Context ctx);
 }

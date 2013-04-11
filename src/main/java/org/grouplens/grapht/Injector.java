@@ -38,7 +38,7 @@ import java.lang.annotation.Annotation;
  * assert (i.getInstance(Foo.class) instanceof Bar);
  * </pre>
  * <p>
- * Alternatively, {@link InjectorConfigurationBuilder}, and {@link InjectSPI}
+ * Alternatively, {@link BindingFunctionBuilder}, and {@link InjectSPI}
  * can be used to create your own Injector implementations.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
@@ -59,7 +59,7 @@ public interface Injector {
      * @return An instance of type T
      * @throws InjectionException if type cannot be instantiated
      */
-    public <T> T getInstance(Class<T> type);
+    <T> T getInstance(Class<T> type);
 
     /**
      * <p>
@@ -71,5 +71,5 @@ public interface Injector {
      * @return An instance of type T
      * @throws InjectionException if type cannot be instantiated
      */
-    public <T> T getInstance(Annotation qualifier, Class<T> type);
+    <T> T getInstance(Annotation qualifier, Class<T> type);
 }

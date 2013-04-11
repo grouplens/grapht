@@ -65,7 +65,8 @@ public class InjectionException extends RuntimeException {
      * @return The Member that is the target of injection, or null if the
      *         failure had no injection point associated with it
      */
-    public @Nullable Member getTarget() {
+    @Nullable
+    public Member getTarget() {
         return target;
     }
     
