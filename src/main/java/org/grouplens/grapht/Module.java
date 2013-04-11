@@ -22,9 +22,8 @@ package org.grouplens.grapht;
  * Module represents a grouping of related configuration. An entire project
  * could be configured in a single Module, or multiple components can be
  * separated. This also allows you to share example configurations if your
- * application has complex possibilities. An example of this is configuring an
- * item-item recommender.
- * 
+ * application has complex possibilities.
+ *
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface Module {
@@ -33,5 +32,5 @@ public interface Module {
      * 
      * @param ctx The root context
      */
-    void bind(Context ctx);
+    void configure(Context ctx);
 }

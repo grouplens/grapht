@@ -130,7 +130,7 @@ public class InjectorBuilder extends AbstractContext {
 
     /**
      * Apply a module to the root context of this InjectorBuilder (i.e.
-     * {@link Module#bind(Context)}).
+     * {@link Module#configure(Context)}).
      * 
      * @param module The module to apply
      * @return This InjectorBuilder

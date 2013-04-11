@@ -162,13 +162,13 @@ public class BindingFunctionBuilder implements Cloneable {
     }
 
     /**
-     * Run the module's {@link Module#bind(Context) bind()} method on the root
+     * Run the module's {@link Module#configure(Context) bind()} method on the root
      * context of this builder.
      * 
      * @param module The module to apply
      */
     public void applyModule(Module module) {
-        module.bind(getRootContext());
+        module.configure(getRootContext());
     }
 
     /**

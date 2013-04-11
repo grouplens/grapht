@@ -46,6 +46,7 @@ See [closed issues][issues-0.5] for more details.
 * Add a visitor for satisfactions (#33)
 * Add support for specifying default implementations and providers in properties files under the
   `META-INF` directory (#51)
+* `Module.bind` is now called `Module.configure`
 
 [issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
 
