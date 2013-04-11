@@ -130,15 +130,15 @@ public final class Types {
     }
 
     /**
-     * Return the type distance between the child and parent types. If the child
-     * does not extend from parent, then a negative value is returned.
-     * Otherwise, the number of steps between child and parent is returned. As
-     * an example, if child is an immediate subclass of parent, then 1 is
-     * returned. If child and parent are equal than 0 is returned.
+     * Return the type distance between the child and parent types. The child type
+     * must be a subtype of the parent. The type distance between a class and itself is 0;
+     * the distance from a class to one of its immediate supertypes (superclass or a directly
+     * implemented interface) is 1; deeper distances are computed recursively.
      * 
      * @param child The child type
      * @param parent The parent type
      * @return The type distance
+     * @throws IllegalArgumentException if {@code child} is not a subtype of {@code parent}.
      */
     public static int getTypeDistance(@Nonnull Class<?> child, @Nonnull Class<?> parent) {
         Preconditions.notNull("child class", child);
@@ -146,8 +146,7 @@ public final class Types {
 
         if (!parent.isAssignableFrom(child)) {
             // if child does not extend from the parent, return -1
-            // REVIEW Do we want to do this, or throw IllegalArgumentException?
-            return -1;
+            throw new IllegalArgumentException("child not a subclass of parent");
         } else if (child.equals(parent)) {
             // fast-path same-node tests
             return 0;

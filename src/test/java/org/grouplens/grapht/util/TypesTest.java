@@ -162,8 +162,12 @@ public class TypesTest {
 
     @Test
     public void testBadTypeDistance() {
-        assertThat(Types.getTypeDistance(TypeB.class, String.class),
-                   equalTo(-1));
+        try {
+            Types.getTypeDistance(TypeB.class, String.class);
+            fail("type distance on bad type should throw exception");
+        } catch (IllegalArgumentException e) {
+            /* expected */
+        }
     }
 
     public static class Inner {}
