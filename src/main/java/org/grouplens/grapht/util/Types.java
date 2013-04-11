@@ -144,12 +144,12 @@ public final class Types {
         Preconditions.notNull("child class", child);
         Preconditions.notNull("parent class", parent);
 
-        if (!parent.isAssignableFrom(child)) {
+        if (child.equals(parent)) {
+            // fast-path same-class tests
+            return 0;
+        } else if (!parent.isAssignableFrom(child)) {
             // if child does not extend from the parent, return -1
             throw new IllegalArgumentException("child not a subclass of parent");
-        } else if (child.equals(parent)) {
-            // fast-path same-node tests
-            return 0;
         } else if (!parent.isInterface()) {
             // if the parent is not an interface, we only need to follower superclasses
             int distance = 0;
@@ -160,38 +160,23 @@ public final class Types {
             }
             return distance;
         } else {
-            // worst case, do a breadth-first search for shortest path
-            Queue<Class<?>> workQueue = new ArrayDeque<Class<?>>();
-            Map<Class<?>,Integer> dMap = new HashMap<Class<?>, Integer>();
-            workQueue.add(child);
-            dMap.put(child, 0);
-
-            while (!workQueue.isEmpty()) {
-                final Class<?> current = workQueue.remove();
-                final int distance = dMap.get(current);
-                if (current.equals(parent)) {
-                    // we found the parent, done searching
-                    return distance;
-                }
-
-                Class<?> sup = current.getSuperclass();
-                if (sup != null) {
-                    // since Java has single inheritance, we will not have seen this class before
-                    workQueue.add(sup);
-                    dMap.put(sup, distance + 1);
-                }
-
-                for (Class<?> iface: current.getInterfaces()) {
-                    if (!dMap.containsKey(iface)) {
-                        workQueue.add(iface);
-                        dMap.put(iface, distance + 1);
+            // worst case, recursively compute the type
+            // recursion is safe, as types aren't too deep except in crazy-land
+            int minDepth = Integer.MAX_VALUE;
+            Class<?> sup = child.getSuperclass();
+            if (sup != null && parent.isAssignableFrom(sup)) {
+                minDepth = getTypeDistance(sup, parent);
+            }
+            for (Class<?> iface: child.getInterfaces()) {
+                if (parent.isAssignableFrom(iface)) {
+                    int d = getTypeDistance(iface, parent);
+                    if (d < minDepth) {
+                        minDepth = d;
                     }
                 }
             }
-
-            // if we got this far, the child does not extend the parent
-            // which is inconsistent with our previous assumption
-            throw new AssertionError("cannot find superclass");
+            // minDepth now holds the depth of the superclass with shallowest depth
+            return minDepth + 1;
         }
     }
     
