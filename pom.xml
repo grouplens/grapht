@@ -100,10 +100,11 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>3.1</version>
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
+            <Xlint/>
           </configuration>
         </plugin>
         <plugin>
@@ -113,7 +114,21 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <configuration>
+              <proc>none</proc>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
@@ -210,20 +225,6 @@
   <profiles>
     <profile>
       <id>lint</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <compilerArguments>
-                <Xlint/>
-              </compilerArguments>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-
       <reporting>
         <plugins>
           <plugin>

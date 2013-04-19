@@ -27,6 +27,8 @@ import org.grouplens.grapht.spi.*;
 import org.junit.Test;
 
 import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.*;
 
 public class DependencySolverTest {
@@ -1124,6 +1126,7 @@ public class DependencySolverTest {
     }
     
     @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
     public static @interface Qual {
         int value();
     }

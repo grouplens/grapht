@@ -20,12 +20,12 @@ package org.grouplens.grapht.spi.reflect;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
@@ -33,8 +33,10 @@ import static org.junit.Assert.assertThat;
 
 public class QualifiersTest {
     @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
     public static @interface Qual {}
     @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
     public static @interface VQual {
         String value();
     }
