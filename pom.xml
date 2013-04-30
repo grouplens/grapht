@@ -37,6 +37,10 @@
     <developerConnection>scm:hg:https://bitbucket.org/grouplens/grapht</developerConnection>
     <url>https://bitbucket.org/grouplens/grapht</url>
   </scm>
+  <ciManagement>
+    <system>jenkins</system>
+    <url>http://dev.grouplens.org/jenkins</url>
+  </ciManagement>
 
   <properties>
     <grapht.web.path>scpexe://medusa.cs.umn.edu/srv/www/grapht</grapht.web.path>
@@ -207,6 +211,7 @@
           <reportSet>
             <reports>
               <report>index</report>
+              <report>cim</report>
               <report>dependencies</report>
               <report>dependency-convergence</report>
               <report>dependency-info</report>
@@ -224,6 +229,12 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.9</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.3</version>
       </plugin>
     </plugins>
   </reporting>
