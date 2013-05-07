@@ -111,7 +111,10 @@
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
-            <Xlint/>
+            <compilerArgs>
+              <arg>-Xlint</arg>
+            </compilerArgs>
+            <fork>true</fork>
           </configuration>
         </plugin>
         <plugin>
