@@ -24,6 +24,7 @@ import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -46,7 +47,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
      * @param setter The setter method
      * @param parameter The parameter index to apply
      */
-    public SetterInjectionPoint(Method setter, int parameter) {
+    public SetterInjectionPoint(@Nonnull Method setter, int parameter) {
         Preconditions.notNull("setter method", setter);
         Preconditions.inRange(parameter, 0, setter.getParameterTypes().length);
         
@@ -58,7 +59,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     /**
      * @return The setter method wrapped by this injection point
      */
-    @Override
+    @Override @Nonnull
     public Method getMember() {
         return setter;
     }

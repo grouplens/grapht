@@ -24,6 +24,7 @@ import org.grouplens.grapht.util.ConstructorProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
+import javax.annotation.Nonnull;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -54,7 +55,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
      * @throws IndexOutOfBoundsException if {@code pIndex} is not a valid index into the
      *                                   constructor's parameters
      */
-    public ConstructorParameterInjectionPoint(Constructor<?> ctor, int pIndex) {
+    public ConstructorParameterInjectionPoint(@Nonnull Constructor<?> ctor, int pIndex) {
         Preconditions.notNull("constructor", ctor);
         Preconditions.inRange(pIndex, 0, ctor.getParameterTypes().length);
 
@@ -66,7 +67,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     /**
      * @return The constructor wrapped by this injection point
      */
-    @Override
+    @Override @Nonnull
     public Constructor<?> getMember() {
         return constructor;
     }

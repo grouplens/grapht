@@ -23,6 +23,7 @@ import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 
+import javax.annotation.Nonnull;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
@@ -31,7 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
-    public static final long serialVersionUID = -1L;
+    private static final long serialVersionUID = -1L;
     private final transient Method method;
 
     /**
@@ -40,7 +41,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
      * 
      * @param method The method to invoke without arguments
      */
-    public NoArgumentInjectionPoint(Method method) {
+    public NoArgumentInjectionPoint(@Nonnull Method method) {
         Preconditions.notNull("method", method);
         if (method.getParameterTypes().length != 0) {
             throw new IllegalArgumentException("Method takes arguments: " + method);
@@ -52,7 +53,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     /**
      * @return The setter method wrapped by this injection point
      */
-    @Override
+    @Override @Nonnull
     public Method getMember() {
         return method;
     }

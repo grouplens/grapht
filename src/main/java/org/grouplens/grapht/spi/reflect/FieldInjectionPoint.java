@@ -24,6 +24,7 @@ import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -45,7 +46,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
      * @param field The field to inject
      * @throws NullPointerException if field is null
      */
-    public FieldInjectionPoint(Field field) {
+    public FieldInjectionPoint(@Nonnull Field field) {
         Preconditions.notNull("field", field);
         this.field = field;
         attributes = new AttributesImpl(field.getAnnotations());
@@ -66,7 +67,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
         return attributes;
     }
 
-    @Override
+    @Override @Nonnull
     public Field getMember() {
         return field;
     }
