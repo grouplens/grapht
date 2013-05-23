@@ -42,7 +42,10 @@ public interface Context {
     /**
      * Start a new binding for the given type T within the scope of this
      * context. The returned Binding instance can be configured and completed by
-     * invoking one of its various to() methods.
+     * invoking one of its various to() methods. By default, the resulting binding will
+     * apply to both qualified and unqualified uses of the type; see {@link Binding#withQualifier(Class)}
+     * to restrict to qualified types, and {@link Binding#unqualified()}} to restrict to only
+     * match unqualified types.
      * 
      * @param <T> The matched source type
      * @param type The raw class that is matched
@@ -59,7 +62,9 @@ public interface Context {
      * @param type The type to bind.
      * @param <T>  The type to bind.
      * @return A new binding in this context for T with qualifier qual.
+     * @see #bind(Class)
      * @see Binding#withQualifier(Class)
+     * @see Binding#unqualified()
      */
     <T> Binding<T> bind(Class<? extends Annotation> qual, Class<T> type);
 
