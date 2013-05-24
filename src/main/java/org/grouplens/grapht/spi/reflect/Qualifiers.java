@@ -55,7 +55,7 @@ public final class Qualifiers {
      * @return A QualifierMatcher that matches using the default policy.
      */
     public static QualifierMatcher matchDefault() {
-        return matchAny();
+        return matchNone();
     }
     
     /**
