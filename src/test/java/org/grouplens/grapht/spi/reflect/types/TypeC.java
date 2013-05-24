@@ -70,7 +70,7 @@ public class TypeC {
     
     @Inject
     public void setRoleD(@RoleD InterfaceB b) {
-        // RoleE has no default type, but inherits from RoleD, which defaults to TypeB
+        // RoleD defaults to TypeB
         b1 = b;
     }
     

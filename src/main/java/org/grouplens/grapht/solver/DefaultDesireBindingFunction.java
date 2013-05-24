@@ -71,8 +71,13 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             if (result == null) {
                 result = getAnnotatedDefault(desire, annotType);
             }
+
+            // if the qualifier does not allow fall-through, we're done
+            if (!qualifier.annotationType().isAnnotationPresent(AllowUnqualifiedMatch.class)) {
+                return result;
+            }
         }
-        
+
         // Now check the desired type for @DefaultImplementation or @DefaultProvider if the type
         // source has not been disabled.
         if (result == null) {
