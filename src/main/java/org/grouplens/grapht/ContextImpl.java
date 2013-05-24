@@ -60,7 +60,7 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context within(Class<?> type) {
-        return in(config.getSPI().matchAny(), type, false);
+        return in(config.getSPI().matchDefault(), type, false);
     }
 
     @Override
@@ -75,7 +75,7 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context at(Class<?> type) {
-        return in(config.getSPI().matchAny(), type, true);
+        return in(config.getSPI().matchDefault(), type, true);
     }
 
     @Override

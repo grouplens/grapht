@@ -48,13 +48,13 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
 
     /**
      * Create an unanchored ReflectionContextElementMatcher that matches the given type
-     * and any qualifier.
+     * with the default qualifier matcher.
      * 
      * @param type The type to match
      * @throws NullPointerException if type is null
      */
     public ReflectionContextElementMatcher(Class<?> type) {
-        this(type, Qualifiers.matchAny());
+        this(type, Qualifiers.matchDefault());
     }
 
     /**

@@ -65,7 +65,7 @@ class BindingImpl<T> implements Binding<T> {
     
     public BindingImpl(ContextImpl context, Class<T> type) {
         this(context, type, context.getBuilder().getDefaultExclusions(),
-             context.getBuilder().getSPI().matchAny(), 
+             context.getBuilder().getSPI().matchDefault(),
              CachePolicy.NO_PREFERENCE);
     }
     

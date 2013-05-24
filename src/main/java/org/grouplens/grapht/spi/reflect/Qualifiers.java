@@ -22,6 +22,7 @@ import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
+import javax.annotation.Nonnull;
 import javax.inject.Qualifier;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -48,6 +49,14 @@ public final class Qualifiers {
     public static boolean isQualifier(Class<? extends Annotation> type) {
         return type.getAnnotation(javax.inject.Qualifier.class) != null;
     }
+
+    /**
+     * The default qualifier matcher. This is currently the {@linkplain #matchAny() any matcher}.
+     * @return A QualifierMatcher that matches using the default policy.
+     */
+    public static QualifierMatcher matchDefault() {
+        return matchAny();
+    }
     
     /**
      * @return A QualifierMatcher that matches any qualifier
@@ -68,7 +77,7 @@ public final class Qualifiers {
      * @return A QualifierMatcher that matches any annotation of the given class
      *         type
      */
-    public static QualifierMatcher match(Class<? extends Annotation> annotType) {
+    public static QualifierMatcher match(@Nonnull Class<? extends Annotation> annotType) {
         return new AnnotationClassMatcher(annotType);
     }
     
@@ -76,7 +85,7 @@ public final class Qualifiers {
      * @param annot Annotation instance to match
      * @return A QualifierMatcher that matches annotations equaling annot
      */
-    public static QualifierMatcher match(Annotation annot) {
+    public static QualifierMatcher match(@Nonnull Annotation annot) {
         return new AnnotationMatcher(annot);
     }
     

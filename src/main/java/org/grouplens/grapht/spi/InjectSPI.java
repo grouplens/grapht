@@ -135,8 +135,9 @@ public interface InjectSPI {
      * Create a QualifierMatcher that matches the given annotation type. This
      * annotation must be annotated with {@link javax.inject.Qualifier}.
      * 
-     * @param qualifier The qualifier annotation type
-     * @return A QualifierMatcher matching the qualifier type
+     * @param qualifier The qualifier annotation type.  If {@code null}, the absence of a qualifier
+     *                  is matched.
+     * @return A QualifierMatcher matching the qualifier type.
      */
     QualifierMatcher match(Class<? extends Annotation> qualifier);
     
@@ -149,8 +150,9 @@ public interface InjectSPI {
      * reflection API are serializable; if you use some other annotation implementation, it must be
      * serializable.
      *
-     * @param annot The annotation instance to equal to
-     * @return A QualifierMatcher matching the given annotation instance
+     * @param annot The annotation instance to equal to.  If {@code null}, the absence of a qualifier
+     *              is matched.
+     * @return A QualifierMatcher matching the given annotation instance.
      */
     QualifierMatcher match(Annotation annot);
     
@@ -159,6 +161,11 @@ public interface InjectSPI {
      *         qualifier
      */
     QualifierMatcher matchAny();
+
+    /**
+     * @return A QualifierMatcher that matches using the default policy.
+     */
+    QualifierMatcher matchDefault();
     
     /**
      * @return A QualifierMatcher that matches only the null qualifier

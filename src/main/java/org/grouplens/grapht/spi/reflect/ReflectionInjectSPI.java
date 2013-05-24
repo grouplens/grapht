@@ -47,12 +47,25 @@ public class ReflectionInjectSPI implements InjectSPI {
     
     @Override
     public QualifierMatcher match(Class<? extends Annotation> qualifier) {
-        return Qualifiers.match(qualifier);
+        if (qualifier != null) {
+            return Qualifiers.match(qualifier);
+        } else {
+            return Qualifiers.matchNone();
+        }
     }
 
     @Override
     public QualifierMatcher match(Annotation annot) {
-        return Qualifiers.match(annot);
+        if (annot != null) {
+            return Qualifiers.match(annot);
+        } else {
+            return Qualifiers.matchNone();
+        }
+    }
+
+    @Override
+    public QualifierMatcher matchDefault() {
+        return Qualifiers.matchDefault();
     }
 
     @Override
