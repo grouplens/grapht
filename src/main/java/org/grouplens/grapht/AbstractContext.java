@@ -28,11 +28,7 @@ public abstract class AbstractContext implements Context {
     @Override
     public <T> Binding<T> bind(Class<? extends Annotation> qual,
                                Class<T> type) {
-        if (qual == null) {
-            return bind(type).unqualified();
-        } else {
-            return bind(type).withQualifier(qual);
-        }
+        return bind(type).withQualifier(qual);
     }
 
     @Override @Deprecated

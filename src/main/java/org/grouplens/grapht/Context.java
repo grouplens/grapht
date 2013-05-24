@@ -51,13 +51,11 @@ public interface Context {
     <T> Binding<T> bind(Class<T> type);
 
     /**
-     * Start a new binding for a qualified type. A shortcut for {@code
-     * bind(type).withQualifier(qual)}, if {@code qual} is non-null, and {@code
-     * bind(type).unqualified()} if {@code qual} is null.
-     *
+     * Start a new binding for a qualified type. A shortcut for
+     * {@code bind(type).withQualifier(qual)}.
      * @param qual The type's qualifier.
      * @param type The type to bind.
-     * @param <T>  The type to bind.
+     * @param <T> The type to bind.
      * @return A new binding in this context for T with qualifier qual.
      * @see Binding#withQualifier(Class)
      */
