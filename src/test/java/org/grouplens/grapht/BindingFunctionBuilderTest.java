@@ -221,6 +221,21 @@ public class BindingFunctionBuilderTest {
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
+
+    @Test
+    public void testAnyQualifierBindings() throws Exception {
+        // Test that bind rules properly record the qualifier they're bound with
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+
+        builder.getRootContext().bind(InterfaceA.class).withAnyQualifier().to(TypeA.class);
+
+        // expected
+        Map<ContextMatcher, Collection<BindRule>> expected = new HashMap<ContextMatcher, Collection<BindRule>>();
+        expected.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                     Arrays.asList(BindRules.toSatisfaction(InterfaceA.class, spi.matchAny(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false)));
+
+        assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
+    }
     
     @Test
     public void testNamedBindings() throws Exception {

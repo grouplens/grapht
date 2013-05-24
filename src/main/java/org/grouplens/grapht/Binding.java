@@ -66,6 +66,16 @@ public interface Binding<T> {
     Binding<T> withQualifier(@Nonnull Annotation annot);
 
     /**
+     * Configure the binding to match injection points that have any qualifier annotation (including
+     * no qualifier).
+     *
+     * <p>This will override any previous name or qualifier annotation.
+     *
+     * @return A newly configured Binding
+     */
+    Binding<T> withAnyQualifier();
+
+    /**
      * <p>
      * Configure the binding to only match injection points that have no
      * qualifier. By default, the binding matches any injection point with the

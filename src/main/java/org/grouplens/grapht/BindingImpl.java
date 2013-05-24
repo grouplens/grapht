@@ -90,6 +90,12 @@ class BindingImpl<T> implements Binding<T> {
         QualifierMatcher q = context.getBuilder().getSPI().match(annot);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
+
+    @Override
+    public Binding<T> withAnyQualifier() {
+        QualifierMatcher q = context.getBuilder().getSPI().matchAny();
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+    }
     
     @Override
     public Binding<T> unqualified() {
