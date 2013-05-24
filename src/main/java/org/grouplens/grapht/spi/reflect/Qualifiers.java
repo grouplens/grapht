@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -55,7 +56,7 @@ public final class Qualifiers {
      * @return A QualifierMatcher that matches using the default policy.
      */
     public static QualifierMatcher matchDefault() {
-        return matchNone();
+        return new DefaultMatcher();
     }
     
     /**
@@ -101,6 +102,40 @@ public final class Qualifiers {
                 // lower priorities sort lower (higher precedence)
                 return getPriority() - o.getPriority();
             }
+        }
+    }
+
+    private static class DefaultMatcher extends AbstractMatcher {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public int getPriority() {
+            return 3;
+        }
+
+        @Override
+        public boolean matches(Annotation q) {
+            if (q == null) {
+                return true;
+            } else {
+                Class<? extends Annotation> atype = q.annotationType();
+                return atype.isAnnotationPresent(AllowUnqualifiedMatch.class);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof DefaultMatcher;
+        }
+
+        @Override
+        public int hashCode() {
+            return DefaultMatcher.class.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "%";
         }
     }
     

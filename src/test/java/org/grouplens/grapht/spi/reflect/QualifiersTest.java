@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.junit.Test;
 
@@ -40,12 +41,19 @@ public class QualifiersTest {
     public static @interface VQual {
         String value();
     }
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @AllowUnqualifiedMatch
+    public static @interface DftQual {}
 
     private Qual makeQual() {
         return AnnotationBuilder.of(Qual.class).build();
     }
     private VQual makeVQual(String val) {
         return AnnotationBuilder.of(VQual.class).set("value", val).build();
+    }
+    private DftQual makeDftQual() {
+        return AnnotationBuilder.of(DftQual.class).build();
     }
 
     @Test
@@ -64,6 +72,8 @@ public class QualifiersTest {
                    equalTo(true));
         assertThat(Qualifiers.matchAny().matches(makeVQual("foo")),
                    equalTo(true));
+        assertThat(Qualifiers.matchAny().matches(makeDftQual()),
+                   equalTo(true));
         assertThat(Qualifiers.matchAny(), equalTo(Qualifiers.matchAny()));
         assertThat(SerializationUtils.clone(Qualifiers.matchAny()),
                    equalTo(Qualifiers.matchAny()));
@@ -77,10 +87,28 @@ public class QualifiersTest {
                    equalTo(false));
         assertThat(Qualifiers.matchNone().matches(makeVQual("foo")),
                    equalTo(false));
+        assertThat(Qualifiers.matchNone().matches(makeDftQual()),
+                   equalTo(false));
         assertThat(Qualifiers.matchNone(), equalTo(Qualifiers.matchNone()));
         assertThat(Qualifiers.matchNone(), not(equalTo(Qualifiers.matchAny())));
         assertThat(SerializationUtils.clone(Qualifiers.matchNone()),
                    equalTo(Qualifiers.matchNone()));
+    }
+
+    @Test
+    public void testMatchDefault() throws Exception {
+        assertThat(Qualifiers.matchDefault().matches(null),
+                   equalTo(true));
+        assertThat(Qualifiers.matchDefault().matches(makeQual()),
+                   equalTo(false));
+        assertThat(Qualifiers.matchDefault().matches(makeVQual("foo")),
+                   equalTo(false));
+        assertThat(Qualifiers.matchDefault().matches(makeDftQual()),
+                   equalTo(true));
+        assertThat(Qualifiers.matchDefault(), equalTo(Qualifiers.matchDefault()));
+        assertThat(Qualifiers.matchDefault(), not(equalTo(Qualifiers.matchAny())));
+        assertThat(SerializationUtils.clone(Qualifiers.matchDefault()),
+                   equalTo(Qualifiers.matchDefault()));
     }
 
     @Test
