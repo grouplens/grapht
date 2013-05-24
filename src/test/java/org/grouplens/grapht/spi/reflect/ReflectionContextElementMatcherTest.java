@@ -86,7 +86,7 @@ public class ReflectionContextElementMatcherTest {
     private void doTestMatch(Class<?> matcherType, Class<? extends Annotation> matcherRole,
                              Class<?> satisfactionType, Class<? extends Annotation> satisfactionRole, 
                              boolean expected) {
-        QualifierMatcher mr = (matcherRole == null ? new ReflectionInjectSPI().matchAny() : new ReflectionInjectSPI().match(matcherRole));
+        QualifierMatcher mr = (matcherRole == null ? new ReflectionInjectSPI().matchDefault() : new ReflectionInjectSPI().match(matcherRole));
         final Annotation sr = (satisfactionRole == null ? null : new AnnotationBuilder(satisfactionRole).build());
         Pair<Satisfaction, Attributes> node = Pair.<Satisfaction, Attributes>of(new ClassSatisfaction(satisfactionType),
                                                                                 new Attributes() {
