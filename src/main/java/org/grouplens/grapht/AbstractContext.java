@@ -31,6 +31,11 @@ public abstract class AbstractContext implements Context {
         return bind(type).withQualifier(qual);
     }
 
+    @Override
+    public <T> Binding<T> bindAny(Class<T> type) {
+        return bind(type).withAnyQualifier();
+    }
+
     @Override @Deprecated
     public Context in(Class<?> type) {
         return within(type);

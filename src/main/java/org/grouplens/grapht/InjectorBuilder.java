@@ -99,6 +99,11 @@ public class InjectorBuilder extends AbstractContext {
     }
     
     @Override
+    public <T> Binding<T> bindAny(Class<T> type) {
+        return builder.getRootContext().bindAny(type);
+    }
+    
+    @Override
     public Context within(Class<?> type) {
         return builder.getRootContext().within(type);
     }

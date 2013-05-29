@@ -41,8 +41,11 @@ import java.lang.annotation.Annotation;
 public interface Context {
     /**
      * Start a new binding for the given type T within the scope of this
-     * context. The returned Binding instance can be configured and completed by
-     * invoking one of its various to() methods.
+     * context.  The returned Binding instance can be configured and completed by
+     * invoking one of its various to() methods.  Unless further configuration is
+     * done, this binding will match unqualified dependencies and dependencies
+     * with a qualifier annotated with
+     * {@link org.grouplens.grapht.annotation.AllowUnqualifiedMatch}.
      * 
      * @param <T> The matched source type
      * @param type The raw class that is matched
@@ -60,6 +63,15 @@ public interface Context {
      * @see Binding#withQualifier(Class)
      */
     <T> Binding<T> bind(Class<? extends Annotation> qual, Class<T> type);
+
+    /**
+     * Start a new binding for a type irrespective of qualifier.  This is a
+     * shortcut for {@code bind(type).withAnyQualifier()}.
+     * @param type The type.
+     * @return A new binding in this context for type T with any (or no) 
+     *         qualifier.
+     */
+    <T> Binding<T> bindAny(Class<T> type);
 
     /**
      * @deprecated Use {@link #within(Class)}.

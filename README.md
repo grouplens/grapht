@@ -47,7 +47,7 @@ See [closed issues][issues-0.5] for more details.
 - Add support for specifying default implementations and providers in properties files under the
   `META-INF` directory (#51)
 - `Module.bind` is now called `Module.configure`
-- **Incompatible change:** Changed default binding policy with respect to qualfier matching.  Now, if you bind a type without specifying any qualifier, it defaults to binding unqualified dependencies and dependencies whose qualifiers are annotated with `@AllowUnqualifiedMatch`.  To get the old behavior of matching irrespective of qualifier matcher, do `bind(Type.class).withAnyQualifier()`.
+- **Incompatible change:** Changed default binding policy with respect to qualfier matching.  Now, if you bind a type without specifying any qualifier, it defaults to binding unqualified dependencies and dependencies whose qualifiers are annotated with `@AllowUnqualifiedMatch`.  To get the old behavior of matching irrespective of qualifier matcher, do `bind(Type.class).withAnyQualifier()` (or `bindAny(Type.class)`).
 
 [issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
 
