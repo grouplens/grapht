@@ -35,18 +35,19 @@ following to the dependencies section in your POM:
 
 See [closed issues][issues-0.5] for more details.
 
-* Rewrite serialization logic to be more robust (#54)
-* Return immutable views rather than copies of sets from `Graph` (#58)
-* Be smarter about checking provider types (#35, #36)
-* Add anchored context matchers (`at` matching) (#41)
-* Improve diagnostic warnings and validity checking
-* Rename `Edge.getLabel()` to `getDesireChain()`
-* Change `Graph.updateEdgeLabel` to `replaceEdge`
-* Remove `Binding.finalBinding` in favor of boolean parameter on `to` (#46)
-* Add a visitor for satisfactions (#33)
-* Add support for specifying default implementations and providers in properties files under the
+- Rewrite serialization logic to be more robust (#54)
+- Return immutable views rather than copies of sets from `Graph` (#58)
+- Be smarter about checking provider types (#35, #36)
+- Add anchored context matchers (`at` matching) (#41)
+- Improve diagnostic warnings and validity checking
+- Rename `Edge.getLabel()` to `getDesireChain()`
+- Change `Graph.updateEdgeLabel` to `replaceEdge`
+- Remove `Binding.finalBinding` in favor of boolean parameter on `to` (#46)
+- Add a visitor for satisfactions (#33)
+- Add support for specifying default implementations and providers in properties files under the
   `META-INF` directory (#51)
-* `Module.bind` is now called `Module.configure`
+- `Module.bind` is now called `Module.configure`
+- **Incompatible change:** Changed default binding policy with respect to qualfier matching.  Now, if you bind a type without specifying any qualifier, it defaults to binding unqualified dependencies and dependencies whose qualifiers are annotated with `@AllowUnqualifiedMatch`.  To get the old behavior of matching irrespective of qualifier matcher, do `bind(Type.class).withAnyQualifier()`.
 
 [issues-0.5]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.5.0
 
