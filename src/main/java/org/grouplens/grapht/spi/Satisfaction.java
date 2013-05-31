@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.List;
+import org.grouplens.grapht.Injector;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import org.grouplens.grapht.Injector;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.List;
 
 
 /**
@@ -73,6 +72,16 @@ public interface Satisfaction extends Serializable {
      * @return whether the satisfaction already has an instance.
      */
     boolean hasInstance();
+
+    /**
+     * Visit the satisfaction. This method invokes the appropriate method on the
+     * provided visitor to report information on itself.
+     *
+     * @param visitor The visitor object.
+     * @param <T> The type returned from the visitor.
+     * @return The return value from the invoked visitor method.
+     */
+    <T> T visit(SatisfactionVisitor<T> visitor);
     
     /**
      * Get the default cache policy for instances created by this satisfaction.

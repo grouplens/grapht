@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect.types;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 /**

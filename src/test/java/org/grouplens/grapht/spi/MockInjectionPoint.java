@@ -18,12 +18,12 @@
  */
 package org.grouplens.grapht.spi;
 
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
+import org.grouplens.grapht.util.Types;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
-
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
-import org.grouplens.grapht.util.Types;
 
 /**
  * MockInjectionPoint is a simple injection point that wraps a type, qualifier, and a

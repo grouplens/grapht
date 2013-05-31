@@ -18,24 +18,18 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.InterfaceB;
-import org.grouplens.grapht.spi.reflect.types.ProviderC;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
-import org.grouplens.grapht.spi.reflect.types.TypeC;
+import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.annotation.Nullable;
+import javax.inject.Provider;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SatisfactionTest {
     private InjectionPoint ctorProviderCIP;

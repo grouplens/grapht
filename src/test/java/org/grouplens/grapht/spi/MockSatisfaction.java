@@ -18,11 +18,10 @@
  */
 package org.grouplens.grapht.spi;
 
+import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Provider;
 
 
 /**
@@ -84,6 +83,11 @@ public class MockSatisfaction implements Satisfaction {
     @Override
     public boolean hasInstance() {
         return true;
+    }
+
+    @Override
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        throw new UnsupportedOperationException("cannot visit the mock satisfaction");
     }
 
     @Override

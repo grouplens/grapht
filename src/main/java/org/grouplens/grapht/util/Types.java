@@ -18,18 +18,17 @@
  */
 package org.grouplens.grapht.util;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Static helper methods for working with types.
@@ -38,6 +37,9 @@ import java.util.List;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public final class Types {
+
+    private static final TypeVariable<?> PROVIDER_TYPE_VAR =Provider.class.getTypeParameters()[0];
+
     private Types() {}
 
     private static final Class<?>[] PRIMITIVE_TYPES = {
@@ -128,31 +130,54 @@ public final class Types {
     }
 
     /**
-     * Return the type distance between the child and parent types. If the child
-     * does not extend from parent, then a negative value is returned.
-     * Otherwise, the number of steps between child and parent is returned. As
-     * an example, if child is an immediate subclass of parent, then 1 is
-     * returned. If child and parent are equal than 0 is returned.
+     * Return the type distance between the child and parent types. The child type
+     * must be a subtype of the parent. The type distance between a class and itself is 0;
+     * the distance from a class to one of its immediate supertypes (superclass or a directly
+     * implemented interface) is 1; deeper distances are computed recursively.
      * 
      * @param child The child type
      * @param parent The parent type
      * @return The type distance
-     * @throws NullPointerException if child or parent are null
+     * @throws IllegalArgumentException if {@code child} is not a subtype of {@code parent}.
      */
-    public static int getTypeDistance(Class<?> child, Class<?> parent) {
-        if (!parent.isAssignableFrom(child)) {
+    public static int getTypeDistance(@Nonnull Class<?> child, @Nonnull Class<?> parent) {
+        Preconditions.notNull("child class", child);
+        Preconditions.notNull("parent class", parent);
+
+        if (child.equals(parent)) {
+            // fast-path same-class tests
+            return 0;
+        } else if (!parent.isAssignableFrom(child)) {
             // if child does not extend from the parent, return -1
-            return -1;
+            throw new IllegalArgumentException("child not a subclass of parent");
+        } else if (!parent.isInterface()) {
+            // if the parent is not an interface, we only need to follower superclasses
+            int distance = 0;
+            Class<?> cur = child;
+            while (!cur.equals(parent)) {
+                distance++;
+                cur = cur.getSuperclass();
+            }
+            return distance;
+        } else {
+            // worst case, recursively compute the type
+            // recursion is safe, as types aren't too deep except in crazy-land
+            int minDepth = Integer.MAX_VALUE;
+            Class<?> sup = child.getSuperclass();
+            if (sup != null && parent.isAssignableFrom(sup)) {
+                minDepth = getTypeDistance(sup, parent);
+            }
+            for (Class<?> iface: child.getInterfaces()) {
+                if (parent.isAssignableFrom(iface)) {
+                    int d = getTypeDistance(iface, parent);
+                    if (d < minDepth) {
+                        minDepth = d;
+                    }
+                }
+            }
+            // minDepth now holds the depth of the superclass with shallowest depth
+            return minDepth + 1;
         }
-        
-        // at this point we can assume at some point a superclass of child
-        // will equal parent
-        int distance = 0;
-        while(!child.equals(parent)) {
-            distance++;
-            child = child.getSuperclass();
-        }
-        return distance;
     }
     
     /**
@@ -165,10 +190,18 @@ public final class Types {
      *             Provider
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
-        try {
-            return Types.box(providerClass.getMethod("get").getReturnType());
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
+        Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
+        if(!bindings.containsKey(PROVIDER_TYPE_VAR)){
+            throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
+        }
+        final Class<?> inferredType = TypeUtils.getRawType(bindings.get(PROVIDER_TYPE_VAR), null);
+        try{
+            final Class<?> observedType = providerClass.getMethod("get").getReturnType();
+            if(inferredType.isAssignableFrom(observedType)) {
+                return observedType;
+            } else {
+                return inferredType;
+            }
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class does not implement get()");
         }
@@ -188,7 +221,7 @@ public final class Types {
     
     /**
      * Return true if the type is not abstract and not an interface, and has
-     * a constructor annotated with {@link Inject}, or its only constructor
+     * a constructor annotated with {@link Inject} or its only constructor
      * is the default constructor.
      * 
      * @param type A class type
@@ -265,254 +298,5 @@ public final class Types {
             }
         }
         return Class.forName(name);
-    }
-    
-    /**
-     * Read in a Class from the given ObjectInput. This is only compatible with
-     * classes that were serialized with
-     * {@link #writeClass(ObjectOutput, Class)}. Although Class is Serializable,
-     * this guarantees a simple structure within a file.
-     * 
-     * @param in The stream to read from
-     * @return The next Class encoded in the stream
-     * @throws IOException if an IO error occurs
-     * @throws ClassNotFoundException if the class can no longer be found at
-     *             runtime
-     */
-    public static Class<?> readClass(ObjectInput in) throws IOException, ClassNotFoundException {
-        String typeName = in.readUTF();
-        int arrayCount = in.readInt();
-        int hash = in.readInt();
-
-        Class<?> baseType = classByName(typeName);
-        if (hash != hash(baseType)) {
-            throw new IOException("Class definition changed since serialization: " + typeName);
-        }
-        
-        if (arrayCount > 0) {
-            return Array.newInstance(baseType, new int[arrayCount]).getClass();
-        } else {
-            return baseType;
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Class to the given ObjectOutput. When the class type is not an
-     * array, its name is written as a UTF string, and a false boolean
-     * to record that it's not an array. When it is an array type, the canonical
-     * name of its component type is written as a UTF string, and then a true
-     * boolean value.
-     * <p>
-     * The class can be decoded by calling {@link #readClass(ObjectInput)}.
-     * 
-     * @param out The stream to write to
-     * @param cls The class type to encode
-     * @throws IOException if an IO error occurs
-     */
-    public static void writeClass(ObjectOutput out, Class<?> cls) throws IOException {
-        int arrayCount = 0;
-        Class<?> baseType = cls;
-        while(baseType.isArray()) {
-            arrayCount++;
-            baseType = baseType.getComponentType();
-        }
-        
-        out.writeUTF(baseType.getName());
-        out.writeInt(arrayCount);
-        out.writeInt(hash(baseType));
-    }
-    
-    /**
-     * Read in a Constructor from the given ObjectInput. This is only compatible
-     * with constructors serialized
-     * {@link #writeConstructor(ObjectOutput, Constructor)}. Because Constructor
-     * is not Serializable, this must be used instead of
-     * {@link ObjectInput#readObject()}.
-     * 
-     * @param in The stream to read from
-     * @return The next constructor encoded in the stream
-     * @throws IOException if an IO error occurs
-     * @throws ClassNotFoundException if the declaring class of the constructor
-     *             cannot be found at runtime
-     * @throws NoSuchMethodException if the constructor no longer exists in the
-     *             loaded class definition
-     */
-    public static Constructor<?> readConstructor(ObjectInput in) throws IOException, ClassNotFoundException {
-        Class<?> declaring = readClass(in);
-        Class<?>[] args = new Class<?>[in.readInt()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = readClass(in);
-        }
-        
-        try {
-            return declaring.getDeclaredConstructor(args);
-        } catch (NoSuchMethodException e) {
-            throw new IOException("Constructor no longer exists", e);
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Constructor to the given ObjectOutput. Because Constructor is
-     * not Serializable, it is encoded to the stream as its declaring class, the
-     * number of parameters, and then the parameter classes in their defined
-     * order. All classes are written to the stream using
-     * {@link #writeClass(ObjectOutput, Class)}.
-     * <p>
-     * The constructor can be decoded by calling
-     * {@link #readConstructor(ObjectInput)}.
-     * 
-     * @param out The output stream to write to
-     * @param ctor The constructor to serialize
-     * @throws IOException if an IO error occurs
-     */
-    public static void writeConstructor(ObjectOutput out, Constructor<?> ctor) throws IOException {
-        writeClass(out, ctor.getDeclaringClass());
-        
-        Class<?>[] args = ctor.getParameterTypes();
-        out.writeInt(args.length);
-        for (int i = 0; i < args.length; i++) {
-            writeClass(out, args[i]);
-        }
-    }
-    
-    /**
-     * Read in a Method from the given ObjectInput. This is only compatible with
-     * methods serialized {@link #writeMethod(ObjectOutput, Method)}. Because
-     * Method is not Serializable, this must be used instead of
-     * {@link ObjectInput#readObject()}.
-     * 
-     * @param in The stream to read from
-     * @return The next method encoded in the stream
-     * @throws IOException If an IO error occurs or if the method no longer
-     *             exists
-     * @throws ClassNotFoundException if the declaring class of the method
-     *             cannot be found at runtime
-     */
-    public static Method readMethod(ObjectInput in) throws IOException, ClassNotFoundException {
-        Class<?> declaring = readClass(in);
-        String name = in.readUTF();
-        
-        Class<?>[] args = new Class<?>[in.readInt()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = readClass(in);
-        }
-        
-        try {
-            return declaring.getDeclaredMethod(name, args);
-        } catch (NoSuchMethodException e) {
-            throw new IOException("Method no longer exists", e);
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Method to the given ObjectOutput. Because Method is not
-     * Serializable, it is encoded to the stream as its declaring class, its
-     * name as a UTF string, the number of parameters, and then the parameter
-     * classes in their defined order. All classes are written to the stream
-     * using {@link #writeClass(ObjectOutput, Class)}.
-     * <p>
-     * The method can be decoded by calling {@link #readMethod(ObjectInput)}.
-     * 
-     * @param out The output stream to write to
-     * @param m The method to serialize
-     * @throws IOException if an IO error occurs
-     */
-    public static void writeMethod(ObjectOutput out, Method m) throws IOException {
-        writeClass(out, m.getDeclaringClass());
-        out.writeUTF(m.getName());
-        
-        Class<?>[] args = m.getParameterTypes();
-        out.writeInt(args.length);
-        for (int i = 0; i < args.length; i++) {
-            writeClass(out, args[i]);
-        }
-    }
-    
-    /**
-     * Read in a Field from the given ObjectInput. This is only compatible with
-     * methods serialized {@link #writeField(ObjectOutput, Field)}. Because
-     * Method is not Serializable, this must be used instead of
-     * {@link ObjectInput#readObject()}.
-     * 
-     * @param in The stream to read from
-     * @return The next field encoded in the stream
-     * @throws IOException If an IO error occurs or if the field no longer
-     *             exists
-     * @throws ClassNotFoundException if the declaring class of the field cannot
-     *             be found at runtime
-     */
-    public static Field readField(ObjectInput in) throws IOException, ClassNotFoundException {
-        Class<?> declaring = readClass(in);
-        String name = in.readUTF();
-        
-        Class<?> fieldType = readClass(in);
-        
-        Field f;
-        try {
-            f = declaring.getDeclaredField(name);
-            if (f.getType().equals(fieldType)) {
-                throw new IOException("Field type changed from " + fieldType + " to " + f.getType());
-            }
-            return f;
-        } catch (NoSuchFieldException e) {
-            throw new IOException("Field no longer exists", e);
-        }
-    }
-    
-    /**
-     * <p>
-     * Write the Field to the given ObjectOutput. Because Field is not
-     * Serializable, it is encoded to the stream as its declaring class, its
-     * name as a UTF string, and its type. All classes are written to the stream
-     * using {@link #writeClass(ObjectOutput, Class)}.
-     * <p>
-     * The method can be decoded by calling {@link #readField(ObjectInput)}.
-     * 
-     * @param out The output stream to write to
-     * @param f The field to serialize
-     * @throws IOException if an IO error occurs
-     */
-    public static void writeField(ObjectOutput out, Field f) throws IOException {
-        writeClass(out, f.getDeclaringClass());
-        out.writeUTF(f.getName());
-        writeClass(out, f.getType());
-    }
-    
-    private static int hash(Class<?> type) {
-        // convert to a string, both for lexigraphical ordering
-        // and to combine into a hash
-        List<String> ctors = new ArrayList<String>();
-        for (Constructor<?> c: type.getDeclaredConstructors()) {
-            ctors.add(c.getName() + ":" + Arrays.toString(c.getParameterTypes()));
-        }
-        List<String> methods = new ArrayList<String>();
-        for (Method m: type.getDeclaredMethods()) {
-            methods.add(m.getName() + ":" + Arrays.toString(m.getParameterTypes()));
-        }
-        List<String> fields = new ArrayList<String>();
-        for (Field f: type.getDeclaredFields()) {
-            fields.add(f.getName() + ":" + f.getType().getName());
-        }
-        
-        // impose a consistent ordering
-        Collections.sort(ctors);
-        Collections.sort(methods);
-        Collections.sort(fields);
-        
-        StringBuilder sb = new StringBuilder();
-        for (String c: ctors) {
-            sb.append(c);
-        }
-        for (String m: methods) {
-            sb.append(m);
-        }
-        for (String f: fields) {
-            sb.append(f);
-        }
-        
-        return sb.toString().hashCode();
     }
 }

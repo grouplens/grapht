@@ -16,28 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
+package org.grouplens.grapht.types.dft;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-public class MockContextMatcher implements ContextMatcher {
-    private static final long serialVersionUID = 1L;
-
-    private final Class<?> type;
-    private final MockQualifierMatcher qualifier;
-    
-    public MockContextMatcher(Class<?> type) {
-        this(type, MockQualifierMatcher.any());
-    }
-    
-    public MockContextMatcher(Class<?> type, MockQualifierMatcher qualifier) {
-        this.type = type;
-        this.qualifier = qualifier;
-
-    }
-    
-    @Override
-    public boolean matches(Pair<Satisfaction, Attributes> n) {
-        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight().getQualifier());
-    }
+/**
+ * Created with IntelliJ IDEA. User: michael Date: 3/23/13 Time: 1:03 PM To change this template use
+ * File | Settings | File Templates.
+ */
+public class CDftImplB implements IDftImpl {
 }

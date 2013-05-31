@@ -18,11 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect.types;
 
+import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
+
+import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.inject.Qualifier;
-
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
+@AllowUnqualifiedMatch
 public @interface RoleA { }

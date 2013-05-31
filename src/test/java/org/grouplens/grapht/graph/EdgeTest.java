@@ -18,19 +18,14 @@
  */
 package org.grouplens.grapht.graph;
 
+import org.junit.Assert;
+import org.grouplens.grapht.spi.*;
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import junit.framework.Assert;
-
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.MockDesire;
-import org.grouplens.grapht.spi.MockSatisfaction;
-import org.junit.Test;
 
 public class EdgeTest {
     @Test
@@ -43,7 +38,7 @@ public class EdgeTest {
         
         Assert.assertEquals(head, edge.getHead());
         Assert.assertEquals(tail, edge.getTail());
-        Assert.assertEquals(ep, edge.getLabel());
+        Assert.assertEquals(ep, edge.getDesireChain());
     }
     
     @Test

@@ -21,8 +21,6 @@ package org.grouplens.grapht.spi.reflect.types;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.grouplens.grapht.spi.reflect.types.CycleA;
-
 public class CycleB {
     public final Provider<CycleA> pa;
     

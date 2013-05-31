@@ -18,11 +18,11 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.spi.Desire;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-
-import org.grouplens.grapht.spi.Desire;
 
 /**
  * Thrown when a BindingFunction would be required to return multiple binding

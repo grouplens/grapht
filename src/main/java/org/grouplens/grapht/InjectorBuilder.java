@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
-
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
@@ -27,6 +25,8 @@ import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+
+import java.lang.annotation.Annotation;
 
 /**
  * <p>
@@ -99,23 +99,43 @@ public class InjectorBuilder extends AbstractContext {
     }
     
     @Override
-    public Context in(Class<?> type) {
-        return builder.getRootContext().in(type);
-    }
-
-    @Override
-    public Context in(Class<? extends Annotation> qualifier, Class<?> type) {
-        return builder.getRootContext().in(qualifier, type);
+    public <T> Binding<T> bindAny(Class<T> type) {
+        return builder.getRootContext().bindAny(type);
     }
     
     @Override
-    public Context in(Annotation annot, Class<?> type) {
-        return builder.getRootContext().in(annot, type);
+    public Context within(Class<?> type) {
+        return builder.getRootContext().within(type);
+    }
+
+    @Override
+    public Context within(Class<? extends Annotation> qualifier, Class<?> type) {
+        return builder.getRootContext().within(qualifier, type);
+    }
+    
+    @Override
+    public Context within(Annotation annot, Class<?> type) {
+        return builder.getRootContext().within(annot, type);
+    }
+
+    @Override
+    public Context at(Class<?> type) {
+        return builder.getRootContext().at(type);
+    }
+
+    @Override
+    public Context at(Class<? extends Annotation> qualifier, Class<?> type) {
+        return builder.getRootContext().at(qualifier, type);
+    }
+
+    @Override
+    public Context at(Annotation annot, Class<?> type) {
+        return builder.getRootContext().at(annot, type);
     }
 
     /**
      * Apply a module to the root context of this InjectorBuilder (i.e.
-     * {@link Module#bind(Context)}).
+     * {@link Module#configure(Context)}).
      * 
      * @param module The module to apply
      * @return This InjectorBuilder

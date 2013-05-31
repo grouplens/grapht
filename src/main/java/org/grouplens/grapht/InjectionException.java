@@ -18,9 +18,8 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.reflect.Member;
-
 import javax.annotation.Nullable;
+import java.lang.reflect.Member;
 
 /**
  * Thrown when an Injector fails to instantiate a requested object. In many ways
@@ -66,7 +65,8 @@ public class InjectionException extends RuntimeException {
      * @return The Member that is the target of injection, or null if the
      *         failure had no injection point associated with it
      */
-    public @Nullable Member getTarget() {
+    @Nullable
+    public Member getTarget() {
         return target;
     }
     

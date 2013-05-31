@@ -31,7 +31,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Michael Ekstrand
  */
-public class QualifiedComponentTest {
+public class NullComponentTest {
     @Test
     public void testDefaultNull() {
         InjectorBuilder b = new InjectorBuilder();

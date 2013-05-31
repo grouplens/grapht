@@ -18,13 +18,12 @@
  */
 package org.grouplens.grapht.graph;
 
-import java.io.Serializable;
-
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Satisfaction;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
 
 
 /**
@@ -43,10 +42,9 @@ import org.grouplens.grapht.spi.Satisfaction;
  * @author Michael Ludwig <mludwig@cs.umn.edu
  */
 public class Node implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
-    // "final"
-    private CachedSatisfaction label;
+    private final CachedSatisfaction label;
     
     /**
      * Create a new Node with a null label.
@@ -90,7 +88,8 @@ public class Node implements Serializable {
     /**
      * @return The current label instance of the Node, which can be null
      */
-    public @Nullable CachedSatisfaction getLabel() {
+    @Nullable
+    public CachedSatisfaction getLabel() {
         return label;
     }
     

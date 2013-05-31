@@ -18,12 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.solver.BindingResult;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
@@ -33,19 +28,14 @@ import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.MockInjectionPoint;
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
-import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ConstructorParameterInjectionPoint;
-import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.ProviderClassSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionDesire;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
-import org.grouplens.grapht.spi.reflect.SetterInjectionPoint;
 import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.List;
 
 public class ReflectionDesireTest {
     private static <T extends Annotation> Attributes qualifier(Class<T> qtype) {

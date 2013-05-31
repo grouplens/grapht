@@ -18,8 +18,13 @@
  */
 package org.grouplens.grapht.util;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import org.grouplens.grapht.spi.reflect.types.InterfaceA;
+import org.grouplens.grapht.spi.reflect.types.InterfaceB;
+import org.grouplens.grapht.spi.reflect.types.TypeA;
+import org.grouplens.grapht.spi.reflect.types.TypeB;
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
+import static org.junit.Assert.fail;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -30,8 +35,10 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
+import javax.inject.Provider;
 
 @SuppressWarnings("rawtypes")
 public class TypesTest {
@@ -69,17 +76,98 @@ public class TypesTest {
         Types.erase(param);
     }
 
+    private void testProvidedType(Class<? extends Provider<?>> cls){
+        Class<?> result = Types.getProvidedType(TestingProviders.SimpleProvider.class);
+        assertThat(result, equalTo((Class) TestingProviders.Target.class));
+    }
+
     @Test
-    public void testWriteInnerClass() throws IOException, ClassNotFoundException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ObjectOutput oo = new ObjectOutputStream(out);
-        Types.writeClass(oo, Inner.class);
-        oo.close();
-        byte[] bytes = out.toByteArray();
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        ObjectInput oin = new ObjectInputStream(in);
-        Class<?> cls = Types.readClass(oin);
-        assertThat(cls, equalTo((Class) Inner.class));
+    public void testSimpleProvider(){
+        testProvidedType(TestingProviders.SimpleProvider.class);
+    }
+
+    @Test
+    public void testAbstractProvider(){
+        testProvidedType(TestingProviders.SubtypedProvider.class);
+        testProvidedType(TestingProviders.SubtypedProvider2.class);
+    }
+
+    @Test
+    public void testInterfaceProvider(){
+        testProvidedType(TestingProviders.ImplementedProvider.class);
+        testProvidedType(TestingProviders.ImplementedProvider2.class);
+    }
+
+    @Test
+    public void testBoundedProvider(){
+        Class<?> cls = new TestingProviders.BoundedProvider<TestingProviders.Target>().getClass();
+        try{
+            Types.getProvidedType((Class<? extends Provider<?>>) cls);
+            fail("getProvidedType didn't throw an IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e){
+            // This is the correct behavior
+        }
+        cls = new TestingProviders.UnboundedProvider<TestingProviders.Target>().getClass();
+        try{
+            Types.getProvidedType((Class<? extends Provider<?>>) cls);
+            fail("getProvidedType didn't throw an IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e){
+            // This is the correct behavior
+        }
+    }
+
+    @Test
+    public void testMultiBoundProvider(){
+        Class<?> cls = new TestingProviders.MultiBoundProvider<TestingProviders.Target>().getClass();
+        try{
+            Types.getProvidedType((Class<? extends Provider<?>>) cls);
+            fail("getProvidedType didn't throw an IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e){
+            // This is the correct behavior
+        }
+    }
+
+    @Test
+    public void testSameClassDistance() {
+        assertThat(Types.getTypeDistance(String.class, String.class),
+                   equalTo(0));
+    }
+
+    @Test
+    public void testSubClassDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, TypeA.class),
+                   equalTo(1));
+    }
+
+    @Test
+    public void testInterfaceDistance() {
+        assertThat(Types.getTypeDistance(TypeA.class, InterfaceA.class),
+                   equalTo(1));
+    }
+
+    @Test
+    public void testTwoStepInterfaceDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, InterfaceA.class),
+                   equalTo(2));
+    }
+
+    @Test
+    public void testSecondInterfaceDistance() {
+        assertThat(Types.getTypeDistance(TypeB.class, InterfaceB.class),
+                   equalTo(1));
+    }
+
+    @Test
+    public void testBadTypeDistance() {
+        try {
+            Types.getTypeDistance(TypeB.class, String.class);
+            fail("type distance on bad type should throw exception");
+        } catch (IllegalArgumentException e) {
+            /* expected */
+        }
     }
 
     public static class Inner {}

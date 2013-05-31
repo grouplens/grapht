@@ -18,21 +18,22 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.MethodProxy;
+import org.grouplens.grapht.util.Preconditions;
+
+import javax.annotation.Nonnull;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.InjectionPoint;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
-
-public class NoArgumentInjectionPoint implements InjectionPoint, Externalizable {
- // "final"
-    private Method method;
+public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = -1L;
+    private final transient Method method;
 
     /**
      * Create a NoArgumentInjectionPoint that wraps the given no-argument
@@ -40,7 +41,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Externalizable 
      * 
      * @param method The method to invoke without arguments
      */
-    public NoArgumentInjectionPoint(Method method) {
+    public NoArgumentInjectionPoint(@Nonnull Method method) {
         Preconditions.notNull("method", method);
         if (method.getParameterTypes().length != 0) {
             throw new IllegalArgumentException("Method takes arguments: " + method);
@@ -50,14 +51,9 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Externalizable 
     }
     
     /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public NoArgumentInjectionPoint() { }
-    
-    /**
      * @return The setter method wrapped by this injection point
      */
-    @Override
+    @Override @Nonnull
     public Method getMember() {
         return method;
     }
@@ -100,14 +96,36 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Externalizable 
     public String toString() {
         return method.getName() + "()";
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        method = Types.readMethod(in);
+
+    private Object writeReplace() {
+        return new SerialProxy(method);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeMethod(out, method);
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("Serialization proxy required");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final MethodProxy method;
+        public SerialProxy(Method m) {
+            method = MethodProxy.of(m);
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new NoArgumentInjectionPoint(method.resolve());
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("no class for " + method.toString());
+                ex.initCause(e);
+                throw ex;
+            } catch (NoSuchMethodException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("cannot resolve " + method.toString());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }

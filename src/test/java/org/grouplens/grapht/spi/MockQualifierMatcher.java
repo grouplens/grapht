@@ -30,7 +30,7 @@ public class MockQualifierMatcher implements QualifierMatcher {
     private MockQualifierMatcher() {
         qualifiers = null;
     }
-    
+
     public static MockQualifierMatcher any() {
         return new MockQualifierMatcher();
     }
@@ -38,7 +38,12 @@ public class MockQualifierMatcher implements QualifierMatcher {
     public static MockQualifierMatcher none() {
         return match((Annotation) null);
     }
-    
+
+    @Override
+    public int getPriority() {
+        return 0;
+    }
+
     public static MockQualifierMatcher match(Annotation... qualifiers) {
         MockQualifierMatcher q = new MockQualifierMatcher();
         q.qualifiers = new HashSet<Annotation>();

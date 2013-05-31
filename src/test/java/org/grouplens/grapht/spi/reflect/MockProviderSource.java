@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Provider;
-
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.ProviderSource;
+
+import javax.inject.Provider;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MockProviderSource implements ProviderSource {
     private final Map<ReflectionDesire, Provider<?>> providers;

@@ -18,20 +18,19 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Member;
-
-import javax.annotation.Nullable;
-
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
+
+import javax.annotation.Nullable;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Member;
 
 /**
  * SimpleInjectionPoint is a synthetic injection point used for
@@ -39,11 +38,12 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
-    // "final"
-    private transient Attributes attrs;
-    private Class<?> type;
-    private boolean nullable;
+public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
+    private static final long serialVersionUID = -1L;
+    // fields marked as transient since direct serialization is disabled
+    private final transient Attributes attrs;
+    private final transient Class<?> type;
+    private final transient boolean nullable;
     
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Preconditions.notNull("type", type);
@@ -55,11 +55,6 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
         this.type = type;
         this.nullable = nullable;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public SimpleInjectionPoint() { }
     
     @Override
     public Class<?> getErasedType() {
@@ -105,20 +100,40 @@ public class SimpleInjectionPoint implements InjectionPoint, Externalizable {
         String q = (attrs.getQualifier() == null ? "" : attrs.getQualifier() + ":");
         return q + type.getSimpleName();
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        type = Types.readClass(in);
-        nullable = in.readBoolean();
 
-        Annotation qualifier = (Annotation) in.readObject();
-        attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
+    private Object writeReplace() {
+        return new SerialProxy(type, nullable, attrs.getQualifier());
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, type);
-        out.writeBoolean(nullable);
-        out.writeObject(attrs.getQualifier());
+
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("Serialization proxy required");
+    }
+
+    /**
+     * Serialization proxy for the Serialization Proxy Pattern.
+     */
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private ClassProxy type;
+        private boolean nullable;
+        @Nullable @SuppressWarnings("SE_BAD_FIELD")
+        private Annotation qualifier;
+
+        private SerialProxy(Class<?> t, boolean isNullable, @Nullable Annotation qual) {
+            type = ClassProxy.of(t);
+            nullable = isNullable;
+            qualifier = qual;
+        }
+
+        public Object readResolve() throws ObjectStreamException {
+            try {
+                return new SimpleInjectionPoint(qualifier, type.resolve(), nullable);
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex =
+                        new InvalidObjectException("cannot resolve class " + type.getClassName());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }

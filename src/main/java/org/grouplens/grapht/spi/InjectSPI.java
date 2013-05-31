@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+import java.lang.annotation.Annotation;
 
 /**
  * InjectSPI is a service provider interface for accessing and creating the
@@ -107,6 +106,11 @@ public interface InjectSPI {
     /**
      * Create a Desire that wraps a synthetic InjectionPoint for the qualified
      * type, that may or may not be satisfied by a null value.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
      * 
      * @param qualifier The qualifier on the synthetic injection point
      * @param type The desired type, and type of the injection point
@@ -114,33 +118,41 @@ public interface InjectSPI {
      * @return A Desire for the given qualified type
      */
     Desire desire(@Nullable Annotation qualifier, Class<?> type, boolean nullable);
-    
+
     /**
-     * Create a ContextMatcher that matches the given context formed by a
-     * Qualifier and a type. The created ContextMatcher must be
-     * compatible with the BindRules, Desires, and Satisfactions created by this
-     * InjectSPI.
-     * 
+     * Create a ContextElementMatcher that matches the given context formed by a Qualifier and a
+     * type. The created ContextElementMatcher must be compatible with the BindRules, Desires, and
+     * Satisfactions created by this InjectSPI.
+     *
      * @param qualifier The qualifier matcher
-     * @param type The type of the context
-     * @return A ContextMatcher representing the qualifier and type
+     * @param type      The type of the context
+     * @param anchored  Whether the matcher is anchored
+     * @return A ContextElementMatcher representing the qualifier and type
      */
-    ContextMatcher context(QualifierMatcher qualifier, Class<?> type);
-    
+    ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type, boolean anchored);
+
     /**
      * Create a QualifierMatcher that matches the given annotation type. This
      * annotation must be annotated with {@link javax.inject.Qualifier}.
      * 
-     * @param qualifier The qualifier annotation type
-     * @return A QualifierMatcher matching the qualifier type
+     * @param qualifier The qualifier annotation type.  If {@code null}, the absence of a qualifier
+     *                  is matched.
+     * @return A QualifierMatcher matching the qualifier type.
      */
     QualifierMatcher match(Class<? extends Annotation> qualifier);
     
     /**
      * Create a QualifierMatcher that matches annotation instances equal to 
      * the given instance.
-     * @param annot The annotation instance to equal to
-     * @return A QualifierMatcher matching the given annotation instance
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
+     * @param annot The annotation instance to equal to.  If {@code null}, the absence of a qualifier
+     *              is matched.
+     * @return A QualifierMatcher matching the given annotation instance.
      */
     QualifierMatcher match(Annotation annot);
     
@@ -149,6 +161,11 @@ public interface InjectSPI {
      *         qualifier
      */
     QualifierMatcher matchAny();
+
+    /**
+     * @return A QualifierMatcher that matches using the default policy.
+     */
+    QualifierMatcher matchDefault();
     
     /**
      * @return A QualifierMatcher that matches only the null qualifier

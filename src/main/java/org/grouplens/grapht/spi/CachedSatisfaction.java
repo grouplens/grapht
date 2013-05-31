@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-
 import org.grouplens.grapht.util.Preconditions;
+
+import java.io.Serializable;
 
 /**
  * CachedSatisfaction is the pairing of a {@link Satisfaction} and
@@ -31,11 +31,10 @@ import org.grouplens.grapht.util.Preconditions;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public class CachedSatisfaction implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
-    // "final"
-    private Satisfaction satisfaction;
-    private CachePolicy cachePolicy;
+    private final Satisfaction satisfaction;
+    private final CachePolicy cachePolicy;
     
     /**
      * Create a new CachedSatisfaction wrapping the given satisfaction and the

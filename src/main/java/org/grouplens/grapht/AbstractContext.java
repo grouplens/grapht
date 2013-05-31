@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
 /**
@@ -28,5 +29,25 @@ public abstract class AbstractContext implements Context {
     public <T> Binding<T> bind(Class<? extends Annotation> qual,
                                Class<T> type) {
         return bind(type).withQualifier(qual);
+    }
+
+    @Override
+    public <T> Binding<T> bindAny(Class<T> type) {
+        return bind(type).withAnyQualifier();
+    }
+
+    @Override @Deprecated
+    public Context in(Class<?> type) {
+        return within(type);
+    }
+
+    @Override @Deprecated
+    public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
+        return within(qualifier, type);
+    }
+
+    @Override @Deprecated
+    public Context in(@Nullable Annotation qualifier, Class<?> type) {
+        return within(qualifier, type);
     }
 }

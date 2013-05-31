@@ -18,12 +18,9 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
-
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.spi.ContextChain;
+import java.lang.annotation.Annotation;
 
 /**
  * <p>
@@ -38,14 +35,17 @@ import org.grouplens.grapht.spi.ContextChain;
  * creating bindings, the context stack can be configured by calling
  * {@link #in(Class)} or {@link #in(Class, Class)}.
  * 
- * @see ContextChain
+ * @see org.grouplens.grapht.spi.ElementChainContextMatcher
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 public interface Context {
     /**
      * Start a new binding for the given type T within the scope of this
-     * context. The returned Binding instance can be configured and completed by
-     * invoking one of its various to() methods.
+     * context.  The returned Binding instance can be configured and completed by
+     * invoking one of its various to() methods.  Unless further configuration is
+     * done, this binding will match unqualified dependencies and dependencies
+     * with a qualifier annotated with
+     * {@link org.grouplens.grapht.annotation.AllowUnqualifiedMatch}.
      * 
      * @param <T> The matched source type
      * @param type The raw class that is matched
@@ -65,35 +65,110 @@ public interface Context {
     <T> Binding<T> bind(Class<? extends Annotation> qual, Class<T> type);
 
     /**
+     * Start a new binding for a type irrespective of qualifier.  This is a
+     * shortcut for {@code bind(type).withAnyQualifier()}.
+     * @param type The type.
+     * @return A new binding in this context for type T with any (or no) 
+     *         qualifier.
+     */
+    <T> Binding<T> bindAny(Class<T> type);
+
+    /**
+     * @deprecated Use {@link #within(Class)}.
+     */
+    @Deprecated
+    Context in(Class<?> type);
+
+    /**
+     * @deprecated Use {@link #within(Class, Class)}.
+     */
+    @Deprecated
+    Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+
+    /**
+     * @deprecated Use {@link #within(Annotation, Class)}.
+     */
+    @Deprecated
+    Context in(@Nullable Annotation qualifier, Class<?> type);
+
+    /**
      * Create a new Context that extends the current context stack with the
      * given class type. This matches with the default {@link Qualifier}. This is equivalent
-     * to <code>in(null, type);</code>
-     * 
+     * to <code>within(null, type);</code>
+     *
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(Class<?> type);
-    
+    Context within(Class<?> type);
+
     /**
      * Create a new Context that extends the current context stack with the
      * given class and {@link Qualifier} annotation. If the qualifier is null,
      * the default or null qualifier is used.
-     * 
+     *
      * @param qualifier The qualifier type that must be matched along with the type
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
-    
+    Context within(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+
     /**
      * Create a new Context that extends the current context stack with the
      * given class, qualified by the specific Annotation instance. If the
      * qualifier is null, the default or null qualifier is used.
-     * 
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
      * @param qualifier The qualifier instance that must be matched along with
      *            the type
      * @param type The type to extend this context by
      * @return A new Context with a longer context stack
      */
-    Context in(@Nullable Annotation qualifier, Class<?> type);
+    Context within(@Nullable Annotation qualifier, Class<?> type);
+
+    /**
+     * Create a new Context that extends the current context stack with the given class type as an
+     * anchored match. This matches with the default {@link Qualifier}. This is equivalent to
+     * <code>at(null, type);</code>
+     *
+     * @param type The type to extend this context by
+     * @return A new Context with a longer context stack
+     * @see #at(Class, Class)
+     */
+    Context at(Class<?> type);
+
+    /**
+     * Create a new Context that extends the current context stack with the given class and {@link
+     * Qualifier} annotation as an anchored match. If the qualifier is null, the default or null
+     * qualifier is used.
+     * <p>
+     * Unlike {@link #in(Class,Class)}, this match is <em>anchored</em> &mdash; that is, it only
+     * matches at the end of a context chain.  Context is matched if it ends with this or,
+     * if further context is opened inside this context, if the inner context matches immediately.
+     * </p>
+     *
+     * @param qualifier The qualifier type that must be matched along with the type
+     * @param type      The type to extend this context by
+     * @return A new Context with a longer context stack
+     */
+    Context at(@Nullable Class<? extends Annotation> qualifier, Class<?> type);
+
+    /**
+     * Create a new Context that extends the current context stack with the given class, qualified
+     * by the specific Annotation instance. as an anchored match. If the qualifier is null, the
+     * default or null qualifier is used.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
+     * @param qualifier The qualifier instance that must be matched along with the type
+     * @param type      The type to extend this context by
+     * @return A new Context with a longer context stack
+     */
+    Context at(@Nullable Annotation qualifier, Class<?> type);
 }

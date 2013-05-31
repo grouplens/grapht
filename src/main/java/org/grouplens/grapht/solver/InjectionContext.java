@@ -18,19 +18,14 @@
  */
 package org.grouplens.grapht.solver;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.ContextMatcher;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * <p>
@@ -111,7 +106,7 @@ public class InjectionContext implements Serializable {
     }
     
     /**
-     * @return The type path of this context, usable by {@link ContextMatcher}
+     * @return The type path of this context, usable by {@link org.grouplens.grapht.spi.ContextElementMatcher}
      */
     public List<Pair<Satisfaction, Attributes>> getTypePath() {
         return context;

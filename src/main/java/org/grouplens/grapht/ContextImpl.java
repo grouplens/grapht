@@ -18,15 +18,14 @@
  */
 package org.grouplens.grapht;
 
+import org.grouplens.grapht.spi.ContextElementMatcher;
+import org.grouplens.grapht.spi.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.QualifierMatcher;
+
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.grouplens.grapht.spi.ContextChain;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.QualifierMatcher;
 
 /**
  * ContextImpl is the basic implementation of Context.
@@ -34,11 +33,11 @@ import org.grouplens.grapht.spi.QualifierMatcher;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 class ContextImpl extends AbstractContext {
-    private final ContextChain context;
+    private final ElementChainContextMatcher context;
     
     private final BindingFunctionBuilder config;
     
-    public ContextImpl(BindingFunctionBuilder config, ContextChain context) {
+    public ContextImpl(BindingFunctionBuilder config, ElementChainContextMatcher context) {
         this.config = config;
         this.context = context;
     }
@@ -50,7 +49,7 @@ class ContextImpl extends AbstractContext {
     /**
      * @return The context chain of this context
      */
-    public ContextChain getContextChain() {
+    public ElementChainContextMatcher getContextChain() {
         return context;
     }
     
@@ -60,25 +59,40 @@ class ContextImpl extends AbstractContext {
     }
 
     @Override
-    public Context in(Class<?> type) {
-        return in(config.getSPI().matchAny(), type);
+    public Context within(Class<?> type) {
+        return in(config.getSPI().matchDefault(), type, false);
     }
 
     @Override
-    public Context in(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        return in(config.getSPI().match(qualifier), type);
+    public Context within(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
+        return in(config.getSPI().match(qualifier), type, false);
     }
     
     @Override
-    public Context in(@Nullable Annotation annot, Class<?> type) {
-        return in(config.getSPI().match(annot), type);
+    public Context within(@Nullable Annotation annot, Class<?> type) {
+        return in(config.getSPI().match(annot), type, false);
+    }
+
+    @Override
+    public Context at(Class<?> type) {
+        return in(config.getSPI().matchDefault(), type, true);
+    }
+
+    @Override
+    public Context at(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
+        return in(config.getSPI().match(qualifier), type, true);
+    }
+
+    @Override
+    public Context at(@Nullable Annotation annot, Class<?> type) {
+        return in(config.getSPI().match(annot), type, true);
     }
     
-    private Context in(QualifierMatcher q, Class<?> type) {
-        ContextMatcher nextMatcher = config.getSPI().context(q, type);
+    private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
+        ContextElementMatcher nextMatcher = config.getSPI().context(q, type, anchored);
         
-        List<ContextMatcher> nextChain = new ArrayList<ContextMatcher>(context.getContexts());
+        List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
         nextChain.add(nextMatcher);
-        return new ContextImpl(config, new ContextChain(nextChain));
+        return new ContextImpl(config, new ElementChainContextMatcher(nextChain));
     }
 }

@@ -18,41 +18,21 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-
-import javax.inject.Qualifier;
-
-import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.solver.InjectionContext;
 
 /**
- * <p>
- * ContextMatcher represents a "pattern" that can match an element within the
- * dependency context created as a Resolver follows a dependency hierarchy. The
- * dependency context is an ordered list of Nodes and the Roles of the Desires
- * that the Nodes satisfy. The top-level Node can be thought of as the root Node
- * or first element within the dependency context. Later elements represent
- * dependencies or dependencies of dependencies of the root node.
- * <p>
- * ContextMatchers can match or apply to these nodes and {@link Qualifier}s
- * within a dependency context. As an example, the reflection based
- * ContextMatcher matches nodes that are sub-types of the type the matcher was
- * configured with.
- * <p>
- * ContextMatchers are composed into a list with {@link ContextChain} to
- * parallel the composing of nodes and {@link Qualifier}s into the dependency
- * context list. The ContextChain can then be used to determine if the list of
- * ContextMatchers applies to any given dependency context.
- * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * Interface for context matchers.  A context matcher matches contexts to
+ * determine whether particular bind rules are to be applied.
+ *
+ * @author Michael Ekstrand
  */
-public interface ContextMatcher extends Serializable {
+public interface ContextMatcher {
     /**
-     * Return true if this ContextMatcher matches or applies to the given
-     * Satisfaction and Qualifier.
-     * 
-     * @param n The node and attributes in the current dependency context
-     * @return True if this matcher matches the node and attributes, false
-     *         otherwise
+     * Attempt to match this context matcher against the specified context. If the
+     * matcher matches, it will return a {@link ContextMatch} describing the result.
+     *
+     * @param context The context to match.
+     * @return The match information, or {@code null} if the matcher does not match.
      */
-    boolean matches(Pair<Satisfaction, Attributes> n);
+    ContextMatch matches(InjectionContext context);
 }

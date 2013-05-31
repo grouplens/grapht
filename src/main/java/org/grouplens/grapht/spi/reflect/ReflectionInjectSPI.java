@@ -18,18 +18,13 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.spi.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
+import java.lang.annotation.Annotation;
 
 /**
  * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It
@@ -41,8 +36,8 @@ import org.grouplens.grapht.spi.Satisfaction;
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public ContextMatcher context(QualifierMatcher qualifier, Class<?> type) {
-        return new ReflectionContextMatcher(type, qualifier);
+    public ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type, boolean anchored) {
+        return new ReflectionContextElementMatcher(type, qualifier, anchored);
     }
     
     @Override
@@ -52,12 +47,25 @@ public class ReflectionInjectSPI implements InjectSPI {
     
     @Override
     public QualifierMatcher match(Class<? extends Annotation> qualifier) {
-        return Qualifiers.match(qualifier);
+        if (qualifier != null) {
+            return Qualifiers.match(qualifier);
+        } else {
+            return Qualifiers.matchNone();
+        }
     }
 
     @Override
     public QualifierMatcher match(Annotation annot) {
-        return Qualifiers.match(annot);
+        if (annot != null) {
+            return Qualifiers.match(annot);
+        } else {
+            return Qualifiers.matchNone();
+        }
+    }
+
+    @Override
+    public QualifierMatcher matchDefault() {
+        return Qualifiers.matchDefault();
     }
 
     @Override

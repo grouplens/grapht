@@ -18,24 +18,18 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the
@@ -43,9 +37,9 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class NullSatisfaction implements Satisfaction, Externalizable {
-    // "final"
-    private Class<?> type;
+public class NullSatisfaction implements Satisfaction, Serializable {
+    private static final long serialVersionUID = -1L;
+    private final transient Class<?> type;
     
     /**
      * Create a NullSatisfaction that uses <code>null</code> to satisfy the
@@ -58,11 +52,6 @@ public class NullSatisfaction implements Satisfaction, Externalizable {
         Preconditions.notNull("type", type);
         this.type = Types.box(type);
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public NullSatisfaction() { }
     
     @Override
     public CachePolicy getDefaultCachePolicy() {
@@ -91,6 +80,11 @@ public class NullSatisfaction implements Satisfaction, Externalizable {
     }
 
     @Override
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        return visitor.visitNull();
+    }
+
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Provider<?> makeProvider(ProviderSource dependencies) {
         return new InstanceProvider(null);
@@ -113,14 +107,32 @@ public class NullSatisfaction implements Satisfaction, Externalizable {
     public String toString() {
         return "Null(" + type.getSimpleName() + ")";
     }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        type = Types.readClass(in);
+
+    private Object writeReplace() {
+        return new SerialProxy(type);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, type);
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("must use serialization proxy");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final ClassProxy type;
+
+        public SerialProxy(Class<?> cls) {
+            type = ClassProxy.of(cls);
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new NullSatisfaction(type.resolve());
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex = new InvalidObjectException("cannot resolve " + type);
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }

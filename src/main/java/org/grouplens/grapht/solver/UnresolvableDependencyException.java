@@ -18,7 +18,12 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.Satisfaction;
+
+import java.util.List;
 
 /**
  * Thrown when a desire cannot be resolved to an instantiable satisfaction.
@@ -52,10 +57,15 @@ public class UnresolvableDependencyException extends SolverException {
     
     @Override
     public String getMessage() {
-        return new StringBuilder("Unable to satisfy desire: ")
-            .append(format(desire.getInjectionPoint()))
-            .append('\n')
-            .append(format(context))
-            .toString();
+        StringBuilder sb = new StringBuilder("Unable to satisfy desire ")
+                .append(format(desire.getInjectionPoint()));
+        List<Pair<Satisfaction, Attributes>> path = context.getTypePath();
+        if (!path.isEmpty()) {
+            sb.append(" of ")
+              .append(path.get(0).getLeft());
+        }
+        sb.append('\n')
+          .append(format(context));
+        return sb.toString();
     }
 }

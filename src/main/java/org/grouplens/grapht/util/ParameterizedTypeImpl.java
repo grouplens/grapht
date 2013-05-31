@@ -25,7 +25,8 @@ import java.util.Arrays;
 class ParameterizedTypeImpl implements ParameterizedType {
     private final Class<?> rawType;
     private final Type[] arguments;
-    
+
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     ParameterizedTypeImpl(Class<?> rawType, Type[] arguments) {
         this.rawType = rawType;
         this.arguments = arguments;

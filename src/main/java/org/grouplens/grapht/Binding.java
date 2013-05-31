@@ -18,14 +18,13 @@
  */
 package org.grouplens.grapht;
 
-import java.lang.annotation.Annotation;
+import org.grouplens.grapht.solver.BindRule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
-
-import org.grouplens.grapht.solver.BindRule;
+import java.lang.annotation.Annotation;
 
 /**
  * Binding is part of the fluent API used for configuring an {@link Injector}.
@@ -35,20 +34,6 @@ import org.grouplens.grapht.solver.BindRule;
  * @param <T> The source type
  */
 public interface Binding<T> {
-    /**
-     * <p>
-     * Specify that the binding created created is the last binding to apply to
-     * the desired type. It is permissible to have two bindings as
-     * <code>A -&gt; B -&gt; C</code>. If the binding from A to B is a final
-     * binding, the binding from B to C will not be followed.
-     * <p>
-     * Bindings to instances and {@link Provider Providers} are automatically
-     * final bindings.
-     * 
-     * @return A newly configured Binding
-     */
-    Binding<T> finalBinding();
-
     /**
      * <p>
      * Configure the binding to match the given {@link Qualifier} annotation.
@@ -63,19 +48,33 @@ public interface Binding<T> {
      * @return A newly configured Binding
      */
     Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier);
-    
+
     /**
-     * <p>
-     * Configure the binding to match injection points that have been annotated
-     * with the exact annotation instance.
-     * <p>
-     * This will override any previous name or qualifier annotation.
-     * 
-     * @param annot The annotation instance to match
+     * Configure the binding to match injection points that have been annotated with the exact
+     * annotation instance.
+     *
+     * <p>This will override any previous name or qualifier annotation.
+     *
+     * <p>The annotation provided must be serializable.  Annotations built by {@link
+     * org.grouplens.grapht.annotation.AnnotationBuilder} (recommended) or retrieved from the Java
+     * reflection API are serializable; if you use some other annotation implementation, it must be
+     * serializable.
+     *
+     * @param annot The annotation instance to match.
      * @return A newly configured Binding
      */
     Binding<T> withQualifier(@Nonnull Annotation annot);
-    
+
+    /**
+     * Configure the binding to match injection points that have any qualifier annotation (including
+     * no qualifier).
+     *
+     * <p>This will override any previous name or qualifier annotation.
+     *
+     * @return A newly configured Binding
+     */
+    Binding<T> withAnyQualifier();
+
     /**
      * <p>
      * Configure the binding to only match injection points that have no
@@ -125,8 +124,23 @@ public interface Binding<T> {
      * <p>
      * The given type may have its own dependencies that will have to be
      * satisfied by other bindings.
+     * <p>It is permissible to have two bindings forming a chain, like
+     * <code>A &rarr; B &rarr; C</code>. The {@code chained} parameter controls
+     * whether the chain is followed.  If {@code chained == false} for the {@code A &rarr; B}
+     * binding, then the {@code B &rarr; C} binding is not followed (and the {@code A &rarr; B}
+     * binding is called <emph>terminal</emph>).
      * 
      * @param impl The implementation type
+     * @param chained Whether further binding lookup will be done on the implementation type.
+     *                {@code true} allows lookup, {@code false} creates a terminal binding.
+     */
+    void to(@Nonnull Class<? extends T> impl, boolean chained);
+
+    /**
+     * Bind to an implementation type non-terminally.  This calls {@link #to(Class, boolean)}
+     * as {@code this.to(impl, true)}.
+     *
+     * @param impl The implementation type.
      */
     void to(@Nonnull Class<? extends T> impl);
 

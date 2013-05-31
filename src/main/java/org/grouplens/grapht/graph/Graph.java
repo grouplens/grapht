@@ -1,4 +1,4 @@
-/*
+    /*
  * Grapht, an open source dependency injector.
  * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
@@ -20,8 +20,12 @@ package org.grouplens.grapht.graph;
 
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.Preconditions;
 
 import javax.annotation.Nullable;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -35,8 +39,8 @@ import java.util.*;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class Graph implements Serializable, Cloneable {
-    private static final long serialVersionUID = 1L;
+public final class Graph implements Serializable, Cloneable {
+    private static final long serialVersionUID = -1L;
     
     // The outgoing key set is used to represent the set of nodes in the graph,
     // although it should hold that the incoming key set is equivalent
@@ -91,14 +95,15 @@ public class Graph implements Serializable, Cloneable {
     }
 
     /**
-     * Return a mutable set of nodes currently within the graph. Future changes
-     * to the graph will not be reflected by the returned collection. Changes to
-     * the returned set will not affect the graph.
-     * 
+     * Return the set of nodes currently within the graph.
+     *
+     * This is an unmodifiable set view of the graph's set of nodes; changes in the graph will be
+     * reflected in this set.  If you need to modify the graph while traversing it, make a copy.
+     *
      * @return The nodes in the graph
      */
     public Set<Node> getNodes() {
-        return new HashSet<Node>(outgoing.keySet());
+        return Collections.unmodifiableSet(incoming.keySet());
     }
 
     /**
@@ -161,12 +166,13 @@ public class Graph implements Serializable, Cloneable {
         }
         
         for (Edge e: edges) {
-            if (e.getLabel() == null) {
+            List<Desire> theChain = e.getDesireChain();
+            if (theChain == null) {
                 if (label == null) {
                     return e;
                 }
             } else {
-                if (e.getLabel().equals(label)) {
+                if (theChain.equals(label)) {
                     return e;
                 }
             }
@@ -260,10 +266,8 @@ public class Graph implements Serializable, Cloneable {
      * returned edges will have a head node equaling the input node.
      * </p>
      * <p>
-     * Future changes to the graph will not be reflected by the returned
-     * collection. Changes to the returned set will not affect the graph. A null
-     * set is returned if the node is not in the graph. An empty set is returned
-     * when the node is in the graph but has no outgoing edges.
+     * This is an unmodifiable view of the node's adjacency set; changes in the graph will be
+     * reflected in this set.  If you need to modify the graph while traversing it, make a copy.
      * </p>
      * 
      * @param node The query node
@@ -276,7 +280,7 @@ public class Graph implements Serializable, Cloneable {
             throw new NullPointerException("Node cannot be null");
         
         Set<Edge> edges = outgoing.get(node);
-        return (edges == null ? null : new HashSet<Edge>(edges));
+        return (edges == null ? null : Collections.unmodifiableSet(edges));
     }
 
     /**
@@ -285,10 +289,8 @@ public class Graph implements Serializable, Cloneable {
      * returned edges will have a tail node equaling the input node.
      * </p>
      * <p>
-     * Future changes to the graph will not be reflected by the returned
-     * collection. Changes to the returned set will not affect the graph. A null
-     * set is returned if the node is not in the graph. An empty set is returned
-     * when the node is in the graph but has no incoming edges.
+     * This is an unmodifiable view of the node's adjacency set; changes in the graph will be
+     * reflected in this set.  If you need to modify the graph while traversing it, make a copy.
      * </p>
      * 
      * @param node The query node
@@ -301,7 +303,7 @@ public class Graph implements Serializable, Cloneable {
             throw new NullPointerException("Node cannot be null");
         
         Set<Edge> edges = incoming.get(node);
-        return (edges == null ? null : new HashSet<Edge>(edges));
+        return (edges == null ? null : Collections.unmodifiableSet(edges));
     }
 
     /**
@@ -388,7 +390,7 @@ public class Graph implements Serializable, Cloneable {
             // and remove old outgoing edges from incoming graph
             Set<Edge> newOutgoingEdges = new HashSet<Edge>();
             for (Edge old: oldOutgoingEdges) {
-                Edge newEdge = new Edge(newNode, old.getTail(), old.getLabel());
+                Edge newEdge = new Edge(newNode, old.getTail(), old.getDesireChain());
                 newOutgoingEdges.add(newEdge);
                 incoming.get(old.getTail()).remove(old);
                 incoming.get(old.getTail()).add(newEdge);
@@ -404,7 +406,7 @@ public class Graph implements Serializable, Cloneable {
             // and remove old incoming edges from the outgoing graph
             Set<Edge> newIncomingEdges = new HashSet<Edge>();
             for (Edge old: oldIncomingEdges) {
-                Edge newEdge = new Edge(old.getHead(), newNode, old.getLabel());
+                Edge newEdge = new Edge(old.getHead(), newNode, old.getDesireChain());
                 newIncomingEdges.add(newEdge);
                 outgoing.get(old.getHead()).remove(old);
                 outgoing.get(old.getHead()).add(newEdge);
@@ -511,49 +513,43 @@ public class Graph implements Serializable, Cloneable {
     }
 
     /**
-     * <p>
-     * Update the structure of this graph so that the provided old edge is
-     * replaced by a new edge that is created with the same head and tail nodes,
-     * but has the new label. The set of outgoing edges from the head node
-     * will be updated to no longer include the old edge and to include the new
-     * edge with the new label. The set of incoming edges to the tail node
-     * will be similarly updated.
-     * </p>
-     * <p>
-     * The newly created and added edge will be returned. Its head and tail will
-     * equal the head and tail of <tt>oldEdge</tt> and its label will be
-     * <tt>newLabel</tt>. If the old edge is not in this graph, then no new
-     * edge is added and null is returned.
-     * </p>
-     * 
+     * Replace an edge in the graph. The new edge must have the same head and tail as the old edge.
+     * The set of outgoing edges from the head node will be updated to no longer include the old
+     * edge and to include the new edge. The set of incoming edges to the tail node will be
+     * similarly updated.
+     *
      * @param oldEdge The old edge to remove and replace
-     * @param newLabel The new label for the new edge that is replacing
-     *            oldEdge
-     * @return The new edge, or null if oldEdge was not in this graph
-     * @throws NullPointerException if oldEdge is null
+     * @param newEdge The new edge that is replacing oldEdge
+     * @return {@code true} if the edge has been replace, {@code false} if it was not in the graph.
+     * @throws IllegalArgumentException if the new edge does not have the same nodes.
      */
-    public Edge updateEdgeLabel(Edge oldEdge, List<Desire> newLabel) {
-        if (oldEdge == null)
-            throw new NullPointerException("Old edge cannot be null");
-        
+    public boolean replaceEdge(Edge oldEdge, Edge newEdge) {
+        Preconditions.notNull("old edge", oldEdge);
+        Preconditions.notNull("new edge", newEdge);
+        if (!newEdge.getHead().equals(oldEdge.getHead())) {
+            throw new IllegalArgumentException("new edge has different head");
+        }
+        if (!newEdge.getTail().equals(oldEdge.getTail())) {
+            throw new IllegalArgumentException("new edge has different tail");
+        }
+
         Set<Edge> outgoingEdges = outgoing.get(oldEdge.getHead());
         if (outgoingEdges != null) {
             if (outgoingEdges.remove(oldEdge)) {
                 // the old edge was in the graph so replace it
-                Edge newEdge = new Edge(oldEdge.getHead(), oldEdge.getTail(), newLabel);
                 outgoingEdges.add(newEdge);
-                
+
                 // now we replace the incoming edge as well, but we assume it exists
                 Set<Edge> incomingEdges = incoming.get(oldEdge.getTail());
                 incomingEdges.remove(oldEdge);
                 incomingEdges.add(newEdge);
-                
-                return newEdge;
+
+                return true;
             }
         }
-        
+
         // if we've gotten here, the old edge was not in the graph
-        return null;
+        return false;
     }
 
     /**
@@ -577,5 +573,40 @@ public class Graph implements Serializable, Cloneable {
             g2.incoming.put(e.getKey(), new HashSet<Edge>(e.getValue()));
         }
         return g2;
+    }
+
+    private Object writeReplace() {
+        return new SerialProxy(incoming);
+    }
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("serialization proxy required");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final Set<Node> nodes;
+        private final Set<Edge> edges;
+
+        public SerialProxy(Map<Node,Set<Edge>> repr) {
+            nodes = new HashSet<Node>(repr.size());
+            edges = new HashSet<Edge>();
+            for (Map.Entry<Node,Set<Edge>> e: repr.entrySet()) {
+                nodes.add(e.getKey());
+                edges.addAll(e.getValue());
+            }
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            Graph g = new Graph();
+            for (Node n: nodes) {
+                g.addNode(n);
+            }
+            for (Edge e: edges) {
+                g.addEdge(e);
+            }
+            return g;
+        }
     }
 }

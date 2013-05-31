@@ -18,11 +18,11 @@
  */
 package org.grouplens.grapht.spi.reflect.types;
 
-import javax.inject.Inject;
-
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.ConstructorParameterInjectionPoint;
 import org.grouplens.grapht.spi.reflect.SetterInjectionPoint;
+
+import javax.inject.Inject;
 
 public class TypeC {
     public static final InjectionPoint CONSTRUCTOR;
@@ -70,7 +70,7 @@ public class TypeC {
     
     @Inject
     public void setRoleD(@RoleD InterfaceB b) {
-        // RoleE has no default type, but inherits from RoleD, which defaults to TypeB
+        // RoleD defaults to TypeB
         b1 = b;
     }
     

@@ -18,17 +18,16 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
 
 
 /**
  * <p>
  * QualifierMatcher encapsulates the logic used to determine if a BindRule or
- * ContextMatcher match a particular Qualifier. Common qualifier matching rules
+ * ContextElementMatcher match a particular Qualifier. Common qualifier matching rules
  * are:
  * <ol>
  * <li>Any qualifier</li>
@@ -52,4 +51,13 @@ public interface QualifierMatcher extends Comparable<QualifierMatcher>, Serializ
      * @return True if matched
      */
     boolean matches(@Nullable Annotation q);
+
+    /**
+     * Get the priority of this matcher. Lower priority values have precedence in selecting
+     * the final bind rule. All Grapht matchers have priorities of at least 0; negative
+     * priority values are reserved for custom extensions.
+     *
+     * @return The priority.
+     */
+    int getPriority();
 }

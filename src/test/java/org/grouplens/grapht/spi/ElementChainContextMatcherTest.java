@@ -18,25 +18,27 @@
  */
 package org.grouplens.grapht.spi;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.Assert;
-
-import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.junit.Test;
 
-public class ContextChainTest {
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
+
+public class ElementChainContextMatcherTest {
     @Test
     public void testEmptyChainEmptyContextSuccess() throws Exception {
-        // Test that an empty ContextChain matches an empty context
+        // Test that an empty ElementChainContextMatcher matches an empty context
         doTest(new Class<?>[0], new Class<?>[0], true);
     }
     
     @Test
     public void testEmptyChainNonEmptyContextSuccess() throws Exception {
-        // Test that an empty ContextChain matches contexts that have any nodes
+        // Test that an empty ElementChainContextMatcher matches contexts that have any nodes
         doTest(new Class<?>[0], new Class<?>[] { A.class }, true);
         doTest(new Class<?>[0], new Class<?>[] { A.class, B.class }, true);
         doTest(new Class<?>[0], new Class<?>[] { A.class, Ap.class }, true);
@@ -45,7 +47,7 @@ public class ContextChainTest {
     
     @Test
     public void testEqualChainContextSuccess() throws Exception {
-        // Test that a ContextChain equaling the context matches
+        // Test that a ElementChainContextMatcher equaling the context matches
         doTest(new Class<?>[] { A.class }, new Class<?>[] { A.class }, true);
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[] { A.class, B.class }, true);
         doTest(new Class<?>[] { A.class, B.class, C.class }, new Class<?>[] { A.class, B.class, C.class }, true);
@@ -53,7 +55,7 @@ public class ContextChainTest {
     
     @Test
     public void testSubstringChainSuccess() throws Exception {
-        // Test that a ContextChain that is a substring (front/middle/end)
+        // Test that a ElementChainContextMatcher that is a substring (front/middle/end)
         // matches the context
         doTest(new Class<?>[] { A.class }, new Class<?>[] { A.class, B.class, C.class }, true);
         doTest(new Class<?>[] { B.class }, new Class<?>[] { A.class, B.class, C.class }, true);
@@ -67,7 +69,7 @@ public class ContextChainTest {
     
     @Test
     public void testSubsequenceChainSuccess() throws Exception {
-        // Test that a ContextChain that is a subsequence (with elements 
+        // Test that a ElementChainContextMatcher that is a subsequence (with elements
         // separated in the context) matches the context
         doTest(new Class<?>[] { A.class, C.class }, new Class<?>[] { A.class, B.class, C.class, Ap.class, Bp.class, Cp.class }, true);
         doTest(new Class<?>[] { A.class, Ap.class }, new Class<?>[] { A.class, B.class, C.class, Ap.class, Bp.class, Cp.class }, true);
@@ -81,7 +83,7 @@ public class ContextChainTest {
     
     @Test
     public void testMatcherInheritenceSuccess() throws Exception {
-        // Test that a ContextChain that has supertypes of the context
+        // Test that a ElementChainContextMatcher that has supertypes of the context
         // is still matched
         doTest(new Class<?>[] { A.class }, new Class<?>[] { Ap.class }, true);
 
@@ -92,14 +94,14 @@ public class ContextChainTest {
     
     @Test
     public void testNonEmptyChainEmptyContextFail() throws Exception {
-        // Test that a non-empty ContextChain fails to match an empty context
+        // Test that a non-empty ElementChainContextMatcher fails to match an empty context
         doTest(new Class<?>[] { A.class }, new Class<?>[0], false);
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[0], false);
     }
     
     @Test
     public void testNonSubsequenceFail() throws Exception {
-        // Test that a ContextChain that is not a subsequence fails to match
+        // Test that a ElementChainContextMatcher that is not a subsequence fails to match
         doTest(new Class<?>[] { A.class }, new Class<?>[] { B.class }, false);
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[] { B.class, A.class }, false);
         doTest(new Class<?>[] { B.class, A.class, C.class }, new Class<?> [] { C.class, B.class, A.class }, false);
@@ -108,26 +110,64 @@ public class ContextChainTest {
     
     @Test
     public void testSuperstringFail() throws Exception {
-        // Test that a ContextChain that is the context plus additional matchers
+        // Test that a ElementChainContextMatcher that is the context plus additional matchers
         // fails to match the context
         doTest(new Class<?>[] { A.class, B.class }, new Class<?>[] { A.class }, false);
         doTest(new Class<?>[] { A.class, B.class, C.class }, new Class<?>[] { A.class, C.class }, false);
         doTest(new Class<?>[] { A.class, B.class, C.class}, new Class<?>[] { A.class, B.class }, false);
     }
+
+    @Test
+    public void testAnchoredElementMatchers() {
+        List<ContextElementMatcher> matchers = new ArrayList<ContextElementMatcher>();
+        matchers.add(new MockContextElementMatcher(A.class, true));
+        ContextMatcher matcher = new ElementChainContextMatcher(matchers);
+        assertThat(matcher.matches(makeContext()),
+                   nullValue());
+        assertThat(matcher.matches(makeContext(A.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(B.class, A.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(A.class, B.class)),
+                   nullValue());
+    }
+
+    @Test
+    public void testAnchoredAndUnanchored() {
+        List<ContextElementMatcher> matchers = new ArrayList<ContextElementMatcher>();
+        matchers.add(new MockContextElementMatcher(A.class, true));
+        matchers.add(new MockContextElementMatcher(B.class));
+        ContextMatcher matcher = new ElementChainContextMatcher(matchers);
+        assertThat(matcher.matches(makeContext()),
+                   nullValue());
+        assertThat(matcher.matches(makeContext(A.class, B.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(A.class, B.class, C.class)),
+                   notNullValue());
+        assertThat(matcher.matches(makeContext(A.class, C.class, B.class)),
+                   nullValue());
+    }
+
+    private InjectionContext makeContext(Class<?>... types) {
+        InjectionContext context = new InjectionContext();
+        for (Class<?> type: types) {
+            MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
+            context = context.push(sat, new AttributesImpl());
+        }
+        return context;
+    }
     
     private void doTest(Class<?>[] chainTypes, Class<?>[] contextTypes, boolean expectedMatch) throws Exception {
-        List<ContextMatcher> matchers = new ArrayList<ContextMatcher>();
+        List<ContextElementMatcher> elementMatchers = new ArrayList<ContextElementMatcher>();
         for (Class<?> type: chainTypes) {
-            matchers.add(new MockContextMatcher(type));
+            elementMatchers.add(new MockContextElementMatcher(type));
         }
-        ContextChain chain = new ContextChain(matchers);
-        
-        List<Pair<Satisfaction, Attributes>> context = new ArrayList<Pair<Satisfaction, Attributes>>();
-        for (Class<?> type: contextTypes) {
-            context.add(Pair.<Satisfaction, Attributes>of(new MockSatisfaction(type, new ArrayList<Desire>()), new AttributesImpl()));
-        }
-        
-        Assert.assertEquals(expectedMatch, chain.matches(context));
+        ElementChainContextMatcher chain = new ElementChainContextMatcher(elementMatchers);
+
+        InjectionContext context = makeContext(contextTypes);
+
+        assertThat(chain.matches(context),
+                   expectedMatch ? notNullValue() : nullValue());
     }
     
     private static class A {}

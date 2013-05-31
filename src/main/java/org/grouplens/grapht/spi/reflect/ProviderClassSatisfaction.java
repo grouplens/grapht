@@ -18,22 +18,16 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.lang.reflect.Type;
-import java.util.List;
+import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.util.ClassProxy;
+import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.ProviderSource;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.util.Types;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -41,9 +35,9 @@ import org.grouplens.grapht.util.Types;
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
-public class ProviderClassSatisfaction implements Satisfaction, Externalizable {
-    // "final"
-    private Class<? extends Provider<?>> providerType;
+public class ProviderClassSatisfaction implements Satisfaction, Serializable {
+    private static final long serialVersionUID = -1L;
+    private final transient Class<? extends Provider<?>> providerType;
 
     /**
      * Create a ProviderClassSatisfaction that wraps a given provider type.
@@ -59,11 +53,6 @@ public class ProviderClassSatisfaction implements Satisfaction, Externalizable {
         
         this.providerType = providerType;
     }
-    
-    /**
-     * Constructor required by {@link Externalizable}.
-     */
-    public ProviderClassSatisfaction() { }
     
     @Override
     public CachePolicy getDefaultCachePolicy() {
@@ -99,6 +88,11 @@ public class ProviderClassSatisfaction implements Satisfaction, Externalizable {
     }
 
     @Override
+    public <T> T visit(SatisfactionVisitor<T> visitor) {
+        return visitor.visitProviderClass(providerType);
+    }
+
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Provider<?> makeProvider(ProviderSource dependencies) {
         // we have to use the raw type because we don't have enough information,
@@ -124,15 +118,37 @@ public class ProviderClassSatisfaction implements Satisfaction, Externalizable {
     public String toString() {
         return "Provider(" + providerType.getSimpleName() + ")";
     }
-    
-    @Override
-    @SuppressWarnings("unchecked")
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        providerType = (Class<? extends Provider<?>>) Types.readClass(in);
+
+    private Object writeReplace() {
+        return new SerialProxy(providerType);
     }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        Types.writeClass(out, providerType);
+
+    private void readObject(ObjectInputStream stream) throws ObjectStreamException {
+        throw new InvalidObjectException("must use serialization proxy");
+    }
+
+    private static class SerialProxy implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final ClassProxy providerType;
+
+        public SerialProxy(Class<?> cls) {
+            providerType = ClassProxy.of(cls);
+        }
+
+        @SuppressWarnings("unchecked")
+        private Object readResolve() throws ObjectStreamException {
+            try {
+                return new ProviderClassSatisfaction((Class<? extends Provider<?>>) providerType.resolve().asSubclass(Provider.class));
+            } catch (ClassNotFoundException e) {
+                InvalidObjectException ex = new InvalidObjectException("cannot resolve " + providerType);
+                ex.initCause(e);
+                throw ex;
+            } catch (ClassCastException e) {
+                InvalidObjectException ex = new InvalidObjectException("class " + providerType + " is not a provider");
+                ex.initCause(e);
+                throw ex;
+            }
+        }
     }
 }
