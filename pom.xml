@@ -5,7 +5,7 @@
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
-  <version>0.5.0</version>
+  <version>0.6.0-SNAPSHOT</version>
   <artifactId>grapht</artifactId>
   <groupId>org.grouplens.grapht</groupId>
   <name>Grapht Dependency Injector</name>
