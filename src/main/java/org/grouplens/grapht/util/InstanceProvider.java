@@ -18,21 +18,39 @@
  */
 package org.grouplens.grapht.util;
 
-import javax.inject.Provider;
-
 /**
  * InstanceProvider is a simple Provider that always provides the same instance.
  * 
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  * @param <T>
  */
-public class InstanceProvider<T> implements Provider<T> {
+public class InstanceProvider<T> implements TypedProvider<T> {
+    private final Class<?> providedType;
     private final T instance;
-    
+
+    /**
+     * Construct a new instance provider.
+     * @param instance The instance.
+     * @deprecated Use {@link Providers#of(Object)} instead.
+     */
+    @Deprecated
     public InstanceProvider(T instance) {
-        this.instance = instance;
+        this(instance, instance == null ? Object.class : instance.getClass());
     }
-    
+
+    InstanceProvider(T instance, Class<?> type) {
+        if (instance != null && !type.isInstance(instance)) {
+            throw new IllegalArgumentException("instance not of specified type");
+        }
+        this.instance = instance;
+        providedType = type;
+    }
+
+    @Override
+    public Class<?> getProvidedType() {
+        return providedType;
+    }
+
     @Override
     public T get() {
         return instance;

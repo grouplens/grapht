@@ -216,7 +216,11 @@ public final class Types {
      */
     @SuppressWarnings("unchecked")
     public static Class<?> getProvidedType(Provider<?> provider) {
-        return getProvidedType((Class<? extends Provider<?>>) provider.getClass());
+        if (provider instanceof TypedProvider) {
+            return ((TypedProvider) provider).getProvidedType();
+        } else {
+            return getProvidedType((Class<? extends Provider<?>>) provider.getClass());
+        }
     }
     
     /**

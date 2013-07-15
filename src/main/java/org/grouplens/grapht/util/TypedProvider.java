@@ -18,27 +18,21 @@
  */
 package org.grouplens.grapht.util;
 
-import javax.annotation.Nonnull;
 import javax.inject.Provider;
 
 /**
- * Utility methods for providers.
+ * A provider that can report at runtime the type it will provide.  This is mostly to allow instance
+ * and wrapper providers to pass through type information.
  *
  * @since 0.6
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public final class Providers {
-    private Providers() {}
-
-    public static <T> Provider<T> of(@Nonnull T object) {
-        return new InstanceProvider<T>(object, object.getClass());
-    }
-
-    public static <T> Provider<T> of(@Nonnull T object, Class<?> type) {
-        return new InstanceProvider<T>(object, type);
-    }
-
-    public static <T> Provider<T> memoize(@Nonnull Provider<T> inner) {
-        return new MemoizingProvider<T>(inner);
-    }
+public interface TypedProvider<T> extends Provider<T> {
+    /**
+     * Get the type of object that will be provided by this provider.  Any object returned from
+     * {@link #get()} must be of this type.  This is used to help the injector refine its types.
+     *
+     * @return The type of objects that will be provided.
+     */
+    Class<?> getProvidedType();
 }

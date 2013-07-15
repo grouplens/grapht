@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.util;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Provider;
 
@@ -29,7 +30,7 @@ import javax.inject.Provider;
  * @author Michael Ludwig <mludwig@cs.umn.edu>
  */
 @ThreadSafe
-public class MemoizingProvider<T> implements Provider<T> {
+public class MemoizingProvider<T> implements TypedProvider<T> {
     private final Provider<T> wrapped;
 
     // We track a boolean because this supports providing null instances, in
@@ -38,11 +39,16 @@ public class MemoizingProvider<T> implements Provider<T> {
     private volatile T cached;
     private volatile boolean invoked;
 
-    public MemoizingProvider(Provider<T> provider) {
+    public MemoizingProvider(@Nonnull Provider<T> provider) {
         Preconditions.notNull("provider", provider);
         wrapped = provider;
         cached = null;
         invoked = false;
+    }
+
+    @Override
+    public Class<?> getProvidedType() {
+        return Types.getProvidedType(wrapped);
     }
 
     @Override
