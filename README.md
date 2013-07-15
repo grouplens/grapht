@@ -31,7 +31,7 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
-### 0.5.0 (in progress)
+### 0.5.0
 
 See [closed issues][issues-0.5] for more details.
 
