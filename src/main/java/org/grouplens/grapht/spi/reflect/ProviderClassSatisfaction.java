@@ -116,7 +116,7 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
     
     @Override
     public String toString() {
-        return "Provider(" + providerType.getSimpleName() + ")";
+        return "Provider(" + providerType.getName() + ")";
     }
 
     private Object writeReplace() {

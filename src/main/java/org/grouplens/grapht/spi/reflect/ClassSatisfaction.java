@@ -105,7 +105,7 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
     
     @Override
     public String toString() {
-        return "Class(" + type.getSimpleName() + ")";
+        return "Class(" + type.getName() + ")";
     }
 
     private Object writeReplace() {
