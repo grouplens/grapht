@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -116,9 +115,13 @@ public class DefaultInjector implements Injector {
         if (defaultPolicy.equals(CachePolicy.NO_PREFERENCE)) {
             throw new IllegalArgumentException("Default CachePolicy cannot be NO_PREFERENCE");
         }
-        
+
         this.spi = spi;
-        solver = new DependencySolver(Arrays.asList(functions), defaultPolicy, maxDepth);
+        solver = DependencySolver.newBuilder()
+                                 .addBindingFunctions(functions)
+                                 .setDefaultPolicy(defaultPolicy)
+                                 .setMaxDepth(maxDepth)
+                                 .build();
         providerCache = new HashMap<Node, Provider<?>>();
     }
     

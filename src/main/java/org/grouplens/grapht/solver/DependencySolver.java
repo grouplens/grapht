@@ -72,7 +72,9 @@ public class DependencySolver {
      *            a cycle exists
      * @throws IllegalArgumentException if maxDepth is less than 1
      * @throws NullPointerException if bindFunctions is null
+     * @deprecated Use {@link DependencySolverBuilder} (and {@link #newBuilder()}) instead.
      */
+    @Deprecated
     public DependencySolver(List<BindingFunction> bindFunctions, CachePolicy defaultPolicy, int maxDepth) {
         Preconditions.notNull("bindFunctions", bindFunctions);
         Preconditions.notNull("defaultPolicy", defaultPolicy);
@@ -80,7 +82,7 @@ public class DependencySolver {
             throw new IllegalArgumentException("Max depth must be at least 1");
         }
         
-        this.functions = bindFunctions;
+        this.functions = new ArrayList<BindingFunction>(bindFunctions);
         this.maxDepth = maxDepth;
         this.defaultPolicy = defaultPolicy;
         
@@ -91,6 +93,16 @@ public class DependencySolver {
         graph.addNode(root);
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
+    }
+
+    /**
+     * Create a new dependency solver builder.
+     *
+     * @return A dependency solver builder.
+     */
+    public static DependencySolverBuilder newBuilder() {
+        // REVIEW Do we want this here, or as DependencySolverBuilder.create()?
+        return new DependencySolverBuilder();
     }
     
     /**
