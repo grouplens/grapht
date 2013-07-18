@@ -101,7 +101,6 @@ public class DependencySolver {
      * @return A dependency solver builder.
      */
     public static DependencySolverBuilder newBuilder() {
-        // REVIEW Do we want this here, or as DependencySolverBuilder.create()?
         return new DependencySolverBuilder();
     }
     
