@@ -19,6 +19,7 @@
 package org.grouplens.grapht.util;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 /**
@@ -34,7 +35,7 @@ public final class Providers {
         return new InstanceProvider<T>(object, object.getClass());
     }
 
-    public static <T> Provider<T> of(@Nonnull T object, Class<?> type) {
+    public static <T> Provider<T> of(@Nullable T object, Class<?> type) {
         return new InstanceProvider<T>(object, type);
     }
 

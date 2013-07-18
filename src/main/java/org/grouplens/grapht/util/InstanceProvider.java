@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.util;
 
+import javax.annotation.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -44,7 +45,7 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
         this(instance, instance == null ? Object.class : instance.getClass());
     }
 
-    InstanceProvider(T instance, Class<?> type) {
+    InstanceProvider(@Nullable T instance, Class<?> type) {
         if (instance != null && !type.isInstance(instance)) {
             throw new IllegalArgumentException("instance not of specified type");
         }
