@@ -20,6 +20,22 @@ package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.spi.Desire;
 
+import javax.annotation.Nullable;
+
+/**
+ * Locate bindings for an injection point.
+ *
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
+ */
 public interface BindingFunction {
+    /**
+     * Find the applicable binding, if any, for a desire in a particular context.
+     *
+     * @param context The context.
+     * @param desire The desire.
+     * @return The result of binding {@code desire}, or {@code null} if there is no binding.
+     * @throws SolverException If there is an error (such as ambiguous bindings).
+     */
+    @Nullable
     BindingResult bind(InjectionContext context, Desire desire) throws SolverException;
 }
