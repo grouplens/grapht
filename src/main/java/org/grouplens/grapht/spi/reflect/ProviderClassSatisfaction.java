@@ -33,7 +33,7 @@ import java.util.List;
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
  * type given a {@link Provider} class capable of providing that type.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ProviderClassSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = -1L;

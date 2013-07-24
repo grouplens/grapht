@@ -26,7 +26,7 @@ import java.io.Serializable;
 /**
  * InstanceProvider is a simple Provider that always provides the same instance.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @param <T>
  */
 public class InstanceProvider<T> implements TypedProvider<T>, Serializable {

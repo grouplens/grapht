@@ -23,7 +23,7 @@ import java.lang.annotation.*;
 /**
  * Mark a component or qualifier as defaulting to {@code null}.
  *
- * @author Michael Ekstrand <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })

@@ -48,7 +48,7 @@ import java.util.*;
  * ensure termination, it has a maximum context depth that is configurable.
  * 
  * @see DefaultInjector
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class DependencySolver {
     private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);

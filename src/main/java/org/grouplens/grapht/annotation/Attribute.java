@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * outcome of bindings, they only add information that is accessible in the
  * final dependency graph.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)

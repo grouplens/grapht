@@ -25,7 +25,7 @@ import javax.inject.Provider;
  * and wrapper providers to pass through type information.
  *
  * @since 0.6
- * @author <a href="http://www.grouplens.org">GroupLens Research</a>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface TypedProvider<T> extends Provider<T> {
     /**

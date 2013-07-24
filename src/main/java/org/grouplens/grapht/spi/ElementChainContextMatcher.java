@@ -36,7 +36,7 @@ import java.util.*;
  * ElementChainContextMatcher matches a context if its element matchers match a
  * subsequence of the nodes within the context.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ElementChainContextMatcher implements ContextMatcher, Serializable {
     private static final long serialVersionUID = 1L;

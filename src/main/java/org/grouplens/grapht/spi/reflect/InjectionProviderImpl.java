@@ -38,7 +38,7 @@ import java.util.Map;
  * type assuming that the type can be represented as a set of desires, and that
  * those desires are satisfied by other Provider implementations.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @param <T> The object type that is provided
  */
 public class InjectionProviderImpl<T> implements Provider<T> {

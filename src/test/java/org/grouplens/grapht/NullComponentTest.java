@@ -29,7 +29,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class NullComponentTest {
     @Test

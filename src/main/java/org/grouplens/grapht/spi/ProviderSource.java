@@ -25,7 +25,7 @@ import javax.inject.Provider;
  * ProviderSource provides a mapping from Desires to Providers that are
  * capable of creating instances satisfying the desire. 
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface ProviderSource {
     /**

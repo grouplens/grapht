@@ -26,7 +26,7 @@ import javax.inject.Provider;
  * Utility methods for providers.
  *
  * @since 0.6
- * @author <a href="http://www.grouplens.org">GroupLens Research</a>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Providers {
     private Providers() {}

@@ -36,7 +36,7 @@ import java.util.List;
  * {@link Object#equals(Object)} and {@link Object#hashCode()} so that they can
  * be de-duplicated, etc.
  * 
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface Satisfaction extends Serializable {
     /**

@@ -30,7 +30,7 @@ import java.util.Collections;
  * functions are each capable of producing a single result for a desire, since
  * binding functions are given a priority.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class MultipleBindingsException extends SolverException {
     private static final long serialVersionUID = 1L;

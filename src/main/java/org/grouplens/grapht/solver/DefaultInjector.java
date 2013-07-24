@@ -45,7 +45,7 @@ import java.util.Map;
  * uses the {@link DependencySolver} to manage dependency resolution. New
  * injectors can easily be built to also use this solver.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @ThreadSafe
 public class DefaultInjector implements Injector {

@@ -29,7 +29,7 @@ import java.lang.reflect.Modifier;
  * Utility to organize checks for common assertions, and to throw
  * appropriately worded exceptions on failure.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Preconditions {
     private Preconditions() { }

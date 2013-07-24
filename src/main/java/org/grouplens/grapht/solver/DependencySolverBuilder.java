@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @see org.grouplens.grapht.solver.DependencySolver#newBuilder()
  * @since 0.6
- * @author <a href="http://www.grouplens.org">GroupLens Research</a>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class DependencySolverBuilder {
     private List<BindingFunction> bindingFunctions = new LinkedList<BindingFunction>();

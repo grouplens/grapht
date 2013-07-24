@@ -22,7 +22,7 @@ package org.grouplens.grapht.spi;
  * Interface for context matches. A context match is the result of successfully
  * matching a {@link ContextMatcher}.
  *
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface ContextMatch extends Comparable<ContextMatch> {
 }

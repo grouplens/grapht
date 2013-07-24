@@ -24,7 +24,7 @@ import javax.inject.Provider;
  * Abstract implementation of {@link SatisfactionVisitor}.  All methods delegate to
  * {@link #visitDefault()}, which in turn returns a default value.
  *
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @since 0.5
  */
 public abstract class AbstractSatisfactionVisitor<T> implements SatisfactionVisitor<T> {

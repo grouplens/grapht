@@ -27,7 +27,7 @@ import javax.inject.Provider;
  * another Provider that it wraps.
  *
  * @param <T>
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @ThreadSafe
 public class MemoizingProvider<T> implements TypedProvider<T> {

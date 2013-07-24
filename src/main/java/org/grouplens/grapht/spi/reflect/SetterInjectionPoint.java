@@ -32,7 +32,7 @@ import java.lang.reflect.Type;
 /**
  * SetterInjectionPoint represents an injection point via a setter method.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class SetterInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;

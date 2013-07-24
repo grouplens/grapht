@@ -26,7 +26,7 @@ import javax.inject.Qualifier;
  * an annotation is intended to be used as a qualifier but has not been
  * annotated with {@link Qualifier}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InvalidBindingException extends RuntimeException {
     private static final long serialVersionUID = 1L;

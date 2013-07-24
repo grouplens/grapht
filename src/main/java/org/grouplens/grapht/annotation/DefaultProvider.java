@@ -25,7 +25,7 @@ import java.lang.annotation.*;
  * DefaultProvider specifies a Provider implementation to act as a default binding
  * for types annotated with it.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @Documented
 @Target(ElementType.TYPE)

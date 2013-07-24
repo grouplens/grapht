@@ -37,7 +37,7 @@ import java.io.Serializable;
  * type inherits from the matcher's type and if the node's {@link Qualifier}
  * matches the configured {@link QualifierMatcher}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ReflectionContextElementMatcher implements ContextElementMatcher, Serializable {
     private static final long serialVersionUID = -1L;

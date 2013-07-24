@@ -36,7 +36,7 @@ import java.lang.annotation.Annotation;
  * {@link #in(Class)} or {@link #in(Class, Class)}.
  * 
  * @see org.grouplens.grapht.spi.ElementChainContextMatcher
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface Context {
     /**

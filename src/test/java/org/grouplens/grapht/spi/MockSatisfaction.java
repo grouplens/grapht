@@ -29,7 +29,7 @@ import java.util.List;
  * types of test cases. It can be configured by its constructors, although
  * {@link #makeProvider(ProviderSource)} always returns the same provider.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class MockSatisfaction implements Satisfaction {
     private static final long serialVersionUID = 1L;

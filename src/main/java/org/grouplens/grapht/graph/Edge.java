@@ -40,7 +40,7 @@ import java.util.List;
  * from the graph's perspective. In those situations, the graph has multiple
  * edges from one node to the other.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class Edge implements Serializable {
     private static final long serialVersionUID = 2L;

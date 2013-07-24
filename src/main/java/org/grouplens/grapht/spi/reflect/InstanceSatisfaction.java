@@ -33,8 +33,8 @@ import java.util.List;
  * Satisfaction implementation wrapping an instance. It has no dependencies, and
  * the resulting providers just return the instance.
  * 
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InstanceSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = 1L;

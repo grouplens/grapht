@@ -21,7 +21,7 @@ package org.grouplens.grapht.spi.reflect.types;
 import org.grouplens.grapht.annotation.DefaultNull;
 
 /**
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @DefaultNull
 public class TypeDftN {

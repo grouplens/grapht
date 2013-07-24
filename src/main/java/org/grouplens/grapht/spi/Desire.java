@@ -26,7 +26,7 @@ import java.io.Serializable;
  * iteratively resolved and narrowed until they finally correspond to
  * {@link Satisfaction}s.
  *
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  *
  */
 public interface Desire extends Serializable {

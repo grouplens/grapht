@@ -41,7 +41,7 @@ import java.lang.annotation.Annotation;
  * Alternatively, {@link BindingFunctionBuilder}, and {@link InjectSPI}
  * can be used to create your own Injector implementations.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface Injector {
     /**

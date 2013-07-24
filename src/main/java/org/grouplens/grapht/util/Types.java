@@ -33,8 +33,8 @@ import java.util.Queue;
 /**
  * Static helper methods for working with types.
  * 
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Types {
 

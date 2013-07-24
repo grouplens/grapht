@@ -34,7 +34,7 @@ import java.lang.annotation.Annotation;
 /**
  * Utilities related to Qualifier implementations.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Qualifiers {
     private Qualifiers() { }

@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * ContextImpl is the basic implementation of Context.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 class ContextImpl extends AbstractContext {
     private final ElementChainContextMatcher context;

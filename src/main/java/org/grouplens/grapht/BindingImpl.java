@@ -48,7 +48,7 @@ import java.util.Set;
  * BindingImpl is the default implementation of Binding that is used by
  * {@link BindingFunctionBuilder}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @param <T> The bindings source's type
  */
 class BindingImpl<T> implements Binding<T> {

@@ -41,7 +41,7 @@ import java.util.List;
  * injected, and the Foo instances returned by that Provider's get() method
  * would be configured as if the injection point was for <code>Foo</code>.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ProviderBindingFunction implements BindingFunction {
     private final InjectSPI spi;
