@@ -32,7 +32,7 @@ import java.lang.reflect.Type;
 /**
  * FieldInjectionPoint is an injection point wrapping a field.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;

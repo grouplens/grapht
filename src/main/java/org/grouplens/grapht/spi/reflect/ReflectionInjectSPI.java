@@ -32,7 +32,7 @@ import java.lang.annotation.Annotation;
  * points that have been annotated with {@link Inject} to determine a type's
  * dependencies.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override

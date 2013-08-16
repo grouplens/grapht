@@ -27,7 +27,7 @@ import java.lang.reflect.Member;
  * exposes the type that could not be instantiated, and possible the member
  * (method, construcotr, or field) that could not be injected into.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectionException extends RuntimeException {
     private static final long serialVersionUID = 1L;

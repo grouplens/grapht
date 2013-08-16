@@ -16,26 +16,23 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.solver;
+package org.grouplens.grapht.util;
 
-import org.grouplens.grapht.spi.Desire;
-
-import javax.annotation.Nullable;
+import javax.inject.Provider;
 
 /**
- * Locate bindings for an injection point.
+ * A provider that can report at runtime the type it will provide.  This is mostly to allow instance
+ * and wrapper providers to pass through type information.
  *
+ * @since 0.6
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface BindingFunction {
+public interface TypedProvider<T> extends Provider<T> {
     /**
-     * Find the applicable binding, if any, for a desire in a particular context.
+     * Get the type of object that will be provided by this provider.  Any object returned from
+     * {@link #get()} must be of this type.  This is used to help the injector refine its types.
      *
-     * @param context The context.
-     * @param desire The desire.
-     * @return The result of binding {@code desire}, or {@code null} if there is no binding.
-     * @throws SolverException If there is an error (such as ambiguous bindings).
+     * @return The type of objects that will be provided.
      */
-    @Nullable
-    BindingResult bind(InjectionContext context, Desire desire) throws SolverException;
+    Class<?> getProvidedType();
 }

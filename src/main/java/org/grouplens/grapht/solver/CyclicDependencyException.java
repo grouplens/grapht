@@ -24,7 +24,7 @@ import org.grouplens.grapht.spi.Desire;
  * Thrown by when a cyclic dependency is detected and could not be broken or
  * bypassed by the solver.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class CyclicDependencyException extends SolverException {
     private static final long serialVersionUID = 1L;

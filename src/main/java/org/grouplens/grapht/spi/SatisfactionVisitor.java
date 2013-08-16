@@ -24,7 +24,7 @@ import javax.inject.Provider;
  * An interface for visiting {@link Satisfaction}s.
  *
  * @param <T> The type returned from this satisfaction's values.
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @since 0.5
  * @see {@link Satisfaction}
  */

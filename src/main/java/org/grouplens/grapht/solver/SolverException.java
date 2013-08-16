@@ -28,7 +28,7 @@ import org.grouplens.grapht.spi.Satisfaction;
  * Thrown by {@link BindingFunction} or {@link DependencySolver} when a desire
  * cannot be satisfied.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class SolverException extends Exception {
     private static final long serialVersionUID = 1L;

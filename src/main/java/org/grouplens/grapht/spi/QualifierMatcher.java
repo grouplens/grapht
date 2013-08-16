@@ -38,7 +38,7 @@ import java.lang.annotation.Annotation;
  * All QualifierMatchers created by the same InjectSPI must be comparable,
  * matchers from different SPIs do not need to be comparable.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface QualifierMatcher extends Comparable<QualifierMatcher>, Serializable {
     /**

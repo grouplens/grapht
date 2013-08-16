@@ -24,7 +24,7 @@ package org.grouplens.grapht;
  * separated. This also allows you to share example configurations if your
  * application has complex possibilities.
  *
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface Module {
     /**

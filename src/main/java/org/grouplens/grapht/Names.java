@@ -28,7 +28,7 @@ import javax.inject.Named;
  * configuring an injector that relies on named qualifiers. Qualifiers with
  * other attributes can by instantiated using the {@link AnnotationBuilder}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class Names {
     /**

@@ -42,7 +42,7 @@ import java.io.Serializable;
  * context list. The ElementChainContextMatcher can then be used to determine if the list of
  * ContextMatchers applies to any given dependency context.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface ContextElementMatcher extends Serializable {
     /**

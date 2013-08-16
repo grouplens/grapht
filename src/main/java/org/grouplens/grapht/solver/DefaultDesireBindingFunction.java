@@ -40,7 +40,7 @@ import java.util.Properties;
  * it will also check for {@link DefaultDouble}, {@link DefaultInteger},
  * {@link DefaultBoolean}, and {@link DefaultString}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class DefaultDesireBindingFunction implements BindingFunction {
     private static final String META_INF_DEFAULTS = "/META-INF/grapht/defaults/";

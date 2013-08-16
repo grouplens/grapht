@@ -37,7 +37,7 @@ import java.util.Map.Entry;
  * converts calls to {@link Context} and {@link Binding} methods into multiple
  * {@link BindingFunction BindingFunctions}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class BindingFunctionBuilder implements Cloneable {
     /**

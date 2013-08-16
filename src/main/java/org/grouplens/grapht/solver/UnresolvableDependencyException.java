@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Thrown when a desire cannot be resolved to an instantiable satisfaction.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class UnresolvableDependencyException extends SolverException {
     private static final long serialVersionUID = 1L;

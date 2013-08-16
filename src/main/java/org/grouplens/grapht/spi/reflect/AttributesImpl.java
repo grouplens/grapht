@@ -30,7 +30,7 @@ import java.util.Map;
  * Basic implementation of {@link Attributes} based on the {@link Annotation}
  * array reported by the injection point.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class AttributesImpl implements Attributes {
     private final Map<Class<? extends Annotation>, Annotation> attrs;

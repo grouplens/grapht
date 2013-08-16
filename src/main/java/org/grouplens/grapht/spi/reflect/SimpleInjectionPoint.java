@@ -36,7 +36,7 @@ import java.lang.reflect.Member;
  * SimpleInjectionPoint is a synthetic injection point used for
  * {@link InjectSPI#desire(Annotation, Class, boolean)}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;

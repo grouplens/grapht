@@ -35,7 +35,7 @@ import java.util.List;
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the
  * <code>null</code> value.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class NullSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = -1L;

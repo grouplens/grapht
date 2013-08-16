@@ -39,7 +39,7 @@ import java.util.*;
  * implementation to represent a desire, except that the point of injection is
  * abstracted by an {@link InjectionPoint}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ReflectionDesire implements Desire, Serializable {
     private static final long serialVersionUID = -1L;

@@ -46,7 +46,7 @@ import java.util.*;
  * Essentially, each InjectionContext instance is associated with a single
  * resolution attempt for an injection point.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectionContext implements Serializable {
     private static final long serialVersionUID = 1L;

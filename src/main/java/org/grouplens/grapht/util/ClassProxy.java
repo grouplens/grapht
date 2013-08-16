@@ -43,7 +43,7 @@ import java.util.*;
  *     to fully reconstruct the class.
  * </p>
  *
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @Immutable
 public final class ClassProxy implements Serializable {

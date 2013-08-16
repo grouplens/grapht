@@ -31,7 +31,7 @@ import java.util.Map;
  * bindings are represented as a map from input Desires to output Desires, via
  * {@link #addMapping(Desire, Desire)}.
  * 
- * @author Michael Ludwig
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class MockBindRule implements BindRule {
     private final Map<Desire, Desire> bindings;

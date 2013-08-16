@@ -34,7 +34,7 @@ import java.io.*;
 /**
  * Foundational implementation of {@link BindRule}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 final class BindRuleImpl implements BindRule, Serializable {
     private static final long serialVersionUID = -1L;

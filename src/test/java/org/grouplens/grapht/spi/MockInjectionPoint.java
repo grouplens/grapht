@@ -30,7 +30,7 @@ import java.lang.reflect.Type;
  * transient state. It has no actual injectable point but can be used when
  * constructing ReflectionDesires on the fly for tests.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class MockInjectionPoint implements InjectionPoint {
     private static final long serialVersionUID = 1L;

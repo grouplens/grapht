@@ -16,26 +16,30 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.solver;
+package org.grouplens.grapht.util;
 
-import org.grouplens.grapht.spi.Desire;
-
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Provider;
 
 /**
- * Locate bindings for an injection point.
+ * Utility methods for providers.
  *
+ * @since 0.6
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface BindingFunction {
-    /**
-     * Find the applicable binding, if any, for a desire in a particular context.
-     *
-     * @param context The context.
-     * @param desire The desire.
-     * @return The result of binding {@code desire}, or {@code null} if there is no binding.
-     * @throws SolverException If there is an error (such as ambiguous bindings).
-     */
-    @Nullable
-    BindingResult bind(InjectionContext context, Desire desire) throws SolverException;
+public final class Providers {
+    private Providers() {}
+
+    public static <T> Provider<T> of(@Nonnull T object) {
+        return new InstanceProvider<T>(object, object.getClass());
+    }
+
+    public static <T> Provider<T> of(@Nullable T object, Class<?> type) {
+        return new InstanceProvider<T>(object, type);
+    }
+
+    public static <T> Provider<T> memoize(@Nonnull Provider<T> inner) {
+        return new MemoizingProvider<T>(inner);
+    }
 }

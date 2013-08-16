@@ -37,7 +37,7 @@ import java.util.*;
  * nodes and edges. It assumes that all input nodes and edges are not null and
  * will throw exceptions otherwise. Graph is not thread safe.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Graph implements Serializable, Cloneable {
     private static final long serialVersionUID = -1L;

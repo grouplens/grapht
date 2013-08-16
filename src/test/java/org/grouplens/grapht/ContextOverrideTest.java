@@ -31,7 +31,7 @@ import static org.junit.Assert.assertThat;
 /**
  * Test using multiple context bindings to separate components.
  *
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ContextOverrideTest {
     private InjectorBuilder build;

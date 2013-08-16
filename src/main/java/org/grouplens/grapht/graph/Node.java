@@ -39,7 +39,7 @@ import java.io.Serializable;
  * 
  * @see Edge
  * @see Graph
- * @author Michael Ludwig <mludwig@cs.umn.edu
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class Node implements Serializable {
     private static final long serialVersionUID = 2L;

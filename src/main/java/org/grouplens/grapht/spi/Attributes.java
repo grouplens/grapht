@@ -31,7 +31,7 @@ import java.util.Collection;
  * applied. Additional attributes can be defined by creating a new annotation
  * type that is itself annotated with {@link Attribute}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface Attributes {
     /**

@@ -28,7 +28,7 @@ import java.lang.reflect.Type;
  * InjectionPoint represents a point of injection for an instantiable type.
  * Examples include a constructor parameter, a setter method, or a field.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface InjectionPoint extends Serializable {
     /**

@@ -40,7 +40,7 @@ import java.lang.annotation.Annotation;
  * bind rules, a {@link DefaultInjector} to resolve dependencies, and the
  * {@link ReflectionInjectSPI} to access dependency information.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectorBuilder extends AbstractContext {
     private final BindingFunctionBuilder builder;

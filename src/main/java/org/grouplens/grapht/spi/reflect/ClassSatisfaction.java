@@ -34,7 +34,7 @@ import java.util.List;
  * ClassSatisfaction is a satisfaction that instantiates instances of a given
  * type.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ClassSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = -1L;
@@ -105,7 +105,7 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
     
     @Override
     public String toString() {
-        return "Class(" + type.getSimpleName() + ")";
+        return "Class(" + type.getName() + ")";
     }
 
     private Object writeReplace() {

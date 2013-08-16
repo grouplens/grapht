@@ -50,7 +50,7 @@ import java.util.Map;
  * <p>The proxies returned by this builder are immutable and serializable, like
  * those returned by {@link java.lang.reflect.AnnotatedElement}.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @param <T> The annotation type created
  */
 public final class AnnotationBuilder<T extends Annotation> {

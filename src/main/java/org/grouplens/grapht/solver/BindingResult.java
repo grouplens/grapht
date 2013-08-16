@@ -27,7 +27,7 @@ import org.grouplens.grapht.util.Preconditions;
  * effectively a {@link Desire} with additional metadata needed to implement
  * certain features within the dependency solver.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class BindingResult {
     private final Desire desire;

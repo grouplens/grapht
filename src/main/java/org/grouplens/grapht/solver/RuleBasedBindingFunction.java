@@ -50,7 +50,7 @@ import java.util.*;
  * the type of the BindRule. If multiple rules tie for best, then the solver
  * fails with a checked exception.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class RuleBasedBindingFunction implements BindingFunction {
     private static final String APPLIED_RULES = "APPLIED_BIND_RULES";

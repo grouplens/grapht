@@ -28,7 +28,7 @@ import java.io.Serializable;
  * the policy is dependent on the edges and bindings taken to reach a particular
  * node in the graph.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class CachedSatisfaction implements Serializable {
     private static final long serialVersionUID = 2L;

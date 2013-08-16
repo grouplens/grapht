@@ -35,7 +35,7 @@ import java.util.List;
  * dependencies and it always returns the same Provider when
  * {@link #makeProvider(ProviderSource)} is invoked.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ProviderInstanceSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = 1L;

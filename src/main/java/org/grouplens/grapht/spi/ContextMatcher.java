@@ -24,7 +24,7 @@ import org.grouplens.grapht.solver.InjectionContext;
  * Interface for context matchers.  A context matcher matches contexts to
  * determine whether particular bind rules are to be applied.
  *
- * @author Michael Ekstrand
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface ContextMatcher {
     /**

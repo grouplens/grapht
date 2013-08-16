@@ -35,7 +35,7 @@ import java.lang.reflect.Type;
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter
  * of a constructor.
  * 
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;

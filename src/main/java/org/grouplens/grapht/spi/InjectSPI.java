@@ -36,7 +36,7 @@ import java.lang.annotation.Annotation;
  * using reflection to analyze types.
  * 
  * @see ReflectionInjectSPI
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface InjectSPI {
     /**

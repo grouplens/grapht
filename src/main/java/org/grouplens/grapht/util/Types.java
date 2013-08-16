@@ -33,8 +33,8 @@ import java.util.Queue;
 /**
  * Static helper methods for working with types.
  * 
- * @author Michael Ekstrand <ekstrand@cs.umn.edu>
- * @author Michael Ludwig <mludwig@cs.umn.edu>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Types {
 
@@ -216,7 +216,11 @@ public final class Types {
      */
     @SuppressWarnings("unchecked")
     public static Class<?> getProvidedType(Provider<?> provider) {
-        return getProvidedType((Class<? extends Provider<?>>) provider.getClass());
+        if (provider instanceof TypedProvider) {
+            return ((TypedProvider) provider).getProvidedType();
+        } else {
+            return getProvidedType((Class<? extends Provider<?>>) provider.getClass());
+        }
     }
     
     /**

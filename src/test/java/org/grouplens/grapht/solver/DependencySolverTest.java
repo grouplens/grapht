@@ -33,7 +33,11 @@ import java.util.*;
 
 public class DependencySolverTest {
     private DependencySolver createSolver(Map<ContextMatcher, Collection<BindRule>> rules) {
-        return new DependencySolver(Arrays.<BindingFunction>asList(new RuleBasedBindingFunction(rules)), CachePolicy.NO_PREFERENCE, 100);
+        return DependencySolver.newBuilder()
+                .addBindingFunction(new RuleBasedBindingFunction(rules))
+                .setDefaultPolicy(CachePolicy.NO_PREFERENCE)
+                .setMaxDepth(100)
+                .build();
     }
     
     // bypass synthetic root and return node that resolves the desire 
