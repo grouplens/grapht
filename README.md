@@ -26,10 +26,20 @@ following to the dependencies section in your POM:
     <dependency>
       <groupId>org.grouplens.grapht</groupId>
       <artifactId>grapht</artifactId>
-      <version>0.3.0</version>
+      <version>0.6.0</version>
     </dependency>
     
 ## Release Notes
+
+### 0.6.0
+
+See [closed issues][issues-0.6] for more details.
+
+* Added typed providers
+* Add `DependencySolverBuilder` to make construction more obvious
+* Make instance providers serializable
+
+[issues-0.6]: https://bitbucket.org/grouplens/grapht/issues?status=duplicate&status=invalid&status=resolved&status=wontfix&milestone=0.6.0
 
 ### 0.5.0
 
