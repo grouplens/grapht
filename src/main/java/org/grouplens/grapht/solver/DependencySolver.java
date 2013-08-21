@@ -279,7 +279,7 @@ public class DependencySolver {
      * @param graph The graph to store the results in.
      * @param context The context of {@code parent}.
      * @param defer The map of deferred nodes.
-     * @throws SolverException if thtere is an error resolving the nodes.
+     * @throws SolverException if there is an error resolving the nodes.
      */
     private void resolveFully(Desire desire, Node parent, Graph graph, InjectionContext context, 
                               Map<Node, DeferredResult> defer) throws SolverException {
