@@ -95,10 +95,8 @@ public class DependencySolver {
      *            a cycle exists
      * @throws IllegalArgumentException if maxDepth is less than 1
      * @throws NullPointerException if bindFunctions is null
-     * @deprecated Use {@link DependencySolverBuilder} (and {@link #newBuilder()}) instead.
      */
-    @Deprecated
-    public DependencySolver(List<BindingFunction> bindFunctions, CachePolicy defaultPolicy, int maxDepth) {
+    DependencySolver(List<BindingFunction> bindFunctions, CachePolicy defaultPolicy, int maxDepth) {
         Preconditions.notNull("bindFunctions", bindFunctions);
         Preconditions.notNull("defaultPolicy", defaultPolicy);
         if (maxDepth <= 0) {
