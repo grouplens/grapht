@@ -22,6 +22,7 @@ import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.util.Preconditions;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,10 +64,7 @@ public class DependencySolverBuilder {
      * @return The builder (for chaining).
      */
     public DependencySolverBuilder addBindingFunctions(@Nonnull BindingFunction... funcs) {
-        for (BindingFunction fn: funcs) {
-            addBindingFunction(fn);
-        }
-        return this;
+        return addBindingFunctions(Arrays.asList(funcs));
     }
 
     /**
