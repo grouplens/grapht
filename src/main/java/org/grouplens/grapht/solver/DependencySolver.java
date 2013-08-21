@@ -82,6 +82,7 @@ public class DependencySolver {
     private final CachePolicy defaultPolicy;
 
     private final List<BindingFunction> functions;
+    private final List<BindingFunction> triggerFunctions;
     
     private DAGNode<CachedSatisfaction,DesireChain> graph;
     private Set<DAGEdge<CachedSatisfaction,DesireChain>> backEdges;
@@ -96,7 +97,9 @@ public class DependencySolver {
      * @throws IllegalArgumentException if maxDepth is less than 1
      * @throws NullPointerException if bindFunctions is null
      */
-    DependencySolver(List<BindingFunction> bindFunctions, CachePolicy defaultPolicy, int maxDepth) {
+    DependencySolver(List<BindingFunction> bindFunctions,
+                     List<BindingFunction> triggers,
+                     CachePolicy defaultPolicy, int maxDepth) {
         Preconditions.notNull("bindFunctions", bindFunctions);
         Preconditions.notNull("defaultPolicy", defaultPolicy);
         if (maxDepth <= 0) {
@@ -104,6 +107,7 @@ public class DependencySolver {
         }
         
         this.functions = new ArrayList<BindingFunction>(bindFunctions);
+        this.triggerFunctions = new ArrayList<BindingFunction>(triggers);
         this.maxDepth = maxDepth;
         this.defaultPolicy = defaultPolicy;
         
