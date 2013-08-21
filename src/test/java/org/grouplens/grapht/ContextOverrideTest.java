@@ -117,6 +117,35 @@ public class ContextOverrideTest {
         assertThat(out.inner.plug, instanceOf(Plug.class));
     }
 
+    /**
+     * Test anchored root binding.
+     */
+    @Test
+    public void testAnchoredToRoot() {
+        build.bind(IPlug.class)
+             .to(PlugA.class);
+        build.at(null)
+             .bind(IPlug.class)
+             .to(PlugH.class);
+        Injector inj = build.build();
+
+        // Does directly requesting a plug get us the anchored binding?
+        assertThat(inj.getInstance(IPlug.class),
+                   instanceOf(PlugH.class));
+
+        // Is the non-anchored binding used for dependencies?
+        Outer out = inj.getInstance(Outer.class);
+        assertThat(out.plug,
+                   instanceOf(PlugA.class));
+        assertThat(out.inner.plug,
+                   instanceOf(PlugA.class));
+        assertThat(out.plug, sameInstance(out.inner.plug));
+
+        // quick check this again, make sure nothing changed
+        assertThat(inj.getInstance(IPlug.class),
+                   instanceOf(PlugH.class));
+    }
+
     @DefaultImplementation(PlugA.class)
     public static interface IPlug {}
     public static class PlugA implements IPlug {}

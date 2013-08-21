@@ -47,7 +47,14 @@ public class MockContextElementMatcher implements ContextElementMatcher {
     
     @Override
     public boolean matches(Pair<Satisfaction, Attributes> n) {
-        return type.isAssignableFrom(n.getLeft().getErasedType()) && qualifier.matches(n.getRight().getQualifier());
+        Satisfaction sat = n.getLeft();
+        boolean typeMatches;
+        if (sat == null) {
+            typeMatches = type == null;
+        } else {
+            typeMatches = type.isAssignableFrom(sat.getErasedType());
+        }
+        return typeMatches && qualifier.matches(n.getRight().getQualifier());
     }
 
     @Override

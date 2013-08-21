@@ -149,7 +149,7 @@ public class ElementChainContextMatcherTest {
     }
 
     private InjectionContext makeContext(Class<?>... types) {
-        InjectionContext context = new InjectionContext();
+        InjectionContext context = InjectionContext.empty();
         for (Class<?> type: types) {
             MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
             context = context.push(sat, new AttributesImpl());

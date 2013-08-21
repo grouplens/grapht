@@ -25,6 +25,7 @@ import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,9 @@ public class DependencySolver {
             
             // before any deferred nodes are processed, we use a synthetic root
             // and null original desire since nothing produced this root
-            deferredNodes.add(new DeferredResult(new Node(), null, new InjectionContext()));
+            InjectionContext initialContext =
+                    InjectionContext.empty().push(null, new AttributesImpl());
+            deferredNodes.add(new DeferredResult(new Node(), null, initialContext));
             
             while(!deferredNodes.isEmpty()) {
                 DeferredResult treeRoot = deferredNodes.poll();
@@ -260,7 +263,16 @@ public class DependencySolver {
         }
         return options;
     }
-    
+
+    /**
+     * Resolve a desire and its dependencies, inserting them into the graph.
+     * @param desire The desire to resolve.
+     * @param parent The parent node (in the initial call, this is the root node).
+     * @param graph The graph to store the results in.
+     * @param context The context of {@code parent}.
+     * @param defer The map of deferred nodes.
+     * @throws SolverException if thtere is an error resolving the nodes.
+     */
     private void resolveFully(Desire desire, Node parent, Graph graph, InjectionContext context, 
                               Map<Node, DeferredResult> defer) throws SolverException {
         // check context depth against max to detect likely dependency cycles

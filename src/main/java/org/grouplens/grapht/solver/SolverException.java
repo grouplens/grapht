@@ -56,8 +56,10 @@ public class SolverException extends Exception {
         sb.append("Context:\n");
         sb.append("  Type path:\n");
         for (Pair<Satisfaction, Attributes> path: ctx.getTypePath()) {
+            Satisfaction sat = path.getLeft();
+            Class<?> type = sat == null ? null : sat.getErasedType();
             sb.append("    ")
-              .append(format(path.getRight(), path.getLeft().getErasedType()))
+              .append(format(path.getRight(), type))
               .append('\n');
         }
         sb.append('\n');
@@ -79,6 +81,7 @@ public class SolverException extends Exception {
 
     protected String format(Attributes attr, Class<?> type) {
         String base = (attr.getQualifier() != null ? attr.getQualifier() + ":" : "");
-        return base + type.getName();
+        String name = type == null ? null : type.getName();
+        return base + name;
     }
 }

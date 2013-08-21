@@ -60,7 +60,7 @@ public class InjectionContext implements Serializable {
     /**
      * Create a new InjectionContext that has an empty context.
      */
-    public InjectionContext() {
+    private InjectionContext() {
         // The default context starts out with an empty type path, no prior
         // desires and no stored values
         context = Collections.emptyList();
@@ -77,6 +77,14 @@ public class InjectionContext implements Serializable {
         context = Collections.unmodifiableList(newCtx);
         desires = new ArrayList<Desire>();
         values = new HashMap<String, Object>();
+    }
+
+    /**
+     * Create a new empty injection context.
+     * @return An empty injection context.
+     */
+    public static InjectionContext empty() {
+        return new InjectionContext();
     }
     
     /**

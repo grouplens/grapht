@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.ContextElementMatcher;
@@ -26,6 +28,7 @@ import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
+import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -42,6 +45,7 @@ import java.io.Serializable;
 public class ReflectionContextElementMatcher implements ContextElementMatcher, Serializable {
     private static final long serialVersionUID = -1L;
 
+    @Nullable
     private final transient Class<?> type;
     private final transient QualifierMatcher qualifier;
     private final transient boolean anchored;
@@ -78,9 +82,9 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
      * @param anchored  Whether the element matcher is anchored (see {@link #isAnchored()})
      * @throws NullPointerException if type or qualifier is null
      */
-    public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier,
+    public ReflectionContextElementMatcher(@Nullable Class<?> type,
+                                           QualifierMatcher qualifier,
                                            boolean anchored) {
-        Preconditions.notNull("type", type);
         Preconditions.notNull("qualifier matcher", qualifier);
 
         this.type = type;
@@ -105,12 +109,16 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
     @Override
     public boolean matches(Pair<Satisfaction, Attributes> n) {
         // we must check for nulls in case it is a synthetic satisfaction
-        if (n.getLeft().getErasedType() != null && type.isAssignableFrom(n.getLeft().getErasedType())) {
-            // type is a match, so check the QualifierMatcher
-            return qualifier.matches(n.getRight().getQualifier());
+        Satisfaction sat = n.getLeft();
+        boolean typeMatches;
+        if (type == null) {
+            typeMatches = sat == null || sat.getErasedType() == null;
+        } else {
+            typeMatches = sat != null && sat.getErasedType() != null &&
+                          type.isAssignableFrom(sat.getErasedType());
         }
-        
-        return false;
+
+        return typeMatches && qualifier.matches(n.getRight().getQualifier());
     }
 
     @Override
@@ -120,21 +128,29 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ReflectionContextElementMatcher)) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof ReflectionContextElementMatcher) {
+            ReflectionContextElementMatcher r = (ReflectionContextElementMatcher) o;
+            return new EqualsBuilder().append(type, r.type)
+                                      .append(qualifier, r.qualifier)
+                                      .isEquals();
+        } else {
             return false;
         }
-        ReflectionContextElementMatcher r = (ReflectionContextElementMatcher) o;
-        return r.type.equals(type) && r.qualifier.equals(qualifier);
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ qualifier.hashCode();
+        return new HashCodeBuilder().append(type)
+                                    .append(qualifier)
+                                    .toHashCode();
     }
     
     @Override
     public String toString() {
-        return "Context(" + qualifier + ":" + type.getSimpleName() + ")";
+        String tname = type == null ? "null" : type.getSimpleName();
+        return "Context(" + qualifier + ":" + tname + ")";
     }
 
     private Object writeReplace() {

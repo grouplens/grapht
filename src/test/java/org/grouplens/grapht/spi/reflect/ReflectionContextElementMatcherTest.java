@@ -81,6 +81,12 @@ public class ReflectionContextElementMatcherTest {
     public void testSubclassNoRoleInheritenceNoMatch() {
         doTestMatch(A.class, RoleA.class, B.class, RoleD.class, false);
     }
+
+    @Test
+    public void testNull() {
+        doTestMatch(null, null, null, null, true);
+        doTestMatch(null, null, A.class, null, false);
+    }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void doTestMatch(Class<?> matcherType, Class<? extends Annotation> matcherRole,
@@ -88,23 +94,27 @@ public class ReflectionContextElementMatcherTest {
                              boolean expected) {
         QualifierMatcher mr = (matcherRole == null ? new ReflectionInjectSPI().matchDefault() : new ReflectionInjectSPI().match(matcherRole));
         final Annotation sr = (satisfactionRole == null ? null : new AnnotationBuilder(satisfactionRole).build());
-        Pair<Satisfaction, Attributes> node = Pair.<Satisfaction, Attributes>of(new ClassSatisfaction(satisfactionType),
-                                                                                new Attributes() {
-                                                                                    @Override
-                                                                                    public Annotation getQualifier() {
-                                                                                        return sr;
-                                                                                    }
+        Satisfaction sat = null;
+        if (satisfactionType != null) {
+            sat = new ClassSatisfaction(satisfactionType);
+        }
+        Attributes attrs = new Attributes() {
+            @Override
+            public Annotation getQualifier() {
+                return sr;
+            }
 
-                                                                                    @Override
-                                                                                    public <T extends Annotation> T getAttribute(Class<T> atype) {
-                                                                                        return null;
-                                                                                    }
-                                                                                    
-                                                                                    @Override
-                                                                                    public Collection<Annotation> getAttributes() {
-                                                                                        return Collections.emptyList();
-                                                                                    }
-        });
+            @Override
+            public <T extends Annotation> T getAttribute(Class<T> atype) {
+                return null;
+            }
+
+            @Override
+            public Collection<Annotation> getAttributes() {
+                return Collections.emptyList();
+            }
+        };
+        Pair<Satisfaction, Attributes> node = Pair.of(sat, attrs);
         
         ReflectionContextElementMatcher cm = new ReflectionContextElementMatcher(matcherType, mr);
         Assert.assertEquals(expected, cm.matches(node));
