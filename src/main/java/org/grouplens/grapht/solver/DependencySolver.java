@@ -166,7 +166,15 @@ public class DependencySolver {
             throw e;
         }
     }
-    
+
+    /**
+     * Merge a graph, resulting from a resolve, into the graph being built.
+     *
+     * @param fullTree The unmerged graph.
+     * @param root The root node (in {@code fullTree}).
+     * @param defer The map of deferred nodes.  If a node to be merged is in this, it is queued
+     *              for re-resolution.
+     */
     private void merge(Graph fullTree, Node root, Map<Node, DeferredResult> defer) {
         List<Node> sorted = fullTree.sort(root);
         
