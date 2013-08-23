@@ -2,6 +2,7 @@ package org.grouplens.grapht.util;
 
 import com.google.common.collect.Iterators;
 
+import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -12,7 +13,9 @@ import java.util.NoSuchElementException;
  * @since 0.7.0
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public abstract class AbstractChain<E> extends AbstractList<E> {
+public abstract class AbstractChain<E> extends AbstractList<E> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     protected final AbstractChain<E> previous;
     protected final E tailValue;
     protected final int length;
