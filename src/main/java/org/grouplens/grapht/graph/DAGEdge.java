@@ -8,6 +8,8 @@ import java.io.Serializable;
 /**
  * Edges in DAGs.  These arise from building nodes with a {@link DAGNodeBuilder}.
  *
+ * <p>Two edges are equal if they connect the same pair of nodes and have the same label.
+ *
  * @param <V> The type of node labels.
  * @param <E> The type of edge labels.
  * @see DAGNode
@@ -85,5 +87,17 @@ public class DAGEdge<V,E> implements Serializable {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("edge ")
+          .append(label)
+          .append(" from ")
+          .append(head)
+          .append(" to ")
+          .append(tail);
+        return sb.toString();
     }
 }

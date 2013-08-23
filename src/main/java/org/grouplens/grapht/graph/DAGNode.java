@@ -1,22 +1,21 @@
 package org.grouplens.grapht.graph;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
  * A node in a (rooted) DAG.  Since DAGs are rooted, a full graph is just represented by its root
- * node.  Two nodes are equal if their labels and adjacency lists are equal (therefore, they are
- * equal if and only if they are the roots of equal graphs).
+ * node.  Nodes are compared using reference equality, so distinct nodes do not compare equal even
+ * if they have identical labels and edge sets.
  *
  * <p>Nodes and edges may not have null labels.  There <em>may</em> be multiple edges from one
  * node to another, so long as those edges have distinct labels.
@@ -82,7 +81,7 @@ public class DAGNode<V,E> implements Serializable {
      *              need to be constructed within the constructor in order to create the circular
      *              references back to the head nodes properly.
      */
-    DAGNode(V lbl, Iterable<Pair<DAGNode<V,E>,E>> edges) {
+    DAGNode(@Nonnull V lbl, Iterable<Pair<DAGNode<V,E>,E>> edges) {
         label = lbl;
         ImmutableSet.Builder<DAGEdge<V,E>> bld = ImmutableSet.builder();
         for (Pair<DAGNode<V,E>,E> pair: edges) {
@@ -139,57 +138,13 @@ public class DAGNode<V,E> implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            HashCodeBuilder hcb = new HashCodeBuilder();
-            hcb.append(label);
-            int edgeHash = 0;
-            for (DAGEdge<V,E> edge: outgoingEdges) {
-                edgeHash += 37 * (37 * 17 + edge.getTail().hashCode()) + edge.getLabel().hashCode();
-            }
-            hcb.append(edgeHash);
-            hashCode = hcb.toHashCode();
-        }
-        return hashCode;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>This does a deep structural comparison of the two DAG nodes.  Comparing DAG nodes for
-     * equality is therefore expensive, unless they are the same object or have different labels.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof DAGNode) {
-            DAGNode<?,?> on = (DAGNode) o;
-            if (!label.equals(on.label)) {
-                return false;
-            } else if (outgoingEdges.size() != on.outgoingEdges.size()) {
-                return false;
-            }
-
-            Function<DAGEdge,Pair<DAGNode,Object>> edgePair = new Function<DAGEdge, Pair<DAGNode, Object>>() {
-                @Nullable
-                @Override
-                public Pair<DAGNode, Object> apply(@Nullable DAGEdge input) {
-                    if (input == null) {
-                        return null;
-                    } else {
-                        return Pair.of(input.getTail(), input.getLabel());
-                    }
-                }
-            };
-
-            HashSet<Pair<DAGNode, Object>> out =
-                    Sets.newHashSet(Iterables.transform(outgoingEdges, edgePair));
-            HashSet<Pair<DAGNode, Object>> otherOut
-                    = Sets.newHashSet(Iterables.transform(on.outgoingEdges, edgePair));
-            return out.equals(otherOut);
-        } else {
-            return false;
-        }
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("node ")
+          .append(label)
+          .append(" with ")
+          .append(outgoingEdges.size())
+          .append(" edges");
+        return sb.toString();
     }
 }
