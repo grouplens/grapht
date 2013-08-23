@@ -33,4 +33,36 @@ public class TestDAGNode {
         assertThat(e.getTail().getLabel(), equalTo("foo"));
         assertThat(e.getTail().getOutgoingEdges(), hasSize(0));
     }
+
+    @Test
+    public void testSingletonEquals() {
+        DAGNode<String,String> nodeA = DAGNode.singleton("foo");
+        DAGNode<String,String> nodeA2 = DAGNode.singleton("foo");
+        DAGNode<String,String> nodeB = DAGNode.singleton("bar");
+        assertThat(nodeA.equals(nodeA), equalTo(true));
+        assertThat(nodeA.equals(nodeA2), equalTo(true));
+        assertThat(nodeA.equals(nodeB), equalTo(false));
+    }
+
+    @Test
+    public void testSameEdgeEquals() {
+        DAGNode<String,String> nodeA = DAGNode.singleton("foo");
+        DAGNodeBuilder<String,String> bld = DAGNode.newBuilder("bar");
+        bld.addEdge(nodeA, "wombat");
+        DAGNode<String,String> nodeB = bld.build();
+        DAGNode<String,String> nodeB2 = bld.build();
+        assertThat(nodeB.equals(nodeB2), equalTo(true));
+    }
+
+    @Test
+    public void testSameLabelHashEdgeNotEqual() {
+        DAGNode<String,String> nodeA = DAGNode.singleton("bar");
+        DAGNodeBuilder<String,String> bld = DAGNode.newBuilder("bar");
+        bld.addEdge(nodeA, "wombat");
+        DAGNode<String,String> nodeB = bld.build();
+        DAGNode<String,String> nodeB2 = bld.build();
+        assertThat(nodeB.equals(nodeB2), equalTo(true));
+        assertThat(nodeB.equals(nodeA), equalTo(false));
+        assertThat(nodeA.equals(nodeB), equalTo(false));
+    }
 }

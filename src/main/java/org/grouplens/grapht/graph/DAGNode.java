@@ -1,12 +1,18 @@
 package org.grouplens.grapht.graph;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -33,6 +39,7 @@ public class DAGNode<V,E> implements Serializable {
 
     private final V label;
     private final ImmutableSet<DAGEdge<V,E>> outgoingEdges;
+    private transient volatile int hashCode;
 
     /**
      * Create a new DAG node with no outgoing edges.
@@ -99,5 +106,60 @@ public class DAGNode<V,E> implements Serializable {
     @Nonnull
     public Set<DAGEdge<V,E>> getOutgoingEdges() {
         return outgoingEdges;
+    }
+
+    @Override
+    public int hashCode() {
+        if (hashCode == 0) {
+            HashCodeBuilder hcb = new HashCodeBuilder();
+            hcb.append(label);
+            int edgeHash = 0;
+            for (DAGEdge<V,E> edge: outgoingEdges) {
+                edgeHash += 37 * (37 * 17 + edge.getTail().hashCode()) + edge.getLabel().hashCode();
+            }
+            hcb.append(edgeHash);
+            hashCode = hcb.toHashCode();
+        }
+        return hashCode;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This does a deep structural comparison of the two DAG nodes.  Comparing DAG nodes for
+     * equality is therefore expensive, unless they are the same object or have different labels.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof DAGNode) {
+            DAGNode<?,?> on = (DAGNode) o;
+            if (!label.equals(on.label)) {
+                return false;
+            } else if (outgoingEdges.size() != on.outgoingEdges.size()) {
+                return false;
+            }
+
+            Function<DAGEdge,Pair<DAGNode,Object>> edgePair = new Function<DAGEdge, Pair<DAGNode, Object>>() {
+                @Nullable
+                @Override
+                public Pair<DAGNode, Object> apply(@Nullable DAGEdge input) {
+                    if (input == null) {
+                        return null;
+                    } else {
+                        return Pair.of(input.getTail(), input.getLabel());
+                    }
+                }
+            };
+
+            HashSet<Pair<DAGNode, Object>> out =
+                    Sets.newHashSet(Iterables.transform(outgoingEdges, edgePair));
+            HashSet<Pair<DAGNode, Object>> otherOut
+                    = Sets.newHashSet(Iterables.transform(on.outgoingEdges, edgePair));
+            return out.equals(otherOut);
+        } else {
+            return false;
+        }
     }
 }
