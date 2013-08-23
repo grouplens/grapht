@@ -73,6 +73,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
     
     @Override
     public BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException {
+        // FIXME Build a better way to remember the applied rules
         Set<BindRule> appliedRules = context.getValue(APPLIED_RULES);
         if (appliedRules == null) {
             appliedRules = new HashSet<BindRule>();
