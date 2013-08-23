@@ -96,7 +96,7 @@ public final class Qualifiers {
         @Override
         public int compareTo(QualifierMatcher o) {
             if (o == null) {
-                // other type is unknown, so push it to the front
+                // other type is unknown, so extend it to the front
                 return 1;
             } else {
                 // lower priorities sort lower (higher precedence)

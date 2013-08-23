@@ -21,7 +21,6 @@ package org.grouplens.grapht.solver;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.ContextMatch;
 import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
@@ -73,7 +72,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, Desire desire) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException {
         Set<BindRule> appliedRules = context.getValue(APPLIED_RULES);
         if (appliedRules == null) {
             appliedRules = new HashSet<BindRule>();
@@ -88,7 +87,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
                 // the context applies to the current context, so go through all
                 // bind rules within it and record those that match the desire
                 for (BindRule br: rules.get(matcher)) {
-                    if (br.matches(desire) && !appliedRules.contains(br)) {
+                    if (br.matches(desire.getCurrentDesire()) && !appliedRules.contains(br)) {
                         validRules.add(Pair.of(match, br));
                         logger.trace("Matching rule, context: {}, rule: {}", matcher, br);
                     }
@@ -123,7 +122,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
             appliedRules.add(selectedRule);
             
             logger.debug("Applying rule: {} to desire: {}", selectedRule, desire);
-            return new BindingResult(selectedRule.apply(desire), selectedRule.getCachePolicy(),
+            return new BindingResult(selectedRule.apply(desire.getCurrentDesire()), selectedRule.getCachePolicy(),
                                      false, selectedRule.isTerminal());
         }
         

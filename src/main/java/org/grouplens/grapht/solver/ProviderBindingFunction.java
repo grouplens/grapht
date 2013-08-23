@@ -52,7 +52,8 @@ public class ProviderBindingFunction implements BindingFunction {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, Desire desire) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain desires) throws SolverException {
+        Desire desire = desires.getCurrentDesire();
         if (Provider.class.equals(desire.getDesiredType())) {
             // Look at the parameterized type of the injection point to
             // find what type of object should be provided

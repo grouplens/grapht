@@ -1,13 +1,13 @@
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.grouplens.grapht.spi.Desire;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A sequence of desires.  When one desire is resolved, that resolution can be a desire that needs
@@ -21,11 +21,12 @@ import java.util.NoSuchElementException;
  * @since 0.7.0
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class DesireChain implements Iterable<Desire> {
+public class DesireChain extends AbstractList<Desire> {
     @Nullable
     private final DesireChain previous;
     @Nonnull
     private final Desire desire;
+    private final int length;
     @Nonnull
     private final Desire initialDesire;
 
@@ -42,6 +43,7 @@ public class DesireChain implements Iterable<Desire> {
         previous = prev;
         desire = d;
         initialDesire = prev == null ? d : prev.getInitialDesire();
+        length = prev == null ? 1 : prev.size() + 1;
     }
 
     @Nonnull
@@ -55,15 +57,46 @@ public class DesireChain implements Iterable<Desire> {
     }
 
     /**
+     * Return the list of desires up to, but not including, the current desire.
+     * @return The previous desire chain.
+     */
+    @Nonnull
+    public List<Desire> getPreviousDesires() {
+        if (previous == null) {
+            return Collections.emptyList();
+        } else {
+            return previous;
+        }
+    }
+
+    /**
      * Extend this chain with a new desire. The chain is not modified; this method returns a new
      * chain that includes the new desire as its current desire.
-     * 
+     *
      * @param d The new current desire.
      * @return The new desire chain.
      */
     @Nonnull
     public DesireChain extend(@Nonnull Desire d) {
         return new DesireChain(this, d);
+    }
+
+    @Override
+    public int size() {
+        return length;
+    }
+
+    @Override
+    public Desire get(int i) {
+        Preconditions.checkElementIndex(i, length);
+        if (i == length - 1) {
+            return desire;
+        } else if (i == 0) {
+            return initialDesire;
+        } else {
+            assert previous != null;
+            return previous.get(i);
+        }
     }
 
     @Override

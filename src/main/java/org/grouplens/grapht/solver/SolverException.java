@@ -49,7 +49,7 @@ public class SolverException extends Exception {
         super(msg, throwable);
     }
     
-    protected String format(InjectionContext ctx) {
+    protected String format(InjectionContext ctx, DesireChain desires) {
         StringBuilder sb = new StringBuilder();
         
         // type path
@@ -66,12 +66,12 @@ public class SolverException extends Exception {
         
         // desire chain
         sb.append("  Prior desires:\n");
-        for (Desire desire: ctx.getPriorDesires()) {
+        for (Desire desire: desires.getPreviousDesires()) {
             sb.append("    ")
               .append(format(desire.getInjectionPoint().getAttributes(), desire.getDesiredType()))
               .append('\n');
         }
-        
+
         return sb.toString();
     }
     

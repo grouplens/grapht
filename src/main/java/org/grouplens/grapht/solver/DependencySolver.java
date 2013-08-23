@@ -136,7 +136,7 @@ public class DependencySolver {
             // before any deferred nodes are processed, we use a synthetic root
             // and null original desire since nothing produced this root
             InjectionContext initialContext =
-                    InjectionContext.empty().push(null, new AttributesImpl());
+                    InjectionContext.empty().extend(null, new AttributesImpl());
             deferredNodes.add(new DeferredResult(new Node(), null, initialContext));
             
             while(!deferredNodes.isEmpty()) {
@@ -152,7 +152,7 @@ public class DependencySolver {
                     Satisfaction deferredSatisfaction = treeRoot.deferredNode.getLabel().getSatisfaction();
                     for (Desire d: deferredSatisfaction.getDependencies()) {
                         logger.debug("Attempting to resolve deferred dependency {} of {}", d, deferredSatisfaction);
-                        InjectionContext newContext = treeRoot.originalContext.push(deferredSatisfaction, treeRoot.originalDesire.getInjectionPoint().getAttributes());
+                        InjectionContext newContext = treeRoot.originalContext.extend(deferredSatisfaction, treeRoot.originalDesire.getInjectionPoint().getAttributes());
                         resolveFully(d, treeRoot.deferredNode, tree, newContext, toResolve);
                     }
                 }
@@ -298,7 +298,7 @@ public class DependencySolver {
         graph.addEdge(new Edge(parent, newNode, result.desires));
         
         if (result.deferDependencies) {
-            // push node onto deferred queue and skip its dependencies for now
+            // extend node onto deferred queue and skip its dependencies for now
             logger.debug("Deferring dependencies of {}", result.satisfaction);
             defer.put(newNode, new DeferredResult(newNode, desire, context));
         } else {
@@ -307,22 +307,23 @@ public class DependencySolver {
                 // - the call to resolveFully() is responsible for adding the dependency edges
                 //   so we don't need to process the returned node
                 logger.debug("Attempting to satisfy dependency {} of {}", d, result.satisfaction);
-                InjectionContext newContext = context.push(result.satisfaction, desire.getInjectionPoint().getAttributes());
+                InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint().getAttributes());
                 resolveFully(d, newNode, graph, newContext, defer);
             }
         }
     }
     
     private Resolution resolve(Desire desire, InjectionContext context) throws SolverException {
-        Desire currentDesire = desire;
+        DesireChain chain = DesireChain.singleton(desire);
+
         CachePolicy policy = CachePolicy.NO_PREFERENCE;
         while(true) {
-            logger.debug("Current desire: {}", currentDesire);
+            logger.debug("Current desire: {}", chain.getCurrentDesire());
             
             BindingResult binding = null;
             for (BindingFunction bf: functions) {
-                binding = bf.bind(context, currentDesire);
-                if (binding != null && !context.getPriorDesires().contains(binding.getDesire())) {
+                binding = bf.bind(context, chain);
+                if (binding != null && !chain.getPreviousDesires().contains(binding.getDesire())) {
                     // found a binding that hasn't been used before
                     break;
                 }
@@ -331,10 +332,9 @@ public class DependencySolver {
             boolean defer = false;
             boolean terminate = true;
             if (binding != null) {
-                // update the prior desires
-                context.recordDesire(currentDesire);
-                currentDesire = binding.getDesire();
-                
+                // update the desire chain
+                chain = chain.extend(binding.getDesire());
+
                 terminate = binding.terminates();
                 defer = binding.isDeferred();
                 
@@ -344,23 +344,21 @@ public class DependencySolver {
                 }
             }
             
-            if (terminate && currentDesire.isInstantiable()) {
-                // push current desire so its included in resolved desires
-                context.recordDesire(currentDesire);
-                logger.info("Satisfied {} with {}", desire, currentDesire.getSatisfaction());
+            if (terminate && chain.getCurrentDesire().isInstantiable()) {
+                logger.info("Satisfied {} with {}", desire, chain.getCurrentDesire().getSatisfaction());
                 
                 // update cache policy if a specific policy hasn't yet been selected
                 if (policy.equals(CachePolicy.NO_PREFERENCE)) {
-                    policy = currentDesire.getSatisfaction().getDefaultCachePolicy();
+                    policy = chain.getCurrentDesire().getSatisfaction().getDefaultCachePolicy();
                     if (policy.equals(CachePolicy.NO_PREFERENCE)) {
                         policy = defaultPolicy;
                     }
                 }
                 
-                return new Resolution(currentDesire.getSatisfaction(), policy, context.getPriorDesires(), defer);
+                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, defer);
             } else if (binding == null) {
                 // no more desires to process, it cannot be satisfied
-                throw new UnresolvableDependencyException(currentDesire, context);
+                throw new UnresolvableDependencyException(chain, context);
             }
         }
     }
@@ -375,7 +373,7 @@ public class DependencySolver {
         private final boolean deferDependencies;
         
         public Resolution(Satisfaction satisfaction, CachePolicy policy, 
-                          List<Desire> desires, boolean deferDependencies) {
+                          DesireChain desires, boolean deferDependencies) {
             this.satisfaction = satisfaction;
             this.policy = policy;
             this.desires = desires;

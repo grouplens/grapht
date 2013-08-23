@@ -6,9 +6,9 @@ import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -24,6 +24,7 @@ public class DesireChainTest {
         assertThat(chain.getInitialDesire(),
                    equalTo(desire));
         assertThat(chain, contains(desire));
+        assertThat(chain.getPreviousDesires(), hasSize(0));
     }
 
     @Test
@@ -35,6 +36,8 @@ public class DesireChainTest {
                    equalTo(d2));
         assertThat(chain.getInitialDesire(),
                    equalTo(d1));
+        assertThat(chain.getPreviousDesires(),
+                   equalTo((List<Desire>) DesireChain.singleton(d1)));
         assertThat(chain, contains(d1, d2));
     }
 }

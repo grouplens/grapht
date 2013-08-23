@@ -52,9 +52,6 @@ public class InjectionContext implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private final List<Pair<Satisfaction, Attributes>> context;
-    
-    // mutable
-    private final List<Desire> desires;
     private final transient Map<String, Object> values;
     
     /**
@@ -64,7 +61,6 @@ public class InjectionContext implements Serializable {
         // The default context starts out with an empty type path, no prior
         // desires and no stored values
         context = Collections.emptyList();
-        desires = new ArrayList<Desire>();
         values = new HashMap<String, Object>();
     }
     
@@ -75,7 +71,6 @@ public class InjectionContext implements Serializable {
         newCtx.add(Pair.of(satisfaction, attrs));
         
         context = Collections.unmodifiableList(newCtx);
-        desires = new ArrayList<Desire>();
         values = new HashMap<String, Object>();
     }
 
@@ -88,29 +83,16 @@ public class InjectionContext implements Serializable {
     }
     
     /**
-     * Create a new context that is updated to have the satisfaction and
-     * attribute pushed to the end of its type path. The prior desires and value
-     * cache for the new context will be empty.
+     * Create a new context that is updated to have the satisfaction and attribute pushed to the
+     * end of its type path. The value cache for the new context will be empty.
      * 
      * @param satisfaction The next satisfaction in the dependency graph
      * @param attrs The attributes of the injection point receiving the
      *            satisfaction
      * @return A new context with updated type path
      */
-    public InjectionContext push(Satisfaction satisfaction, Attributes attrs) {
+    public InjectionContext extend(Satisfaction satisfaction, Attributes attrs) {
         return new InjectionContext(this, satisfaction, attrs);
-    }
-    
-    /**
-     * Push the given desire onto this context's list of prior desires. This is
-     * useful to keep track of the chain of desires processed until an
-     * instantiable desire is found.
-     * 
-     * @param desire The desire to push
-     */
-    public void recordDesire(Desire desire) {
-        Preconditions.notNull("desire", desire);
-        desires.add(desire);
     }
     
     /**
@@ -118,13 +100,6 @@ public class InjectionContext implements Serializable {
      */
     public List<Pair<Satisfaction, Attributes>> getTypePath() {
         return context;
-    }
-    
-    /**
-     * @return Prior generated desires before invoking the function
-     */
-    public List<Desire> getPriorDesires() {
-        return  Collections.unmodifiableList(desires);
     }
     
     /**
