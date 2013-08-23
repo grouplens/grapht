@@ -2,9 +2,7 @@ package org.grouplens.grapht.graph;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -37,9 +35,13 @@ import java.util.Set;
 public class DAGNode<V,E> implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Nonnull
     private final V label;
+    @Nonnull
     private final ImmutableSet<DAGEdge<V,E>> outgoingEdges;
     private transient volatile int hashCode;
+    @Nullable
+    private transient volatile ImmutableSetMultimap<DAGNode<V,E>,DAGEdge<V,E>> reverseEdgeCache;
 
     /**
      * Create a new DAG node with no outgoing edges.
@@ -106,6 +108,34 @@ public class DAGNode<V,E> implements Serializable {
     @Nonnull
     public Set<DAGEdge<V,E>> getOutgoingEdges() {
         return outgoingEdges;
+    }
+
+    /**
+     * Get a multimap of incoming edges.  For each node reachable from this node, the map will
+     * contain each of its incoming edges (also reachable from this graph).
+     *
+     * @return The reverse edge map.
+     */
+    @Nonnull
+    public SetMultimap<DAGNode<V,E>,DAGEdge<V,E>> getIncomingEdgeMap() {
+        if (reverseEdgeCache == null) {
+            ImmutableSetMultimap.Builder<DAGNode<V,E>,DAGEdge<V,E>> bld = ImmutableSetMultimap.builder();
+            for (DAGEdge<V,E> nbr: outgoingEdges) {
+                bld.put(nbr.getTail(), nbr);
+                bld.putAll(nbr.getTail().getIncomingEdgeMap());
+            }
+            reverseEdgeCache = bld.build();
+        }
+        return reverseEdgeCache;
+    }
+
+    /**
+     * Get the incoming edges to a node reachable from this node.
+     * @return The set of incoming edges, or an empty set if the node is not reachable.
+     */
+    @Nonnull
+    public Set<DAGEdge<V,E>> getIncomingEdges(DAGNode<V,E> node) {
+        return getIncomingEdgeMap().get(node);
     }
 
     @Override

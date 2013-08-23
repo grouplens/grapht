@@ -2,9 +2,7 @@ package org.grouplens.grapht.graph;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -64,5 +62,16 @@ public class TestDAGNode {
         assertThat(nodeB.equals(nodeB2), equalTo(true));
         assertThat(nodeB.equals(nodeA), equalTo(false));
         assertThat(nodeA.equals(nodeB), equalTo(false));
+    }
+
+    @Test
+    public void testGetReverseEdge() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNodeBuilder<String,String> bld = DAGNode.newBuilder("bar");
+        bld.addEdge(foo, "wombat");
+        DAGNode<String,String> bar = bld.build();
+
+        assertThat(bar.getIncomingEdges(foo),
+                   contains(DAGEdge.create(bar, foo, "wombat")));
     }
 }

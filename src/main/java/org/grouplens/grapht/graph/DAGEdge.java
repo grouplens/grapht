@@ -25,6 +25,10 @@ public class DAGEdge<V,E> implements Serializable {
     private final E label;
     private transient volatile int hashCode;
 
+    public static <V,E> DAGEdge<V,E> create(DAGNode<V,E> head, DAGNode<V,E> tail, E label) {
+        return new DAGEdge<V,E>(head, tail, label);
+    }
+
     DAGEdge(DAGNode<V,E> hd, DAGNode<V,E> tl, E lbl) {
         assert hd != null;
         assert tl != null;
