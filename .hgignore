@@ -1,5 +1,5 @@
 ^bin
-(^|/)target/
+(^|/)target(/|$)
 (^|/)\.(project|classpath)$
 (^|/)\.settings/
 (^|/)\.idea/
