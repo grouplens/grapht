@@ -1,13 +1,11 @@
 package org.grouplens.grapht.solver;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A sequence of desires.  When one desire is resolved, that resolution can be a desire that needs
@@ -21,12 +19,7 @@ import java.util.*;
  * @since 0.7.0
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class DesireChain extends AbstractList<Desire> {
-    @Nullable
-    private final DesireChain previous;
-    @Nonnull
-    private final Desire desire;
-    private final int length;
+public class DesireChain extends AbstractChain<Desire> {
     @Nonnull
     private final Desire initialDesire;
 
@@ -40,15 +33,13 @@ public class DesireChain extends AbstractList<Desire> {
      * @param d The desire.
      */
     private DesireChain(DesireChain prev, @Nonnull Desire d) {
-        previous = prev;
-        desire = d;
+        super(prev, d);
         initialDesire = prev == null ? d : prev.getInitialDesire();
-        length = prev == null ? 1 : prev.size() + 1;
     }
 
     @Nonnull
     public Desire getCurrentDesire() {
-        return desire;
+        return tailValue;
     }
 
     @Nonnull
@@ -79,84 +70,5 @@ public class DesireChain extends AbstractList<Desire> {
     @Nonnull
     public DesireChain extend(@Nonnull Desire d) {
         return new DesireChain(this, d);
-    }
-
-    @Override
-    public int size() {
-        return length;
-    }
-
-    @Override
-    public Desire get(int i) {
-        Preconditions.checkElementIndex(i, length);
-        if (i == length - 1) {
-            return desire;
-        } else if (i == 0) {
-            return initialDesire;
-        } else {
-            assert previous != null;
-            return previous.get(i);
-        }
-    }
-
-    @Override
-    public Iterator<Desire> iterator() {
-        Iterator<Desire> current = Iterators.singletonIterator(desire);
-        if (previous == null) {
-            return current;
-        } else {
-            return Iterators.concat(previous.iterator(), current);
-        }
-    }
-
-    /**
-     * Iterate over this chain's elements in reverse order.
-     * @return An iterator over the chain's elements in reverse order (current first).
-     */
-    Iterator<Desire> reverseIterator() {
-        return new Iterator<Desire>() {
-            DesireChain cur = DesireChain.this;
-            @Override
-            public boolean hasNext() {
-                return cur != null;
-            }
-
-            @Override
-            public Desire next() {
-                if (cur == null) {
-                    throw new NoSuchElementException();
-                }
-                Desire d = cur.desire;
-                cur = cur.previous;
-                return d;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    @Override
-    public int hashCode() {
-        HashCodeBuilder hcb = new HashCodeBuilder();
-        Iterator<Desire> iter = reverseIterator();
-        while (iter.hasNext()) {
-            hcb.append(iter.next());
-        }
-        return hcb.toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof DesireChain) {
-            return Iterators.elementsEqual(reverseIterator(),
-                                           ((DesireChain) o).reverseIterator());
-        } else {
-            return false;
-        }
     }
 }
