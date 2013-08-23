@@ -1,6 +1,7 @@
 package org.grouplens.grapht.graph;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -23,6 +24,7 @@ public class DAGNodeBuilder<V,E> {
 
     public DAGNodeBuilder(V lbl) {
         label = lbl;
+        edges = Sets.newHashSet();
     }
 
     /**
