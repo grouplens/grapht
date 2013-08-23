@@ -135,8 +135,7 @@ public class DependencySolver {
             
             // before any deferred nodes are processed, we use a synthetic root
             // and null original desire since nothing produced this root
-            InjectionContext initialContext =
-                    InjectionContext.empty().extend(null, new AttributesImpl());
+            InjectionContext initialContext = InjectionContext.initial();
             deferredNodes.add(new DeferredResult(new Node(), null, initialContext));
             
             while(!deferredNodes.isEmpty()) {
@@ -284,7 +283,7 @@ public class DependencySolver {
     private void resolveFully(Desire desire, Node parent, Graph graph, InjectionContext context, 
                               Map<Node, DeferredResult> defer) throws SolverException {
         // check context depth against max to detect likely dependency cycles
-        if (context.getTypePath().size() > maxDepth) {
+        if (context.size() > maxDepth) {
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
         }
         

@@ -65,7 +65,7 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
      * Iterate over this chain's elements in reverse order.
      * @return An iterator over the chain's elements in reverse order (current first).
      */
-    protected Iterator<E> reverseIterator() {
+    public Iterator<E> reverseIterator() {
         return new Iterator<E>() {
             AbstractChain<E> cur = AbstractChain.this;
             @Override
@@ -86,6 +86,15 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    public Iterable<E> reverse() {
+        return new Iterable<E>() {
+            @Override
+            public Iterator<E> iterator() {
+                return reverseIterator();
             }
         };
     }

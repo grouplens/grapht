@@ -20,68 +20,55 @@ package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
+import org.grouplens.grapht.util.AbstractChain;
 import org.grouplens.grapht.util.Preconditions;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
  * InjectionContext represents the current path through the dependency graph to
  * the desire being resolved by
- * {@link BindingFunction#bind(InjectionContext, Desire)}. The InjectionContext
+ * {@link BindingFunction#bind(InjectionContext, DesireChain)}. The InjectionContext
  * is most significantly represented as a list of satisfactions and the
  * associated injection point attributes. This list represents the "type path"
  * from the root node in the graph to the previously resolved satisfaction.
  * <p>
  * Although the type path for an InjectionContext instance is immutable, it does
- * maintain mutable state to assist BindingFunction implementations. When
- * resolving a dependency desire, the BindingFunctions might produce a chain of
- * desires before reaching an instantiable one. This chain is recorded as
- * mutable state within a context instance. To allow functions more flexibility,
- * each context instance provides a String-based map.
+ * maintain mutable state to assist BindingFunction implementations.  To allow functions
+ * more flexibility, each context instance provides a String-based map.
  * <p>
  * Essentially, each InjectionContext instance is associated with a single
  * resolution attempt for an injection point.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class InjectionContext implements Serializable {
+public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes>> {
     private static final long serialVersionUID = 1L;
     
-    private final List<Pair<Satisfaction, Attributes>> context;
     private final transient Map<String, Object> values;
-    
-    /**
-     * Create a new InjectionContext that has an empty context.
-     */
-    private InjectionContext() {
-        // The default context starts out with an empty type path, no prior
-        // desires and no stored values
-        context = Collections.emptyList();
-        values = new HashMap<String, Object>();
-    }
-    
-    private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
-        // A context with a pushed satisfaction inherits and updates the type
-        // path, but resets the desires and stored values
-        List<Pair<Satisfaction, Attributes>> newCtx = new ArrayList<Pair<Satisfaction, Attributes>>(prior.context);
-        newCtx.add(Pair.of(satisfaction, attrs));
-        
-        context = Collections.unmodifiableList(newCtx);
-        values = new HashMap<String, Object>();
+
+    public static InjectionContext singleton(Satisfaction satisfaction, Attributes attrs) {
+        return new InjectionContext(null, satisfaction, attrs);
     }
 
     /**
-     * Create a new empty injection context.
-     * @return An empty injection context.
+     * Create an initial injection context.  The initial context is a singleton with a null
+     * satisfaction and empty attributes.
+     * @return An initial context.
      */
-    public static InjectionContext empty() {
-        return new InjectionContext();
+    public static InjectionContext initial() {
+        return singleton(null, new AttributesImpl());
     }
     
+    private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
+        super(prior, Pair.of(satisfaction, attrs));
+        values = new HashMap<String, Object>();
+    }
+
     /**
      * Create a new context that is updated to have the satisfaction and attribute pushed to the
      * end of its type path. The value cache for the new context will be empty.
@@ -93,13 +80,6 @@ public class InjectionContext implements Serializable {
      */
     public InjectionContext extend(Satisfaction satisfaction, Attributes attrs) {
         return new InjectionContext(this, satisfaction, attrs);
-    }
-    
-    /**
-     * @return The type path of this context, usable by {@link org.grouplens.grapht.spi.ContextElementMatcher}
-     */
-    public List<Pair<Satisfaction, Attributes>> getTypePath() {
-        return context;
     }
     
     /**
@@ -121,7 +101,7 @@ public class InjectionContext implements Serializable {
      * <p>
      * Associated <tt>value</tt> with <tt>key</tt> for this context instance.
      * This can be used to store values that might affect behavior of a future
-     * invocation of {@link BindingFunction#bind(InjectionContext, Desire)} with
+     * invocation of {@link BindingFunction#bind(InjectionContext, DesireChain)} with
      * this context instance.
      * <p>
      * One such example would be to ensure that a BindRule is not applied more

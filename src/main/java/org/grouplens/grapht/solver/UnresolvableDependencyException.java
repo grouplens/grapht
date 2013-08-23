@@ -59,7 +59,7 @@ public class UnresolvableDependencyException extends SolverException {
     public String getMessage() {
         StringBuilder sb = new StringBuilder("Unable to satisfy desire ")
                 .append(format(desires.getCurrentDesire().getInjectionPoint()));
-        List<Pair<Satisfaction, Attributes>> path = context.getTypePath();
+        List<Pair<Satisfaction, Attributes>> path = context;
         if (!path.isEmpty()) {
             sb.append(" of ")
               .append(path.get(0).getLeft());

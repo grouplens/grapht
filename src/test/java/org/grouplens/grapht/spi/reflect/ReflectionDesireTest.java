@@ -134,7 +134,7 @@ public class ReflectionDesireTest {
                     SetterInjectionPoint sp = (SetterInjectionPoint) (d.getInjectionPoint());
                     if (sp.getMember().equals(methodOrCtorParam)) {
                         result = new DefaultDesireBindingFunction(new ReflectionInjectSPI())
-                                .bind(InjectionContext.empty(),
+                                .bind(InjectionContext.initial(),
                                       DesireChain.singleton(d));
                         break;
                     }
@@ -144,7 +144,7 @@ public class ReflectionDesireTest {
                     ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) (d.getInjectionPoint());
                     if (((Integer) methodOrCtorParam).intValue() == cp.getParameterIndex()) {
                         result = new DefaultDesireBindingFunction(new ReflectionInjectSPI())
-                                .bind(InjectionContext.empty(),
+                                .bind(InjectionContext.initial(),
                                       DesireChain.singleton(d));
                         break;
                     }

@@ -26,7 +26,7 @@ import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.util.Types;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -100,8 +100,6 @@ public class ElementChainContextMatcher implements ContextMatcher, Serializable 
      */
     @Override
     public ContextMatch matches(InjectionContext context) {
-        List<Pair<Satisfaction, Attributes>> nodes = context.getTypePath();
-
         /* Walk backwards through both lists, scanning for a match. At the end,
          * we'll check the anchor counters to see if there was one. */
         // matched element indexes, reversed (matches[0] is index of match of last element matcher).
@@ -109,21 +107,19 @@ public class ElementChainContextMatcher implements ContextMatcher, Serializable 
         // ei is the index of the current matcher. also, number of unmatched matchers - 1
         int ei = elementMatchers.size() - 1;
         // ni is the index of the current noe
-        int ni = nodes.size() - 1;
-        // step very, very carefully
-        while (ni >= 0 && ei >= 0) {
+        int ni = context.size();
+        Iterator<Pair<Satisfaction,Attributes>> iter = context.reverseIterator();
+        while (iter.hasNext() && ei >= 0 && ni >= 0) {
+            Pair<Satisfaction, Attributes> pair = iter.next();
+            ni -= 1;
             ContextElementMatcher em = elementMatchers.get(ei);
-            if (em.matches(nodes.get(ni))) {
-                // we have a match, advance both counters
+            if (em.matches(pair)) {
+                // we have a match, save node index & advance match index
                 matches[matches.length - ei - 1] = ni;
                 ei--;
-                ni--;
             } else if (em.isAnchored()) {
                 // no match, but em is anchored. So skip the rest of the nodes, no match.
                 ni = -1;
-            } else {
-                // no match,but em is not anchored. therefore, check next node
-                ni--;
             }
         }
 
@@ -206,11 +202,12 @@ public class ElementChainContextMatcher implements ContextMatcher, Serializable 
                 return ctb.toComparison();
             }
 
-            List<Pair<Satisfaction, Attributes>> path = context.getTypePath();
+            List<Pair<Satisfaction, Attributes>> path = context;
 
             // compare matcher type closeness from end to beginning
+            // stop early if we reach a decision
             assert matches.length == m.matches.length; // or we have problems
-            for (int i = matches.length - 1; i >= 0; i--) {
+            for (int i = matches.length - 1; i >= 0 && ctb.toComparison() == 0; i--) {
                 int mi = matches.length - i - 1;
                 assert matches[mi] == m.matches[mi];
 

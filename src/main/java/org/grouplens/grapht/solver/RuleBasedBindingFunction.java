@@ -53,7 +53,7 @@ import java.util.*;
  */
 public class RuleBasedBindingFunction implements BindingFunction {
     private static final String APPLIED_RULES = "APPLIED_BIND_RULES";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RuleBasedBindingFunction.class);
     
     private final Map<ContextMatcher, Collection<BindRule>> rules;

@@ -55,7 +55,7 @@ public class SolverException extends Exception {
         // type path
         sb.append("Context:\n");
         sb.append("  Type path:\n");
-        for (Pair<Satisfaction, Attributes> path: ctx.getTypePath()) {
+        for (Pair<Satisfaction, Attributes> path: ctx) {
             Satisfaction sat = path.getLeft();
             Class<?> type = sat == null ? null : sat.getErasedType();
             sb.append("    ")
