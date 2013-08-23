@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <groupId>org.grouplens</groupId>
+    <artifactId>grouplens-oss-parent</artifactId>
+    <version>1-SNAPSHOT</version>
   </parent>
   <version>0.7.0-SNAPSHOT</version>
   <artifactId>grapht</artifactId>
@@ -50,6 +50,21 @@
       <url>${grapht.web.path}</url>
     </site>
   </distributionManagement>
+
+  <repositories>
+    <!-- The current trunk may depend on snapshots of dependencies, such as Grapht,
+         that are published to the GroupLens development repository. -->
+    <repository>
+      <id>grouplens-devel</id>
+      <url>http://dev.grouplens.org/maven</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>true</enabled>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+  </repositories>
 
   <dependencies>
     <dependency>
