@@ -53,6 +53,8 @@ import java.util.*;
  */
 public class RuleBasedBindingFunction implements BindingFunction {
     private static final String APPLIED_RULES = "APPLIED_BIND_RULES";
+    private static final Map<Object,Set<BindRule>> bindRuleMemory
+            = new WeakHashMap<Object, Set<BindRule>>();
 
     private static final Logger logger = LoggerFactory.getLogger(RuleBasedBindingFunction.class);
     
@@ -74,12 +76,15 @@ public class RuleBasedBindingFunction implements BindingFunction {
     @Override
     public BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException {
         // FIXME Build a better way to remember the applied rules
-        Set<BindRule> appliedRules = context.getValue(APPLIED_RULES);
-        if (appliedRules == null) {
-            appliedRules = new HashSet<BindRule>();
-            context.putValue(APPLIED_RULES, appliedRules);
+        Set<BindRule> appliedRules;
+        synchronized (bindRuleMemory) {
+            appliedRules = bindRuleMemory.get(desire.getKey());
+            if (appliedRules == null) {
+                appliedRules = new HashSet<BindRule>();
+                bindRuleMemory.put(desire.getKey(), appliedRules);
+            }
         }
-        
+
         // collect all bind rules that apply to this desire
         List<Pair<ContextMatch, BindRule>> validRules = new ArrayList<Pair<ContextMatch, BindRule>>();
         for (ContextMatcher matcher: rules.keySet()) {

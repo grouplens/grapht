@@ -6,6 +6,7 @@ import org.grouplens.grapht.util.AbstractChain;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A sequence of desires.  When one desire is resolved, that resolution can be a desire that needs
@@ -22,6 +23,7 @@ import java.util.List;
 public class DesireChain extends AbstractChain<Desire> {
     @Nonnull
     private final Desire initialDesire;
+    private final UUID key;
 
     public static DesireChain singleton(Desire desire) {
         return new DesireChain(null, desire);
@@ -34,6 +36,7 @@ public class DesireChain extends AbstractChain<Desire> {
      */
     private DesireChain(DesireChain prev, @Nonnull Desire d) {
         super(prev, d);
+        key = prev == null ? UUID.randomUUID() : prev.key;
         initialDesire = prev == null ? d : prev.getInitialDesire();
     }
 
@@ -58,6 +61,17 @@ public class DesireChain extends AbstractChain<Desire> {
         } else {
             return previous;
         }
+    }
+
+    /**
+     * Get this chain's key. Each chain has a key, a unique object that is created when the chain
+     * is created (via {@link #singleton(org.grouplens.grapht.spi.Desire)}), and preserved through
+     * {@link #extend(org.grouplens.grapht.spi.Desire)} operations.  It can be used to remember
+     * state across invocations of a binding function as a desire chain is built up.
+     * @return The chain's key.
+     */
+    public Object getKey() {
+        return key;
     }
 
     /**

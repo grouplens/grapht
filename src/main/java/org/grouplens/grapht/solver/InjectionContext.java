@@ -23,10 +23,6 @@ import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.AbstractChain;
-import org.grouplens.grapht.util.Preconditions;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>
@@ -37,10 +33,6 @@ import java.util.Map;
  * associated injection point attributes. This list represents the "type path"
  * from the root node in the graph to the previously resolved satisfaction.
  * <p>
- * Although the type path for an InjectionContext instance is immutable, it does
- * maintain mutable state to assist BindingFunction implementations.  To allow functions
- * more flexibility, each context instance provides a String-based map.
- * <p>
  * Essentially, each InjectionContext instance is associated with a single
  * resolution attempt for an injection point.
  * 
@@ -49,8 +41,6 @@ import java.util.Map;
 public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes>> {
     private static final long serialVersionUID = 1L;
     
-    private final transient Map<String, Object> values;
-
     public static InjectionContext singleton(Satisfaction satisfaction, Attributes attrs) {
         return new InjectionContext(null, satisfaction, attrs);
     }
@@ -66,7 +56,6 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
     
     private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
         super(prior, Pair.of(satisfaction, attrs));
-        values = new HashMap<String, Object>();
     }
 
     /**
@@ -80,39 +69,5 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
      */
     public InjectionContext extend(Satisfaction satisfaction, Attributes attrs) {
         return new InjectionContext(this, satisfaction, attrs);
-    }
-    
-    /**
-     * Retrieve the object associated with the given String key. This will
-     * return null if there is no value associated with the key.
-     * 
-     * @param key The String key
-     * @return The value associated to key by a BindingFunction for this context
-     *         instance
-     * @throws NullPointerException if key is null
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getValue(String key) {
-        Preconditions.notNull("key", key);
-        return (T) values.get(key);
-    }
-    
-    /**
-     * <p>
-     * Associated <tt>value</tt> with <tt>key</tt> for this context instance.
-     * This can be used to store values that might affect behavior of a future
-     * invocation of {@link BindingFunction#bind(InjectionContext, DesireChain)} with
-     * this context instance.
-     * <p>
-     * One such example would be to ensure that a BindRule is not applied more
-     * than once within a given context.
-     * 
-     * @param key The String key
-     * @param value The value to store
-     * @throws NullPointerException if key is null
-     */
-    public void putValue(String key, Object value) {
-        Preconditions.notNull("key", key);
-        values.put(key, value);
     }
 }
