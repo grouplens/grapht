@@ -228,13 +228,12 @@ public class DependencySolver {
                         // is already in this graph (but had no edges, so it didn't
                         // get identified correctly)
                         // FIXME This is probably broken
-                        assert false;
-                        bld.setLabel(toMerge.getLabel());
-                        logger.debug("Linking deferred satisfaction to graph: {}", toMerge.getLabel());
+                        throw new RuntimeException("hideously broken code path");
+                        // bld.setLabel(toMerge.getLabel());
+                        // logger.debug("Linking deferred satisfaction to graph: {}", toMerge.getLabel());
                     } else {
                         // create a new node
                         bld.setLabel(toMerge.getLabel());
-                        newNode = DAGNode.singleton(toMerge.getLabel());
                         logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
                     }
 
@@ -250,6 +249,8 @@ public class DependencySolver {
                     if (defer.containsKey(toMerge)) {
                         DeferredResult oldResult = defer.get(toMerge);
                         // deferredNodes.add(new DeferredResult(newNode, oldResult.originalDesire, oldResult.originalContext));
+                    } else {
+                        newNode = bld.build();
                     }
                 } else {
                     // note that if the original node was in the defer queue,
