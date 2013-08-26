@@ -22,6 +22,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
+import org.grouplens.grapht.spi.reflect.NullSatisfaction;
 import org.grouplens.grapht.util.AbstractChain;
 
 /**
@@ -45,15 +46,6 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
         return new InjectionContext(null, satisfaction, attrs);
     }
 
-    /**
-     * Create an initial injection context.  The initial context is a singleton with a null
-     * satisfaction and empty attributes.
-     * @return An initial context.
-     */
-    public static InjectionContext initial() {
-        return singleton(null, new AttributesImpl());
-    }
-    
     private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
         super(prior, Pair.of(satisfaction, attrs));
     }

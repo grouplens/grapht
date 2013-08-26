@@ -1141,7 +1141,8 @@ public class DependencySolverTest {
     
     private DAGNode<CachedSatisfaction, DesireChain> getNode(DAGNode<CachedSatisfaction, DesireChain> g, CachedSatisfaction s) {
         return Iterables.find(g.getReachableNodes(),
-                              DAGNode.labelMatches(Predicates.equalTo(s)));
+                              DAGNode.labelMatches(Predicates.equalTo(s)),
+                              null);
     }
     
     @Qualifier

@@ -21,11 +21,14 @@ package org.grouplens.grapht.solver;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.graph.*;
+import org.grouplens.grapht.graph.DAGEdge;
+import org.grouplens.grapht.graph.DAGNode;
+import org.grouplens.grapht.graph.DAGNodeBuilder;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.spi.reflect.NullSatisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
@@ -56,7 +59,11 @@ public class DependencySolver {
     private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);
     public static final CachedSatisfaction ROOT_SATISFACTION =
             new CachedSatisfaction(new NullSatisfaction(Void.TYPE), CachePolicy.NO_PREFERENCE);
-    
+    public static InjectionContext initialContext() {
+        return InjectionContext.singleton(ROOT_SATISFACTION.getSatisfaction(),
+                                          new AttributesImpl());
+    }
+
     private final int maxDepth;
     private final CachePolicy defaultPolicy;
 
@@ -128,7 +135,7 @@ public class DependencySolver {
      * 
      * @param desire The desire to include in the graph
      */
-    public void resolve(Desire desire) throws SolverException {
+    public synchronized void resolve(Desire desire) throws SolverException {
         logger.info("Resolving desire: {}", desire);
         
         try {
@@ -137,8 +144,7 @@ public class DependencySolver {
             
             // before any deferred nodes are processed, we use a synthetic root
             // and null original desire since nothing produced this root
-            InjectionContext initialContext = InjectionContext.initial();
-            deferredNodes.add(new DeferredResult(ROOT_SATISFACTION, null, initialContext));
+            deferredNodes.add(new DeferredResult(ROOT_SATISFACTION, null, initialContext()));
             
             while(!deferredNodes.isEmpty()) {
                 DeferredResult treeRoot = deferredNodes.poll();
@@ -159,7 +165,7 @@ public class DependencySolver {
                         bld.addEdge(resolveFully(d, newContext, toResolve));
                     }
                 }
-                merge(bld.build(), toResolve);
+                graph = merge(bld.build(), true, toResolve);
             }
         } catch(SolverException e) {
             logger.error("Error while resolving: {}", e.getMessage());
@@ -174,10 +180,14 @@ public class DependencySolver {
      * Merge a graph, resulting from a resolve, into the global graph.
      *
      * @param tree The unmerged graph.
+     * @param mergeRoot Whether to merge this with the root of the global graph.  If {@code true},
+     *                  the outgoing edges of {@code tree} are added to the outgoing edges of
+     *                  the root of the global graph and the resulting graph returned.
      * @param defer The map of deferred nodes.  If a node to be merged is in this, it is queued
      */
-    private void merge(DAGNode<CachedSatisfaction,DesireChain> tree,
-                       Map<CachedSatisfaction, DeferredResult> defer) {
+    private DAGNode<CachedSatisfaction,DesireChain> merge(DAGNode<CachedSatisfaction,DesireChain> tree,
+                                                          boolean mergeRoot,
+                                                          Map<CachedSatisfaction, DeferredResult> defer) {
         List<DAGNode<CachedSatisfaction, DesireChain>> sorted = tree.getSortedNodes();
         
         // Look up each node's dependencies in the merged graph, since we sorted
@@ -186,81 +196,55 @@ public class DependencySolver {
         Map<DAGNode<CachedSatisfaction,DesireChain>,
                 DAGNode<CachedSatisfaction,DesireChain>> mergedMap = Maps.newHashMap();
         for (DAGNode<CachedSatisfaction, DesireChain> toMerge: sorted) {
-            if (toMerge == tree && tree.getLabel() == ROOT_SATISFACTION) {
-                // This is the synthetic root of the tree.
-                // We replace the root node of the tree with the root in the merged graph.
-                for (DAGEdge<CachedSatisfaction, DesireChain> oldEdge: tree.getOutgoingEdges()) {
-                    DAGNode<CachedSatisfaction, DesireChain> newTail = mergedMap.get(oldEdge.getTail());
-                    assert newTail != null; // like below, it must have been merged previously
+            // Get all previously seen dependency configurations for this satisfaction
+            Map<Set<DAGNode<CachedSatisfaction, DesireChain>>, DAGNode<CachedSatisfaction, DesireChain>> dependencyOptions = getDependencyOptions(toMerge.getLabel());
 
-                    // there can be at most one edge with this label in the merged
-                    // graph because this is at the root context, and there is no
-                    // way to cause their configurations to diverge
-                    if (graph.getOutgoingEdge(oldEdge.getLabel()) == null) {
-                        // this desire is not in the merged graph
-                        graph = DAGNode.copyBuilder(graph)
-                                       .addEdge(newTail, oldEdge.getLabel())
-                                       .build();
-                    }
-                }
-            } else {
-                // Get all previously seen dependency configurations for this satisfaction
-                Map<Set<DAGNode<CachedSatisfaction, DesireChain>>, DAGNode<CachedSatisfaction, DesireChain>> dependencyOptions = getDependencyOptions(toMerge.getLabel());
-                
-                // Accumulate the set of dependencies for this node, filtering
-                // them through the previous level map
-                Set<DAGNode<CachedSatisfaction, DesireChain>> dependencies = Sets.newHashSet();
-                for (DAGEdge<CachedSatisfaction,DesireChain> dep: toMerge.getOutgoingEdges()) {
-                    // levelMap converts from the tree to the merged graph
-                    DAGNode<CachedSatisfaction, DesireChain> filtered = mergedMap.get(dep.getTail());
-                    assert filtered != null; // all dependencies should have been merged previously
-                    dependencies.add(filtered);
-                }
-                
-                DAGNode<CachedSatisfaction, DesireChain> newNode = dependencyOptions.get(dependencies);
-                if (newNode == null) {
-                    DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.newBuilder();
-                    // this configuration for the satisfaction has not been seen before
-                    // - add it to merged graph, and connect to its dependencies
-
-                    if (toMerge == tree) {
-                        // non-cyclic deferred node from a prior resolution, so toMerge
-                        // is already in this graph (but had no edges, so it didn't
-                        // get identified correctly)
-                        // FIXME This is probably broken
-                        throw new RuntimeException("hideously broken code path");
-                        // bld.setLabel(toMerge.getLabel());
-                        // logger.debug("Linking deferred satisfaction to graph: {}", toMerge.getLabel());
-                    } else {
-                        // create a new node
-                        bld.setLabel(toMerge.getLabel());
-                        logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
-                    }
-
-                    for (DAGEdge<CachedSatisfaction, DesireChain> dep: toMerge.getOutgoingEdges()) {
-                        // add the edge with the new head and the previously merged tail
-                        // List<Desire> is downsized to the first Desire, too
-                        DAGNode<CachedSatisfaction, DesireChain> filtered = mergedMap.get(dep.getTail());
-                        bld.addEdge(filtered, dep.getLabel());
-                    }
-
-                    // if the original node was in the defer queue, insert
-                    // merged node into the final queue
-                    if (defer.containsKey(toMerge)) {
-                        DeferredResult oldResult = defer.get(toMerge);
-                        // deferredNodes.add(new DeferredResult(newNode, oldResult.originalDesire, oldResult.originalContext));
-                    } else {
-                        newNode = bld.build();
-                    }
-                } else {
-                    // note that if the original node was in the defer queue,
-                    // it does not get transfered to the final queue
-                    logger.debug("Node already in merged graph for satisfaction: {}", toMerge.getLabel());
-                }
-
-                // update merge map so future nodes use this node as a dependency
-                mergedMap.put(toMerge, newNode);
+            // Accumulate the set of dependencies for this node, filtering
+            // them through the previous level map
+            Set<DAGNode<CachedSatisfaction, DesireChain>> dependencies = Sets.newHashSet();
+            for (DAGEdge<CachedSatisfaction,DesireChain> dep: toMerge.getOutgoingEdges()) {
+                // levelMap converts from the tree to the merged graph
+                DAGNode<CachedSatisfaction, DesireChain> filtered = mergedMap.get(dep.getTail());
+                assert filtered != null; // all dependencies should have been merged previously
+                dependencies.add(filtered);
             }
+
+            DAGNode<CachedSatisfaction, DesireChain> newNode = dependencyOptions.get(dependencies);
+            if (newNode == null) {
+                DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.newBuilder();
+                // this configuration for the satisfaction has not been seen before
+                // - add it to merged graph, and connect to its dependencies
+
+                bld.setLabel(toMerge.getLabel());
+                logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
+
+                for (DAGEdge<CachedSatisfaction, DesireChain> dep: toMerge.getOutgoingEdges()) {
+                    // add the edge with the new head and the previously merged tail
+                    // List<Desire> is downsized to the first Desire, too
+                    DAGNode<CachedSatisfaction, DesireChain> filtered = mergedMap.get(dep.getTail());
+                    bld.addEdge(filtered, dep.getLabel());
+                }
+
+                newNode = bld.build();
+            } else {
+                // note that if the original node was in the defer queue,
+                // it does not get transfered to the final queue
+                logger.debug("Node already in merged graph for satisfaction: {}", toMerge.getLabel());
+            }
+
+            // update merge map so future nodes use this node as a dependency
+            mergedMap.put(toMerge, newNode);
+        }
+
+        // now time to build up the last node
+        if (mergeRoot) {
+            DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.copyBuilder(graph);
+            for (DAGEdge<CachedSatisfaction,DesireChain> edge: mergedMap.get(tree).getOutgoingEdges()) {
+                bld.addEdge(edge.getTail(), edge.getLabel());
+            }
+            return bld.build();
+        } else {
+            return mergedMap.get(tree);
         }
     }
     
