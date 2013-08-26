@@ -50,7 +50,20 @@ public class DAGNodeBuilder<V,E> {
                                        @Nonnull E label) {
         Preconditions.checkNotNull(target, "edge target");
         Preconditions.checkNotNull(label, "edge label");
-        edges.add(Pair.of(target, label));
+        return addEdge(Pair.of(target, label));
+    }
+
+    /**
+     * Add an edge.
+     * @param edge The target node and label for the edge.
+     * @return The builder (for chaining).
+     */
+    @Nonnull
+    public DAGNodeBuilder<V,E> addEdge(Pair<DAGNode<V,E>,E> edge) {
+        Preconditions.checkNotNull(edge, "edge");
+        Preconditions.checkNotNull(edge.getLeft(), "edge target");
+        Preconditions.checkNotNull(edge.getRight(), "edge label");
+        edges.add(edge);
         return this;
     }
 

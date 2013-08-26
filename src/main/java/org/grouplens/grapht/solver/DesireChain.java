@@ -1,9 +1,13 @@
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Predicate;
+import org.grouplens.grapht.graph.DAGEdge;
+import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +42,15 @@ public class DesireChain extends AbstractChain<Desire> {
         super(prev, d);
         key = prev == null ? UUID.randomUUID() : prev.key;
         initialDesire = prev == null ? d : prev.getInitialDesire();
+    }
+
+    public static Predicate<DesireChain> hasInitialDesire(final Desire d) {
+        return new Predicate<DesireChain>() {
+            @Override
+            public boolean apply(@Nullable DesireChain input) {
+                return input != null && input.getInitialDesire().equals(d);
+            }
+        };
     }
 
     @Nonnull

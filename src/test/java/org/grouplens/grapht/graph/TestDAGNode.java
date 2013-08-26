@@ -15,6 +15,8 @@ public class TestDAGNode {
         assertThat(node, notNullValue());
         assertThat(node.getLabel(), equalTo("foo"));
         assertThat(node.getOutgoingEdges(), hasSize(0));
+        assertThat(node.getReachableNodes(),
+                   contains(node));
     }
 
     @Test
@@ -30,6 +32,10 @@ public class TestDAGNode {
         assertThat(e.getLabel(), equalTo("wombat"));
         assertThat(e.getTail().getLabel(), equalTo("foo"));
         assertThat(e.getTail().getOutgoingEdges(), hasSize(0));
+        assertThat(bar.getReachableNodes(),
+                   containsInAnyOrder(foo, bar));
+        assertThat(bar.getSortedNodes(),
+                   contains(foo, bar));
     }
 
     @Test
@@ -64,5 +70,7 @@ public class TestDAGNode {
         assertThat(head.getIncomingEdges(foo),
                    containsInAnyOrder(DAGEdge.create(bar, foo, "wombat"),
                                       DAGEdge.create(blatz, foo, "skunk")));
+        assertThat(head.getReachableNodes(),
+                   containsInAnyOrder(foo, bar, blatz, head));
     }
 }

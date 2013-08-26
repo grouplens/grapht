@@ -1,15 +1,16 @@
 package org.grouplens.grapht.graph;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.SetMultimap;
+import com.google.common.base.Predicate;
+import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,6 +42,7 @@ public class DAGNode<V,E> implements Serializable {
     private transient volatile int hashCode;
     @Nullable
     private transient volatile ImmutableSetMultimap<DAGNode<V,E>,DAGEdge<V,E>> reverseEdgeCache;
+    private transient volatile ImmutableSet<DAGNode<V,E>> reachableNodeCache;
 
     /**
      * Create a new DAG node with no outgoing edges.
@@ -72,6 +74,21 @@ public class DAGNode<V,E> implements Serializable {
      */
     public static <V,E> DAGNodeBuilder<V,E> newBuilder(V label) {
         return new DAGNodeBuilder<V, E>(label);
+    }
+
+    /**
+     * Create a new builder initialized to build a copy of the specified node.
+     * @param node The node to copy.
+     * @param <V> The type of node labels.
+     * @param <E> The type of edge labels.
+     * @return A new builder initialized with the labels and edges of {@code node}.
+     */
+    public static <V,E> DAGNodeBuilder<V,E> copyBuilder(DAGNode<V,E> node) {
+        DAGNodeBuilder<V,E> bld = newBuilder(node.getLabel());
+        for (DAGEdge<V,E> edge: node.getOutgoingEdges()) {
+            bld.addEdge(edge.getTail(), edge.getLabel());
+        }
+        return bld;
     }
 
     /**
@@ -110,6 +127,38 @@ public class DAGNode<V,E> implements Serializable {
     }
 
     /**
+     * Get the outgoing edge with the specified target and label, if it exists.
+     * @param target The target node.
+     * @param label The label.
+     * @return The edge from this node to {@code target} with label {@code label}, if it exists, or
+     * {@code null} if no such edge exists.
+     */
+    public DAGEdge<V,E> getOutgoingEdge(DAGNode<V,E> target, E label) {
+        for (DAGEdge<V,E> edge: outgoingEdges) {
+            if (edge.getTail().equals(target) && edge.getLabel().equals(label)) {
+                return edge;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get an outgoing edge from this node with the specified label, if it exists.
+     *
+     * @param label The label.
+     * @return An outgoing edge with the specified label, or {@code null} if no such edge exists.
+     * If multiple edges have this label, an arbitrary one is returned.
+     */
+    public DAGEdge<V,E> getOutgoingEdge(E label) {
+        for (DAGEdge<V,E> edge: outgoingEdges) {
+            if (edge.getLabel().equals(label)) {
+                return edge;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get a multimap of incoming edges.  For each node reachable from this node, the map will
      * contain each of its incoming edges (also reachable from this graph).
      *
@@ -126,6 +175,42 @@ public class DAGNode<V,E> implements Serializable {
             reverseEdgeCache = bld.build();
         }
         return reverseEdgeCache;
+    }
+
+    @Nonnull
+    public Set<DAGNode<V,E>> getReachableNodes() {
+        if (reachableNodeCache == null) {
+            // FIXME don't make so many copies
+            reachableNodeCache = ImmutableSet.copyOf(getSortedNodes());
+        }
+        return reachableNodeCache;
+    }
+
+    /**
+     * Topographical sort all nodes reachable from the given root node. Nodes
+     * that are farther away, or more connected, are at the beginning of the
+     * list.
+     * <p>
+     * Nodes in the graph that are not connected to the root will not appear in
+     * the returned list.
+     * @return The sorted list of reachable nodes.
+     */
+    @Nonnull
+    public List<DAGNode<V,E>> getSortedNodes() {
+        LinkedHashSet<DAGNode<V,E>> visited = Sets.newLinkedHashSet();
+        sortVisit(visited);
+        return ImmutableList.copyOf(visited);
+    }
+
+    private void sortVisit(LinkedHashSet<DAGNode<V,E>> visited) {
+        if (!visited.contains(this)) {
+            for (DAGEdge<V,E> nbr: outgoingEdges) {
+                nbr.getTail().sortVisit(visited);
+            }
+            // neighbors won't have added this, or we have an impossible cycle
+            assert !visited.contains(this);
+            visited.add(this);
+        }
     }
 
     /**
@@ -146,5 +231,15 @@ public class DAGNode<V,E> implements Serializable {
           .append(outgoingEdges.size())
           .append(" edges");
         return sb.toString();
+    }
+
+    public static <V> Predicate<DAGNode<V,?>> labelMatches(final Predicate<V> pred) {
+        return new Predicate<DAGNode<V, ?>>() {
+            @Override
+            public boolean apply(@Nullable DAGNode<V, ?> input) {
+                V lbl = input == null ? null : input.getLabel();
+                return pred.apply(lbl);
+            }
+        };
     }
 }

@@ -1,8 +1,10 @@
 package org.grouplens.grapht.graph;
 
+import com.google.common.base.Predicate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
@@ -99,5 +101,25 @@ public class DAGEdge<V,E> implements Serializable {
           .append(" to ")
           .append(tail);
         return sb.toString();
+    }
+
+    public static <E> Predicate<DAGEdge<?,E>> labelMatches(final Predicate<E> pred) {
+        return new Predicate<DAGEdge<?, E>>() {
+            @Override
+            public boolean apply(@Nullable DAGEdge<?, E> input) {
+                E label = input == null ? null : input.getLabel();
+                return pred.apply(label);
+            }
+        };
+    }
+
+    public static <V,E> Predicate<DAGEdge<V,E>> tailMatches(final Predicate<DAGNode<V,E>> pred) {
+        return new Predicate<DAGEdge<V, E>>() {
+            @Override
+            public boolean apply(@Nullable DAGEdge<V, E> input) {
+                DAGNode<V,E> tail = input == null ? null : input.getTail();
+                return pred.apply(tail);
+            }
+        };
     }
 }
