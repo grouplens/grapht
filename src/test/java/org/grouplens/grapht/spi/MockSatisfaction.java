@@ -95,11 +95,29 @@ public class MockSatisfaction implements Satisfaction {
         return provider;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        return sb.append("mock satisfaction of ")
+                 .append(type)
+                 .append(" with provider ")
+                 .append(provider)
+                 .append(" (")
+                 .append(dependencies.size())
+                 .append(" dependencies)")
+                 .toString();
+    }
+
     @SuppressWarnings("rawtypes")
     private static class NullProvider implements Provider {
         @Override
         public Object get() {
             return null;
+        }
+
+        @Override
+        public String toString() {
+            return "return null";
         }
     }
     
@@ -114,6 +132,11 @@ public class MockSatisfaction implements Satisfaction {
         @Override
         public Object get() {
             return instance;
+        }
+
+        @Override
+        public String toString() {
+            return "return " + instance;
         }
     }
 }

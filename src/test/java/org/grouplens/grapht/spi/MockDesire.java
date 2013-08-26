@@ -83,4 +83,21 @@ public class MockDesire implements Desire {
     public Desire restrict(Satisfaction satisfaction) {
         return new MockDesire(satisfaction.getErasedType(), satisfaction, qualifier);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("mock desire for ")
+          .append(desiredType);
+        if (qualifier != null) {
+            sb.append(" with qualifier ")
+              .append(qualifier);
+        }
+        if (satisfaction != null) {
+            sb.append(" (satisfied by ")
+              .append(satisfaction)
+              .append(")");
+        }
+        return sb.toString();
+    }
 }
