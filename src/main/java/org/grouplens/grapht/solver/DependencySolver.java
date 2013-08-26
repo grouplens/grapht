@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
@@ -189,6 +191,15 @@ public class DependencySolver {
                                                           boolean mergeRoot,
                                                           Map<CachedSatisfaction, DeferredResult> defer) {
         List<DAGNode<CachedSatisfaction, DesireChain>> sorted = tree.getSortedNodes();
+
+        Map<Pair<CachedSatisfaction,Set<DAGNode<CachedSatisfaction,DesireChain>>>,
+                DAGNode<CachedSatisfaction,DesireChain>> nodeTable = Maps.newHashMap();
+        for (DAGNode<CachedSatisfaction,DesireChain> node: graph.getReachableNodes()) {
+            Pair<CachedSatisfaction,Set<DAGNode<CachedSatisfaction,DesireChain>>> key =
+                    Pair.of(node.getLabel(), node.getAdjacentNodes());
+            assert !nodeTable.containsKey(key);
+            nodeTable.put(key, node);
+        }
         
         // Look up each node's dependencies in the merged graph, since we sorted
         // by reverse depth we can guarantee that dependencies have already
@@ -196,27 +207,24 @@ public class DependencySolver {
         Map<DAGNode<CachedSatisfaction,DesireChain>,
                 DAGNode<CachedSatisfaction,DesireChain>> mergedMap = Maps.newHashMap();
         for (DAGNode<CachedSatisfaction, DesireChain> toMerge: sorted) {
-            // Get all previously seen dependency configurations for this satisfaction
-            Map<Set<DAGNode<CachedSatisfaction, DesireChain>>, DAGNode<CachedSatisfaction, DesireChain>> dependencyOptions = getDependencyOptions(toMerge.getLabel());
-
+            CachedSatisfaction sat = toMerge.getLabel();
             // Accumulate the set of dependencies for this node, filtering
             // them through the previous level map
-            Set<DAGNode<CachedSatisfaction, DesireChain>> dependencies = Sets.newHashSet();
-            for (DAGEdge<CachedSatisfaction,DesireChain> dep: toMerge.getOutgoingEdges()) {
-                // levelMap converts from the tree to the merged graph
-                DAGNode<CachedSatisfaction, DesireChain> filtered = mergedMap.get(dep.getTail());
-                assert filtered != null; // all dependencies should have been merged previously
-                dependencies.add(filtered);
-            }
+            Set<DAGNode<CachedSatisfaction, DesireChain>> dependencies =
+                    FluentIterable.from(toMerge.getOutgoingEdges())
+                                  .transform(DAGEdge.<CachedSatisfaction,DesireChain>extractTail())
+                                  .transform(Functions.forMap(mergedMap))
+                                  .toSet();
 
-            DAGNode<CachedSatisfaction, DesireChain> newNode = dependencyOptions.get(dependencies);
+            DAGNode<CachedSatisfaction, DesireChain> newNode =
+                    nodeTable.get(Pair.of(sat, dependencies));
             if (newNode == null) {
                 DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.newBuilder();
                 // this configuration for the satisfaction has not been seen before
                 // - add it to merged graph, and connect to its dependencies
 
-                bld.setLabel(toMerge.getLabel());
-                logger.debug("Adding new node to merged graph for satisfaction: {}", toMerge.getLabel());
+                bld.setLabel(sat);
+                logger.debug("Adding new node to merged graph for satisfaction: {}", sat);
 
                 for (DAGEdge<CachedSatisfaction, DesireChain> dep: toMerge.getOutgoingEdges()) {
                     // add the edge with the new head and the previously merged tail
@@ -226,6 +234,7 @@ public class DependencySolver {
                 }
 
                 newNode = bld.build();
+                nodeTable.put(Pair.of(sat, dependencies), newNode);
             } else {
                 // note that if the original node was in the defer queue,
                 // it does not get transfered to the final queue
@@ -247,7 +256,7 @@ public class DependencySolver {
             return mergedMap.get(tree);
         }
     }
-    
+
     private Map<Set<DAGNode<CachedSatisfaction, DesireChain>>, DAGNode<CachedSatisfaction, DesireChain>> getDependencyOptions(CachedSatisfaction satisfaction) {
         // build a base map of dependency configurations to nodes for the provided
         // satisfaction, using the current state of the graph
@@ -299,9 +308,7 @@ public class DependencySolver {
                 //   so we don't need to process the returned node
                 logger.debug("Attempting to satisfy dependency {} of {}", d, result.satisfaction);
                 InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint().getAttributes());
-                Pair<DAGNode<CachedSatisfaction, DesireChain>, DesireChain> depResult;
-                depResult = resolveFully(d, newContext, defer);
-                nodeBuilder.addEdge(depResult);
+                nodeBuilder.addEdge(resolveFully(d, newContext, defer));
             }
         }
 

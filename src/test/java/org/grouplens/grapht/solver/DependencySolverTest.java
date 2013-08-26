@@ -32,6 +32,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.*;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -651,8 +652,9 @@ public class DependencySolverTest {
         
         // special case for root (since the graph adds a synthetic root)
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n1).size());
-        Assert.assertNull(r.getGraph().getIncomingEdges(n1).iterator().next().getHead().getLabel());
-        
+        assertThat(r.getGraph().getIncomingEdges(n1).iterator().next().getHead().getLabel(),
+                   equalTo(DependencySolver.ROOT_SATISFACTION));
+
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n2).size());
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(on2).size());
         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n3).size());

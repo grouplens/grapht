@@ -1,5 +1,6 @@
 package org.grouplens.grapht.graph;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -119,6 +120,16 @@ public class DAGEdge<V,E> implements Serializable {
             public boolean apply(@Nullable DAGEdge<V, E> input) {
                 DAGNode<V,E> tail = input == null ? null : input.getTail();
                 return pred.apply(tail);
+            }
+        };
+    }
+
+    public static <V,E> Function<DAGEdge<V,E>,DAGNode<V,E>> extractTail() {
+        return new Function<DAGEdge<V, E>, DAGNode<V, E>>() {
+            @Nullable
+            @Override
+            public DAGNode<V, E> apply(@Nullable DAGEdge<V, E> input) {
+                return input == null ? null : input.getTail();
             }
         };
     }

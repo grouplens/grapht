@@ -159,6 +159,16 @@ public class DAGNode<V,E> implements Serializable {
     }
 
     /**
+     * Get the nodes that are adjacent to this node (only considering outgoing edges).
+     * @return The set of adjacent nodes.
+     */
+    public Set<DAGNode<V,E>> getAdjacentNodes() {
+        return FluentIterable.from(outgoingEdges)
+                             .transform(DAGEdge.<V,E>extractTail())
+                             .toSet();
+    }
+
+    /**
      * Get a multimap of incoming edges.  For each node reachable from this node, the map will
      * contain each of its incoming edges (also reachable from this graph).
      *
@@ -228,6 +238,8 @@ public class DAGNode<V,E> implements Serializable {
         sb.append("node ")
           .append(label)
           .append(" with ")
+          .append(getReachableNodes().size())
+          .append(" nodes and ")
           .append(outgoingEdges.size())
           .append(" edges");
         return sb.toString();
