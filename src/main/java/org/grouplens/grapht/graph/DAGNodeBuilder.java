@@ -72,4 +72,9 @@ public class DAGNodeBuilder<V,E> {
         Preconditions.checkState(label != null, "no node label set");
         return new DAGNode<V,E>(label, edges);
     }
+
+    @Override
+    public String toString() {
+        return String.format("node builder with label %s and %d edges", label, edges.size());
+    }
 }

@@ -19,11 +19,13 @@
 package org.grouplens.grapht.spi.reflect;
 
 import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorBuilder;
-import org.grouplens.grapht.graph.*;
+import org.grouplens.grapht.graph.DAGEdge;
+import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.DesireChain;
@@ -64,9 +66,14 @@ public class ReflectionInjectionTest {
         Assert.assertEquals(1, bnode.getOutgoingEdges().size());
         DAGNode<CachedSatisfaction, DesireChain> pnode = bnode.getOutgoingEdges().iterator().next().getTail();
         Assert.assertEquals(Provider.class, pnode.getLabel().getSatisfaction().getErasedType());
-        
-        Assert.assertEquals(1, pnode.getOutgoingEdges().size());
-        DAGNode<CachedSatisfaction, DesireChain> anode2 = pnode.getOutgoingEdges().iterator().next().getTail();
+
+        // no outgoing edges...
+        Assert.assertEquals(0, pnode.getOutgoingEdges().size());
+        // but a back edge
+        Map<Pair<DAGNode<CachedSatisfaction, DesireChain>, Desire>,
+                DAGNode<CachedSatisfaction, DesireChain>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
+        assertThat(backEdges.entrySet(), hasSize(1));
+        DAGNode<CachedSatisfaction, DesireChain> anode2 = backEdges.values().iterator().next();
         Assert.assertSame(anode, anode2);
     }
     

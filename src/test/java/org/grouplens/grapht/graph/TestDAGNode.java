@@ -1,6 +1,9 @@
 package org.grouplens.grapht.graph;
 
+import com.google.common.collect.Maps;
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -72,5 +75,41 @@ public class TestDAGNode {
                                       DAGEdge.create(blatz, foo, "skunk")));
         assertThat(head.getReachableNodes(),
                    containsInAnyOrder(foo, bar, blatz, head));
+    }
+
+    @Test
+    public void testReplaceSingleNode() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.singleton("bar");
+        Map<DAGNode<String,String>,DAGNode<String,String>> mem = Maps.newHashMap();
+        DAGNode<String,String> replaced = foo.replaceNode(foo, bar, mem);
+        assertThat(replaced, equalTo(bar));
+        assertThat(mem, hasEntry(foo, bar));
+    }
+
+    @Test
+    public void testReplaceAbsentNode() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.singleton("bar");
+        DAGNode<String,String> blatz = DAGNode.singleton("blatz");
+        Map<DAGNode<String,String>,DAGNode<String,String>> mem = Maps.newHashMap();
+        DAGNode<String,String> replaced = foo.replaceNode(blatz, bar, mem);
+        assertThat(replaced, equalTo(foo));
+        assertThat(mem.size(), equalTo(0));
+    }
+
+    @Test
+    public void testReplaceEdgeNode() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.singleton("bar");
+        DAGNode<String,String> graph = DAGNode.<String,String>newBuilder("graph")
+                                              .addEdge(foo, "wombat")
+                                              .build();
+        Map<DAGNode<String,String>,DAGNode<String,String>> mem = Maps.newHashMap();
+        DAGNode<String,String> replaced = graph.replaceNode(foo, bar, mem);
+        assertThat(replaced, not(equalTo(graph)));
+        assertThat(mem, hasEntry(foo, bar));
+        assertThat(mem, hasEntry(graph, replaced));
+        assertThat(replaced.getAdjacentNodes(), contains(bar));
     }
 }

@@ -11,6 +11,7 @@ import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -164,7 +165,7 @@ public class DAGNode<V,E> implements Serializable {
      */
     public Set<DAGNode<V,E>> getAdjacentNodes() {
         return FluentIterable.from(outgoingEdges)
-                             .transform(DAGEdge.<V,E>extractTail())
+                             .transform(DAGEdge.<V, E>extractTail())
                              .toSet();
     }
 
@@ -230,6 +231,35 @@ public class DAGNode<V,E> implements Serializable {
     @Nonnull
     public Set<DAGEdge<V,E>> getIncomingEdges(DAGNode<V,E> node) {
         return getIncomingEdgeMap().get(node);
+    }
+
+    /**
+     * Replace one node with another in this graph.  All edges referencing {@code node} are replaced
+     * with edges referencing {@code replacement}.
+     *
+     * @param node The node to replace.
+     * @param replacement The replacement node.
+     * @param memory A table to remember node replacements.  It maintains a mapping of every node
+     *               that has to be replaced with the node that replaces it.
+     * @return The graph with the replaced node.
+     */
+    public DAGNode<V,E> replaceNode(DAGNode<V,E> node, DAGNode<V,E> replacement,
+                                    Map<DAGNode<V,E>,DAGNode<V,E>> memory) {
+        if (this.equals(node)) {
+            memory.put(node, replacement);
+            return replacement;
+        } else if (getReachableNodes().contains(node)) {
+            DAGNodeBuilder<V,E> bld = newBuilder(label);
+            for (DAGEdge<V,E> edge: outgoingEdges) {
+                DAGNode<V,E> newTail = edge.getTail().replaceNode(node, replacement, memory);
+                bld.addEdge(newTail, edge.getLabel());
+            }
+            DAGNode<V,E> repl = bld.build();
+            memory.put(this, repl);
+            return repl;
+        } else {
+            return this;
+        }
     }
 
     @Override

@@ -205,7 +205,16 @@ public class DefaultInjector implements Injector {
                     Iterables.find(forNode.getOutgoingEdges(),
                                    DAGEdge.labelMatches(DesireChain.hasInitialDesire(desire)),
                                    null);
-            DAGNode<CachedSatisfaction, DesireChain> dependency = edge.getTail();
+            DAGNode<CachedSatisfaction, DesireChain> dependency;
+            if (edge != null) {
+                dependency = edge.getTail();
+            } else {
+                dependency = solver.getBackEdge(forNode, desire);
+            }
+            if (dependency == null) {
+                // we have an unresolved graph, that can't happen
+                throw new RuntimeException("unresolved dependency " + desire + " for " + forNode.getLabel().getSatisfaction());
+            }
             return getProvider(dependency);
         }
     }
