@@ -64,6 +64,8 @@ public class SerializationTest {
         DAGNode<CachedSatisfaction, String> n2 = DAGNode.singleton(s2);
         DAGNodeBuilder<CachedSatisfaction, String> bld = DAGNode.newBuilder(s1);
         bld.addEdge(n2, "wombat");
+        bld.addEdge(n2, "foobar");
+        write(bld.build());
         DAGNode<Object, Object> read = read();
         
         Assert.assertEquals(2, read.getReachableNodes().size());
