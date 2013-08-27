@@ -133,4 +133,61 @@ public class DAGEdge<V,E> implements Serializable {
             }
         };
     }
+
+    public static <V,E> Predicate<DAGEdge<V,E>> headMatches(final Predicate<DAGNode<V,E>> pred) {
+        return new Predicate<DAGEdge<V, E>>() {
+            @Override
+            public boolean apply(@Nullable DAGEdge<V, E> input) {
+                DAGNode<V,E> head = input == null ? null : input.getHead();
+                return pred.apply(head);
+            }
+        };
+    }
+
+    public static <V,E> Function<DAGEdge<V,E>,DAGNode<V,E>> extractHead() {
+        return new Function<DAGEdge<V, E>, DAGNode<V, E>>() {
+            @Nullable
+            @Override
+            public DAGNode<V, E> apply(@Nullable DAGEdge<V, E> input) {
+                return input == null ? null : input.getHead();
+            }
+        };
+    }
+
+    /**
+     * Transform an edge.  This function does not further transform the nodes, so if the edge is
+     * known as the outgoing edge of a node, that won't be fixed.  Mostly useful for bulk operations
+     * on a bunch of edges, if you have them lying around.
+     *
+     * @param func The node transformation function.  If this function returns null, that is treated
+     *             as equivalent to the identity function.
+     * @param <V> The type of vertices.
+     * @param <E> The type of edges.
+     * @return A function over edges.
+     */
+    public static <V,E> Function<DAGEdge<V,E>,DAGEdge<V,E>> transformNodes(final Function<DAGNode<V,E>,DAGNode<V,E>> func) {
+        return new Function<DAGEdge<V, E>, DAGEdge<V, E>>() {
+            @Nullable
+            @Override
+            public DAGEdge<V, E> apply(@Nullable DAGEdge<V, E> input) {
+                if (input == null) {
+                    return null;
+                }
+                DAGNode<V,E> nt, nh;
+                nt = func.apply(input.getTail());
+                nh = func.apply(input.getHead());
+                if (nt == null) {
+                    nt = input.getTail();
+                }
+                if (nh == null) {
+                    nh = input.getHead();
+                }
+                if (!nt.equals(input.getTail()) || !nh.equals(input.getHead())) {
+                    return create(nh, nt, input.getLabel());
+                } else {
+                    return input;
+                }
+            }
+        };
+    }
 }

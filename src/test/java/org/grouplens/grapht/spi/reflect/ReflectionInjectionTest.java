@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.BindingFunctionBuilder;
@@ -70,11 +71,10 @@ public class ReflectionInjectionTest {
         // no outgoing edges...
         Assert.assertEquals(0, pnode.getOutgoingEdges().size());
         // but a back edge
-        Map<Pair<DAGNode<CachedSatisfaction, DesireChain>, Desire>,
-                DAGNode<CachedSatisfaction, DesireChain>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
-        assertThat(backEdges.entrySet(), hasSize(1));
-        DAGNode<CachedSatisfaction, DesireChain> anode2 = backEdges.values().iterator().next();
-        Assert.assertSame(anode, anode2);
+        ImmutableSet<DAGEdge<CachedSatisfaction, DesireChain>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
+        assertThat(backEdges, hasSize(1));
+        DAGEdge<CachedSatisfaction, DesireChain> edge = backEdges.iterator().next();
+        Assert.assertSame(anode, edge.getTail());
     }
     
     @Test

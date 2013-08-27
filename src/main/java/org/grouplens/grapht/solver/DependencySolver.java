@@ -18,11 +18,11 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
+import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
@@ -36,6 +36,7 @@ import org.grouplens.grapht.spi.reflect.NullSatisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.org.mozilla.javascript.TopLevel;
 
 import java.util.*;
 
@@ -86,8 +87,7 @@ public class DependencySolver {
     private final List<BindingFunction> functions;
     
     private DAGNode<CachedSatisfaction,DesireChain> graph;
-    private Map<Pair<DAGNode<CachedSatisfaction,DesireChain>,Desire>,
-            DAGNode<CachedSatisfaction,DesireChain>> backEdges;
+    private Set<DAGEdge<CachedSatisfaction,DesireChain>> backEdges;
 
     /**
      * Create a DependencySolver that uses the given functions, and max
@@ -113,7 +113,7 @@ public class DependencySolver {
         this.defaultPolicy = defaultPolicy;
         
         graph = DAGNode.singleton(ROOT_SATISFACTION);
-        backEdges = Maps.newHashMap();
+        backEdges = Sets.newHashSet();
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
     }
@@ -143,8 +143,8 @@ public class DependencySolver {
      * node being provided, and this map will report that edge.
      * @return A snapshot of the map of back-edges.
      */
-    public ImmutableMap<Pair<DAGNode<CachedSatisfaction, DesireChain>, Desire>, DAGNode<CachedSatisfaction, DesireChain>> getBackEdges() {
-        return ImmutableMap.copyOf(backEdges);
+    public ImmutableSet<DAGEdge<CachedSatisfaction, DesireChain>> getBackEdges() {
+        return ImmutableSet.copyOf(backEdges);
     }
 
     /**
@@ -154,7 +154,12 @@ public class DependencySolver {
      */
     public synchronized DAGNode<CachedSatisfaction,DesireChain> getBackEdge(DAGNode<CachedSatisfaction, DesireChain> parent,
                                                                             Desire desire) {
-        return backEdges.get(Pair.of(parent, desire));
+        return FluentIterable.from(backEdges)
+                             .filter(Predicates.and(DAGEdge.headMatches(Predicates.equalTo(parent)),
+                                                    DAGEdge.labelMatches(DesireChain.hasInitialDesire(desire))))
+                             .first()
+                             .transform(DAGEdge.<CachedSatisfaction,DesireChain>extractTail())
+                             .orNull();
     }
 
     /**
@@ -209,7 +214,7 @@ public class DependencySolver {
                         // that means we need a back edge
                         // this assertion should be true, don't know why it isn't
                         // assert graph.getReachableNodes().contains(merged);
-                        backEdges.put(Pair.of(parent, d), merged);
+                        backEdges.add(DAGEdge.create(parent, merged, result.getRight()));
                     } else {
                         // an edge from parent to merged does not add a cycle
                         // we have to update graph right away so it's available to merge the next
@@ -234,20 +239,7 @@ public class DependencySolver {
                 DAGNode<CachedSatisfaction,DesireChain>> memory = Maps.newHashMap();
         graph = graph.replaceNode(old, repl, memory);
         // loop over a snapshot of the list, replacing nodes
-        for (Map.Entry<Pair<DAGNode<CachedSatisfaction,DesireChain>,Desire>,DAGNode<CachedSatisfaction,DesireChain>> e: Lists.newArrayList(backEdges.entrySet())) {
-            Pair<DAGNode<CachedSatisfaction, DesireChain>, Desire> key = e.getKey();
-            DAGNode<CachedSatisfaction, DesireChain> value = e.getValue();
-            DAGNode<CachedSatisfaction, DesireChain> nk, nv;
-            nk = memory.get(key.getLeft());
-            nv = memory.get(value);
-            if (nk != null || nv != null) {
-                // need to transform this entry
-                backEdges.put(nk == null ? key : Pair.of(nk, key.getRight()),
-                              nv == null ? value : nv);
-            }
-        }
-        // trim out unused nodes
-        backEdges.keySet().retainAll(graph.getReachableNodes());
+        backEdges = Sets.newHashSet(Iterables.transform(backEdges, DAGEdge.transformNodes(Functions.forMap(memory, null))));
     }
 
     /**
