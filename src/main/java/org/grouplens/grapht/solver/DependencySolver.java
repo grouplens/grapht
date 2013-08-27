@@ -20,6 +20,7 @@ package org.grouplens.grapht.solver;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
@@ -72,6 +73,7 @@ public class DependencySolver {
     private final List<BindingFunction> functions;
     
     private DAGNode<CachedSatisfaction,DesireChain> graph;
+    private Map<DAGNode<CachedSatisfaction,DesireChain>,DAGNode<CachedSatisfaction,DesireChain>> backEdges;
 
     private final Queue<DeferredResult> deferredNodes;
 
@@ -101,6 +103,7 @@ public class DependencySolver {
         deferredNodes = new ArrayDeque<DeferredResult>();
 
         graph = DAGNode.singleton(ROOT_SATISFACTION);
+        backEdges = Maps.newHashMap();
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
     }
@@ -115,10 +118,23 @@ public class DependencySolver {
     }
     
     /**
-     * @return The resolved dependency graph
+     * Get the current full dependency graph. This consists of a synthetic root node with edges
+     * to the resolutions of all dependencies passed to {@link #resolve(Desire)}.
+     * @return The resolved dependency graph.
      */
     public DAGNode<CachedSatisfaction,DesireChain> getGraph() {
         return graph;
+    }
+
+    /**
+     * Get the map of back-edges for circular dependencies.  Circular dependencies are only allowed
+     * via provider injection, and only if {@link ProviderBindingFunction} is one of the binding
+     * functions.  In such cases, there will be a back edge from the provider node to the actual
+     * node being provided, and this map will report that edge.
+     * @return The map of back-edges.
+     */
+    public Map<DAGNode<CachedSatisfaction,DesireChain>,DAGNode<CachedSatisfaction,DesireChain>> getBackEdges() {
+        return ImmutableMap.copyOf(backEdges);
     }
 
     /**
@@ -257,24 +273,6 @@ public class DependencySolver {
         }
     }
 
-    private Map<Set<DAGNode<CachedSatisfaction, DesireChain>>, DAGNode<CachedSatisfaction, DesireChain>> getDependencyOptions(CachedSatisfaction satisfaction) {
-        // build a base map of dependency configurations to nodes for the provided
-        // satisfaction, using the current state of the graph
-        Map<Set<DAGNode<CachedSatisfaction, DesireChain>>, DAGNode<CachedSatisfaction, DesireChain>> options =
-                Maps.newHashMap();
-        for (DAGNode<CachedSatisfaction, DesireChain> node: graph.getReachableNodes()) {
-            if (satisfaction.equals(node.getLabel())) {
-                // accumulate all of its immediate dependencies
-                Set<DAGNode<CachedSatisfaction, DesireChain>> option = Sets.newHashSet();
-                for (DAGEdge<CachedSatisfaction, DesireChain> edge: node.getOutgoingEdges()) {
-                    option.add(edge.getTail());
-                }
-                options.put(option, node);
-            }
-        }
-        return options;
-    }
-
     /**
      * Resolve a desire and its dependencies, inserting them into the graph.
      *
@@ -297,6 +295,8 @@ public class DependencySolver {
         DAGNodeBuilder<CachedSatisfaction,DesireChain> nodeBuilder = DAGNode.newBuilder();
         nodeBuilder.setLabel(sat);
 
+        InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint().getAttributes());
+
         if (result.deferDependencies) {
             // extend node onto deferred queue and skip its dependencies for now
             logger.debug("Deferring dependencies of {}", result.satisfaction);
@@ -307,7 +307,6 @@ public class DependencySolver {
                 // - the call to resolveFully() is responsible for adding the dependency edges
                 //   so we don't need to process the returned node
                 logger.debug("Attempting to satisfy dependency {} of {}", d, result.satisfaction);
-                InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint().getAttributes());
                 nodeBuilder.addEdge(resolveFully(d, newContext, defer));
             }
         }

@@ -21,8 +21,6 @@ package org.grouplens.grapht.solver;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
-import org.grouplens.grapht.spi.reflect.NullSatisfaction;
 import org.grouplens.grapht.util.AbstractChain;
 
 /**
@@ -33,10 +31,7 @@ import org.grouplens.grapht.util.AbstractChain;
  * is most significantly represented as a list of satisfactions and the
  * associated injection point attributes. This list represents the "type path"
  * from the root node in the graph to the previously resolved satisfaction.
- * <p>
- * Essentially, each InjectionContext instance is associated with a single
- * resolution attempt for an injection point.
- * 
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes>> {
