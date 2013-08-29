@@ -19,7 +19,6 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.graph.DAGEdge;
@@ -145,11 +144,11 @@ public class DefaultInjector implements Injector {
         synchronized(this) {
             Desire desire = spi.desire(qualifier, type, false);
 
-            Predicate<DAGEdge<?, DesireChain>> pred = DAGEdge.labelMatches(DesireChain.hasInitialDesire(desire));
+            Predicate<DesireChain> pred = DesireChain.hasInitialDesire(desire);
 
             // check if the desire is already in the graph
             DAGEdge<CachedSatisfaction, DesireChain> resolved =
-                    Iterables.find(solver.getGraph().getOutgoingEdges(), pred, null);
+                    solver.getGraph().getOutgoingEdgeWithLabel(pred);
 
             // The edge is only non-null if getInstance() has been called before,
             // it may be present in the graph at a deeper node. If that's the case
@@ -161,7 +160,7 @@ public class DefaultInjector implements Injector {
                 } catch(SolverException e) {
                     throw new InjectionException(type, null, e);
                 }
-                resolved = Iterables.find(solver.getGraph().getOutgoingEdges(), pred, null);
+                resolved = solver.getGraph().getOutgoingEdgeWithLabel(pred);
             }
 
             // Check if the provider for the resolved node is in our cache
@@ -202,9 +201,7 @@ public class DefaultInjector implements Injector {
         @Override
         public Provider<?> apply(Desire desire) {
             DAGEdge<CachedSatisfaction, DesireChain> edge =
-                    Iterables.find(forNode.getOutgoingEdges(),
-                                   DAGEdge.labelMatches(DesireChain.hasInitialDesire(desire)),
-                                   null);
+                    forNode.getOutgoingEdgeWithLabel(DesireChain.hasInitialDesire(desire));
             DAGNode<CachedSatisfaction, DesireChain> dependency;
             if (edge != null) {
                 dependency = edge.getTail();

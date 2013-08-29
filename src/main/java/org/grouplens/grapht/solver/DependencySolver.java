@@ -18,9 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,7 +34,6 @@ import org.grouplens.grapht.spi.reflect.NullSatisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.org.mozilla.javascript.TopLevel;
 
 import java.util.*;
 

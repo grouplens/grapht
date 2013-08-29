@@ -20,6 +20,8 @@ public class TestDAGNode {
         assertThat(node.getOutgoingEdges(), hasSize(0));
         assertThat(node.getReachableNodes(),
                    contains(node));
+        assertThat(node.getOutgoingEdgeWithLabel("wombat"),
+                   nullValue());
     }
 
     @Test
@@ -39,6 +41,8 @@ public class TestDAGNode {
                    containsInAnyOrder(foo, bar));
         assertThat(bar.getSortedNodes(),
                    contains(foo, bar));
+        assertThat(bar.getOutgoingEdgeWithLabel("wombat").getTail(),
+                   equalTo(foo));
     }
 
     @Test

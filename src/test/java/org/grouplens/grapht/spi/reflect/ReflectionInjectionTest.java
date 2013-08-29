@@ -19,7 +19,6 @@
 package org.grouplens.grapht.spi.reflect;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.Injector;
@@ -97,8 +96,7 @@ public class ReflectionInjectionTest {
         Assert.assertSame(instance, r.getInstance(TypeC.class));
 
         DAGNode<CachedSatisfaction, DesireChain> resolvedRoot =
-                Iterables.find(r.getSolver().getGraph().getOutgoingEdges(),
-                               DAGEdge.labelMatches(DesireChain.hasInitialDesire(rootDesire))).getTail();
+                r.getSolver().getGraph().getOutgoingEdgeWithLabel(DesireChain.hasInitialDesire(rootDesire)).getTail();
         assertThat(resolvedRoot.getOutgoingEdges(),
                    hasSize(5));
 
@@ -186,8 +184,7 @@ public class ReflectionInjectionTest {
         Assert.assertSame(instance, r.getInstance(TypeC.class));
 
         DAGNode<CachedSatisfaction, DesireChain> resolvedRoot =
-                Iterables.find(r.getSolver().getGraph().getOutgoingEdges(),
-                               DAGEdge.labelMatches(DesireChain.hasInitialDesire(rootDesire))).getTail();
+                r.getSolver().getGraph().getOutgoingEdgeWithLabel(DesireChain.hasInitialDesire(rootDesire)).getTail();
         assertThat(resolvedRoot.getOutgoingEdges(),
                    hasSize(5));
         

@@ -2,6 +2,7 @@ package org.grouplens.grapht.graph;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -150,13 +151,20 @@ public class DAGNode<V,E> implements Serializable {
      * @return An outgoing edge with the specified label, or {@code null} if no such edge exists.
      * If multiple edges have this label, an arbitrary one is returned.
      */
-    public DAGEdge<V,E> getOutgoingEdge(E label) {
-        for (DAGEdge<V,E> edge: outgoingEdges) {
-            if (edge.getLabel().equals(label)) {
-                return edge;
-            }
-        }
-        return null;
+    public DAGEdge<V,E> getOutgoingEdgeWithLabel(E label) {
+        return getOutgoingEdgeWithLabel(Predicates.equalTo(label));
+    }
+
+    /**
+     * Search for an outgoing edge by a predicate.
+     *
+     * @param predicate A predicate over labels.
+     * @return An outgoing edge matching the predicate, or {@code null} if no such edge exists.  If
+     *         multiple edges have labels matching the predicate, it is undefined which one will be
+     *         added.
+     */
+    public DAGEdge<V, E> getOutgoingEdgeWithLabel(Predicate<E> predicate) {
+        return Iterables.find(outgoingEdges, DAGEdge.labelMatches(predicate), null);
     }
 
     /**
