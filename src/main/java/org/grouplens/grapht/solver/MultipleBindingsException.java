@@ -36,11 +36,11 @@ public class MultipleBindingsException extends SolverException {
     private static final long serialVersionUID = 1L;
 
     private final InjectionContext context;
-    private final Desire desire;
+    private final DesireChain desires;
     private final Collection<?> bindings;
     
-    public MultipleBindingsException(Desire desire, InjectionContext context, Collection<?> bindings) {
-        this.desire = desire;
+    public MultipleBindingsException(DesireChain desires, InjectionContext context, Collection<?> bindings) {
+        this.desires = desires;
         this.context = context;
         this.bindings = Collections.unmodifiableCollection(new ArrayList<Object>(bindings));
     }
@@ -65,15 +65,15 @@ public class MultipleBindingsException extends SolverException {
      *         BindingFunction
      */
     public Desire getDesire() {
-        return desire;
+        return desires.getCurrentDesire();
     }
     
     @Override
     public String getMessage() {
         return new StringBuilder("Too many choices for desire: ")
-            .append(format(desire.getInjectionPoint()))
+            .append(format(getDesire().getInjectionPoint()))
             .append('\n')
-            .append(format(context))
+            .append(format(context, desires))
             .toString();
     }
 }

@@ -25,7 +25,9 @@ import java.util.*;
 /**
  * An immutable list. This is useful for implementing immutable classes and cleanly
  * serializing them.
+ * @deprecated Use {@link com.google.common.collect.ImmutableList} instead.
  */
+@Deprecated
 public class FrozenList<E> extends AbstractList<E> implements RandomAccess, Serializable {
     private static final long serialVersionUID = 1L;
 

@@ -18,17 +18,14 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.junit.Assert;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.solver.BindingResult;
-import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
-import org.grouplens.grapht.solver.InjectionContext;
-import org.grouplens.grapht.solver.SolverException;
+import org.grouplens.grapht.solver.*;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.MockInjectionPoint;
 import org.grouplens.grapht.spi.reflect.types.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -129,14 +126,16 @@ public class ReflectionDesireTest {
         Assert.assertNotNull(restricted);
     }
     
-    private ReflectionDesire getDefaultDesire(Object methodOrCtorParam, List<ReflectionDesire>  desires) throws SolverException {
+    private ReflectionDesire getDefaultDesire(Object methodOrCtorParam, List<ReflectionDesire> desires) throws SolverException {
         BindingResult result = null;
         for (ReflectionDesire d: desires) {
             if (methodOrCtorParam instanceof Method) {
                 if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                     SetterInjectionPoint sp = (SetterInjectionPoint) (d.getInjectionPoint());
                     if (sp.getMember().equals(methodOrCtorParam)) {
-                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI()).bind(InjectionContext.empty(), d);
+                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI())
+                                .bind(DependencySolver.initialContext(),
+                                      DesireChain.singleton(d));
                         break;
                     }
                 }
@@ -144,7 +143,9 @@ public class ReflectionDesireTest {
                 if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                     ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) (d.getInjectionPoint());
                     if (((Integer) methodOrCtorParam).intValue() == cp.getParameterIndex()) {
-                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI()).bind(InjectionContext.empty(), d);
+                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI())
+                                .bind(DependencySolver.initialContext(),
+                                      DesireChain.singleton(d));
                         break;
                     }
                 }

@@ -56,7 +56,8 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, Desire desire) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain dchain) throws SolverException {
+        Desire desire = dchain.getCurrentDesire();
         BindingResult result = null;
 
         Annotation qualifier = desire.getInjectionPoint().getAttributes().getQualifier();
@@ -64,10 +65,10 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         // Only use qualifier defaults if this is the first desire 
         // (i.e. the desire that declared any qualifier)
         // REVIEW If it is not the first desire, can a qualifier exist?
-        if (context.getPriorDesires().isEmpty() && qualifier != null) {
+        if (desire.equals(dchain.getInitialDesire()) && qualifier != null) {
             Class<? extends Annotation> annotType = qualifier.annotationType();
 
-            result = getDefaultValue(desire, annotType);
+            result = getDefaultValue(dchain.getCurrentDesire(), annotType);
             if (result == null) {
                 result = getAnnotatedDefault(desire, annotType);
             }
