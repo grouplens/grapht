@@ -98,7 +98,12 @@ public final class ClassProxy implements Serializable {
         WeakReference<Class<?>> ref = theClass;
         Class<?> cls = ref == null ? null : ref.get();
         if (cls == null) {
-            cls = ClassUtils.getClass(className);
+            if(className.equals("void")) {
+                // special case
+                cls = Void.TYPE;
+            } else {
+                cls = ClassUtils.getClass(className);
+            }
             long check = checksumClass(cls);
             if (checksum == check) {
                 theClass = new WeakReference<Class<?>>(cls);

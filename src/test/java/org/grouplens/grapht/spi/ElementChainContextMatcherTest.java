@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.junit.Test;
@@ -149,10 +150,10 @@ public class ElementChainContextMatcherTest {
     }
 
     private InjectionContext makeContext(Class<?>... types) {
-        InjectionContext context = InjectionContext.empty();
+        InjectionContext context = DependencySolver.initialContext();
         for (Class<?> type: types) {
             MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
-            context = context.push(sat, new AttributesImpl());
+            context = context.extend(sat, new AttributesImpl());
         }
         return context;
     }

@@ -112,7 +112,9 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
         Satisfaction sat = n.getLeft();
         boolean typeMatches;
         if (type == null) {
-            typeMatches = sat == null || sat.getErasedType() == null;
+            typeMatches = sat == null
+                          || sat.getErasedType() == null
+                          || sat.getType().equals(Void.TYPE);
         } else {
             typeMatches = sat != null && sat.getErasedType() != null &&
                           type.isAssignableFrom(sat.getErasedType());
