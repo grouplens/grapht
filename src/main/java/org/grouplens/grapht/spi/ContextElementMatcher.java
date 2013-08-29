@@ -27,10 +27,8 @@ import java.io.Serializable;
  * <p>
  * ContextElementMatcher represents a "pattern" that can match an element within the
  * dependency context created as a Resolver follows a dependency hierarchy. The
- * dependency context is an ordered list of Nodes and the Roles of the Desires
- * that the Nodes satisfy. The top-level Node can be thought of as the root Node
- * or first element within the dependency context. Later elements represent
- * dependencies or dependencies of dependencies of the root node.
+ * dependency context is an ordered list of satisfactions and the qualifiers of the desires they satisfy.
+ * The first satisfaction is the root satisfaction, a {@code null} satisfaction of type {@code void}.
  * <p>
  * ContextMatchers can match or apply to these nodes and {@link Qualifier}s
  * within a dependency context. As an example, the reflection based
