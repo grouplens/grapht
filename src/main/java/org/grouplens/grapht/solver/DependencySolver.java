@@ -209,8 +209,6 @@ public class DependencySolver {
                     if (merged.getReachableNodes().contains(parent)) {
                         // parent node is referenced from merged, we have a circle!
                         // that means we need a back edge
-                        // this assertion should be true, don't know why it isn't
-                        // assert graph.getReachableNodes().contains(merged);
                         backEdges.add(DAGEdge.create(parent, merged, result.getRight()));
                     } else {
                         // an edge from parent to merged does not add a cycle

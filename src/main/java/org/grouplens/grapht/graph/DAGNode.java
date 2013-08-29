@@ -184,7 +184,7 @@ public class DAGNode<V,E> implements Serializable {
      * @return The reverse edge map.
      */
     @Nonnull
-    public SetMultimap<DAGNode<V,E>,DAGEdge<V,E>> getIncomingEdgeMap() {
+    private SetMultimap<DAGNode<V,E>,DAGEdge<V,E>> getIncomingEdgeMap() {
         if (reverseEdgeCache == null) {
             ImmutableSetMultimap.Builder<DAGNode<V,E>,DAGEdge<V,E>> bld = ImmutableSetMultimap.builder();
             for (DAGEdge<V,E> nbr: outgoingEdges) {
@@ -248,7 +248,8 @@ public class DAGNode<V,E> implements Serializable {
      * @param node The node to replace.
      * @param replacement The replacement node.
      * @param memory A table to remember node replacements.  It maintains a mapping of every node
-     *               that has to be replaced with the node that replaces it.
+     *               that has to be replaced with the node that replaces it.  This map should
+     *               usually be empty on the initial call to this method.
      * @return The graph with the replaced node.
      */
     public DAGNode<V,E> replaceNode(DAGNode<V,E> node, DAGNode<V,E> replacement,
