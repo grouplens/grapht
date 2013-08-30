@@ -152,10 +152,10 @@ public class DependencySolver {
     public synchronized DAGNode<CachedSatisfaction,DesireChain> getBackEdge(DAGNode<CachedSatisfaction, DesireChain> parent,
                                                                             Desire desire) {
         return FluentIterable.from(backEdges)
-                             .filter(Predicates.and(DAGEdge.headMatches(Predicates.equalTo(parent)),
-                                                    DAGEdge.labelMatches(DesireChain.hasInitialDesire(desire))))
+                             .filter(DAGEdge.headMatches(Predicates.equalTo(parent)))
+                             .filter(DAGEdge.labelMatches(DesireChain.hasInitialDesire(desire)))
                              .first()
-                             .transform(DAGEdge.<CachedSatisfaction,DesireChain>extractTail())
+                             .transform(DAGEdge.<CachedSatisfaction, DesireChain>extractTail())
                              .orNull();
     }
 
