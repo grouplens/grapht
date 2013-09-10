@@ -195,7 +195,7 @@ public class DependencySolver {
             if (current.node.getLabel().equals(ROOT_SATISFACTION)) {
                 DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.copyBuilder(parent);
                 bld.addEdge(resolveFully(desire, current.context, deferralQueue));
-                graph = merge(bld.build(), true);
+                graph = merge(bld.build(), graph, true);
             } else if (graph.getReachableNodes().contains(parent)) {
                 // the node needs to be re-scanned. Because parent nodes have no out edges, they
                 // are unmodified by merge and will be preserved.
@@ -206,7 +206,7 @@ public class DependencySolver {
                     Pair<DAGNode<CachedSatisfaction, DesireChain>, DesireChain> result =
                             resolveFully(d, current.context, deferralQueue);
                     // merge it in
-                    DAGNode<CachedSatisfaction, DesireChain> merged = merge(result.getLeft(), false);
+                    DAGNode<CachedSatisfaction, DesireChain> merged = merge(result.getLeft(), graph, false);
                     // now see if there's a real cycle
                     if (merged.getReachableNodes().contains(parent)) {
                         // parent node is referenced from merged, we have a circle!
@@ -242,18 +242,21 @@ public class DependencySolver {
     /**
      * Merge a graph, resulting from a resolve, into the global graph.
      *
-     * @param tree The unmerged graph.
+     * @param tree The unmerged tree to merge in.
+     * @param mergeTarget The graph to merge with.
      * @param mergeRoot Whether to merge this with the root of the global graph.  If {@code true},
      *                  the outgoing edges of {@code tree} are added to the outgoing edges of
      *                  the root of the global graph and the resulting graph returned.
+     * @return The new merged graph.
      */
     private DAGNode<CachedSatisfaction,DesireChain> merge(DAGNode<CachedSatisfaction,DesireChain> tree,
+                                                          DAGNode<CachedSatisfaction,DesireChain> mergeTarget,
                                                           boolean mergeRoot) {
         List<DAGNode<CachedSatisfaction, DesireChain>> sorted = tree.getSortedNodes();
 
         Map<Pair<CachedSatisfaction,Set<DAGNode<CachedSatisfaction,DesireChain>>>,
                 DAGNode<CachedSatisfaction,DesireChain>> nodeTable = Maps.newHashMap();
-        for (DAGNode<CachedSatisfaction,DesireChain> node: graph.getReachableNodes()) {
+        for (DAGNode<CachedSatisfaction,DesireChain> node: mergeTarget.getReachableNodes()) {
             Pair<CachedSatisfaction,Set<DAGNode<CachedSatisfaction,DesireChain>>> key =
                     Pair.of(node.getLabel(), node.getAdjacentNodes());
             assert !nodeTable.containsKey(key);
