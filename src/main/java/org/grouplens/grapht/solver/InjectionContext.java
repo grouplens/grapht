@@ -21,6 +21,7 @@ package org.grouplens.grapht.solver;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.AbstractChain;
 
 /**
@@ -36,9 +37,24 @@ import org.grouplens.grapht.util.AbstractChain;
  */
 public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes>> {
     private static final long serialVersionUID = 1L;
-    
+
+    /**
+     * Construct a singleton injection context.
+     * @param satisfaction The satisfaction.
+     * @param attrs The attributes.
+     * @return The injection context.
+     */
     public static InjectionContext singleton(Satisfaction satisfaction, Attributes attrs) {
         return new InjectionContext(null, satisfaction, attrs);
+    }
+
+    /**
+     * Construct a singleton injection context with no attributes.
+     * @param satisfaction The satisfaction.
+     * @return The injection context.
+     */
+    public static InjectionContext singleton(Satisfaction satisfaction) {
+        return singleton(satisfaction, new AttributesImpl());
     }
 
     private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
