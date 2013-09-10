@@ -66,8 +66,7 @@ public class DependencySolver {
      * @return The context from the initial injection.
      */
     public static InjectionContext initialContext() {
-        return InjectionContext.singleton(ROOT_SATISFACTION.getSatisfaction(),
-                                          new AttributesImpl());
+        return InjectionContext.singleton(ROOT_SATISFACTION.getSatisfaction());
     }
 
     /**
@@ -244,9 +243,10 @@ public class DependencySolver {
      *
      * @param tree The unmerged tree to merge in.
      * @param mergeTarget The graph to merge with.
-     * @param mergeRoot Whether to merge this with the root of the global graph.  If {@code true},
+     * @param mergeRoot Whether to merge this with the root of the merge target.  If {@code true},
      *                  the outgoing edges of {@code tree} are added to the outgoing edges of
-     *                  the root of the global graph and the resulting graph returned.
+     *                  {@code mergeTarget} and the resulting graph is returned; otherwise, just the
+     *                  transformation of {@code tree} is returned.
      * @return The new merged graph.
      */
     private DAGNode<CachedSatisfaction,DesireChain> merge(DAGNode<CachedSatisfaction,DesireChain> tree,
