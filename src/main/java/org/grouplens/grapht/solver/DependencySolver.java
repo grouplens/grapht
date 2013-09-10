@@ -197,9 +197,9 @@ public class DependencySolver {
                 bld.addEdge(resolveFully(desire, current.context, deferralQueue));
                 graph = merge(bld.build(), graph, true);
             } else if (graph.getReachableNodes().contains(parent)) {
-                // the node needs to be re-scanned. Because parent nodes have no out edges, they
-                // are unmodified by merge and will be preserved.
-                Satisfaction sat = current.node.getLabel().getSatisfaction();
+                // the node needs to be re-scanned.  This means that it was not consolidated by
+                // a previous merge operation.  This branch only arises with provider injection.
+                Satisfaction sat = parent.getLabel().getSatisfaction();
                 for (Desire d: sat.getDependencies()) {
                     logger.debug("Attempting to resolve deferred dependency {} of {}", d, sat);
                     // resolve the dependency
