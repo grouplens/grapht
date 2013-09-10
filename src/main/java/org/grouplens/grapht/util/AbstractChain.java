@@ -118,6 +118,12 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
     }
 
     @Override
+    public int hashCode() {
+        // override hashCode so that lint tools don't complain
+        return super.hashCode();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
