@@ -21,10 +21,11 @@ package org.grouplens.grapht.solver;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import org.grouplens.grapht.graph.*;
-import org.junit.Assert;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.graph.DAGEdge;
+import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.spi.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.inject.Qualifier;
