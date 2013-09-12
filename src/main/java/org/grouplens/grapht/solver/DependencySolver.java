@@ -260,7 +260,7 @@ public class DependencySolver {
     private void walkGraphForReplacements(DAGNode<CachedSatisfaction, DesireChain> root,
                                           InjectionContext context,
                                           Map<DAGEdge<CachedSatisfaction, DesireChain>, DAGNode<CachedSatisfaction, DesireChain>> replacements) throws SolverException {
-        assert context.getTailValue().equals(root.getLabel().getSatisfaction());
+        assert context.getTailValue().getLeft().equals(root.getLabel().getSatisfaction());
         for (DAGEdge<CachedSatisfaction,DesireChain> edge: root.getOutgoingEdges()) {
             DesireChain chain = DesireChain.singleton(edge.getLabel().getInitialDesire());
             for (BindingFunction bf: triggerFunctions) {
