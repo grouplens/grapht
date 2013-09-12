@@ -53,6 +53,10 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
         }
     }
 
+    public E getTailValue() {
+        return tailValue;
+    }
+
     @Override
     public int size() {
         return length;
