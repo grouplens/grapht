@@ -243,4 +243,57 @@ public class TestDAGNode {
         DAGNode<String,String> needle = bam.findNodeBFS(DAGNode.<String>labelMatches(Predicates.equalTo("foo")));
         assertThat(needle, sameInstance(foo2));
     }
+
+    @Test
+    public void testEdgeBFSSingleYes() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo, "-> foo")
+                                            .build();
+        DAGEdge<String,String> edge = bar.findEdgeBFS(Predicates.alwaysTrue());
+        // we should have just found the only edge
+        assertThat(edge, isIn(bar.getOutgoingEdges()));
+    }
+
+    @Test
+    public void testEdgeBFSSingleNo() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo, "-> foo")
+                                            .build();
+        DAGEdge<String,String> edge = bar.findEdgeBFS(Predicates.alwaysFalse());
+        // no edge to find
+        assertThat(edge, nullValue());
+    }
+
+    @Test
+    public void testEdgeBFSByName() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> baz = DAGNode.singleton("baz");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo, "-> foo")
+                                            .addEdge(baz, "-> baz")
+                                            .build();
+        DAGEdge<String,String> edge = bar.findEdgeBFS(DAGEdge.labelMatches(Predicates.equalTo("-> baz")));
+        // we should find the correct edge
+        assertThat(edge, isIn(bar.getOutgoingEdges()));
+        assertThat(edge.getTail(), equalTo(baz));
+        assertThat(edge.getLabel(), equalTo("-> baz"));
+    }
+
+    @Test
+    public void testEdgeBFSFirst() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo, "hello")
+                                            .build();
+        DAGNode<String,String> bam = DAGNode.<String,String>newBuilder("bam")
+                                            .addEdge(bar, "wombat")
+                                            .addEdge(foo, "goodbye")
+                                            .build();
+        DAGEdge<String,String> edge = bam.findEdgeBFS(DAGEdge.tailMatches(Predicates.equalTo(foo)));
+        // we should find the first edge
+        assertThat(edge.getLabel(),
+                   equalTo("goodbye"));
+    }
 }

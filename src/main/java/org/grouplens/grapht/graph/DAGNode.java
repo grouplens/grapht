@@ -324,6 +324,35 @@ public class DAGNode<V,E> implements Serializable {
     }
 
     /**
+     * Do a breadth-first search for an edge.
+     *
+     * @param pred The predicate for matching nodes.
+     * @return The first node matching {@code pred} in a breadth-first search, or {@code null} if no
+     *         such node is found.
+     */
+    public DAGEdge<V, E> findEdgeBFS(@Nonnull Predicate<? super DAGEdge<V, E>> pred) {
+        Queue<DAGNode<V, E>> work = Lists.newLinkedList();
+        Set<DAGNode<V, E>> seen = Sets.newHashSet();
+        work.add(this);
+        seen.add(this);
+        while (!work.isEmpty()) {
+            DAGNode<V, E> node = work.remove();
+            for (DAGEdge<V, E> e : node.getOutgoingEdges()) {
+                // is this the edge we are looking for?
+                if (pred.apply(e)) {
+                    return e;
+                } else if (!seen.contains(e.getTail())) {
+                    seen.add(e.getTail());
+                    work.add(e.getTail());
+                }
+            }
+        }
+
+        // no node found
+        return null;
+    }
+
+    /**
      * Transform the edges in this graph.  Edges in parent nodes are passed <em>after</em> their
      * target nodes are rewritten, if necessary.
      *
