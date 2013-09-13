@@ -18,9 +18,13 @@
  */
 package org.grouplens.grapht.graph;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
@@ -133,5 +137,60 @@ public class TestDAGNode {
         assertThat(mem, hasEntry(foo, bar));
         assertThat(mem, hasEntry(graph, replaced));
         assertThat(replaced.getAdjacentNodes(), contains(bar));
+    }
+
+    @Test
+    public void testTransformEdgeNoop() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> graph = DAGNode.<String,String>newBuilder("graph")
+                                              .addEdge(foo, "wombat")
+                                              .build();
+        DAGNode<String,String> g2 = graph.transformEdges((Function) Functions.constant(null));
+        assertThat(g2, sameInstance(graph));
+    }
+
+    @Test
+    public void testTransformEdgeRewrite() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> graph = DAGNode.<String,String>newBuilder("graph")
+                                              .addEdge(foo, "wombat")
+                                              .build();
+        DAGNode<String,String> g2 =
+                graph.transformEdges((Function) Functions.constant(DAGEdge.create(graph, foo,"hairball")));
+        assertThat(g2, not(sameInstance(graph)));
+        assertThat(g2.getOutgoingEdge(foo, "hairball"),
+                   notNullValue());
+    }
+
+    @Test
+    public void testTransformDeeperEdge() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.singleton("bar");
+        DAGNode<String,String> wombat = DAGNode.<String,String>newBuilder("wombat")
+                                               .addEdge(foo, "wombat")
+                                               .build();
+        DAGNode<String,String> graph = DAGNode.<String,String>newBuilder("graph")
+                                              .addEdge(wombat, "wumpus")
+                                              .addEdge(bar, "woozle")
+                                              .build();
+        DAGNode<String,String> g2 =
+                graph.transformEdges(new Function<DAGEdge<String, String>, DAGEdge<String, String>>() {
+                    @Nullable
+                    @Override
+                    public DAGEdge<String, String> apply(@Nullable DAGEdge<String, String> input) {
+                        if (input != null && input.getLabel().equals("woozle")) {
+                            return DAGEdge.create(input.getHead(), input.getTail(), "hatrack");
+                        } else {
+                            return null;
+                        }
+                    }
+                });
+        assertThat(g2, not(sameInstance(graph)));
+        assertThat(g2.getOutgoingEdge(bar, "hatrack"),
+                   notNullValue());
+        assertThat(g2.getOutgoingEdge(bar, "woozle"),
+                   nullValue());
+        assertThat(g2.getOutgoingEdge(wombat, "wumpus"),
+                   notNullValue());
     }
 }

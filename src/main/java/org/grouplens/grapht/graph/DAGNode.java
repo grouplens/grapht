@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.graph;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -284,6 +285,60 @@ public class DAGNode<V,E> implements Serializable {
             DAGNode<V,E> repl = bld.build();
             memory.put(this, repl);
             return repl;
+        } else {
+            return this;
+        }
+    }
+
+    /**
+     * Transform the edges in this graph.  Edges in parent nodes are passed <em>after</em> their
+     * target nodes are rewritten, if necessary.
+     *
+     * @param function The edge transformation function.  Any edge returned by this function must
+     *                 have the same head node as the function it was passed.  The transform
+     *                 function may need to replace the head node on a returned edge; the label and
+     *                 tail will be preserved.  If the function returns {@code null}, that is the
+     *                 same as returning its input unmodified.
+     * @return The rewritten graph.
+     */
+    public DAGNode<V,E> transformEdges(Function<DAGEdge<V,E>,DAGEdge<V,E>> function) {
+        // builder for new node
+        DAGNodeBuilder<V,E> builder = null;
+        // intact edges (unmodified edges)
+        List<DAGEdge<V,E>> intact = Lists.newArrayListWithCapacity(outgoingEdges.size());
+        for (DAGEdge<V,E> edge: outgoingEdges) {
+            DAGNode<V,E> tail = edge.getTail();
+            DAGNode<V,E> transformedTail = tail.transformEdges(function);
+            DAGEdge<V,E> toQuery = edge;
+            if (transformedTail != tail) {
+                // the node changed, query with the updated edge
+                toQuery = DAGEdge.create(this, transformedTail, edge.getLabel());
+            }
+            DAGEdge<V,E> transformedEdge = function.apply(toQuery);
+            if (transformedEdge == null) {
+                transformedEdge = toQuery;
+            }
+            if (edge.equals(transformedEdge)) {
+                // edge unmodified
+                if (builder == null) {
+                    intact.add(transformedEdge);
+                } else {
+                    builder.addEdge(transformedEdge.getTail(), transformedEdge.getLabel());
+                }
+            } else {
+                // modified, need to transform this node
+                if (builder == null) {
+                    builder = newBuilder(label);
+                    for (DAGEdge<V,E> done: intact) {
+                        builder.addEdge(done.getTail(), done.getLabel());
+                    }
+                }
+                builder.addEdge(transformedEdge.getTail(), transformedEdge.getLabel());
+            }
+        }
+
+        if (builder != null) {
+            return builder.build();
         } else {
             return this;
         }
