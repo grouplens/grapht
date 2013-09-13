@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
  */
 public class GraphRewritingTest {
     @Test
-    public void testNoopRewrite() throws SolverException {
+    public void testSimpleRewriteNoTrigger() throws SolverException {
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()
                 .bind(I.class)
@@ -44,7 +44,7 @@ public class GraphRewritingTest {
     }
 
     @Test
-    public void testRewriteInPlace() throws SolverException {
+    public void testRewriteToIdentical() throws SolverException {
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()
               .bind(I.class)
@@ -63,12 +63,8 @@ public class GraphRewritingTest {
                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) C.class));
         DAGNode<CachedSatisfaction, DesireChain> graph2 = initial.rewrite(graph);
-        // should trigger a rewrite, but the graphs should be equivalent
-        assertThat(graph2, not(sameInstance(graph)));
-        assertThat(graph.getOutgoingEdges(), hasSize(1));
-        assertThat(graph.getOutgoingEdges().iterator().next()
-                        .getTail().getLabel().getSatisfaction().getErasedType(),
-                   equalTo((Class) C.class));
+        // should trigger a rewrite, but the graph should be unchanged
+        assertThat(graph2, sameInstance(graph));
     }
 
     @Test
@@ -107,13 +103,13 @@ public class GraphRewritingTest {
         DAGNode<CachedSatisfaction, DesireChain> graph2 = rewriter.rewrite(graph);
         // should change the dependency
         assertThat(graph2, not(sameInstance(graph)));
-        assertThat(graph.getOutgoingEdges(), hasSize(1));
-        assertThat(graph.getOutgoingEdges().iterator().next()
-                        .getTail().getLabel().getSatisfaction().getErasedType(),
+        assertThat(graph2.getOutgoingEdges(), hasSize(1));
+        assertThat(graph2.getOutgoingEdges().iterator().next()
+                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) C.class));
-        assertThat(graph.getOutgoingEdges().iterator().next()
-                        .getTail().getOutgoingEdges().iterator().next()
-                        .getTail().getLabel().getSatisfaction().getErasedType(),
+        assertThat(graph2.getOutgoingEdges().iterator().next()
+                         .getTail().getOutgoingEdges().iterator().next()
+                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) B.class));
     }
 
@@ -158,13 +154,13 @@ public class GraphRewritingTest {
         DAGNode<CachedSatisfaction, DesireChain> graph2 = rewriter.rewrite(graph);
         // should change the dependency
         assertThat(graph2, not(sameInstance(graph)));
-        assertThat(graph.getOutgoingEdges(), hasSize(1));
-        assertThat(graph.getOutgoingEdges().iterator().next()
-                        .getTail().getLabel().getSatisfaction().getErasedType(),
+        assertThat(graph2.getOutgoingEdges(), hasSize(1));
+        assertThat(graph2.getOutgoingEdges().iterator().next()
+                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) C.class));
-        assertThat(graph.getOutgoingEdges().iterator().next()
-                        .getTail().getOutgoingEdges().iterator().next()
-                        .getTail().getLabel().getSatisfaction().getErasedType(),
+        assertThat(graph2.getOutgoingEdges().iterator().next()
+                         .getTail().getOutgoingEdges().iterator().next()
+                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) W.class));
     }
 
