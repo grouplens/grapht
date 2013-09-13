@@ -74,6 +74,11 @@ public class MockQualifierMatcher implements QualifierMatcher {
 
     @Override
     public boolean matches(Annotation q) {
+        return apply(q);
+    }
+
+    @Override
+    public boolean apply(Annotation q) {
         return qualifiers == null || qualifiers.contains(q);
     }
 }
