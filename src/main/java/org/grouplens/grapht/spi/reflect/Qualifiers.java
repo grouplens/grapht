@@ -94,6 +94,12 @@ public final class Qualifiers {
         private static final long serialVersionUID = 1L;
 
         @Override
+        @Deprecated
+        public boolean matches(Annotation q) {
+            return apply(q);
+        }
+
+        @Override
         public int compareTo(QualifierMatcher o) {
             if (o == null) {
                 // other type is unknown, so extend it to the front
@@ -114,7 +120,7 @@ public final class Qualifiers {
         }
 
         @Override
-        public boolean matches(Annotation q) {
+        public boolean apply(Annotation q) {
             if (q == null) {
                 return true;
             } else {
@@ -148,7 +154,7 @@ public final class Qualifiers {
         }
 
         @Override
-        public boolean matches(Annotation q) {
+        public boolean apply(Annotation q) {
             return true;
         }
         
@@ -177,7 +183,7 @@ public final class Qualifiers {
         }
         
         @Override
-        public boolean matches(Annotation q) {
+        public boolean apply(Annotation q) {
             return q == null;
         }
         
@@ -213,7 +219,7 @@ public final class Qualifiers {
         }
 
         @Override
-        public boolean matches(Annotation q) {
+        public boolean apply(Annotation q) {
             Class<? extends Annotation> qtype = (q == null ? null : q.annotationType());
             return type.equals(qtype);
         }
@@ -285,7 +291,7 @@ public final class Qualifiers {
         }
 
         @Override
-        public boolean matches(Annotation q) {
+        public boolean apply(Annotation q) {
             return annotation.equals(q);
         }
         

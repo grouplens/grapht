@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.spi;
 
+import com.google.common.base.Predicate;
+
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 import java.io.Serializable;
@@ -40,7 +42,7 @@ import java.lang.annotation.Annotation;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface QualifierMatcher extends Comparable<QualifierMatcher>, Serializable {
+public interface QualifierMatcher extends Predicate<Annotation>, Comparable<QualifierMatcher>, Serializable {
     /**
      * Return true if this matcher matches the given qualifier annotation. It
      * can be assumed that the annotation type has been annotated with
@@ -49,8 +51,22 @@ public interface QualifierMatcher extends Comparable<QualifierMatcher>, Serializ
      * 
      * @param q The qualifier to match
      * @return True if matched
+     * @deprecated See {@link #apply(Object)}.
      */
+    @Deprecated
     boolean matches(@Nullable Annotation q);
+
+    /**
+     * Return true if this matcher matches the given qualifier annotation. It
+     * can be assumed that the annotation type has been annotated with
+     * {@link Qualifier}. The qualifier will be null if the injection point
+     * being matched did not have a qualifier.
+     *
+     * @param q The qualifier to match
+     * @return True if matched
+     */
+    @Override
+    boolean apply(@Nullable Annotation q);
 
     /**
      * Get the priority of this matcher. Lower priority values have precedence in selecting
