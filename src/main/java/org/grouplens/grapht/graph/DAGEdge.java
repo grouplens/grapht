@@ -122,7 +122,7 @@ public class DAGEdge<V,E> implements Serializable {
         return sb.toString();
     }
 
-    public static <E> Predicate<DAGEdge<?,E>> labelMatches(final Predicate<E> pred) {
+    public static <E> Predicate<DAGEdge<?,E>> labelMatches(final Predicate<? super E> pred) {
         return new Predicate<DAGEdge<?, E>>() {
             @Override
             public boolean apply(@Nullable DAGEdge<?, E> input) {
@@ -132,7 +132,7 @@ public class DAGEdge<V,E> implements Serializable {
         };
     }
 
-    public static <V,E> Predicate<DAGEdge<V,E>> tailMatches(final Predicate<DAGNode<V,E>> pred) {
+    public static <V,E> Predicate<DAGEdge<V,E>> tailMatches(final Predicate<? super DAGNode<V,E>> pred) {
         return new Predicate<DAGEdge<V, E>>() {
             @Override
             public boolean apply(@Nullable DAGEdge<V, E> input) {
@@ -152,7 +152,7 @@ public class DAGEdge<V,E> implements Serializable {
         };
     }
 
-    public static <V,E> Predicate<DAGEdge<V,E>> headMatches(final Predicate<DAGNode<V,E>> pred) {
+    public static <V,E> Predicate<DAGEdge<V,E>> headMatches(final Predicate<? super DAGNode<V,E>> pred) {
         return new Predicate<DAGEdge<V, E>>() {
             @Override
             public boolean apply(@Nullable DAGEdge<V, E> input) {
@@ -183,7 +183,7 @@ public class DAGEdge<V,E> implements Serializable {
      * @param <E> The type of edges.
      * @return A function over edges.
      */
-    public static <V,E> Function<DAGEdge<V,E>,DAGEdge<V,E>> transformNodes(final Function<DAGNode<V,E>,DAGNode<V,E>> func) {
+    public static <V,E> Function<DAGEdge<V,E>,DAGEdge<V,E>> transformNodes(final Function<? super DAGNode<V,E>,? extends DAGNode<V,E>> func) {
         return new Function<DAGEdge<V, E>, DAGEdge<V, E>>() {
             @Nullable
             @Override
