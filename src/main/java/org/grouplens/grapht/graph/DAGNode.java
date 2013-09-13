@@ -29,10 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A node in a (rooted) DAG.  Since DAGs are rooted, a full graph is just represented by its root
@@ -182,7 +179,7 @@ public class DAGNode<V,E> implements Serializable {
      *         multiple edges have labels matching the predicate, it is undefined which one will be
      *         added.
      */
-    public DAGEdge<V, E> getOutgoingEdgeWithLabel(Predicate<E> predicate) {
+    public DAGEdge<V, E> getOutgoingEdgeWithLabel(Predicate<? super E> predicate) {
         return Iterables.find(outgoingEdges, DAGEdge.labelMatches(predicate), null);
     }
 
@@ -291,6 +288,42 @@ public class DAGNode<V,E> implements Serializable {
     }
 
     /**
+     * Do a breadth-first search for a node.
+     *
+     * @param pred The predicate for matching nodes.
+     * @return The first node matching {@code pred} in a breadth-first search, or {@code null} if no
+     *         such node is found.
+     */
+    public DAGNode<V, E> findNodeBFS(@Nonnull Predicate<? super DAGNode<V, E>> pred) {
+        if (pred.apply(this)) {
+            return this;
+        }
+
+        Queue<DAGNode<V, E>> work = Lists.newLinkedList();
+        Set<DAGNode<V, E>> seen = Sets.newHashSet();
+        work.add(this);
+        seen.add(this);
+        while (!work.isEmpty()) {
+            DAGNode<V, E> node = work.remove();
+            for (DAGEdge<V, E> e : node.getOutgoingEdges()) {
+                // is this the node we are looking for?
+                DAGNode<V, E> nbr = e.getTail();
+                if (!seen.contains(nbr)) {
+                    if (pred.apply(nbr)) {
+                        return nbr;
+                    } else {
+                        seen.add(nbr);
+                        work.add(nbr);
+                    }
+                }
+            }
+        }
+
+        // no node found
+        return null;
+    }
+
+    /**
      * Transform the edges in this graph.  Edges in parent nodes are passed <em>after</em> their
      * target nodes are rewritten, if necessary.
      *
@@ -301,7 +334,7 @@ public class DAGNode<V,E> implements Serializable {
      *                 same as returning its input unmodified.
      * @return The rewritten graph.
      */
-    public DAGNode<V,E> transformEdges(Function<DAGEdge<V,E>,DAGEdge<V,E>> function) {
+    public DAGNode<V,E> transformEdges(Function<? super DAGEdge<V,E>, ? extends DAGEdge<V,E>> function) {
         // builder for new node
         DAGNodeBuilder<V,E> builder = null;
         // intact edges (unmodified edges)
@@ -357,7 +390,7 @@ public class DAGNode<V,E> implements Serializable {
         return sb.toString();
     }
 
-    public static <V> Predicate<DAGNode<V,?>> labelMatches(final Predicate<V> pred) {
+    public static <V> Predicate<DAGNode<V,?>> labelMatches(final Predicate<? super V> pred) {
         return new Predicate<DAGNode<V, ?>>() {
             @Override
             public boolean apply(@Nullable DAGNode<V, ?> input) {

@@ -20,8 +20,8 @@ package org.grouplens.grapht.graph;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -192,5 +192,55 @@ public class TestDAGNode {
                    nullValue());
         assertThat(g2.getOutgoingEdge(wombat, "wumpus"),
                    notNullValue());
+    }
+
+    @Test
+    public void testFindBFSSingletonYes() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> needle = foo.findNodeBFS(Predicates.<DAGNode<String, String>>alwaysTrue());
+        assertThat(needle, sameInstance(foo));
+    }
+
+    @Test
+    public void testFindBFSSingletonNo() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> needle = foo.findNodeBFS(Predicates.<DAGNode<String, String>>alwaysFalse());
+        assertThat(needle, nullValue());
+    }
+
+    @Test
+    public void testFindBFSChildMatches() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo, "foo")
+                                            .build();
+        DAGNode<String,String> needle =
+                bar.findNodeBFS(DAGNode.<String>labelMatches(Predicates.equalTo("foo")));
+        assertThat(needle, sameInstance(foo));
+    }
+
+    @Test
+    public void testFindBFSFirstNode() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo, "foo")
+                                            .build();
+        DAGNode<String,String> needle = bar.findNodeBFS(Predicates.<DAGNode<String, String>>alwaysTrue());
+        assertThat(needle, sameInstance(bar));
+    }
+
+    @Test
+    public void testFindBFSFirstFound() {
+        DAGNode<String,String> foo1 = DAGNode.singleton("foo");
+        DAGNode<String,String> foo2 = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                                            .addEdge(foo1, "hello")
+                                            .build();
+        DAGNode<String,String> bam = DAGNode.<String,String>newBuilder("bam")
+                                            .addEdge(bar, "wombat")
+                                            .addEdge(foo2, "goodbye")
+                                            .build();
+        DAGNode<String,String> needle = bam.findNodeBFS(DAGNode.<String>labelMatches(Predicates.equalTo("foo")));
+        assertThat(needle, sameInstance(foo2));
     }
 }
