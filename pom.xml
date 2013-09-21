@@ -263,6 +263,12 @@
   <profiles>
     <profile>
       <id>lint</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS</name>
+          <value>true</value>
+        </property>
+      </activation>
       <reporting>
         <plugins>
           <plugin>
