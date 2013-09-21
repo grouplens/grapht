@@ -1,5 +1,7 @@
 # Grapht
 
+[![Build Status](https://travis-ci.org/grouplens/grapht.png?branch=master)](https://travis-ci.org/grouplens/grapht)
+
 Grapht is a light-weight dependency injector. It converts the dependency
 injection problem into a graph-based problem that can be solved and analyzed
 without constructing any components until a solution is guaranteed. The solution
