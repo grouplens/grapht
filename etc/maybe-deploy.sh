@@ -8,7 +8,7 @@ skip()
     exit 0
 }
 
-if [ "$TRAVIS_JDK_VERSION" -ne "$DEPLOY_JDK" ]; then
+if [ "$TRAVIS_JDK_VERSION" != "$DEPLOY_JDK" ]; then
     skip "Deployment disabled for JDK $TRAVIS_JDK_VERSION"
 fi
 
