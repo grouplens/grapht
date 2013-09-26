@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
@@ -137,6 +138,41 @@ public class TestDAGNode {
         assertThat(mem, hasEntry(foo, bar));
         assertThat(mem, hasEntry(graph, replaced));
         assertThat(replaced.getAdjacentNodes(), contains(bar));
+    }
+
+    @Test
+    public void testReplaceDualUseNode() {
+        DAGNode<String,String> foo, fooP, bar, blatz, graph;
+        foo = DAGNode.singleton("foo");
+        // this node should be replaced once, not twice
+        fooP = DAGNode.<String,String>newBuilder("foo'")
+                .addEdge(foo, "-> foo")
+                .build();
+        bar = DAGNode.<String,String>newBuilder("bar")
+                     .addEdge(fooP, "bar -> foo")
+                     .build();
+        blatz = DAGNode.<String,String>newBuilder("blatz")
+                       .addEdge(fooP, "blatz -> foo")
+                       .build();
+        graph = DAGNode.<String,String>newBuilder("graph")
+                .addEdge(bar, "-> bar")
+                .addEdge(blatz, "-> blatz")
+                .build();
+
+        DAGNode<String,String> foo2 = DAGNode.singleton("foo2");
+        HashMap<DAGNode<String,String>,DAGNode<String,String>> memory = Maps.newHashMap();
+        DAGNode<String,String> replaced = graph.replaceNode(foo, foo2, memory);
+        assertThat(replaced, not(sameInstance(graph)));
+        // if we have > 5 nodes, then fooP was duplicated!
+        assertThat(replaced.getReachableNodes(),
+                   hasSize(5));
+        assertThat(foo2, isIn(replaced.getReachableNodes()));
+        assertThat(foo, not(isIn(replaced.getReachableNodes())));
+        assertThat(fooP, not(isIn(replaced.getReachableNodes())));
+        assertThat(replaced.getSortedNodes().get(0),
+                   equalTo(foo2));
+        assertThat(replaced.getSortedNodes().get(1).getLabel(),
+                   equalTo("foo'"));
     }
 
     @Test
