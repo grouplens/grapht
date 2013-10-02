@@ -65,10 +65,10 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         // Only use qualifier defaults if this is the first desire 
         // (i.e. the desire that declared any qualifier)
         // REVIEW If it is not the first desire, can a qualifier exist?
-        if (desire.equals(dchain.getInitialDesire()) && qualifier != null) {
+        if (dchain.getPreviousDesires().isEmpty() && qualifier != null) {
             Class<? extends Annotation> annotType = qualifier.annotationType();
 
-            result = getDefaultValue(dchain.getCurrentDesire(), annotType);
+            result = getDefaultValue(desire, annotType);
             if (result == null) {
                 result = getAnnotatedDefault(desire, annotType);
             }
