@@ -287,20 +287,4 @@ public final class Types {
         }
         return false;
     }
-
-    /**
-     * Load a class by name, even if it is a primitive type..
-     * @param name The name of the class.
-     * @return The class.
-     * @throws ClassNotFoundException
-     */
-    @Nonnull
-    private static Class<?> classByName(@Nonnull String name) throws ClassNotFoundException {
-        for (Class<?> cls: PRIMITIVE_TYPES) {
-            if (cls.getName().equals(name)) {
-                return cls;
-            }
-        }
-        return Class.forName(name);
-    }
 }

@@ -171,6 +171,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         BindingResult result = null;
         String resourceName = META_INF_DEFAULTS + type.getCanonicalName() + ".properties";
         logger.debug("searching for defaults in {}", resourceName);
+        // FIXME Use a configurable class loader.
         InputStream istr = getClass().getResourceAsStream(resourceName);
 
         if (istr != null) {
@@ -191,7 +192,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             String providerName = props.getProperty("provider");
             if (providerName != null) {
                 try {
-                    // REVIEW Do we want to use this, or the current thread's class loader?
+                    // FIXME Use the configured class loader
                     @SuppressWarnings("rawtypes")
                     Class providerClass = Class.forName(providerName);
                     logger.debug("found provider {} for {}", providerName, type);
@@ -206,7 +207,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             String implName = props.getProperty("implementation");
             if (implName != null) {
                 try {
-                    // REVIEW Do we want to use this, or the current thread's class loader?
+                    // FIXME Use the configured class loader
                     @SuppressWarnings("rawtypes")
                     Class implClass = Class.forName(implName);
                     logger.debug("found implementation {} for {}", implName, type);
