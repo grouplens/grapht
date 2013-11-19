@@ -57,7 +57,6 @@ public class DAGNode<V,E> implements Serializable {
     private final V label;
     @Nonnull
     private final ImmutableSet<DAGEdge<V,E>> outgoingEdges;
-    private transient volatile int hashCode;
     @Nullable
     private transient volatile ImmutableSetMultimap<DAGNode<V,E>,DAGEdge<V,E>> reverseEdgeCache;
     private transient volatile ImmutableSet<DAGNode<V,E>> reachableNodeCache;
@@ -201,24 +200,36 @@ public class DAGNode<V,E> implements Serializable {
      */
     @Nonnull
     private SetMultimap<DAGNode<V,E>,DAGEdge<V,E>> getIncomingEdgeMap() {
-        if (reverseEdgeCache == null) {
-            ImmutableSetMultimap.Builder<DAGNode<V,E>,DAGEdge<V,E>> bld = ImmutableSetMultimap.builder();
-            for (DAGEdge<V,E> nbr: outgoingEdges) {
-                bld.put(nbr.getTail(), nbr);
-                bld.putAll(nbr.getTail().getIncomingEdgeMap());
+        ImmutableSetMultimap<DAGNode<V, E>, DAGEdge<V, E>> edges = reverseEdgeCache;
+        if (edges == null) {
+            synchronized (this) {
+                edges = reverseEdgeCache;
+                if (edges == null) {
+                    ImmutableSetMultimap.Builder<DAGNode<V,E>,DAGEdge<V,E>> bld = ImmutableSetMultimap.builder();
+                    for (DAGEdge<V,E> nbr: outgoingEdges) {
+                        bld.put(nbr.getTail(), nbr);
+                        bld.putAll(nbr.getTail().getIncomingEdgeMap());
+                    }
+                    reverseEdgeCache = edges = bld.build();
+                }
             }
-            reverseEdgeCache = bld.build();
         }
-        return reverseEdgeCache;
+        return edges;
     }
 
     @Nonnull
     public Set<DAGNode<V,E>> getReachableNodes() {
-        if (reachableNodeCache == null) {
-            // FIXME don't make so many copies
-            reachableNodeCache = ImmutableSet.copyOf(getSortedNodes());
+        ImmutableSet<DAGNode<V,E>> nodes = reachableNodeCache;
+        if (nodes == null) {
+            synchronized (this) {
+                nodes = reachableNodeCache;
+                if (nodes == null) {
+                    reachableNodeCache = nodes = ImmutableSet.copyOf(getSortedNodes());
+                }
+            }
+
         }
-        return reachableNodeCache;
+        return nodes;
     }
 
     /**
