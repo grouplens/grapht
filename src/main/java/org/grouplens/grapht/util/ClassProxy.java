@@ -20,6 +20,8 @@ package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -48,6 +50,7 @@ import java.util.*;
 @Immutable
 public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
+    private static final Logger logger = LoggerFactory.getLogger(ClassProxy.class);
 
     private final String className;
     private final long checksum;
@@ -105,10 +108,13 @@ public final class ClassProxy implements Serializable {
                 cls = ClassUtils.getClass(className);
             }
             long check = checksumClass(cls);
-            if (checksum == check) {
-                theClass = new WeakReference<Class<?>>(cls);
-            } else {
+            if (!isSerializationPermissive() && checksum != check) {
                 throw new ClassNotFoundException("checksum mismatch for " + cls.getName());
+            } else {
+                if (checksum != check) {
+                    logger.warn("checksum mismatch for {}", cls);
+                }
+                theClass = new WeakReference<Class<?>>(cls);
             }
         }
         return cls;
@@ -133,6 +139,10 @@ public final class ClassProxy implements Serializable {
     }
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    public static boolean isSerializationPermissive() {
+        return Boolean.getBoolean("grapht.deserialization.permissive");
+    }
 
     /**
      * Compute a checksum for a class. These checksums are used to see if a class has changed
