@@ -28,6 +28,8 @@ import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 
@@ -62,8 +64,11 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()}).
      * @throws NullPointerException if arguments are null
      */
-    public BindRuleImpl(Class<?> depType, Satisfaction satisfaction, CachePolicy policy,
-                        QualifierMatcher qualifier, boolean terminal) {
+    public BindRuleImpl(@Nonnull Class<?> depType,
+                        @Nonnull Satisfaction satisfaction,
+                        @Nonnull CachePolicy policy,
+                        @Nonnull QualifierMatcher qualifier,
+                        boolean terminal) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
@@ -92,8 +97,11 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()})
      * @throws NullPointerException if arguments are null
      */
-    public BindRuleImpl(Class<?> depType, Class<?> implType, CachePolicy policy,
-                        QualifierMatcher qualifier, boolean terminal) {
+    public BindRuleImpl(@Nonnull Class<?> depType,
+                        @Nonnull Class<?> implType,
+                        @Nonnull CachePolicy policy,
+                        @Nonnull QualifierMatcher qualifier,
+                        boolean terminal) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("implementation type", implType);
         Preconditions.notNull("policy", policy);
