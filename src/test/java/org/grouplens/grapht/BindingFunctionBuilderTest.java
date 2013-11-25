@@ -138,6 +138,22 @@ public class BindingFunctionBuilderTest {
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
 
+    @Test
+    public void testBindToSatisfaction() throws Exception {
+        // Test that the fluent api creates type-to-type bind rules in
+        // the root context
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+
+        builder.getRootContext().bind(InterfaceA.class).toSatisfaction(spi.satisfy(TypeA.class));
+
+        // expected
+        Map<ContextMatcher, Collection<BindRule>> expected = new HashMap<ContextMatcher, Collection<BindRule>>();
+        expected.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                     Arrays.asList(BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, true)));
+
+        assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void testBindToWrongProvider() throws Exception {
