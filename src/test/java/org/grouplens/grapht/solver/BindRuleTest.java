@@ -33,6 +33,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 public class BindRuleTest {
     private ReflectionInjectSPI spi;
     
@@ -86,7 +89,7 @@ public class BindRuleTest {
         Assert.assertEquals(b3, new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleA.class), false));
         Assert.assertFalse(b3.equals(new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.match(RoleD.class), false)));
     }
-    
+
     @Test
     public void testPrimitiveMatch() throws Exception {
         // test boxing/unboxing of types
@@ -231,5 +234,18 @@ public class BindRuleTest {
         Assert.assertNotNull(applied.getSatisfaction());
         Assert.assertEquals(ProviderInstanceSatisfaction.class, applied.getSatisfaction().getClass());
         Assert.assertEquals(instance, ((ProviderInstanceSatisfaction) applied.getSatisfaction()).getProvider());
+    }
+
+    @Test
+    public void testCopyBuilder() {
+        BindRule b1 = new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.NO_PREFERENCE, spi.matchAny(), false);
+        BindRule b2 = new BindRuleImpl(TypeA.class, TypeA.class, CachePolicy.MEMOIZE, spi.matchAny(), false);
+        assertThat(b1.newCopyBuilder()
+                     .build(),
+                   equalTo(b1));
+        assertThat(b1.newCopyBuilder()
+                     .setCachePolicy(CachePolicy.MEMOIZE)
+                     .build(),
+                   equalTo(b2));
     }
 }

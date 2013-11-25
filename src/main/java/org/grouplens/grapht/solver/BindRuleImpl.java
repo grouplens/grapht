@@ -28,10 +28,12 @@ import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * Foundational implementation of {@link BindRule}.
@@ -157,6 +159,21 @@ final class BindRuleImpl implements BindRule, Serializable {
         
         // the type and {@link Qualifier}s are not a match, so return false
         return false;
+    }
+
+    @Override
+    public BindRuleBuilder newCopyBuilder() {
+        BindRuleBuilder bld = new BindRuleBuilder();
+        bld.setDependencyType(depType)
+           .setQualifierMatcher(qualifier)
+           .setCachePolicy(policy)
+           .setTerminal(terminal);
+        if (satisfaction != null) {
+            bld.setSatisfaction(satisfaction);
+        } else {
+            bld.setImplementation(implType);
+        }
+        return bld;
     }
 
     @Override
