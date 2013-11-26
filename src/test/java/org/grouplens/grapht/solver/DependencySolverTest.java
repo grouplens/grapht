@@ -19,8 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
@@ -31,14 +30,17 @@ import org.junit.Test;
 import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 public class DependencySolverTest {
-    private DependencySolver createSolver(Map<ContextMatcher, Collection<BindRule>> rules) {
+    private DependencySolver createSolver(ListMultimap<ContextMatcher, BindRule> rules) {
         return DependencySolver.newBuilder()
                 .addBindingFunction(new RuleBasedBindingFunction(rules))
                 .setDefaultPolicy(CachePolicy.NO_PREFERENCE)
@@ -62,13 +64,13 @@ public class DependencySolverTest {
         Desire ra = new MockDesire(sa);
         Desire rb = new MockDesire(sb);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(Arrays.<ContextElementMatcher>asList(new MockContextElementMatcher(B.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(da, ra).setCachePolicy(CachePolicy.MEMOIZE)));
+                     new MockBindRule(da, ra).setCachePolicy(CachePolicy.MEMOIZE));
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(da, ra).setCachePolicy(CachePolicy.NEW_INSTANCE)));
+                     new MockBindRule(da, ra).setCachePolicy(CachePolicy.NEW_INSTANCE));
         
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rb);
         r.resolve(da); // should create a single extra sa node with different cache policy
 
@@ -93,7 +95,7 @@ public class DependencySolverTest {
         Satisfaction sat = new MockSatisfaction(A.class, new ArrayList<Desire>());
         Desire desire = new MockDesire(sat);
 
-        DependencySolver r = createSolver(new HashMap<ContextMatcher, Collection<BindRule>>());
+        DependencySolver r = createSolver(ArrayListMultimap.<ContextMatcher, BindRule>create());
         r.resolve(desire);
         assertThat(r.getGraph().getReachableNodes(), hasSize(2));
 
@@ -111,7 +113,7 @@ public class DependencySolverTest {
         Satisfaction rootSat = new MockSatisfaction(A.class, Arrays.asList(depDesire));
         Desire rootDesire = new MockDesire(rootSat);
         
-        DependencySolver r = createSolver(new HashMap<ContextMatcher, Collection<BindRule>>());
+        DependencySolver r = createSolver(ArrayListMultimap.<ContextMatcher, BindRule>create());
         r.resolve(rootDesire);
         
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
@@ -131,11 +133,11 @@ public class DependencySolverTest {
         Satisfaction root = new MockSatisfaction(A.class, Arrays.asList(d1));
         Desire rootDesire = new MockDesire(root);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, d2),
-                                             new MockBindRule(d2, d3)));
-        DependencySolver r = createSolver(bindings);
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, d2),
+                        new MockBindRule(d2, d3));
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -157,13 +159,13 @@ public class DependencySolverTest {
         Desire d3 = new MockDesire(dep);
         Satisfaction root = new MockSatisfaction(A.class, Arrays.asList(d1));
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, d2),
-                                             new MockBindRule(d2, d3)));
-        
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, d2),
+                        new MockBindRule(d2, d3));
+
         Desire rootDesire = new MockDesire(root);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
 
@@ -189,13 +191,13 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire(s3);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(d2, b2)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -241,17 +243,17 @@ public class DependencySolverTest {
         Desire b3 = new MockDesire(r4);
         Desire ob3 = new MockDesire(or4);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(dr1, br1),
-                                             new MockBindRule(dr2, br2)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(dr1, br1),
+                        new MockBindRule(dr2, br2));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(Object.class, MockQualifierMatcher.match(qualifier1)))),
-                     Arrays.<BindRule>asList(new MockBindRule(d3, b3)));
+                     new MockBindRule(d3, b3));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(Object.class, MockQualifierMatcher.match(qualifier2)))),
-                     Arrays.<BindRule>asList(new MockBindRule(d3, ob3)));
+                     new MockBindRule(d3, ob3));
         
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -287,14 +289,14 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(r2);
         Desire ob1 = new MockDesire(or2);
 
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
+                     new MockBindRule(d1, b1));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, ob1)));
+                     new MockBindRule(d1, ob1));
 
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
 
@@ -319,17 +321,17 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(r3);
         Desire ob2 = new MockDesire(or3);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
+                     new MockBindRule(d1, b1));
         // for this test, CycleA is farther than B so b2 should be selected over ob2
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d2, ob2)));
+                     new MockBindRule(d2, ob2));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(B.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d2, b2)));
+                     new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
         DAGNode<CachedSatisfaction, DesireChain> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
@@ -366,17 +368,17 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(r3);
         Desire ob2 = new MockDesire(or3);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
+                     new MockBindRule(d1, b1));
         // for this test, AB is longer than CycleA so b2 is selected over ob2
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d2, ob2)));
+                     new MockBindRule(d2, ob2));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class), new MockContextElementMatcher(B.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d2, b2)));
+                     new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
         DAGNode<CachedSatisfaction, DesireChain> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
@@ -411,15 +413,15 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(r2);
         Desire ob1 = new MockDesire(or2);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         // for this test, CycleA is more specific than default, so b2 is selected
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, ob1)));
+                     new MockBindRule(d1, ob1));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
+                     new MockBindRule(d1, b1));
         
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
         DAGNode<CachedSatisfaction, DesireChain> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
@@ -451,14 +453,14 @@ public class DependencySolverTest {
         Desire b2 = new MockDesire(sd2);
         Desire b3 = new MockDesire(sd3);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(d2, b2),
-                                             new MockBindRule(d3, b3)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d2, b2),
+                        new MockBindRule(d3, b3));
         
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -494,15 +496,15 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(sd1);
         Desire b2 = new MockDesire(sd1);
         Desire b3 = new MockDesire(sd1);
-        
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(d2, b2),
-                                             new MockBindRule(d3, b3)));
+
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d2, b2),
+                        new MockBindRule(d3, b3));
         
         Desire rootDesire = new MockDesire(r1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -534,13 +536,13 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire(s3);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(d2, b2)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -590,23 +592,23 @@ public class DependencySolverTest {
         Desire b5 = new MockDesire(s6);
         Desire b6 = new MockDesire(s7);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1), // d1 -> s2
-                                             new MockBindRule(d2, b1), // d2 -> s2
-                                             new MockBindRule(d3, b3), // d3 -> s4
-                                             new MockBindRule(d4, b3), // d4 -> s4
-                                             new MockBindRule(d5, b4), // d5 -> s5
-                                             new MockBindRule(d6, b4), // d6 -> s5
-                                             new MockBindRule(d7, b5))); // d7 -> s6
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1), // d1 -> s2
+                        new MockBindRule(d2, b1), // d2 -> s2
+                        new MockBindRule(d3, b3), // d3 -> s4
+                        new MockBindRule(d4, b3), // d4 -> s4
+                        new MockBindRule(d5, b4), // d5 -> s5
+                        new MockBindRule(d6, b4), // d6 -> s5
+                        new MockBindRule(d7, b5)); // d7 -> s6
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(B.class, MockQualifierMatcher.match(r1)))),
-                     Arrays.<BindRule>asList(new MockBindRule(d3, b2))); // r1s1:d3 -> s3
+                     new MockBindRule(d3, b2)); // r1s1:d3 -> s3
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(B.class, MockQualifierMatcher.match(r2)),
                                                     new MockContextElementMatcher(D.class, MockQualifierMatcher.match(r4)))),
-                     Arrays.<BindRule>asList(new MockBindRule(d7, b6))); // r2s1,r4s2:d7 -> s7
+                     new MockBindRule(d7, b6)); // r2s1,r4s2:d7 -> s7
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -682,16 +684,16 @@ public class DependencySolverTest {
         
         // configure bindings so that s1 and s2 cycle for a couple of iterations
         // until the context s2/s2 is reached, then switches to os2
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                   new MockBindRule(d2, b2)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d2, b2));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(B.class),
-                                                    new MockContextElementMatcher(B.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, ob1)));
+                                                                  new MockContextElementMatcher(B.class))),
+                     new MockBindRule(d1, ob1));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         DAGNode<CachedSatisfaction, DesireChain> rootNode = getRoot(r, rootDesire);
         
@@ -751,14 +753,14 @@ public class DependencySolverTest {
         
         // configure bindings so that d1 has two solutions, but 1 is only active
         // within a Bp context (which is not possible in this case)
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
+                     new MockBindRule(d1, b1));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(Bp.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, ob1)));
+                     new MockBindRule(d1, ob1));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
@@ -783,14 +785,14 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         
         // configure bindings so that s1:d1->d1, d1->b1
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1)));
+                     new MockBindRule(d1, b1));
         bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, d1)));
+                     new MockBindRule(d1, d1));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
@@ -821,13 +823,13 @@ public class DependencySolverTest {
         Desire dap = new MockDesire(sap);
         
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(a1, new MockDesire(sd)),
-                                             new MockBindRule(d1, new MockDesire(sb)),
-                                             new MockBindRule(d2, new MockDesire(sc))));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(a1, new MockDesire(sd)),
+                        new MockBindRule(d1, new MockDesire(sb)),
+                        new MockBindRule(d2, new MockDesire(sc)));
         
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(da);
         r.resolve(dap);
         
@@ -878,16 +880,16 @@ public class DependencySolverTest {
         Desire dap = new MockDesire(sap);
         
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(a1, new MockDesire(sd)),
-                                             new MockBindRule(d1, new MockDesire(sb)),
-                                             new MockBindRule(d2, new MockDesire(sc))));
-        bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(Ap.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, new MockDesire(sbp)),
-                                             new MockBindRule(d2, new MockDesire(scp))));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(a1, new MockDesire(sd)),
+                        new MockBindRule(d1, new MockDesire(sb)),
+                        new MockBindRule(d2, new MockDesire(sc)));
+        bindings.putAll(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(Ap.class))),
+                        new MockBindRule(d1, new MockDesire(sbp)),
+                        new MockBindRule(d2, new MockDesire(scp)));
         
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(da);
         r.resolve(dap);
         
@@ -932,13 +934,13 @@ public class DependencySolverTest {
         Desire da = new MockDesire(sa);
         Desire dd = new MockDesire(sd);
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(a1, new MockDesire(sd)),
-                                             new MockBindRule(d1, new MockDesire(sb)),
-                                             new MockBindRule(d2, new MockDesire(sc))));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(a1, new MockDesire(sd)),
+                        new MockBindRule(d1, new MockDesire(sb)),
+                        new MockBindRule(d2, new MockDesire(sc)));
         
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(da);
         r.resolve(dd);
         
@@ -973,16 +975,16 @@ public class DependencySolverTest {
         Desire dd = new MockDesire(sd);
         
         // configure bindings so that a1 -> sd, b1 -> sb, b2 -> sc
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(a1, new MockDesire(sd)),
-                                             new MockBindRule(d1, new MockDesire(sbp)),
-                                             new MockBindRule(d2, new MockDesire(scp))));
-        bindings.put(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, new MockDesire(sb)),
-                                             new MockBindRule(d2, new MockDesire(sc))));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(a1, new MockDesire(sd)),
+                        new MockBindRule(d1, new MockDesire(sbp)),
+                        new MockBindRule(d2, new MockDesire(scp)));
+        bindings.putAll(new ElementChainContextMatcher(Arrays.asList(new MockContextElementMatcher(A.class))),
+                        new MockBindRule(d1, new MockDesire(sb)),
+                        new MockBindRule(d2, new MockDesire(sc)));
         
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(da);
         r.resolve(dd);
         
@@ -1020,12 +1022,12 @@ public class DependencySolverTest {
         Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1));
         
         // configure bindings so that d1->d1 so binding fails
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, d1)));
+                     new MockBindRule(d1, d1));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
     }
     
@@ -1042,13 +1044,13 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire(s1);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(d2, b2)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
     }
     
@@ -1063,13 +1065,13 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire ob1 = new MockDesire(s3);
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(d1, ob1)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(d1, ob1));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
     }
 
@@ -1081,13 +1083,13 @@ public class DependencySolverTest {
         Desire d3 = new MockDesire();
         
         Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1));
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, d2),
-                                             new MockBindRule(d2, d3)));
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, d2),
+                        new MockBindRule(d2, d3));
         
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
     }
     
@@ -1100,12 +1102,12 @@ public class DependencySolverTest {
         Satisfaction s1 = new MockSatisfaction(A.class, Arrays.asList(d1));
         
         Desire b2 = new MockDesire();
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d2, b2)));
+                     new MockBindRule(d2, b2));
 
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
     }
 
@@ -1120,13 +1122,13 @@ public class DependencySolverTest {
         Desire b1 = new MockDesire(s2);
         Desire b2 = new MockDesire();
         
-        Map<ContextMatcher, Collection<BindRule>> bindings = new HashMap<ContextMatcher, Collection<BindRule>>();
-        bindings.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
-                     Arrays.<BindRule>asList(new MockBindRule(d1, b1),
-                                             new MockBindRule(b1, b2))); 
-        
+        ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
+        bindings.putAll(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
+                        new MockBindRule(d1, b1),
+                        new MockBindRule(b1, b2));
+
         Desire rootDesire = new MockDesire(s1);
-        DependencySolver r = createSolver(bindings);
+        DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
     }
     

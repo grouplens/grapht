@@ -259,6 +259,27 @@ class BindingImpl<T> implements Binding<T> {
                                BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
         }
     }
+
+    @Override
+    public void toSatisfaction(@Nonnull Satisfaction sat) {
+        Preconditions.notNull("satisfaction", sat);
+
+        ElementChainContextMatcher matcher = context.getContextChain();
+        BindingFunctionBuilder config = context.getBuilder();
+
+        if (config.getGenerateRules()) {
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(sat.getErasedType());
+            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
+                config.addBindRule(e.getValue(), matcher,
+                                   BindRules.toSatisfaction(e.getKey(), qualifier,
+                                                            sat, cachePolicy, true));
+            }
+        } else {
+            config.addBindRule(RuleSet.EXPLICIT, matcher,
+                               BindRules.toSatisfaction(sourceType, qualifier,
+                                                        sat, cachePolicy, true));
+        }
+    }
     
     private Object coerce(Object in) {
         Class<?> boxedSource = Types.box(sourceType);

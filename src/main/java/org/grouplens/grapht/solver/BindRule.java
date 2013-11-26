@@ -65,6 +65,16 @@ public interface BindRule extends Comparable<BindRule> {
     boolean matches(Desire desire);
 
     /**
+     * Create a new bind rule builder initialized to copy this bind rule.  Use this to create a copy
+     * of this bind rule that differs in some way.
+     *
+     * @return A new bind rule builder whose {@link BindRuleBuilder#build()} method will return a
+     *         copy of this bind rule.
+     * @throws UnsupportedOperationException if the bind rule cannot be reconfigured in this manner.
+     */
+    BindRuleBuilder newCopyBuilder();
+
+    /**
      * Compare this bind rule to another. More-specific bind rules compare less than less-specific
      * rules.
      *

@@ -19,6 +19,7 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.solver.BindRule;
+import org.grouplens.grapht.spi.Satisfaction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -186,4 +187,19 @@ public interface Binding<T> {
      * @see #toNull()
      */
     void toNull(Class<? extends T> type);
+
+    /**
+     * Bind this binding directly to a satisfaction.
+     *
+     * <p><strong>Note:</strong> this method is intended for use by applications that extend Grapht,
+     * or for bindings to other JVM languages. Most applications will have no use for this method,
+     * and developers consider if one of the other methods is more applicable for their situation.
+     * </p>
+     *
+     * <p>Bindings to satisfactions are always {@linkplain org.grouplens.grapht.solver.BindRule#isTerminal() terminal}.
+     * </p>
+     *
+     * @param sat The satisfaction to bind to.
+     */
+    void toSatisfaction(@Nonnull Satisfaction sat);
 }
