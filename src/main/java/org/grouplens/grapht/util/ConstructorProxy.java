@@ -47,7 +47,8 @@ public final class ConstructorProxy implements Serializable {
 
     @Override
     public String toString() {
-        if (stringRepr == null) {
+        String repr = stringRepr;
+        if (repr == null) {
             StringBuilder bld = new StringBuilder();
             bld.append("proxy of ")
                .append(declaringClass.getClassName())
@@ -61,9 +62,9 @@ public final class ConstructorProxy implements Serializable {
                 first = false;
             }
             bld.append(")");
-            stringRepr = bld.toString();
+            stringRepr = repr = bld.toString();
         }
-        return stringRepr;
+        return repr;
     }
 
     @Override
@@ -97,15 +98,16 @@ public final class ConstructorProxy implements Serializable {
      * @throws NoSuchMethodException If the constructor does not exist on the declaring type.
      */
     public Constructor resolve() throws ClassNotFoundException, NoSuchMethodException {
-        if (constructor == null) {
+        Constructor ctor = constructor;
+        if (ctor == null) {
             Class<?> cls = declaringClass.resolve();
             Class<?>[] ptypes = new Class<?>[parameterTypes.length];
             for (int i = ptypes.length - 1; i >= 0; i--) {
                 ptypes[i] = parameterTypes[i].resolve();
             }
-            constructor = cls.getDeclaredConstructor(ptypes);
+            constructor = ctor = cls.getDeclaredConstructor(ptypes);
         }
-        return constructor;
+        return ctor;
     }
 
     /**

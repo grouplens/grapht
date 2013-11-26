@@ -18,16 +18,15 @@
  */
 package org.grouplens.grapht.graph;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
 
@@ -57,10 +56,10 @@ public class DAGNode<V,E> implements Serializable {
     private final V label;
     @Nonnull
     private final ImmutableSet<DAGEdge<V,E>> outgoingEdges;
-    private transient volatile int hashCode;
-    @Nullable
-    private transient volatile ImmutableSetMultimap<DAGNode<V,E>,DAGEdge<V,E>> reverseEdgeCache;
-    private transient volatile ImmutableSet<DAGNode<V,E>> reachableNodeCache;
+
+    private transient Supplier<SetMultimap<DAGNode<V,E>,DAGEdge<V,E>>> reverseEdgeCache;
+    private transient Supplier<Set<DAGNode<V,E>>> reachableNodeCache;
+    private transient Supplier<List<DAGNode<V,E>>> topologicalSortCache;
 
     /**
      * Create a new DAG node with no outgoing edges.
@@ -124,6 +123,29 @@ public class DAGNode<V,E> implements Serializable {
             bld.add(edge);
         }
         outgoingEdges = bld.build();
+        initializeCaches();
+    }
+
+    /**
+     * Initialize caches for traversing this node.
+     */
+    private void initializeCaches() {
+        reverseEdgeCache = Suppliers.memoize(new EdgeMapSupplier());
+        reachableNodeCache = Suppliers.memoize(new NodeSetSupplier());
+        topologicalSortCache = Suppliers.memoize(new TopologicalSortSupplier());
+    }
+
+    /**
+     * Override the object reading protocol to make sure caches are instantiated.  This just calls
+     * {@link #initializeCaches()} after doing the default object-reading.
+     *
+     * @param stream The stream to read from.
+     * @throws IOException If an I/O exception occurs deserializing the object.
+     * @throws ClassNotFoundException If there is a missing class deserializing the object.
+     */
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        initializeCaches();
     }
 
     /**
@@ -201,24 +223,12 @@ public class DAGNode<V,E> implements Serializable {
      */
     @Nonnull
     private SetMultimap<DAGNode<V,E>,DAGEdge<V,E>> getIncomingEdgeMap() {
-        if (reverseEdgeCache == null) {
-            ImmutableSetMultimap.Builder<DAGNode<V,E>,DAGEdge<V,E>> bld = ImmutableSetMultimap.builder();
-            for (DAGEdge<V,E> nbr: outgoingEdges) {
-                bld.put(nbr.getTail(), nbr);
-                bld.putAll(nbr.getTail().getIncomingEdgeMap());
-            }
-            reverseEdgeCache = bld.build();
-        }
-        return reverseEdgeCache;
+        return reverseEdgeCache.get();
     }
 
     @Nonnull
     public Set<DAGNode<V,E>> getReachableNodes() {
-        if (reachableNodeCache == null) {
-            // FIXME don't make so many copies
-            reachableNodeCache = ImmutableSet.copyOf(getSortedNodes());
-        }
-        return reachableNodeCache;
+        return reachableNodeCache.get();
     }
 
     /**
@@ -232,11 +242,16 @@ public class DAGNode<V,E> implements Serializable {
      */
     @Nonnull
     public List<DAGNode<V,E>> getSortedNodes() {
-        LinkedHashSet<DAGNode<V,E>> visited = Sets.newLinkedHashSet();
-        sortVisit(visited);
-        return ImmutableList.copyOf(visited);
+        return topologicalSortCache.get();
     }
 
+    /**
+     * Helper mode for {@link #getSortedNodes()}, via {@link TopologicalSortSupplier}.  This method
+     * does a depth-first traversal of the nodes, adding each to the {@code visited} set when it is
+     * left.  This results in {@code visited} being a topological sort.
+     *
+     * @param visited The set of nodes seen so far.
+     */
     private void sortVisit(LinkedHashSet<DAGNode<V,E>> visited) {
         if (!visited.contains(this)) {
             for (DAGEdge<V,E> nbr: outgoingEdges) {
@@ -432,5 +447,39 @@ public class DAGNode<V,E> implements Serializable {
                 return pred.apply(lbl);
             }
         };
+    }
+
+    /**
+     * Supplier to compute the map of incoming edges.  Used to implement {@link #getIncomingEdgeMap()}.
+     */
+    private class EdgeMapSupplier implements Supplier<SetMultimap<DAGNode<V, E>, DAGEdge<V, E>>> {
+        @Override
+        public SetMultimap<DAGNode<V, E>, DAGEdge<V, E>> get() {
+            ImmutableSetMultimap.Builder<DAGNode<V,E>,DAGEdge<V,E>> bld = ImmutableSetMultimap.builder();
+            for (DAGEdge<V,E> nbr: outgoingEdges) {
+                bld.put(nbr.getTail(), nbr);
+                bld.putAll(nbr.getTail().getIncomingEdgeMap());
+            }
+            return bld.build();
+        }
+    }
+
+    /**
+     * Supplier to compute the set of reachable nodes.
+     */
+    private class NodeSetSupplier implements Supplier<Set<DAGNode<V, E>>> {
+        @Override
+        public ImmutableSet<DAGNode<V, E>> get() {
+            return ImmutableSet.copyOf(getSortedNodes());
+        }
+    }
+
+    private class TopologicalSortSupplier implements Supplier<List<DAGNode<V,E>>> {
+        @Override
+        public List<DAGNode<V, E>> get() {
+            LinkedHashSet<DAGNode<V,E>> visited = Sets.newLinkedHashSet();
+            sortVisit(visited);
+            return ImmutableList.copyOf(visited);
+        }
     }
 }

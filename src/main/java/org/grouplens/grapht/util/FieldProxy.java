@@ -81,15 +81,16 @@ public final class FieldProxy implements Serializable {
      * @throws NoSuchFieldException If the field does not exist on the declaring type.
      */
     public Field resolve() throws ClassNotFoundException, NoSuchFieldException {
-        if (field == null) {
+        Field cachedField = field;
+        if (cachedField == null) {
             Class<?> cls = declaringClass.resolve();
-            field = cls.getDeclaredField(fieldName);
+            field = cachedField = cls.getDeclaredField(fieldName);
         }
         // REVIEW Do we want to test equality or assignability?
-        if (!field.getType().equals(fieldType.resolve())) {
-            throw new NoSuchFieldException("type mismatch on " + field.toString());
+        if (!cachedField.getType().equals(fieldType.resolve())) {
+            throw new NoSuchFieldException("type mismatch on " + cachedField.toString());
         }
-        return field;
+        return cachedField;
     }
 
     /**

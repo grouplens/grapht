@@ -49,7 +49,8 @@ public final class MethodProxy implements Serializable {
 
     @Override
     public String toString() {
-        if (stringRepr == null) {
+        String repr = stringRepr;
+        if (repr == null) {
             StringBuilder bld = new StringBuilder();
             bld.append("proxy of ")
                .append(declaringClass.getClassName())
@@ -65,9 +66,9 @@ public final class MethodProxy implements Serializable {
                 first = false;
             }
             bld.append(")");
-            stringRepr = bld.toString();
+            stringRepr = repr = bld.toString();
         }
-        return stringRepr;
+        return repr;
     }
 
     @Override
@@ -103,15 +104,16 @@ public final class MethodProxy implements Serializable {
      * @throws NoSuchMethodException If the method does not exist on the declaring type.
      */
     public Method resolve() throws ClassNotFoundException, NoSuchMethodException {
-        if (method == null) {
+        Method m = method;
+        if (m == null) {
             Class<?> cls = declaringClass.resolve();
             Class<?>[] ptypes = new Class<?>[parameterTypes.length];
             for (int i = ptypes.length - 1; i >= 0; i--) {
                 ptypes[i] = parameterTypes[i].resolve();
             }
-            method = cls.getDeclaredMethod(methodName, ptypes);
+            method = m = cls.getDeclaredMethod(methodName, ptypes);
         }
-        return method;
+        return m;
     }
 
     /**
