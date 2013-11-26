@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -56,10 +58,23 @@ public final class ClassProxy implements Serializable {
     private final long checksum;
     @Nullable
     private transient volatile WeakReference<Class<?>> theClass;
+    private transient ClassLoader classLoader;
 
     private ClassProxy(String name, long check) {
         className = name;
         checksum = check;
+        classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = ClassProxy.class.getClassLoader();
+        }
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = ClassProxy.class.getClassLoader();
+        }
     }
 
     /**
@@ -105,7 +120,7 @@ public final class ClassProxy implements Serializable {
                 // special case
                 cls = Void.TYPE;
             } else {
-                cls = ClassUtils.getClass(className);
+                cls = ClassUtils.getClass(classLoader, className);
             }
             long check = checksumClass(cls);
             if (!isSerializationPermissive() && checksum != check) {
