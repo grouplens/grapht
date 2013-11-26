@@ -18,6 +18,9 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.ContextMatch;
 import org.grouplens.grapht.spi.ContextMatcher;
@@ -52,24 +55,24 @@ import java.util.*;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class RuleBasedBindingFunction implements BindingFunction {
-    private static final String APPLIED_RULES = "APPLIED_BIND_RULES";
     private static final Map<Object,Set<BindRule>> bindRuleMemory
             = new WeakHashMap<Object, Set<BindRule>>();
 
     private static final Logger logger = LoggerFactory.getLogger(RuleBasedBindingFunction.class);
     
-    private final Map<ContextMatcher, Collection<BindRule>> rules;
+    private final ImmutableListMultimap<ContextMatcher, BindRule> rules;
     
-    public RuleBasedBindingFunction(Map<ContextMatcher, Collection<BindRule>> rules) {
+    public RuleBasedBindingFunction(Multimap<ContextMatcher, BindRule> rules) {
         Preconditions.notNull("rules", rules);
         
-        this.rules = Collections.unmodifiableMap(new HashMap<ContextMatcher, Collection<BindRule>>(rules));
+        this.rules = ImmutableListMultimap.copyOf(rules);
     }
     
     /**
+     * Get the rules underlying this binding function.
      * @return The rules used by this BindingFunction
      */
-    public Map<ContextMatcher, Collection<BindRule>> getRules() {
+    public ListMultimap<ContextMatcher, BindRule> getRules() {
         return rules;
     }
     

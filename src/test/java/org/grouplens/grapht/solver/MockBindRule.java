@@ -87,6 +87,11 @@ public class MockBindRule implements BindRule {
         return MockQualifierMatcher.any();
     }
 
+    @Override
+    public BindRuleBuilder newCopyBuilder() {
+        throw new UnsupportedOperationException("cannot configure mock bind rules");
+    }
+
     public int compareTo(BindRule other) {
         return getQualifier().compareTo(((MockBindRule) other).getQualifier());
     }
