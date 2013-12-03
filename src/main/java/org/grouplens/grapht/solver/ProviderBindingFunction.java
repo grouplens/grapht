@@ -126,7 +126,7 @@ public class ProviderBindingFunction implements BindingFunction {
         @SuppressWarnings("unchecked")
         @Override
         public <T> T visit(SatisfactionVisitor<T> visitor) {
-            return visitor.visitProviderClass((Class) InstanceProvider.class);
+            return (T) visitor.visitProviderClass((Class) InstanceProvider.class);
         }
 
         @Override
