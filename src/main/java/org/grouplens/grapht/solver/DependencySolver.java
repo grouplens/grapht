@@ -25,6 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.graph.DAGNodeBuilder;
+import org.grouplens.grapht.graph.MergePool;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
 import org.grouplens.grapht.spi.Desire;
@@ -84,6 +85,7 @@ public class DependencySolver {
     
     private DAGNode<CachedSatisfaction,DesireChain> graph;
     private Set<DAGEdge<CachedSatisfaction,DesireChain>> backEdges;
+    private MergePool<CachedSatisfaction,DesireChain> mergePool;
 
     /**
      * Create a DependencySolver that uses the given functions, and max
@@ -111,6 +113,7 @@ public class DependencySolver {
         
         graph = DAGNode.singleton(ROOT_SATISFACTION);
         backEdges = Sets.newHashSet();
+        mergePool = MergePool.create();
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
     }
@@ -191,9 +194,13 @@ public class DependencySolver {
             assert parent.getOutgoingEdges().isEmpty();
 
             if (current.node.getLabel().equals(ROOT_SATISFACTION)) {
-                DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.copyBuilder(parent);
-                bld.addEdge(resolveFully(desire, current.context, deferralQueue));
-                graph = merge(bld.build(), graph, true);
+                Pair<DAGNode<CachedSatisfaction, DesireChain>, DesireChain> rootNode =
+                        resolveFully(desire, current.context, deferralQueue);
+                // add this to the global graph
+                graph = DAGNode.copyBuilder(graph)
+                               .addEdge(mergePool.merge(rootNode.getLeft()),
+                                        rootNode.getRight())
+                               .build();
             } else if (graph.getReachableNodes().contains(parent)) {
                 // the node needs to be re-scanned.  This means that it was not consolidated by
                 // a previous merge operation.  This branch only arises with provider injection.
@@ -204,7 +211,7 @@ public class DependencySolver {
                     Pair<DAGNode<CachedSatisfaction, DesireChain>, DesireChain> result =
                             resolveFully(d, current.context, deferralQueue);
                     // merge it in
-                    DAGNode<CachedSatisfaction, DesireChain> merged = merge(result.getLeft(), graph, false);
+                    DAGNode<CachedSatisfaction, DesireChain> merged = mergePool.merge(result.getLeft());
                     // now see if there's a real cycle
                     if (merged.getReachableNodes().contains(parent)) {
                         // parent node is referenced from merged, we have a circle!
@@ -264,7 +271,9 @@ public class DependencySolver {
 
         // Now we have a graph (stage2) with rewritten subtrees based on trigger rules
         // We merge this graph with the original to deduplicate.
-        return merge(stage2, graph, false);
+        MergePool<CachedSatisfaction,DesireChain> pool = MergePool.create();
+        pool.merge(graph);
+        return pool.merge(stage2);
     }
 
     /**
@@ -306,93 +315,6 @@ public class DependencySolver {
                 // trigger binding, add a replacement
                 replacements.put(edge, DAGEdge.create(root, repl.getLeft(), repl.getRight()));
             }
-        }
-    }
-
-    /**
-     * Merge a graph, resulting from a resolve, into the global graph.
-     *
-     * @param tree The unmerged tree to merge in.
-     * @param mergeTarget The graph to merge with.
-     * @param mergeRoot Whether to merge this with the root of the merge target.  If {@code true},
-     *                  the outgoing edges of {@code tree} are added to the outgoing edges of
-     *                  {@code mergeTarget} and the resulting graph is returned; otherwise, just the
-     *                  transformation of {@code tree} is returned.
-     * @return The new merged graph.
-     */
-    private DAGNode<CachedSatisfaction,DesireChain> merge(DAGNode<CachedSatisfaction,DesireChain> tree,
-                                                          DAGNode<CachedSatisfaction,DesireChain> mergeTarget,
-                                                          boolean mergeRoot) {
-        List<DAGNode<CachedSatisfaction, DesireChain>> sorted = tree.getSortedNodes();
-
-        Map<Pair<CachedSatisfaction,Set<DAGNode<CachedSatisfaction,DesireChain>>>,
-                DAGNode<CachedSatisfaction,DesireChain>> nodeTable = Maps.newHashMap();
-        for (DAGNode<CachedSatisfaction,DesireChain> node: mergeTarget.getReachableNodes()) {
-            Pair<CachedSatisfaction,Set<DAGNode<CachedSatisfaction,DesireChain>>> key =
-                    Pair.of(node.getLabel(), node.getAdjacentNodes());
-            assert !nodeTable.containsKey(key);
-            nodeTable.put(key, node);
-        }
-        
-        // Look up each node's dependencies in the merged graph, since we sorted
-        // by reverse depth we can guarantee that dependencies have already
-        // been merged
-        Map<DAGNode<CachedSatisfaction,DesireChain>,
-                DAGNode<CachedSatisfaction,DesireChain>> mergedMap = Maps.newHashMap();
-        for (DAGNode<CachedSatisfaction, DesireChain> toMerge: sorted) {
-            CachedSatisfaction sat = toMerge.getLabel();
-            // Accumulate the set of dependencies for this node, filtering
-            // them through the previous level map
-            Set<DAGNode<CachedSatisfaction, DesireChain>> dependencies =
-                    FluentIterable.from(toMerge.getOutgoingEdges())
-                                  .transform(DAGEdge.<CachedSatisfaction,DesireChain>extractTail())
-                                  .transform(Functions.forMap(mergedMap))
-                                  .toSet();
-
-            DAGNode<CachedSatisfaction, DesireChain> newNode =
-                    nodeTable.get(Pair.of(sat, dependencies));
-            if (newNode == null) {
-                DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.newBuilder();
-                // this configuration for the satisfaction has not been seen before
-                // - add it to merged graph, and connect to its dependencies
-
-                boolean changed = false;
-                bld.setLabel(sat);
-                logger.debug("Adding new node to merged graph for satisfaction: {}", sat);
-
-                for (DAGEdge<CachedSatisfaction, DesireChain> dep: toMerge.getOutgoingEdges()) {
-                    // add the edge with the new head and the previously merged tail
-                    // List<Desire> is downsized to the first Desire, too
-                    DAGNode<CachedSatisfaction, DesireChain> filtered = mergedMap.get(dep.getTail());
-                    bld.addEdge(filtered, dep.getLabel());
-                    changed |= !filtered.equals(dep.getTail());
-                }
-
-                if (changed) {
-                    newNode = bld.build();
-                } else {
-                    // no edges were changed, leave the node unmodified
-                    newNode = toMerge;
-                }
-                nodeTable.put(Pair.of(sat, dependencies), newNode);
-            } else {
-                logger.debug("Node already in merged graph for satisfaction: {}", toMerge.getLabel());
-            }
-
-            // update merge map so future nodes use this node as a dependency
-            mergedMap.put(toMerge, newNode);
-        }
-
-        // now time to build up the last node
-        DAGNode<CachedSatisfaction,DesireChain> newRoot = mergedMap.get(tree);
-        if (mergeRoot) {
-            DAGNodeBuilder<CachedSatisfaction,DesireChain> bld = DAGNode.copyBuilder(graph);
-            for (DAGEdge<CachedSatisfaction,DesireChain> edge: newRoot.getOutgoingEdges()) {
-                bld.addEdge(edge.getTail(), edge.getLabel());
-            }
-            return bld.build();
-        } else {
-            return newRoot;
         }
     }
 
