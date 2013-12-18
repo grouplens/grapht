@@ -197,7 +197,7 @@ public final class Types {
         final Class<?> inferredType = TypeUtils.getRawType(bindings.get(PROVIDER_TYPE_VAR), null);
         try{
             final Class<?> observedType = providerClass.getMethod("get").getReturnType();
-            if(inferredType.isAssignableFrom(observedType)) {
+            if (inferredType != null && inferredType.isAssignableFrom(observedType)) {
                 return observedType;
             } else {
                 return inferredType;
