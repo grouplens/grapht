@@ -8,9 +8,32 @@ public enum Multiplicity {
     /**
      * Match exactly once.
      */
-    ONE,
+    ONE {
+        @Override
+        public boolean isOptional() {
+            return false;
+        }
+
+        @Override
+        public boolean isConsumed() {
+            return true;
+        }
+    },
     /**
      * Match zero or more times.
      */
-    ZERO_OR_MORE
+    ZERO_OR_MORE {
+        @Override
+        public boolean isOptional() {
+            return true;
+        }
+
+        @Override
+        public boolean isConsumed() {
+            return false;
+        }
+    };
+
+    public abstract boolean isOptional();
+    public abstract boolean isConsumed();
 }

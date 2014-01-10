@@ -1,5 +1,9 @@
 package org.grouplens.grapht.spi.context;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.solver.InjectionContext;
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nullable;
@@ -11,18 +15,53 @@ import java.io.Serializable;
  * @since 0.7
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class ContextPattern implements Serializable {
+public class ContextPattern implements ContextMatcher, Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Nullable
-    private final Chain tokenChain;
+    private final Chain<Element> tokenChain;
 
-    public ContextPattern() {
-        tokenChain = null;
+    private ContextPattern() {
+        tokenChain = new Chain<Element>();
     }
 
-    private ContextPattern(Chain tokens) {
-        tokenChain = tokens;
+    private ContextPattern(Chain<Element> tokens) {
+        if (tokens == null) {
+            tokenChain = new Chain<Element>();
+        } else {
+            tokenChain = tokens;
+        }
+    }
+
+    /**
+     * Create an empty context pattern.
+     * @return A context pattern matching only the empty context.
+     */
+    public static ContextPattern empty() {
+        return new ContextPattern();
+    }
+
+    /**
+     * Create a context pattern matching any context.
+     * @return A context pattern matching any context.
+     */
+    public static ContextPattern any() {
+        return empty().appendDotStar();
+    }
+
+    /**
+     * Create a context matcher matching any context with the specified subsequence.
+     *
+     * @param types The subsequence to match.
+     * @return A context matcher that matches any context of which {@code types} (with the default
+     *         qualifier matchers) is a subsequence.
+     */
+    public static ContextPattern subsequence(Class<?>... types) {
+        ContextPattern pat = any();
+        for (Class<?> type: types) {
+            pat = pat.append(ContextElements.matchType(type), Multiplicity.ONE)
+                     .appendDotStar();
+        }
+        return pat;
     }
 
     /**
@@ -34,8 +73,114 @@ public class ContextPattern implements Serializable {
      */
     ContextPattern append(ContextElementMatcher match, Multiplicity mult) {
         Element elem = new Element(match, mult);
-        Chain chain = tokenChain == null ? new Chain(elem) : tokenChain.extend(elem);
+        Chain<Element> chain = tokenChain.extend(elem);
         return new ContextPattern(chain);
+    }
+
+    /**
+     * Append an element to this pattern with multiplicity {@link Multiplicity#ONE}.
+     * @param match The element matcher.
+     * @return This pattern extended by the new element.
+     */
+    ContextPattern append(ContextElementMatcher match) {
+        return append(match, Multiplicity.ONE);
+    }
+
+    /**
+     * Append a type element to this pattern with multiplicity {@link Multiplicity#ONE}.
+     * @param type The type to match, passed to {@link ContextElements#matchType(Class)}.
+     * @return This pattern extended by the new element.
+     */
+    ContextPattern append(Class<?> type) {
+        return append(ContextElements.matchType(type));
+    }
+
+    /**
+     * Return a pattern matching any context of which the current pattern matches a prefix.  This
+     * is accomplished by adding the {@code .*} regular expression token.
+     * @return The new pattern.
+     */
+    ContextPattern appendDotStar() {
+        return append(ContextElements.matchAny(), Multiplicity.ZERO_OR_MORE);
+    }
+
+    @Override
+    public ContextMatch matches(InjectionContext context) {
+        Chain<MatchElement> result = recursiveMatch(tokenChain, context);
+        if (result == null) {
+            return null;
+        } else {
+            return ContextMatch.create(result);
+        }
+    }
+
+    /**
+     * Recursive matching routine.  Matches the pattern via backtracking.  Returns the matched
+     * elements.
+     * @param pattern The pattern.
+     * @param context The context.
+     * @return The chain of match elements.
+     */
+    private Chain<MatchElement> recursiveMatch(Chain<Element> pattern, InjectionContext context) {
+        if (pattern == null || pattern.isEmpty()) {
+            if (context == null || context.isEmpty()) {
+                return new Chain<MatchElement>();
+            } else {
+                return null;
+            }
+        } else if (context == null || context.isEmpty()) {
+            if (pattern.getTailValue().getMultiplicity().isOptional()) {
+                return recursiveMatch(pattern.getLeading(), context);
+            } else {
+                return null;
+            }
+        }
+        // non-empty pattern, non-empty context, go
+        Element matcher = pattern.getTailValue();
+        Pair<Satisfaction, Attributes> ctxElem = context.getTailValue();
+        MatchElement match = matcher.getMatcher().apply(ctxElem, context.size() - 1);
+        if (match == null) {
+            // no match, what do we do?
+            if (matcher.getMultiplicity().isOptional()) {
+                // skip this element, keep going
+                return recursiveMatch(pattern.getLeading(), context);
+            } else {
+                // oops, we must match
+                return null;
+            }
+        } else {
+            // we have a match, try recursion
+            Chain<Element> nextPat =
+                    matcher.getMultiplicity().isConsumed() ? pattern.getLeading() : pattern;
+            Chain<MatchElement> result = recursiveMatch(nextPat,
+                                                        context.getLeading());
+            if (result == null && matcher.getMultiplicity().isOptional()) {
+                // recursive match failed, but element is optional. Try again without it.
+                return recursiveMatch(pattern.getLeading(), context);
+            }
+            if (result != null) {
+                return result.extend(match);
+            } else {
+                return result;
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContextPattern that = (ContextPattern) o;
+
+        if (!tokenChain.equals(that.tokenChain)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return tokenChain.hashCode();
     }
 
     /**
@@ -64,23 +209,23 @@ public class ContextPattern implements Serializable {
     /**
      * A chain of context pattern elements.
      */
-    private static class Chain extends AbstractChain<Element> {
+    private static class Chain<E> extends AbstractChain<E> {
         private static final long serialVersionUID = 1L;
-
-        public Chain(Element val) {
-            super(null, val);
+        public Chain() {
+            super();
         }
 
-        private Chain(Chain head, Element val) {
+        private Chain(Chain<E> head, E val) {
             super(head, val);
         }
 
-        public Chain extend(Element elem) {
-            return new Chain(this, elem);
+        public Chain<E> extend(E elem) {
+            return new Chain<E>(this, elem);
         }
 
-        public Chain getLeading() {
-            return (Chain) previous;
+        @Nullable
+        public Chain<E> getLeading() {
+            return (Chain<E>) previous;
         }
     }
 }
