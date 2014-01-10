@@ -18,51 +18,15 @@
  */
 package org.grouplens.grapht.spi.context;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.MockQualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
+import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 
-public class MockContextElementMatcher implements ContextElementMatcher {
-    private static final long serialVersionUID = 1L;
-
-    private final Class<?> type;
-    private final MockQualifierMatcher qualifier;
-    private final boolean anchored;
-
+public class MockContextElementMatcher extends ReflectionContextElementMatcher {
     public MockContextElementMatcher(Class<?> type) {
         this(type, MockQualifierMatcher.any());
     }
     
     public MockContextElementMatcher(Class<?> type, MockQualifierMatcher qualifier) {
-        this(type, qualifier, false);
-    }
-
-    public MockContextElementMatcher(Class<?> type, boolean anchored) {
-        this(type, MockQualifierMatcher.any(), anchored);
-    }
-
-    public MockContextElementMatcher(Class<?> type, MockQualifierMatcher qualifier, boolean anchored) {
-        this.type = type;
-        this.qualifier = qualifier;
-        this.anchored = anchored;
-    }
-    
-    @Override
-    public boolean matches(Pair<Satisfaction, Attributes> n) {
-        Satisfaction sat = n.getLeft();
-        boolean typeMatches;
-        if (sat == null) {
-            typeMatches = type == null;
-        } else {
-            typeMatches = type.isAssignableFrom(sat.getErasedType());
-        }
-        return typeMatches && qualifier.matches(n.getRight().getQualifier());
-    }
-
-    @Override
-    public boolean isAnchored() {
-        return anchored;
+        super(type, qualifier);
     }
 }

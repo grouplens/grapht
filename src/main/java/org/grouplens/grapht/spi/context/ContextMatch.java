@@ -18,11 +18,59 @@
  */
 package org.grouplens.grapht.spi.context;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
+
+import java.util.List;
+
 /**
  * Interface for context matches. A context match is the result of successfully
  * matching a {@link ContextMatcher}.
  *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface ContextMatch extends Comparable<ContextMatch> {
+public class ContextMatch implements Comparable<ContextMatch> {
+    private final ImmutableList<MatchElement> matchElements;
+
+    private ContextMatch(List<MatchElement> matches) {
+        matchElements = ImmutableList.copyOf(matches);
+    }
+
+    /**
+     * Create a new context match.
+     * @param matches The list of match elements.
+     * @return The context match.
+     */
+    static ContextMatch create(List<MatchElement> matches) {
+        return new ContextMatch(matches);
+    }
+
+    @Override
+    public int compareTo(ContextMatch o) {
+        return Ordering.<MatchElement>natural()
+                       .lexicographical()
+                       .compare(matchElements.reverse(), o.matchElements.reverse());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof ContextMatch) {
+            ContextMatch om = (ContextMatch) o;
+            return matchElements.equals(om.matchElements);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return matchElements.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ContextMatch" + matchElements.toString();
+    }
 }

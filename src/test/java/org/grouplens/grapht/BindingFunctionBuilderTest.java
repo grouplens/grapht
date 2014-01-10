@@ -26,7 +26,8 @@ import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindRules;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.context.ContextElementMatcher;
 import org.grouplens.grapht.spi.context.ContextMatcher;
 import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
@@ -208,9 +209,9 @@ public class BindingFunctionBuilderTest {
         ListMultimap<ContextMatcher, BindRule> expected = ArrayListMultimap.create();
         expected.put(new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()),
                      BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
-        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.context(spi.matchDefault(), TypeC.class, false))),
+        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.contextElement(spi.matchDefault(), TypeC.class))),
                      BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, false));
-        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.context(spi.match(RoleD.class), TypeC.class, false))),
+        expected.put(new ElementChainContextMatcher(Arrays.asList(spi.contextElement(spi.match(RoleD.class), TypeC.class))),
                      BindRules.toSatisfaction(InterfaceB.class, spi.matchDefault(), spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, false));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());

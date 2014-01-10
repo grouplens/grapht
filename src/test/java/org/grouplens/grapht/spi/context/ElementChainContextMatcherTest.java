@@ -21,11 +21,7 @@ package org.grouplens.grapht.spi.context;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.context.MockContextElementMatcher;
 import org.grouplens.grapht.spi.MockSatisfaction;
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
-import org.grouplens.grapht.spi.context.ContextMatcher;
-import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.junit.Test;
 
@@ -127,7 +123,7 @@ public class ElementChainContextMatcherTest {
     @Test
     public void testAnchoredElementMatchers() {
         List<ContextElementMatcher> matchers = new ArrayList<ContextElementMatcher>();
-        matchers.add(new MockContextElementMatcher(A.class, true));
+        matchers.add(new MockContextElementMatcher(A.class /* , true */));
         ContextMatcher matcher = new ElementChainContextMatcher(matchers);
         assertThat(matcher.matches(makeContext()),
                    nullValue());
@@ -142,7 +138,7 @@ public class ElementChainContextMatcherTest {
     @Test
     public void testAnchoredAndUnanchored() {
         List<ContextElementMatcher> matchers = new ArrayList<ContextElementMatcher>();
-        matchers.add(new MockContextElementMatcher(A.class, true));
+        matchers.add(new MockContextElementMatcher(A.class /* , true */));
         matchers.add(new MockContextElementMatcher(B.class));
         ContextMatcher matcher = new ElementChainContextMatcher(matchers);
         assertThat(matcher.matches(makeContext()),

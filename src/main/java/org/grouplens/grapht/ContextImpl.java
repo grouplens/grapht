@@ -89,7 +89,7 @@ class ContextImpl extends AbstractContext {
     }
     
     private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
-        ContextElementMatcher nextMatcher = config.getSPI().context(q, type, anchored);
+        ContextElementMatcher nextMatcher = config.getSPI().contextElement(q, type);
         
         List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
         nextChain.add(nextMatcher);

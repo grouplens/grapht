@@ -34,6 +34,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
 public class ReflectionContextElementMatcherTest {
     @Test
     public void testEquals() {
@@ -117,7 +120,11 @@ public class ReflectionContextElementMatcherTest {
         Pair<Satisfaction, Attributes> node = Pair.of(sat, attrs);
         
         ReflectionContextElementMatcher cm = new ReflectionContextElementMatcher(matcherType, mr);
-        Assert.assertEquals(expected, cm.matches(node));
+        if (expected) {
+            Assert.assertThat(cm.apply(node, 1), notNullValue());
+        } else {
+            Assert.assertThat(cm.apply(node, 1), nullValue());
+        }
     }
     
     public static class A { }

@@ -18,7 +18,10 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.context.ContextElementMatcher;
 
 import javax.annotation.Nonnull;
@@ -37,8 +40,8 @@ import java.lang.annotation.Annotation;
  */
 public class ReflectionInjectSPI implements InjectSPI {
     @Override
-    public ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type, boolean anchored) {
-        return new ReflectionContextElementMatcher(type, qualifier, anchored);
+    public ContextElementMatcher contextElement(QualifierMatcher qualifier, Class<?> type) {
+        return new ReflectionContextElementMatcher(type, qualifier);
     }
     
     @Override
