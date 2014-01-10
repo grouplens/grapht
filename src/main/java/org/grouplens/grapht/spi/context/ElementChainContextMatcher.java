@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi.context;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -29,7 +30,10 @@ import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.util.Types;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * ElementChainContextMatcher represents a list of {@link ContextElementMatcher}s.
@@ -43,8 +47,7 @@ import java.util.*;
 public class ElementChainContextMatcher implements ContextMatcher, Serializable {
     private static final long serialVersionUID = 1L;
 
-    // FIXME Deserialize element matchers correctly
-    private final List<ContextElementMatcher> elementMatchers;
+    private final ImmutableList<ContextElementMatcher> elementMatchers;
 
     /**
      * Create a new ElementChainContextMatcher representing the empty context without any
@@ -62,7 +65,7 @@ public class ElementChainContextMatcher implements ContextMatcher, Serializable 
      * @param elementMatchers The var-args of matchers to use in this chain
      */
     public ElementChainContextMatcher(ContextElementMatcher... elementMatchers) {
-        this(Arrays.asList(elementMatchers));
+        this(ImmutableList.copyOf(elementMatchers));
     }
     
     /**
@@ -74,14 +77,14 @@ public class ElementChainContextMatcher implements ContextMatcher, Serializable 
      * @throws NullPointerException if matchers is null
      */
     public ElementChainContextMatcher(List<? extends ContextElementMatcher> matchers) {
-        this.elementMatchers = new ArrayList<ContextElementMatcher>(matchers);
+        elementMatchers = ImmutableList.copyOf(matchers);
     }
     
     /**
      * @return An unmodifiable list of the context matchers in this chain
      */
     public List<ContextElementMatcher> getContexts() {
-        return Collections.unmodifiableList(elementMatchers);
+        return elementMatchers;
     }
 
     /**
