@@ -16,13 +16,23 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
+package org.grouplens.grapht.spi.context;
+
+import org.grouplens.grapht.solver.InjectionContext;
 
 /**
- * Interface for context matches. A context match is the result of successfully
- * matching a {@link ContextMatcher}.
+ * Interface for context matchers.  A context matcher matches contexts to
+ * determine whether particular bind rules are to be applied.
  *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface ContextMatch extends Comparable<ContextMatch> {
+public interface ContextMatcher {
+    /**
+     * Attempt to match this context matcher against the specified context. If the
+     * matcher matches, it will return a {@link ContextMatch} describing the result.
+     *
+     * @param context The context to match.
+     * @return The match information, or {@code null} if the matcher does not match.
+     */
+    ContextMatch matches(InjectionContext context);
 }

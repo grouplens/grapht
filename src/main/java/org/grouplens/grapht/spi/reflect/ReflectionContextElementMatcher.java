@@ -22,7 +22,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.ContextElementMatcher;
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.ClassProxy;

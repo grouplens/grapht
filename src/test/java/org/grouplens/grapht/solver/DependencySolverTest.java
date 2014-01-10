@@ -24,6 +24,10 @@ import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
+import org.grouplens.grapht.spi.context.ContextMatcher;
+import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.context.MockContextElementMatcher;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -23,9 +23,9 @@ import com.google.common.collect.Multimap;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.spi.ContextElementMatcher;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
+import org.grouplens.grapht.spi.context.ContextMatcher;
+import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 

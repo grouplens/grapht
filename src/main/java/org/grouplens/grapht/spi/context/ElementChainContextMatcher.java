@@ -16,13 +16,15 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
+package org.grouplens.grapht.spi.context;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.solver.InjectionContext;
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 import org.grouplens.grapht.util.Types;
 

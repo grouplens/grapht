@@ -24,7 +24,7 @@ import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.solver.BindRules;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;

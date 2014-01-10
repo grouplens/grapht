@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import javax.annotation.Nonnull;

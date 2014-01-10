@@ -18,8 +18,8 @@
  */
 package org.grouplens.grapht;
 
-import org.grouplens.grapht.spi.ContextElementMatcher;
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
+import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 
 import javax.annotation.Nullable;

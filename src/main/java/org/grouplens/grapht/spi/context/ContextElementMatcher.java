@@ -16,9 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
+package org.grouplens.grapht.spi.context;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Satisfaction;
 
 import javax.inject.Qualifier;
 import java.io.Serializable;
