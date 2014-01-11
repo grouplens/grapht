@@ -73,6 +73,11 @@ class ContextImpl extends AbstractContext {
     }
 
     @Override
+    public Context matching(ContextPattern pat) {
+        return new ContextImpl(config, pattern.append(pat));
+    }
+
+    @Override
     public Context at(Class<?> type) {
         return in(config.getSPI().matchDefault(), type, true);
     }

@@ -112,6 +112,19 @@ public class ContextPattern implements ContextMatcher, Serializable {
     }
 
     /**
+     * Append a context pattern to this pattern.
+     * @param toAppend The pattern to append.
+     * @return The concatenation of this pattern and {@code toAppend}.
+     */
+    public ContextPattern append(ContextPattern toAppend) {
+        ContextPattern pat = this;
+        for (Element elem: toAppend.tokenChain) {
+            pat = pat.append(elem.getMatcher(), elem.getMultiplicity());
+        }
+        return pat;
+    }
+
+    /**
      * Return a pattern matching any context of which the current pattern matches a prefix.  This
      * is accomplished by adding the {@code .*} regular expression token.
      * @return The new pattern.
