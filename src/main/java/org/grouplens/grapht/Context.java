@@ -35,7 +35,6 @@ import java.lang.annotation.Annotation;
  * creating bindings, the context stack can be configured by calling
  * {@link #in(Class)} or {@link #in(Class, Class)}.
  * 
- * @see org.grouplens.grapht.spi.context.ElementChainContextMatcher
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface Context {

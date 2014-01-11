@@ -23,15 +23,13 @@ import com.google.common.collect.Multimap;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
-import org.grouplens.grapht.spi.context.ContextMatcher;
-import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.context.ContextMatcher;
+import org.grouplens.grapht.spi.context.ContextPattern;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -125,7 +123,7 @@ public class BindingFunctionBuilder implements Cloneable {
         intermediateRules = ArrayListMultimap.create();
         superRules = ArrayListMultimap.create();
 
-        root = new ContextImpl(this, new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()));
+        root = new ContextImpl(this, ContextPattern.any());
     }
     
     private BindingFunctionBuilder(BindingFunctionBuilder clone) {
@@ -135,7 +133,7 @@ public class BindingFunctionBuilder implements Cloneable {
         manualRules = ArrayListMultimap.create(clone.manualRules);
         intermediateRules = ArrayListMultimap.create(clone.intermediateRules);
         superRules = ArrayListMultimap.create(clone.superRules);
-        root = new ContextImpl(this, new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()));
+        root = new ContextImpl(this, ContextPattern.any());
     }
     
     @Override
@@ -213,7 +211,7 @@ public class BindingFunctionBuilder implements Cloneable {
         return new RuleBasedBindingFunction(getMap(set));
     }
     
-    void addBindRule(RuleSet set, ElementChainContextMatcher context, BindRule rule) {
+    void addBindRule(RuleSet set, ContextMatcher context, BindRule rule) {
         Multimap<ContextMatcher, BindRule> map = getMap(set);
         map.put(context, rule);
     }

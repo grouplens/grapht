@@ -65,13 +65,29 @@ public class ContextPattern implements ContextMatcher, Serializable {
     }
 
     /**
+     * Create a context matcher matching any context with a subequence matching the provided matchers.
+     *
+     * @param matchers The matchers to match a subsequence.
+     * @return A context matcher that matches any context of which {@code types} (with the default
+     *         qualifier matchers) is a subsequence.
+     */
+    public static ContextPattern subsequence(ContextElementMatcher... matchers) {
+        ContextPattern pat = any();
+        for (ContextElementMatcher matcher: matchers) {
+            pat = pat.append(matcher, Multiplicity.ONE)
+                     .appendDotStar();
+        }
+        return pat;
+    }
+
+    /**
      * Append an element to this pattern.  The pattern is not modified; rather, a new pattern
      * extended with the new matching element is returned.
      * @param match The element matcher.
      * @param mult The multiplicity of this element.
      * @return This pattern extended by the new element.
      */
-    ContextPattern append(ContextElementMatcher match, Multiplicity mult) {
+    public ContextPattern append(ContextElementMatcher match, Multiplicity mult) {
         Element elem = new Element(match, mult);
         Chain<Element> chain = tokenChain.extend(elem);
         return new ContextPattern(chain);
@@ -82,7 +98,7 @@ public class ContextPattern implements ContextMatcher, Serializable {
      * @param match The element matcher.
      * @return This pattern extended by the new element.
      */
-    ContextPattern append(ContextElementMatcher match) {
+    public ContextPattern append(ContextElementMatcher match) {
         return append(match, Multiplicity.ONE);
     }
 
@@ -91,7 +107,7 @@ public class ContextPattern implements ContextMatcher, Serializable {
      * @param type The type to match, passed to {@link ContextElements#matchType(Class)}.
      * @return This pattern extended by the new element.
      */
-    ContextPattern append(Class<?> type) {
+    public ContextPattern append(Class<?> type) {
         return append(ContextElements.matchType(type));
     }
 
@@ -100,7 +116,14 @@ public class ContextPattern implements ContextMatcher, Serializable {
      * is accomplished by adding the {@code .*} regular expression token.
      * @return The new pattern.
      */
-    ContextPattern appendDotStar() {
+    public ContextPattern appendDotStar() {
+        if (!tokenChain.isEmpty()) {
+            Element elem = tokenChain.getTailValue();
+            if (elem.getMatcher().equals(ContextElements.matchAny()) && elem.getMultiplicity().equals(Multiplicity.ZERO_OR_MORE)) {
+                return this;
+            }
+        }
+
         return append(ContextElements.matchAny(), Multiplicity.ZERO_OR_MORE);
     }
 
@@ -167,6 +190,11 @@ public class ContextPattern implements ContextMatcher, Serializable {
     }
 
     @Override
+    public String toString() {
+        return tokenChain.toString();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -203,6 +231,26 @@ public class ContextPattern implements ContextMatcher, Serializable {
 
         public Multiplicity getMultiplicity() {
             return multiplicity;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Element element = (Element) o;
+
+            if (!matcher.equals(element.matcher)) return false;
+            if (multiplicity != element.multiplicity) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = matcher.hashCode();
+            result = 31 * result + multiplicity.hashCode();
+            return result;
         }
     }
 

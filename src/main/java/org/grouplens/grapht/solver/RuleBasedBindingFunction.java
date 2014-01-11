@@ -36,7 +36,7 @@ import java.util.*;
  * BindingFunction that uses BindRules created by the fluent API to bind desires
  * to other desires or satisfactions.
  * <p>
- * For more details on context management, see {@link org.grouplens.grapht.spi.context.ElementChainContextMatcher},
+ * For more details on context management, see {@link org.grouplens.grapht.spi.context.ContextPattern},
  * {@link org.grouplens.grapht.spi.context.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
  * context to activate and select BindRules. A number of rules are used to order
  * applicable BindRules and choose the best. When any of these rules rely on the

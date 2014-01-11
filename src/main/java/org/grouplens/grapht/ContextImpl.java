@@ -19,13 +19,12 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.spi.context.ContextElementMatcher;
-import org.grouplens.grapht.spi.context.ElementChainContextMatcher;
+import org.grouplens.grapht.spi.context.ContextPattern;
 import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.spi.context.Multiplicity;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ContextImpl is the basic implementation of Context.
@@ -33,13 +32,13 @@ import java.util.List;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 class ContextImpl extends AbstractContext {
-    private final ElementChainContextMatcher context;
+    private final ContextPattern pattern;
     
     private final BindingFunctionBuilder config;
     
-    public ContextImpl(BindingFunctionBuilder config, ElementChainContextMatcher context) {
+    public ContextImpl(BindingFunctionBuilder config, ContextPattern context) {
         this.config = config;
-        this.context = context;
+        this.pattern = context;
     }
     
     public BindingFunctionBuilder getBuilder() {
@@ -49,8 +48,8 @@ class ContextImpl extends AbstractContext {
     /**
      * @return The context chain of this context
      */
-    public ElementChainContextMatcher getContextChain() {
-        return context;
+    public ContextPattern getContextChain() {
+        return pattern;
     }
     
     @Override
@@ -90,9 +89,11 @@ class ContextImpl extends AbstractContext {
     
     private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
         ContextElementMatcher nextMatcher = config.getSPI().contextElement(q, type);
+        ContextPattern nextPat = pattern.append(nextMatcher, Multiplicity.ONE);
+        if (!anchored) {
+            nextPat = nextPat.appendDotStar();
+        }
         
-        List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
-        nextChain.add(nextMatcher);
-        return new ContextImpl(config, new ElementChainContextMatcher(nextChain));
+        return new ContextImpl(config, nextPat);
     }
 }
