@@ -48,7 +48,6 @@ public class ContextPatternTest {
 
     @Test
     public void testEmptyChainNonEmptyContextFailure() throws Exception {
-        // Test that the empty ElementChainContextMatcher matches contexts that have any nodes
         assertThat(ContextPattern.empty().matches(makeContext(A.class)),
                    nullValue());
     }
@@ -82,7 +81,6 @@ public class ContextPatternTest {
     
     @Test
     public void testAnyChainNonEmptyContextSuccess() throws Exception {
-        // Test that the 'any' ElementChainContextMatcher matches contexts that have any nodes
         assertThat(ContextPattern.any().matches(makeContext(A.class)),
                    notNullValue());
         assertThat(ContextPattern.any().matches(makeContext(A.class, B.class)),
