@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class ContextPatternTest {
@@ -206,6 +207,61 @@ public class ContextPatternTest {
                    notNullValue());
         assertThat(matcher.matches(makeContext(A.class, C.class, B.class)),
                    nullValue());
+    }
+
+    @Test
+    public void testOrderByCloseness() {
+        ContextPattern patA = ContextPattern.subsequence(A.class);
+        ContextPattern patB = ContextPattern.subsequence(B.class);
+        InjectionContext ctx1 = makeContext(A.class, B.class);
+        // B matches more closely than A
+        assertThat(patB.matches(ctx1), lessThan(patA.matches(ctx1)));
+        // A matches the same as itself
+        assertThat(patA.matches(ctx1),
+                   allOf(lessThanOrEqualTo(patA.matches(ctx1)),
+                         greaterThanOrEqualTo(patA.matches(ctx1))));
+    }
+
+    @Test
+    public void testOrderByLength() {
+        ContextPattern patShort = ContextPattern.subsequence(B.class);
+        ContextPattern patLong = ContextPattern.subsequence(A.class, B.class);
+        InjectionContext ctx1 = makeContext(A.class, B.class);
+        // Long matches more closely than short
+        assertThat(patLong.matches(ctx1), lessThan(patShort.matches(ctx1)));
+        // Long matches like itself.
+        assertThat(patLong.matches(ctx1),
+                   allOf(lessThanOrEqualTo(patLong.matches(ctx1)),
+                         greaterThanOrEqualTo(patLong.matches(ctx1))));
+    }
+
+    @Test
+    public void testOrderByLengthAfterCloseness() {
+        ContextPattern patClose = ContextPattern.subsequence(C.class);
+        ContextPattern patFar = ContextPattern.subsequence(A.class, B.class);
+        InjectionContext ctx1 = makeContext(A.class, B.class, C.class);
+        // Close matches more closely than long
+        assertThat(patClose.matches(ctx1), lessThan(patFar.matches(ctx1)));
+    }
+
+    @Test
+    public void testOrderByType() {
+        ContextPattern patStrict = ContextPattern.subsequence(Ap.class);
+        ContextPattern patLoose = ContextPattern.subsequence(A.class);
+        InjectionContext ctx1 = makeContext(Ap.class);
+        // Tight matches more tightly
+        assertThat(patStrict.matches(ctx1),
+                   lessThan(patLoose.matches(ctx1)));
+    }
+
+    @Test
+    public void testOrderByTypeLast() {
+        ContextPattern patStrict = ContextPattern.subsequence(Bp.class);
+        ContextPattern patLong = ContextPattern.subsequence(A.class, B.class);
+        InjectionContext ctx1 = makeContext(A.class, Bp.class);
+        // Length trumps tightness
+        assertThat(patLong.matches(ctx1),
+                   lessThan(patStrict.matches(ctx1)));
     }
 
     private InjectionContext makeContext(Class<?>... types) {
