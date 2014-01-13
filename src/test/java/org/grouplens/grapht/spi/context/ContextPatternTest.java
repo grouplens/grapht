@@ -264,6 +264,15 @@ public class ContextPatternTest {
                    lessThan(patStrict.matches(ctx1)));
     }
 
+    @Test
+    public void testOrderSubsequenceBeforeOther() {
+        ContextPattern patAny = ContextPattern.any();
+        ContextPattern patLimited = ContextPattern.subsequence(B.class);
+        InjectionContext ctx1 = makeContext(A.class, B.class);
+        // B matches more closely than A
+        assertThat(patLimited.matches(ctx1), lessThan(patAny.matches(ctx1)));
+    }
+
     private InjectionContext makeContext(Class<?>... types) {
         InjectionContext context = DependencySolver.initialContext();
         for (Class<?> type: types) {
