@@ -20,20 +20,13 @@ package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
 import org.grouplens.grapht.spi.reflect.*;
 import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -44,31 +37,6 @@ public class BindRuleTest {
     @Before
     public void setup() {
         spi = new ReflectionInjectSPI();
-    }
-    
-    @Test @Ignore("no longer relevant?")
-    @SuppressWarnings("unchecked")
-    public void testContextMatcherComparator() throws Exception {
-        InjectSPI spi = new ReflectionInjectSPI();
-        ContextElementMatcher cm1 = new ReflectionContextElementMatcher(TypeB.class, spi.matchAny()); // type dist = 0, annot dist = 0
-        ContextElementMatcher cm2 = new ReflectionContextElementMatcher(TypeA.class, spi.match(RoleD.class)); // type dist = 1, annot dist = 0
-        ContextElementMatcher cm3 = new ReflectionContextElementMatcher(TypeA.class, spi.matchAny()); // type dist = 1, annot dist = 1
-        
-        List<ContextElementMatcher> cms = new ArrayList<ContextElementMatcher>();
-        cms.add(cm3);
-        cms.add(cm1);
-        cms.add(cm2);
-        
-        // grab this from the internals of RuleBasedBindingFunction
-        // FIXME Move this to a more appropriate location now that the CM comparator is moved
-        Class<?> comparatorType = Class.forName("org.grouplens.grapht.spi.context.ElementChainContextMatcher$ElementMatcherComparator");
-        Constructor<?> ctor = comparatorType.getConstructor(Class.class);
-        ctor.setAccessible(true);
-        
-        Collections.sort(cms, (Comparator<ContextElementMatcher>) ctor.newInstance(TypeB.class));
-        Assert.assertEquals(cm1, cms.get(0));
-        Assert.assertEquals(cm2, cms.get(1));
-        Assert.assertEquals(cm3, cms.get(2));
     }
     
     @Test
