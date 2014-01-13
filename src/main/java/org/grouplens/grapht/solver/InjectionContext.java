@@ -24,6 +24,8 @@ import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.AbstractChain;
 
+import javax.annotation.Nullable;
+
 /**
  * <p>
  * InjectionContext represents the current path through the dependency graph to
@@ -72,5 +74,16 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
      */
     public InjectionContext extend(Satisfaction satisfaction, Attributes attrs) {
         return new InjectionContext(this, satisfaction, attrs);
+    }
+
+    /**
+     * Get everything except the last element of this context.
+     *
+     * @return Everything except the last element of this context, or {@code null} if the context is
+     *         a singleton.
+     */
+    @Nullable
+    public InjectionContext getLeading() {
+        return (InjectionContext) previous;
     }
 }

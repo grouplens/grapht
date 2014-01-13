@@ -16,23 +16,42 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
-
-import org.grouplens.grapht.solver.InjectionContext;
+package org.grouplens.grapht.spi.context;
 
 /**
- * Interface for context matchers.  A context matcher matches contexts to
- * determine whether particular bind rules are to be applied.
- *
- * @author <a href="http://grouplens.org">GroupLens Research</a>
+ * Multiplicity of element matches - how many times may/must an element match?
+ * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public interface ContextMatcher {
+public enum Multiplicity {
     /**
-     * Attempt to match this context matcher against the specified context. If the
-     * matcher matches, it will return a {@link ContextMatch} describing the result.
-     *
-     * @param context The context to match.
-     * @return The match information, or {@code null} if the matcher does not match.
+     * Match exactly once.
      */
-    ContextMatch matches(InjectionContext context);
+    ONE {
+        @Override
+        public boolean isOptional() {
+            return false;
+        }
+
+        @Override
+        public boolean isConsumed() {
+            return true;
+        }
+    },
+    /**
+     * Match zero or more times.
+     */
+    ZERO_OR_MORE {
+        @Override
+        public boolean isOptional() {
+            return true;
+        }
+
+        @Override
+        public boolean isConsumed() {
+            return false;
+        }
+    };
+
+    public abstract boolean isOptional();
+    public abstract boolean isConsumed();
 }

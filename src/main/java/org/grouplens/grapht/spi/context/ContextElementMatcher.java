@@ -16,9 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi;
+package org.grouplens.grapht.spi.context;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Satisfaction;
 
 import javax.inject.Qualifier;
 import java.io.Serializable;
@@ -34,31 +36,18 @@ import java.io.Serializable;
  * within a dependency context. As an example, the reflection based
  * ContextElementMatcher matches nodes that are sub-types of the type the matcher was
  * configured with.
- * <p>
- * ContextMatchers are composed into a list with {@link ElementChainContextMatcher} to
- * parallel the composing of nodes and {@link Qualifier}s into the dependency
- * context list. The ElementChainContextMatcher can then be used to determine if the list of
- * ContextMatchers applies to any given dependency context.
- * 
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public interface ContextElementMatcher extends Serializable {
     /**
-     * Return true if this ContextElementMatcher matches or applies to the given
-     * Satisfaction and Qualifier.
-     * 
-     * @param n The node and attributes in the current dependency context
-     * @return True if this matcher matches the node and attributes, false
-     *         otherwise
-     */
-    boolean matches(Pair<Satisfaction, Attributes> n);
-
-    /**
-     * Query whether this element matcher is anchored. Anchored matchers must
-     * match immediately (scanning from the end of the context); unanchored
-     * matchers can be matched at first opportunity.
+     * Return true if this ContextElementMatcher matches or applies to the given Satisfaction and
+     * Qualifier.
      *
-     * @return {@code true} if this context matcher is anchored.
+     * @param n The node and attributes in the current dependency context
+     * @param position The position, from the beginning (to help in ordering match elements).
+     * @return A match if this matcher matches the provided node label, or {@code false} if there is
+     *         no match.
      */
-    boolean isAnchored();
+    MatchElement apply(Pair<Satisfaction, Attributes> n, int position);
 }

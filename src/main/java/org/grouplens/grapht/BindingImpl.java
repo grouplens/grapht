@@ -24,9 +24,9 @@ import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.solver.BindRules;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.context.ContextMatcher;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -135,7 +135,7 @@ class BindingImpl<T> implements Binding<T> {
         
         boolean useSatisfaction = Types.isInstantiable(impl);
         
-        ElementChainContextMatcher matcher = context.getContextChain();
+        ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
 
         if (config.getGenerateRules()) {
@@ -181,7 +181,7 @@ class BindingImpl<T> implements Binding<T> {
                                        instance, sourceType);
             throw new InvalidBindingException(sourceType, msg);
         }
-        ElementChainContextMatcher matcher = context.getContextChain();
+        ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
 
         // Apply some type coercing if we're dealing with primitive types
@@ -202,7 +202,7 @@ class BindingImpl<T> implements Binding<T> {
     
     @Override
     public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
-        ElementChainContextMatcher matcher = context.getContextChain();
+        ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
         
@@ -220,7 +220,7 @@ class BindingImpl<T> implements Binding<T> {
 
     @Override
     public void toProvider(@Nonnull Provider<? extends T> provider) {
-        ElementChainContextMatcher matcher = context.getContextChain();
+        ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = config.getSPI().satisfyWithProvider(provider);
 
@@ -243,7 +243,7 @@ class BindingImpl<T> implements Binding<T> {
 
     @Override
     public void toNull(Class<? extends T> type) {
-        ElementChainContextMatcher matcher = context.getContextChain();
+        ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
 
         Satisfaction s = config.getSPI().satisfyWithNull(type);
@@ -264,7 +264,7 @@ class BindingImpl<T> implements Binding<T> {
     public void toSatisfaction(@Nonnull Satisfaction sat) {
         Preconditions.notNull("satisfaction", sat);
 
-        ElementChainContextMatcher matcher = context.getContextChain();
+        ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
 
         if (config.getGenerateRules()) {

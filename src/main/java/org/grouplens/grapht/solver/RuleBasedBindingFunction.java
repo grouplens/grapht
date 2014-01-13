@@ -22,8 +22,8 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.ContextMatch;
-import org.grouplens.grapht.spi.ContextMatcher;
+import org.grouplens.grapht.spi.context.ContextMatch;
+import org.grouplens.grapht.spi.context.ContextMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
@@ -36,8 +36,8 @@ import java.util.*;
  * BindingFunction that uses BindRules created by the fluent API to bind desires
  * to other desires or satisfactions.
  * <p>
- * For more details on context management, see {@link org.grouplens.grapht.spi.ElementChainContextMatcher},
- * {@link org.grouplens.grapht.spi.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
+ * For more details on context management, see {@link org.grouplens.grapht.spi.context.ContextPattern},
+ * {@link org.grouplens.grapht.spi.context.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
  * context to activate and select BindRules. A number of rules are used to order
  * applicable BindRules and choose the best. When any of these rules rely on the
  * current dependency context, the deepest node in the context has the most

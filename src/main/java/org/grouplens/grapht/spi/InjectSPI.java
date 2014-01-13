@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.spi;
 
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import javax.annotation.Nonnull;
@@ -126,10 +127,9 @@ public interface InjectSPI {
      *
      * @param qualifier The qualifier matcher
      * @param type      The type of the context
-     * @param anchored  Whether the matcher is anchored
      * @return A ContextElementMatcher representing the qualifier and type
      */
-    ContextElementMatcher context(QualifierMatcher qualifier, Class<?> type, boolean anchored);
+    ContextElementMatcher contextElement(QualifierMatcher qualifier, Class<?> type);
 
     /**
      * Create a QualifierMatcher that matches the given annotation type. This

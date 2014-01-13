@@ -24,6 +24,7 @@ import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.spi.context.ContextPattern;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import java.lang.annotation.Annotation;
@@ -116,6 +117,11 @@ public class InjectorBuilder extends AbstractContext {
     @Override
     public Context within(Annotation annot, Class<?> type) {
         return builder.getRootContext().within(annot, type);
+    }
+
+    @Override
+    public Context matching(ContextPattern pattern) {
+        return builder.getRootContext().matching(pattern);
     }
 
     @Override

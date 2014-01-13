@@ -19,6 +19,9 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.annotation.DefaultImplementation;
+import org.grouplens.grapht.spi.context.ContextElements;
+import org.grouplens.grapht.spi.context.ContextPattern;
+import org.grouplens.grapht.spi.context.Multiplicity;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -146,6 +149,22 @@ public class ContextOverrideTest {
                    instanceOf(PlugH.class));
     }
 
+    @Test
+    public void testPatternForPlug() {
+        build.matching(ContextPattern.any()
+                                     .append(CInner.class)
+                                     .append(ContextElements.invertMatch(ContextElements.matchType(PlugW.class)),
+                                             Multiplicity.ZERO_OR_MORE))
+             .bind(Plug.class)
+             .to(PlugW.class);
+        Injector inj = build.build();
+        CInner c = inj.getInstance(CInner.class);
+        assertThat(c.plug, instanceOf(PlugW.class));
+        assert c.plug != null;
+        assertThat(((PlugW) c.plug).inner.getClass(),
+                   equalTo((Class) Plug.class));
+    }
+
     @DefaultImplementation(PlugA.class)
     public static interface IPlug {}
     public static class PlugA implements IPlug {}
@@ -190,6 +209,15 @@ public class ContextOverrideTest {
         public COuter(CInner in, @Nullable Plug p) {
             plug = p;
             inner = in;
+        }
+    }
+
+    public static class PlugW extends Plug {
+        private final Plug inner;
+
+        @Inject
+        public PlugW(Plug wrapped) {
+            inner = wrapped;
         }
     }
 }

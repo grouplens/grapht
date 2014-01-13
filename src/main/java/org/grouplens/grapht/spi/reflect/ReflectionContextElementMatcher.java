@@ -22,11 +22,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.ContextElementMatcher;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.context.ContextElementMatcher;
+import org.grouplens.grapht.spi.context.ContextElements;
+import org.grouplens.grapht.spi.context.MatchElement;
 import org.grouplens.grapht.util.ClassProxy;
-import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
@@ -48,7 +50,6 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
     @Nullable
     private final transient Class<?> type;
     private final transient QualifierMatcher qualifier;
-    private final transient boolean anchored;
 
     /**
      * Create an unanchored ReflectionContextElementMatcher that matches the given type
@@ -70,26 +71,8 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
      * @throws NullPointerException if type or qualifier is null
      */
     public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier) {
-        this(type, qualifier, false);
-    }
-
-    /**
-     * Create a ReflectionContextElementMatcher that matches the given type and the given {@link
-     * Qualifier}.
-     *
-     * @param type      The type to match
-     * @param qualifier The QualifierMatcher that determines how qualifiers are matched
-     * @param anchored  Whether the element matcher is anchored (see {@link #isAnchored()})
-     * @throws NullPointerException if type or qualifier is null
-     */
-    public ReflectionContextElementMatcher(@Nullable Class<?> type,
-                                           QualifierMatcher qualifier,
-                                           boolean anchored) {
-        Preconditions.notNull("qualifier matcher", qualifier);
-
         this.type = type;
         this.qualifier = qualifier;
-        this.anchored = anchored;
     }
 
     /**
@@ -107,7 +90,7 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
     }
     
     @Override
-    public boolean matches(Pair<Satisfaction, Attributes> n) {
+    public MatchElement apply(Pair<Satisfaction, Attributes> n, int pos) {
         // we must check for nulls in case it is a synthetic satisfaction
         Satisfaction sat = n.getLeft();
         boolean typeMatches;
@@ -120,14 +103,14 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
                           type.isAssignableFrom(sat.getErasedType());
         }
 
-        return typeMatches && qualifier.matches(n.getRight().getQualifier());
+        if (typeMatches && qualifier.matches(n.getRight().getQualifier())) {
+            return new MatchElem(sat == null ? null : sat.getErasedType(),
+                                 type, qualifier);
+        } else {
+            return null;
+        }
     }
 
-    @Override
-    public boolean isAnchored() {
-        return anchored;
-    }
-    
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -155,8 +138,60 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
         return "Context(" + qualifier + ":" + tname + ")";
     }
 
+    private static class MatchElem implements MatchElement {
+        private final Class<?> matchedType;
+        private final Class<?> patternType;
+        private final QualifierMatcher qualMatcher;
+
+        private MatchElem(Class<?> mtype, Class<?> ptype, QualifierMatcher qmatch) {
+            matchedType = mtype;
+            patternType = ptype;
+            qualMatcher = qmatch;
+        }
+
+        @Override
+        public ContextElements.MatchPriority getPriority() {
+            return ContextElements.MatchPriority.TYPE;
+        }
+
+        @Override
+        public Integer getTypeDistance() {
+            return Types.getTypeDistance(matchedType, patternType);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            } else if (o instanceof MatchElem) {
+                MatchElem other = (MatchElem) o;
+                EqualsBuilder eqb = new EqualsBuilder();
+                return eqb.append(matchedType, other.matchedType)
+                          .append(patternType, other.patternType)
+                          .append(qualMatcher, other.qualMatcher)
+                          .isEquals();
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            HashCodeBuilder hcb = new HashCodeBuilder();
+            return hcb.append(matchedType)
+                      .append(patternType)
+                      .append(qualMatcher)
+                      .toHashCode();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Match(%s,%s)", matchedType, patternType);
+        }
+    }
+
     private Object writeReplace() {
-        return new SerialProxy(type, qualifier, anchored);
+        return new SerialProxy(type, qualifier);
     }
 
     private void readObject(ObjectInputStream stream) throws ObjectStreamException {
@@ -164,24 +199,21 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
     }
 
     private static class SerialProxy implements Serializable {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2L;
 
         private final ClassProxy type;
         private final QualifierMatcher qualifier;
-        private final boolean anchored;
 
-        public SerialProxy(Class<?> t, QualifierMatcher qual, boolean anch) {
+        public SerialProxy(Class<?> t, QualifierMatcher qual) {
             type = ClassProxy.of(t);
             qualifier = qual;
-            anchored = anch;
         }
 
         @SuppressWarnings("unchecked")
         private Object readResolve() throws ObjectStreamException {
             try {
                 return new ReflectionContextElementMatcher(type.resolve(),
-                                                           qualifier,
-                                                           anchored);
+                                                           qualifier);
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex = new InvalidObjectException("cannot resolve " + type);
                 ex.initCause(e);
