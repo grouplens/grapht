@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.spi.reflect;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -106,7 +105,7 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
 
         if (typeMatches && qualifier.matches(n.getRight().getQualifier())) {
             return new MatchElem(sat == null ? null : sat.getErasedType(),
-                                 type, qualifier, pos);
+                                 type, qualifier);
         } else {
             return null;
         }
@@ -143,18 +142,11 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
         private final Class<?> matchedType;
         private final Class<?> patternType;
         private final QualifierMatcher qualMatcher;
-        private final int position;
 
-        private MatchElem(Class<?> mtype, Class<?> ptype, QualifierMatcher qmatch, int pos) {
+        private MatchElem(Class<?> mtype, Class<?> ptype, QualifierMatcher qmatch) {
             matchedType = mtype;
             patternType = ptype;
             qualMatcher = qmatch;
-            position = pos;
-        }
-
-        @Override
-        public boolean includeInComparisons() {
-            return true;
         }
 
         @Override
@@ -163,22 +155,8 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
         }
 
         @Override
-        public int compareTo(MatchElement o) {
-            CompareToBuilder ctb = new CompareToBuilder();
-            ctb.append(getPriority(), o.getPriority());
-            if (ctb.toComparison() == 0) {
-                MatchElem oe;
-                try {
-                    oe = (MatchElem) o;
-                } catch (ClassCastException e) {
-                    throw new IllegalArgumentException("cannot compare with type", e);
-                }
-                ctb.append(oe.position, position) // reverse, so close-to-end is low
-                   .append(Types.getTypeDistance(matchedType, patternType),
-                           Types.getTypeDistance(oe.matchedType, oe.patternType))
-                   .append(qualMatcher, oe.qualMatcher);
-            }
-            return ctb.toComparison();
+        public Integer getTypeDistance() {
+            return Types.getTypeDistance(matchedType, patternType);
         }
 
         @Override
@@ -191,7 +169,6 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
                 return eqb.append(matchedType, other.matchedType)
                           .append(patternType, other.patternType)
                           .append(qualMatcher, other.qualMatcher)
-                          .append(position, other.position)
                           .isEquals();
             } else {
                 return false;
@@ -204,7 +181,6 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
             return hcb.append(matchedType)
                       .append(patternType)
                       .append(qualMatcher)
-                      .append(position)
                       .toHashCode();
         }
 

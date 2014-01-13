@@ -47,8 +47,10 @@ public class ContextMatch implements Comparable<ContextMatch> {
 
     @Override
     public int compareTo(ContextMatch o) {
-        return Ordering.<MatchElement>natural()
+        return Ordering.from(MatchElement.Order.PRIORITY_ONLY)
                        .lexicographical()
+                       .compound(Ordering.from(MatchElement.Order.PRIORITY_AND_DISTANCE)
+                                         .lexicographical())
                        .compare(matchElements.reverse(), o.matchElements.reverse());
     }
 

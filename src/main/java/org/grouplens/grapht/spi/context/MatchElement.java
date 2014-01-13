@@ -18,19 +18,61 @@
  */
 package org.grouplens.grapht.spi.context;
 
+import com.google.common.collect.Ordering;
+
+import javax.annotation.Nullable;
+import java.util.Comparator;
+
 /**
+ * A single element in a context match.  Used in {@link ContextMatch}.
+ *
+ * @since 0.7
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public interface MatchElement extends Comparable<MatchElement> {
-    /**
-     * Query if this element should be included when comparing context matches.
-     * @return {@code true} if this match should be included, {@code false} if it should be ignored.
-     */
-    boolean includeInComparisons();
-
+public interface MatchElement {
     /**
      * Get the priority of this element matcher.
+     *
      * @return The element matcher's priority.
      */
     ContextElements.MatchPriority getPriority();
+
+    /**
+     * Get the type distance of this match.
+     *
+     * @return The type distance in this match, or empty if the type distance is irrelevant
+     *         for this type of matcher.
+     */
+    @Nullable
+    Integer getTypeDistance();
+
+    /**
+     * Orderings for the match order.
+     */
+    public static enum Order implements Comparator<MatchElement> {
+        /**
+         * Priority-only ordering, used for first-pass comparison of context matchers.
+         */
+        PRIORITY_ONLY {
+            @Override
+            public int compare(MatchElement e1, MatchElement e2) {
+                return e1.getPriority().compareTo(e2.getPriority());
+            }
+        },
+        /**
+         * Full ordering of match elements, including type distance.  Closer compares lower (higher
+         * priority).
+         */
+        PRIORITY_AND_DISTANCE {
+            @Override
+            public int compare(MatchElement e1, MatchElement e2) {
+                int cmp = e1.getPriority().compareTo(e2.getPriority());
+                if (cmp == 0) {
+                    Ordering<Integer> distOrder = Ordering.<Integer>natural().nullsLast();
+                    cmp = distOrder.compare(e1.getTypeDistance(), e2.getTypeDistance());
+                }
+                return cmp;
+            }
+        }
+    }
 }
