@@ -32,13 +32,25 @@ import java.lang.annotation.Annotation;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 class ContextImpl extends AbstractContext {
-    private final ContextPattern pattern;
-    
     private final BindingFunctionBuilder config;
-    
-    public ContextImpl(BindingFunctionBuilder config, ContextPattern context) {
+    private final ContextPattern pattern;
+    private final boolean anchored;
+
+    /**
+     * Construct a new context implementation.
+     * @param config The function builder.
+     * @param context The context pattern.
+     * @param anchored Whether this is anchored.  If it is not anchored, {@code .*} will be appended
+     *                 to the context pattern for any calls other than to {@link #matching(ContextPattern)}.
+     */
+    private ContextImpl(BindingFunctionBuilder config, ContextPattern context, boolean anchored) {
         this.config = config;
         this.pattern = context;
+        this.anchored = anchored;
+    }
+
+    public static ContextImpl root(BindingFunctionBuilder config) {
+        return new ContextImpl(config, ContextPattern.empty(), false);
     }
     
     public BindingFunctionBuilder getBuilder() {
@@ -46,10 +58,17 @@ class ContextImpl extends AbstractContext {
     }
     
     /**
-     * @return The context chain of this context
+     * Get the context pattern for this builder.  It will never return {@code null}; for the root
+     * context, it will return {@link ContextPattern#any()}.
+     *
+     * @return The context pattern for this builder.
      */
-    public ContextPattern getContextChain() {
-        return pattern;
+    public ContextPattern getContextPattern() {
+        if (anchored) {
+            return pattern;
+        } else {
+            return pattern.appendDotStar();
+        }
     }
     
     @Override
@@ -74,7 +93,7 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context matching(ContextPattern pat) {
-        return new ContextImpl(config, pattern.append(pat));
+        return new ContextImpl(config, pattern.append(pat), true);
     }
 
     @Override
@@ -94,11 +113,8 @@ class ContextImpl extends AbstractContext {
     
     private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
         ContextElementMatcher nextMatcher = config.getSPI().contextElement(q, type);
-        ContextPattern nextPat = pattern.append(nextMatcher, Multiplicity.ONE);
-        if (!anchored) {
-            nextPat = nextPat.appendDotStar();
-        }
-        
-        return new ContextImpl(config, nextPat);
+        ContextPattern pat = getContextPattern().append(nextMatcher, Multiplicity.ONE);
+
+        return new ContextImpl(config, pat, anchored);
     }
 }

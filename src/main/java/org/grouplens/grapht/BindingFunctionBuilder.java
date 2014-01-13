@@ -25,7 +25,6 @@ import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
 import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.context.ContextMatcher;
-import org.grouplens.grapht.spi.context.ContextPattern;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import java.io.Externalizable;
@@ -123,7 +122,7 @@ public class BindingFunctionBuilder implements Cloneable {
         intermediateRules = ArrayListMultimap.create();
         superRules = ArrayListMultimap.create();
 
-        root = new ContextImpl(this, ContextPattern.any());
+        root = ContextImpl.root(this);
     }
     
     private BindingFunctionBuilder(BindingFunctionBuilder clone) {
@@ -133,7 +132,7 @@ public class BindingFunctionBuilder implements Cloneable {
         manualRules = ArrayListMultimap.create(clone.manualRules);
         intermediateRules = ArrayListMultimap.create(clone.intermediateRules);
         superRules = ArrayListMultimap.create(clone.superRules);
-        root = new ContextImpl(this, ContextPattern.any());
+        root = ContextImpl.root(this);
     }
     
     @Override

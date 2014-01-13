@@ -151,7 +151,7 @@ public class ContextOverrideTest {
 
     @Test
     public void testPatternForPlug() {
-        build.matching(ContextPattern.empty()
+        build.matching(ContextPattern.any()
                                      .append(CInner.class)
                                      .append(ContextElements.invertMatch(ContextElements.matchType(PlugW.class)),
                                              Multiplicity.ZERO_OR_MORE))
