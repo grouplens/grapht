@@ -24,6 +24,7 @@ import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.context.ContextPattern;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
@@ -49,20 +50,64 @@ public class InjectorBuilder extends AbstractContext {
     private boolean enableProviderInjection;
 
     /**
+     * Create a new injector builder.
+     * @param bld The binding function builder.
+     */
+    private InjectorBuilder(BindingFunctionBuilder bld) {
+        builder = bld;
+        cachePolicy = CachePolicy.MEMOIZE;
+        enableProviderInjection = false;
+    }
+
+    /**
      * Create a new InjectorBuilder that automatically applies the given Modules
      * via {@link #applyModule(Module)}. Additional Modules can be applied later
      * as well. Configuration via the {@link Context} interface is also possible
      * (and recommended if Modules aren't used) before calling {@link #build()}.
      * 
      * @param modules Any modules to apply immediately
+     * @deprecated use {@link #create(Module...)} instead
      */
+    @Deprecated
     public InjectorBuilder(Module... modules) {
-        builder = new BindingFunctionBuilder();
+        this(new BindingFunctionBuilder());
         for (Module m: modules) {
             applyModule(m);
         }
-        cachePolicy = CachePolicy.MEMOIZE;
-        enableProviderInjection = false;
+    }
+
+    /**
+     * Create a new injector builder.
+     * @param spi The SPI.
+     * @param modules The initial modules to configure.
+     * @return The injector builder.
+     */
+    public static InjectorBuilder create(InjectSPI spi, Module... modules) {
+        InjectorBuilder bld = new InjectorBuilder(new BindingFunctionBuilder(spi, true));
+        for (Module m: modules) {
+            bld.applyModule(m);
+        }
+        return bld;
+    }
+
+    /**
+     * Create a new injector builder using the specified class loader.
+     * @param loader The class loader.
+     * @param modules The initial modules to configure.
+     * @return The injector builder.
+     */
+    public static InjectorBuilder create(ClassLoader loader, Module... modules) {
+        return create(ReflectionInjectSPI.forClassLoader(loader),
+                      modules);
+    }
+
+    /**
+     * Create a new injector builder with the default SPI.
+     * @param modules The initial modules to configure.
+     * @return The injector builder.
+     */
+    public static InjectorBuilder create(Module... modules) {
+        return create(new ReflectionInjectSPI(), modules);
     }
     
     /**

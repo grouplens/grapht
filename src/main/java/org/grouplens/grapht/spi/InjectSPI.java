@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 
 /**
  * InjectSPI is a service provider interface for accessing and creating the
@@ -81,6 +82,16 @@ public interface InjectSPI {
      * @return A satisfaction wrapping the given instance
      */
     Satisfaction satisfy(@Nonnull Object o);
+
+    /**
+     * Return a Satisfaction that wraps named type, and can satisfy dependencies of the object's
+     * type.
+     *
+     * @param name The name of the class to wrap.
+     * @return A satisfaction wrapping the specified type.
+     * @throws ClassNotFoundException if the class cannot be found.
+     */
+    Satisfaction satisfyWithNamedType(@Nonnull String name) throws ClassNotFoundException;
     
     /**
      * Return a Satisfaction that wraps a Provider class, and can satisfy
@@ -95,7 +106,7 @@ public interface InjectSPI {
     Satisfaction satisfyWithProvider(@Nonnull Class<? extends Provider<?>> providerType);
     
     /**
-     * Return a Satisfaction that wraps the given Provider instance. The
+     * Return a Satisfaction that wraps the given Provider type. The
      * satisfaction will use the given Provider to construct the instances of
      * its provided type.
      * 
@@ -103,6 +114,17 @@ public interface InjectSPI {
      * @return A satisfaction wrapping the given provider
      */
     Satisfaction satisfyWithProvider(@Nonnull Provider<?> provider);
+
+    /**
+     * Return a Satisfaction that wraps provider type with the specified name. The satisfaction will
+     * use the given Provider to construct the instances of its provided type.
+     *
+     * @param providerName The name of the provider class to use.
+     * @return A satisfaction wrapping the given provider
+     * @throws ClassNotFoundException if the class cannot be found.
+     * @throws ClassCastException if the class is not a provider.
+     */
+    Satisfaction satisfyWithProvider(@Nonnull String providerName) throws ClassNotFoundException;
 
     /**
      * Create a Desire that wraps a synthetic InjectionPoint for the qualified
@@ -171,4 +193,11 @@ public interface InjectSPI {
      * @return A QualifierMatcher that matches only the null qualifier
      */
     QualifierMatcher matchNone();
+
+    /**
+     * Get a resource (as {@link ClassLoader#getResource(String)}).
+     * @param path The path to search for.
+     * @return The URL of the resource, or {@code null} if no such resource exists.
+     */
+    URL getResource(String path);
 }

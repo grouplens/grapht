@@ -22,6 +22,7 @@ import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
 import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -43,7 +45,7 @@ import java.util.Properties;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class DefaultDesireBindingFunction implements BindingFunction {
-    private static final String META_INF_DEFAULTS = "/META-INF/grapht/defaults/";
+    private static final String META_INF_DEFAULTS = "META-INF/grapht/defaults/";
     private final Logger logger = LoggerFactory.getLogger(DefaultDesireBindingFunction.class);
     private final InjectSPI spi;
 
@@ -171,19 +173,22 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         BindingResult result = null;
         String resourceName = META_INF_DEFAULTS + type.getCanonicalName() + ".properties";
         logger.debug("searching for defaults in {}", resourceName);
-        // FIXME Use a configurable class loader.
-        InputStream istr = getClass().getResourceAsStream(resourceName);
+        URL url = spi.getResource(resourceName);
 
-        if (istr != null) {
+        if (url != null) {
             Properties props;
+            InputStream istr = null;
             try {
+                istr = url.openStream();
                 props = new Properties();
                 props.load(istr);
             } catch (IOException e) {
                 throw new SolverException("error reading " + resourceName, e);
             } finally {
                 try {
-                    istr.close();
+                    if (istr != null) {
+                        istr.close();
+                    }
                 } catch (IOException e) {
                     logger.error("error closing {}: {}", resourceName, e);
                 }
@@ -192,12 +197,13 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             String providerName = props.getProperty("provider");
             if (providerName != null) {
                 try {
-                    // FIXME Use the configured class loader
-                    @SuppressWarnings("rawtypes")
-                    Class providerClass = Class.forName(providerName);
                     logger.debug("found provider {} for {}", providerName, type);
+                    Satisfaction sat = spi.satisfyWithProvider(providerName);
+                    if (!type.isAssignableFrom(sat.getErasedType())) {
+                        throw new SolverException(providerName + " does not provide " + type);
+                    }
                     // QUESTION: why should the last parameter be true?
-                    result = new BindingResult(desire.restrict(spi.satisfyWithProvider(providerClass)),
+                    result = new BindingResult(desire.restrict(sat),
                                                CachePolicy.NO_PREFERENCE, false, true);
                 } catch (ClassNotFoundException e) {
                     throw new SolverException("cannot find default provider for " + type, e);
@@ -207,11 +213,12 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             String implName = props.getProperty("implementation");
             if (implName != null) {
                 try {
-                    // FIXME Use the configured class loader
-                    @SuppressWarnings("rawtypes")
-                    Class implClass = Class.forName(implName);
                     logger.debug("found implementation {} for {}", implName, type);
-                    result = new BindingResult(desire.restrict(spi.satisfy(implClass)),
+                    Satisfaction sat = spi.satisfyWithNamedType(implName);
+                    if (!type.isAssignableFrom(sat.getErasedType())) {
+                        throw new SolverException(providerName + " not compatible with " + type);
+                    }
+                    result = new BindingResult(desire.restrict(sat),
                                                CachePolicy.NO_PREFERENCE, false, false);
                 } catch (ClassNotFoundException e) {
                     throw new SolverException("cannot find default implementation for " + type, e);

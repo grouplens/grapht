@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 
 /**
  * ReflectionInjectSPI is a complete implementation of {@link InjectSPI}. It
@@ -39,6 +40,24 @@ import java.lang.annotation.Annotation;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ReflectionInjectSPI implements InjectSPI {
+    protected final ClassLoader classLoader;
+
+    public ReflectionInjectSPI() {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+            loader = ReflectionInjectSPI.class.getClassLoader();
+        }
+        classLoader = loader;
+    }
+
+    private ReflectionInjectSPI(ClassLoader loader) {
+        classLoader = loader;
+    }
+
+    public static InjectSPI forClassLoader(ClassLoader loader) {
+        return new ReflectionInjectSPI(loader);
+    }
+
     @Override
     public ContextElementMatcher contextElement(QualifierMatcher qualifier, Class<?> type) {
         return new ReflectionContextElementMatcher(type, qualifier);
@@ -98,6 +117,12 @@ public class ReflectionInjectSPI implements InjectSPI {
     }
 
     @Override
+    public Satisfaction satisfyWithNamedType(@Nonnull String name) throws ClassNotFoundException {
+        Class<?> clazz = classLoader.loadClass(name);
+        return satisfy(clazz);
+    }
+
+    @Override
     public Satisfaction satisfyWithProvider(@Nonnull Class<? extends Provider<?>> providerType) {
         return new ProviderClassSatisfaction(providerType);
     }
@@ -105,5 +130,17 @@ public class ReflectionInjectSPI implements InjectSPI {
     @Override
     public Satisfaction satisfyWithProvider(@Nonnull Provider<?> provider) {
         return new ProviderInstanceSatisfaction(provider);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Satisfaction satisfyWithProvider(@Nonnull String providerName) throws ClassNotFoundException {
+        Class<?> clazz = classLoader.loadClass(providerName);
+        return satisfyWithProvider((Class<Provider<?>>) clazz.asSubclass(Provider.class));
+    }
+
+    @Override
+    public URL getResource(String path) {
+        return classLoader.getResource(path);
     }
 }
