@@ -3,9 +3,6 @@ jdk:
 - oraclejdk7
 - oraclejdk8
 - openjdk6
-matrix:
-  allow_failures:
-  - jdk: oraclejdk8
 install: mvn dependency:go-offline
 script: mvn install
 after_success:
