@@ -32,6 +32,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -194,11 +195,18 @@ public final class ClassProxy implements Serializable {
                                       StringUtils.join(c.getParameterTypes(), ", ")));
         }
         for (Method m: type.getDeclaredMethods()) {
+            if (Modifier.isPrivate(m.getModifiers()) || Modifier.isStatic(m.getModifiers())) {
+                // FIXME Respect injectable methods
+                continue;
+            }
             members.add(String.format("%s(%s): %s", m.getName(),
                                       StringUtils.join(m.getParameterTypes(), ", "),
                                       m.getReturnType()));
         }
         for (Field f: type.getDeclaredFields()) {
+            if (Modifier.isPrivate(f.getModifiers()) || Modifier.isStatic(f.getModifiers())) {
+                continue;
+            }
             members.add(f.getName() + ":" + f.getType().getName());
         }
 
