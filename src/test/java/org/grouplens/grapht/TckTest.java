@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 import org.atinject.tck.Tck;
 import org.atinject.tck.auto.*;
 import org.atinject.tck.auto.accessories.SpareTire;
-import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.reflect.CachePolicy;
 
 public class TckTest extends TestCase {
     

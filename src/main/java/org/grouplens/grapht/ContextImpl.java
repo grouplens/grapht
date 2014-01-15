@@ -18,12 +18,12 @@
  */
 package org.grouplens.grapht;
 
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
-import org.grouplens.grapht.spi.context.ContextElements;
-import org.grouplens.grapht.spi.context.ContextPattern;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.context.Multiplicity;
-import org.grouplens.grapht.spi.reflect.Qualifiers;
+import org.grouplens.grapht.context.ContextElementMatcher;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.context.Multiplicity;
+import org.grouplens.grapht.reflect.internal.Qualifiers;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;

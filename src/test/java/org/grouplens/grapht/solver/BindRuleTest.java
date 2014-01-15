@@ -19,9 +19,9 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.reflect.*;
-import org.grouplens.grapht.spi.reflect.types.*;
+import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.reflect.internal.*;
+import org.grouplens.grapht.reflect.internal.types.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -23,10 +23,10 @@ import com.google.common.collect.*;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.context.ContextElements;
-import org.grouplens.grapht.spi.context.ContextMatcher;
-import org.grouplens.grapht.spi.context.ContextPattern;
+import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextMatcher;
+import org.grouplens.grapht.context.ContextPattern;
 import org.junit.Assert;
 import org.junit.Test;
 

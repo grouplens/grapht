@@ -22,8 +22,8 @@ import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.DesireChain;
 import org.grouplens.grapht.solver.SolverException;
-import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.Desires;
+import org.grouplens.grapht.reflect.CachedSatisfaction;
+import org.grouplens.grapht.reflect.Desires;
 import org.junit.Test;
 
 import javax.inject.Inject;

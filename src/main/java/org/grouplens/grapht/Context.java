@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht;
 
-import org.grouplens.grapht.spi.context.ContextPattern;
+import org.grouplens.grapht.context.ContextPattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;

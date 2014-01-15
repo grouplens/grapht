@@ -18,8 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;

@@ -19,7 +19,7 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.solver.BindRule;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.reflect.Satisfaction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

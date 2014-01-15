@@ -19,10 +19,10 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Preconditions;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.Qualifiers;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.internal.Qualifiers;
 
 /**
  * Builder for bind rules.
@@ -62,7 +62,7 @@ public class BindRuleBuilder {
     }
 
     /**
-     * Get the configured qualifer matcher.  The initial qualifier matcher is {@link org.grouplens.grapht.spi.reflect.Qualifiers#matchAny()}.
+     * Get the configured qualifer matcher.  The initial qualifier matcher is {@link org.grouplens.grapht.reflect.internal.Qualifiers#matchAny()}.
      * @return The qualifier matcher.
      */
     public QualifierMatcher getQualifierMatcher() {

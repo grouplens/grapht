@@ -19,9 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Predicate;
-import org.grouplens.grapht.graph.DAGEdge;
-import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nonnull;
@@ -96,8 +94,8 @@ public class DesireChain extends AbstractChain<Desire> {
 
     /**
      * Get this chain's key. Each chain has a key, a unique object that is created when the chain
-     * is created (via {@link #singleton(org.grouplens.grapht.spi.Desire)}), and preserved through
-     * {@link #extend(org.grouplens.grapht.spi.Desire)} operations.  It can be used to remember
+     * is created (via {@link #singleton(org.grouplens.grapht.reflect.Desire)}), and preserved through
+     * {@link #extend(org.grouplens.grapht.reflect.Desire)} operations.  It can be used to remember
      * state across invocations of a binding function as a desire chain is built up.
      * @return The chain's key.
      */

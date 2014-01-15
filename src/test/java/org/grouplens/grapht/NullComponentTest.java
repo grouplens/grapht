@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht;
 
-import org.grouplens.grapht.spi.reflect.types.TypeDftN;
+import org.grouplens.grapht.reflect.internal.types.TypeDftN;
 import org.junit.Test;
 
 import javax.annotation.Nullable;

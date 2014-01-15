@@ -19,10 +19,10 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.annotation.*;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.Satisfactions;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;

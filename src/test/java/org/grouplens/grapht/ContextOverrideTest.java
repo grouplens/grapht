@@ -19,9 +19,9 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.annotation.DefaultImplementation;
-import org.grouplens.grapht.spi.context.ContextElements;
-import org.grouplens.grapht.spi.context.ContextPattern;
-import org.grouplens.grapht.spi.context.Multiplicity;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.context.Multiplicity;
 import org.junit.Before;
 import org.junit.Test;
 

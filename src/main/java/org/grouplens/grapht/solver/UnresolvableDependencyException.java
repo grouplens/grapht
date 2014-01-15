@@ -19,9 +19,9 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.reflect.Attributes;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Satisfaction;
 
 import java.util.List;
 

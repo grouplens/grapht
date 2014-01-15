@@ -18,8 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.Desire;
 
 /**
  * BindRule is a partial function from desire to desire that acts as a binding.
@@ -40,7 +40,7 @@ public interface BindRule extends Comparable<BindRule> {
 
     /**
      * Apply this BindRule to the given Desire, and return a restricted and
-     * possibly satisfied desire. It is assumed that {@link #matches(org.grouplens.grapht.spi.Desire)}
+     * possibly satisfied desire. It is assumed that {@link #matches(org.grouplens.grapht.reflect.Desire)}
      * returns true.
      *
      * @param desire The desire that is input to this partial binding function
@@ -60,7 +60,7 @@ public interface BindRule extends Comparable<BindRule> {
     /**
      * @param desire The input desire
      * @return True if this desire matches this BindRule and can be passed to
-     *         {@link #apply(org.grouplens.grapht.spi.Desire)}
+     *         {@link #apply(org.grouplens.grapht.reflect.Desire)}
      */
     boolean matches(Desire desire);
 

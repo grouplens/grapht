@@ -23,9 +23,9 @@ import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.context.ContextPattern;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 
 import java.lang.annotation.Annotation;
 
