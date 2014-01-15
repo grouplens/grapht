@@ -24,7 +24,6 @@ import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.context.ContextPattern;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
@@ -82,7 +81,7 @@ public class InjectorBuilder extends AbstractContext {
      * @param modules The initial modules to configure.
      * @return The injector builder.
      */
-    public static InjectorBuilder create(InjectSPI spi, Module... modules) {
+    public static InjectorBuilder create(ReflectionInjectSPI spi, Module... modules) {
         InjectorBuilder bld = new InjectorBuilder(new BindingFunctionBuilder(spi, true));
         for (Module m: modules) {
             bld.applyModule(m);
@@ -204,14 +203,14 @@ public class InjectorBuilder extends AbstractContext {
                 builder.build(RuleSet.INTERMEDIATE_TYPES),
                 builder.build(RuleSet.SUPER_TYPES),
                 new ProviderBindingFunction(builder.getSPI()), // insert extra provider injection
-                new DefaultDesireBindingFunction(builder.getSPI()) 
+                DefaultDesireBindingFunction.create()
             };
         } else {
             functions = new BindingFunction[] { 
                 builder.build(RuleSet.EXPLICIT),
                 builder.build(RuleSet.INTERMEDIATE_TYPES),
                 builder.build(RuleSet.SUPER_TYPES),
-                new DefaultDesireBindingFunction(builder.getSPI()) 
+                DefaultDesireBindingFunction.create()
             };
         }
         

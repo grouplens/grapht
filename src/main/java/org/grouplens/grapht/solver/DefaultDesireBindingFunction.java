@@ -21,13 +21,14 @@ package org.grouplens.grapht.solver;
 import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.Satisfactions;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -47,14 +48,28 @@ import java.util.Properties;
 public class DefaultDesireBindingFunction implements BindingFunction {
     private static final String META_INF_DEFAULTS = "META-INF/grapht/defaults/";
     private final Logger logger = LoggerFactory.getLogger(DefaultDesireBindingFunction.class);
-    private final InjectSPI spi;
+    private final ClassLoader classLoader;
 
     private final Map<Class<?>, BindingResult> metaInfCache =
             new HashMap<Class<?>, BindingResult>();
     
-    public DefaultDesireBindingFunction(InjectSPI spi) {
-        Preconditions.notNull("spi", spi);
-        this.spi = spi;
+    DefaultDesireBindingFunction(ClassLoader loader) {
+        Preconditions.notNull("spi", loader);
+        classLoader = loader;
+    }
+
+    public static DefaultDesireBindingFunction create(ClassLoader loader) {
+        if (loader == null) {
+            loader = Thread.currentThread().getContextClassLoader();
+        }
+        if (loader == null) {
+            loader = DefaultDesireBindingFunction.class.getClassLoader();
+        }
+        return new DefaultDesireBindingFunction(loader);
+    }
+
+    public static DefaultDesireBindingFunction create() {
+        return create(null);
     }
     
     @Override
@@ -108,22 +123,22 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         // FIXME Check whether the annotation type is actually relevant for the desire
         DefaultDouble dfltDouble = type.getAnnotation(DefaultDouble.class);
         if (dfltDouble != null) {
-            return new BindingResult(desire.restrict(spi.satisfy(dfltDouble.value())),
+            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltDouble.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultInteger dfltInt = type.getAnnotation(DefaultInteger.class);
         if (dfltInt != null) {
-            return new BindingResult(desire.restrict(spi.satisfy(dfltInt.value())),
+            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltInt.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultBoolean dfltBool = type.getAnnotation(DefaultBoolean.class);
         if (dfltBool != null) {
-            return new BindingResult(desire.restrict(spi.satisfy(dfltBool.value())),
+            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltBool.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultString dfltStr = type.getAnnotation(DefaultString.class);
         if (dfltStr != null) {
-            return new BindingResult(desire.restrict(spi.satisfy(dfltStr.value())),
+            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltStr.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         return null;
@@ -138,14 +153,14 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
         DefaultProvider provided = type.getAnnotation(DefaultProvider.class);
         if (provided != null) {
-            return new BindingResult(desire.restrict(spi.satisfyWithProvider(provided.value())),
+            return new BindingResult(desire.restrict(Satisfactions.satisfyWithProvider(provided.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
 
         DefaultImplementation impl = type.getAnnotation(DefaultImplementation.class);
         if (impl != null) {
             if (Types.isInstantiable(impl.value())) {
-                return new BindingResult(desire.restrict(spi.satisfy(impl.value())),
+                return new BindingResult(desire.restrict(Satisfactions.satisfy(impl.value())),
                                          CachePolicy.NO_PREFERENCE, false, false);
             } else {
                 return new BindingResult(desire.restrict(impl.value()),
@@ -155,7 +170,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
 
         DefaultNull dnull = type.getAnnotation(DefaultNull.class);
         if (dnull != null) {
-            return new BindingResult(desire.restrict(spi.satisfyWithNull(desire.getDesiredType())),
+            return new BindingResult(desire.restrict(Satisfactions.satisfyWithNull(desire.getDesiredType())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
 
@@ -173,7 +188,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         BindingResult result = null;
         String resourceName = META_INF_DEFAULTS + type.getCanonicalName() + ".properties";
         logger.debug("searching for defaults in {}", resourceName);
-        URL url = spi.getResource(resourceName);
+        URL url = classLoader.getResource(resourceName);
 
         if (url != null) {
             Properties props;
@@ -198,7 +213,8 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             if (providerName != null) {
                 try {
                     logger.debug("found provider {} for {}", providerName, type);
-                    Satisfaction sat = spi.satisfyWithProvider(providerName);
+                    Class<?> clazz = classLoader.loadClass(providerName);
+                    Satisfaction sat = Satisfactions.satisfyWithProvider((Class<Provider<?>>) clazz.asSubclass(Provider.class));
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " does not provide " + type);
                     }
@@ -214,7 +230,8 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             if (implName != null) {
                 try {
                     logger.debug("found implementation {} for {}", implName, type);
-                    Satisfaction sat = spi.satisfyWithNamedType(implName);
+                    Class<?> clazz = classLoader.loadClass(implName);
+                    Satisfaction sat = Satisfactions.satisfy(clazz);
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " not compatible with " + type);
                     }

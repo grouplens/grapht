@@ -27,9 +27,11 @@ import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindRules;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
 import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.Satisfactions;
+import org.grouplens.grapht.spi.context.ContextElements;
 import org.grouplens.grapht.spi.context.ContextMatcher;
 import org.grouplens.grapht.spi.context.ContextPattern;
+import org.grouplens.grapht.spi.reflect.Qualifiers;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
@@ -45,7 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class BindingFunctionBuilderTest {
-    private InjectSPI spi;
+    private ReflectionInjectSPI spi;
     
     @Before
     public void setup() {
@@ -73,7 +75,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher,BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), expectedPolicy, false));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeA.class), expectedPolicy, false));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -89,7 +91,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher,BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -106,7 +108,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher,BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(a), CachePolicy.NO_PREFERENCE, true));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(a), CachePolicy.NO_PREFERENCE, true));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -122,7 +124,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher,BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfyWithProvider(ProviderA.class), CachePolicy.NO_PREFERENCE, true));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfyWithProvider(ProviderA.class), CachePolicy.NO_PREFERENCE, true));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -139,7 +141,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher,BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfyWithProvider(pa), CachePolicy.NO_PREFERENCE, true));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfyWithProvider(pa), CachePolicy.NO_PREFERENCE, true));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -150,12 +152,12 @@ public class BindingFunctionBuilderTest {
         // the root context
         BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
 
-        builder.getRootContext().bind(InterfaceA.class).toSatisfaction(spi.satisfy(TypeA.class));
+        builder.getRootContext().bind(InterfaceA.class).toSatisfaction(Satisfactions.satisfy(TypeA.class));
 
         // expected
         ListMultimap<ContextMatcher,BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, true));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, true));
 
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -205,12 +207,12 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
 
-        expected.put(ContextPattern.subsequence(spi.contextElement(spi.matchDefault(), TypeC.class)),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, false));
-        expected.put(ContextPattern.subsequence(spi.contextElement(spi.match(RoleD.class), TypeC.class)),
-                     BindRules.toSatisfaction(InterfaceB.class, spi.matchDefault(), spi.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, false));
+        expected.put(ContextPattern.subsequence(ContextElements.matchType(TypeC.class, Qualifiers.matchDefault())),
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, false));
+        expected.put(ContextPattern.subsequence(ContextElements.matchType(TypeC.class, Qualifiers.match(RoleD.class))),
+                     BindRules.toSatisfaction(InterfaceB.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, false));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -225,7 +227,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, true));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, true));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -240,7 +242,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.match(RoleD.class), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.match(RoleD.class), Satisfactions.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -255,7 +257,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(InterfaceA.class, spi.matchAny(), spi.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchAny(), Satisfactions.satisfy(TypeA.class), CachePolicy.NO_PREFERENCE, false));
 
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -270,7 +272,7 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> expected = ArrayListMultimap.create();
         expected.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(String.class, spi.match(Names.named("test1")), spi.satisfy("hello world"), CachePolicy.NO_PREFERENCE, true));
+                     BindRules.toSatisfaction(String.class, Qualifiers.match(Names.named("test1")), Satisfactions.satisfy("hello world"), CachePolicy.NO_PREFERENCE, true));
         
         assertEqualBindings(expected, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
     }
@@ -285,14 +287,14 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> explicit = ArrayListMultimap.create();
         explicit.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(TypeA.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(TypeA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         ListMultimap<ContextMatcher, BindRule> superTypes = ArrayListMultimap.create();
         superTypes.put(ContextPattern.any(),
-                       BindRules.toSatisfaction(InterfaceA.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                       BindRules.toSatisfaction(InterfaceA.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         ListMultimap<ContextMatcher, BindRule> interTypes = ArrayListMultimap.create();
         ContextMatcher m = ContextPattern.any();
-        interTypes.put(m, BindRules.toSatisfaction(TypeB.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
-        interTypes.put(m, BindRules.toSatisfaction(TypeBp.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+        interTypes.put(m, BindRules.toSatisfaction(TypeB.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+        interTypes.put(m, BindRules.toSatisfaction(TypeBp.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.build(RuleSet.SUPER_TYPES)).getRules());
@@ -311,13 +313,13 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> explicit = ArrayListMultimap.create();
         explicit.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(TypeB.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(TypeB.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         ListMultimap<ContextMatcher, BindRule> interTypes = ArrayListMultimap.create();
         interTypes.put(ContextPattern.any(),
-                       BindRules.toSatisfaction(TypeBp.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                       BindRules.toSatisfaction(TypeBp.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         ListMultimap<ContextMatcher, BindRule> superTypes = ArrayListMultimap.create();
         superTypes.put(ContextPattern.any(),
-                       BindRules.toSatisfaction(InterfaceB.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                       BindRules.toSatisfaction(InterfaceB.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.build(RuleSet.SUPER_TYPES)).getRules());
@@ -335,13 +337,13 @@ public class BindingFunctionBuilderTest {
         // expected
         ListMultimap<ContextMatcher, BindRule> explicit = ArrayListMultimap.create();
         explicit.put(ContextPattern.any(),
-                     BindRules.toSatisfaction(TypeB.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                     BindRules.toSatisfaction(TypeB.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         ListMultimap<ContextMatcher, BindRule> interTypes = ArrayListMultimap.create();
         interTypes.put(ContextPattern.any(),
-                       BindRules.toSatisfaction(TypeBp.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                       BindRules.toSatisfaction(TypeBp.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
         ListMultimap<ContextMatcher, BindRule> superTypes = ArrayListMultimap.create();
         superTypes.put(ContextPattern.any(),
-                       BindRules.toSatisfaction(InterfaceB.class, spi.matchDefault(), spi.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
+                       BindRules.toSatisfaction(InterfaceB.class, Qualifiers.matchDefault(), Satisfactions.satisfy(TypeBp.class), CachePolicy.NO_PREFERENCE, false));
 
         assertEqualBindings(explicit, ((RuleBasedBindingFunction) builder.build(RuleSet.EXPLICIT)).getRules());
         assertEqualBindings(superTypes, ((RuleBasedBindingFunction) builder.build(RuleSet.SUPER_TYPES)).getRules());

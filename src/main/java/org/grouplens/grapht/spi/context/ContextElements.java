@@ -32,6 +32,10 @@ import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 public final class ContextElements {
     private ContextElements() {}
 
+    public static ContextElementMatcher contextElement(QualifierMatcher qualifier, Class<?> type) {
+        return new ReflectionContextElementMatcher(type, qualifier);
+    }
+
     /**
      * Match priority constants.
      */

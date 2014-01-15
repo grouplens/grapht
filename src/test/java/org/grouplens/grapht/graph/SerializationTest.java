@@ -26,7 +26,8 @@ import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.DesireChain;
 import org.grouplens.grapht.spi.CachePolicy;
 import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.InjectSPI;
+import org.grouplens.grapht.spi.Desires;
+import org.grouplens.grapht.spi.Satisfactions;
 import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.types.NamedType;
@@ -57,9 +58,9 @@ public class SerializationTest {
     
     @Test
     public void testSharedNodesGraph() throws Exception {
-        InjectSPI spi = new ReflectionInjectSPI();
-        CachedSatisfaction s1 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
-        CachedSatisfaction s2 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.MEMOIZE);
+        ReflectionInjectSPI spi = new ReflectionInjectSPI();
+        CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
+        CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.satisfy(Object.class), CachePolicy.MEMOIZE);
 
         DAGNode<CachedSatisfaction, String> n2 = DAGNode.singleton(s2);
         DAGNodeBuilder<CachedSatisfaction, String> bld = DAGNode.newBuilder(s1);
@@ -83,9 +84,9 @@ public class SerializationTest {
                                                   .addBindingFunction(b.build(RuleSet.EXPLICIT))
                                                   .addBindingFunction(b.build(RuleSet.INTERMEDIATE_TYPES))
                                                   .addBindingFunction(b.build(RuleSet.SUPER_TYPES))
-                                                  .addBindingFunction(new DefaultDesireBindingFunction(b.getSPI()))
+                                                  .addBindingFunction(DefaultDesireBindingFunction.create())
                                                   .build();
-        solver.resolve(b.getSPI().desire(null, NamedType.class, false));
+        solver.resolve(Desires.create(null, NamedType.class, false));
         
         DAGNode<CachedSatisfaction,DesireChain> g = solver.getGraph();
         write(g);

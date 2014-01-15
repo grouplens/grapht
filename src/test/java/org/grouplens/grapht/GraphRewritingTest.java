@@ -23,6 +23,7 @@ import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.DesireChain;
 import org.grouplens.grapht.solver.SolverException;
 import org.grouplens.grapht.spi.CachedSatisfaction;
+import org.grouplens.grapht.spi.Desires;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -51,7 +52,7 @@ public class GraphRewritingTest {
                 DependencySolver.newBuilder()
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT), false)
                                 .build();
-        initial.resolve(config.getSPI().desire(null, I.class, false));
+        initial.resolve(Desires.create(null, I.class, false));
         DAGNode<CachedSatisfaction, DesireChain> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
@@ -74,7 +75,7 @@ public class GraphRewritingTest {
                 DependencySolver.newBuilder()
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT), true)
                                 .build();
-        initial.resolve(config.getSPI().desire(null, I.class, false));
+        initial.resolve(Desires.create(null, I.class, false));
         DAGNode<CachedSatisfaction, DesireChain> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
@@ -98,7 +99,7 @@ public class GraphRewritingTest {
                 DependencySolver.newBuilder()
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT))
                                 .build();
-        initial.resolve(config.getSPI().desire(null, I.class, false));
+        initial.resolve(Desires.create(null, I.class, false));
         DAGNode<CachedSatisfaction, DesireChain> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
@@ -144,7 +145,7 @@ public class GraphRewritingTest {
                 DependencySolver.newBuilder()
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT))
                                 .build();
-        initial.resolve(config.getSPI().desire(null, I.class, false));
+        initial.resolve(Desires.create(null, I.class, false));
         DAGNode<CachedSatisfaction, DesireChain> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()

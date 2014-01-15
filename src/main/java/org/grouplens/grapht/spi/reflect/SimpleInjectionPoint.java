@@ -19,7 +19,6 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;

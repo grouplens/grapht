@@ -74,20 +74,29 @@ public final class Qualifiers {
     }
     
     /**
-     * @param annotType Annotation type class to match
+     * @param annotType Annotation type class to match; {@code null} to match only the lack of a
+     *                  qualifier.
      * @return A QualifierMatcher that matches any annotation of the given class
-     *         type
+     *         type.
      */
-    public static QualifierMatcher match(@Nonnull Class<? extends Annotation> annotType) {
-        return new AnnotationClassMatcher(annotType);
+    public static QualifierMatcher match(Class<? extends Annotation> annotType) {
+        if (annotType == null) {
+            return matchNone();
+        } else {
+            return new AnnotationClassMatcher(annotType);
+        }
     }
     
     /**
-     * @param annot Annotation instance to match
+     * @param annot Annotation instance to match, or {@code null} to match only the lack of a qualifier.
      * @return A QualifierMatcher that matches annotations equaling annot
      */
     public static QualifierMatcher match(@Nonnull Annotation annot) {
-        return new AnnotationMatcher(annot);
+        if (annot == null) {
+            return matchNone();
+        } else {
+            return new AnnotationMatcher(annot);
+        }
     }
     
     private abstract static class AbstractMatcher implements QualifierMatcher {

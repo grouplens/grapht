@@ -133,9 +133,9 @@ public class ReflectionDesireTest {
                 if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                     SetterInjectionPoint sp = (SetterInjectionPoint) (d.getInjectionPoint());
                     if (sp.getMember().equals(methodOrCtorParam)) {
-                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI())
-                                .bind(DependencySolver.initialContext(),
-                                      DesireChain.singleton(d));
+                        result = DefaultDesireBindingFunction.create()
+                                                             .bind(DependencySolver.initialContext(),
+                                                                   DesireChain.singleton(d));
                         break;
                     }
                 }
@@ -143,7 +143,7 @@ public class ReflectionDesireTest {
                 if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                     ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) (d.getInjectionPoint());
                     if (((Integer) methodOrCtorParam).intValue() == cp.getParameterIndex()) {
-                        result = new DefaultDesireBindingFunction(new ReflectionInjectSPI())
+                        result = DefaultDesireBindingFunction.create()
                                 .bind(DependencySolver.initialContext(),
                                       DesireChain.singleton(d));
                         break;

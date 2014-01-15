@@ -19,6 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -44,9 +45,9 @@ import java.util.List;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ProviderBindingFunction implements BindingFunction {
-    private final InjectSPI spi;
+    private final ReflectionInjectSPI spi;
     
-    public ProviderBindingFunction(InjectSPI spi) {
+    public ProviderBindingFunction(ReflectionInjectSPI spi) {
         Preconditions.notNull("spi", spi);
         this.spi = spi;
     }
@@ -68,8 +69,8 @@ public class ProviderBindingFunction implements BindingFunction {
                     
                     // Create a desire for the provided type, cloning the attributes
                     // and nullability from the original desire
-                    Desire providedDesire = spi.desire(desire.getInjectionPoint().getAttributes().getQualifier(), 
-                                                       providedType, desire.getInjectionPoint().isNullable());
+                    Desire providedDesire = Desires.create(desire.getInjectionPoint().getAttributes().getQualifier(),
+                                                           providedType, desire.getInjectionPoint().isNullable());
                     // Satisfied JIT desire for this injection point
                     Desire jitDesire = desire.restrict(new ProviderInjectionSatisfaction(providedDesire));
                     // Make sure to defer this binding since the single dependency

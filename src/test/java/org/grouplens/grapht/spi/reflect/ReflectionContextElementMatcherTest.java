@@ -21,7 +21,6 @@ package org.grouplens.grapht.spi.reflect;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
@@ -40,17 +39,17 @@ import static org.hamcrest.Matchers.nullValue;
 public class ReflectionContextElementMatcherTest {
     @Test
     public void testEquals() {
-        InjectSPI spi = new ReflectionInjectSPI();
+        ReflectionInjectSPI spi = new ReflectionInjectSPI();
         
         ReflectionContextElementMatcher m1 = new ReflectionContextElementMatcher(A.class);
         ReflectionContextElementMatcher m2 = new ReflectionContextElementMatcher(B.class);
-        ReflectionContextElementMatcher m3 = new ReflectionContextElementMatcher(A.class, spi.match(RoleA.class));
-        ReflectionContextElementMatcher m4 = new ReflectionContextElementMatcher(A.class, spi.match(RoleB.class));
+        ReflectionContextElementMatcher m3 = new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleA.class));
+        ReflectionContextElementMatcher m4 = new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleB.class));
         
         Assert.assertEquals(m1, new ReflectionContextElementMatcher(A.class));
         Assert.assertEquals(m2, new ReflectionContextElementMatcher(B.class));
-        Assert.assertEquals(m3, new ReflectionContextElementMatcher(A.class, spi.match(RoleA.class)));
-        Assert.assertEquals(m4, new ReflectionContextElementMatcher(A.class, spi.match(RoleB.class)));
+        Assert.assertEquals(m3, new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleA.class)));
+        Assert.assertEquals(m4, new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleB.class)));
         
         Assert.assertFalse(m1.equals(m2));
         Assert.assertFalse(m2.equals(m3));
@@ -95,7 +94,7 @@ public class ReflectionContextElementMatcherTest {
     private void doTestMatch(Class<?> matcherType, Class<? extends Annotation> matcherRole,
                              Class<?> satisfactionType, Class<? extends Annotation> satisfactionRole, 
                              boolean expected) {
-        QualifierMatcher mr = (matcherRole == null ? new ReflectionInjectSPI().matchDefault() : new ReflectionInjectSPI().match(matcherRole));
+        QualifierMatcher mr = (matcherRole == null ? Qualifiers.matchDefault() : Qualifiers.match(matcherRole));
         final Annotation sr = (satisfactionRole == null ? null : new AnnotationBuilder(satisfactionRole).build());
         Satisfaction sat = null;
         if (satisfactionType != null) {

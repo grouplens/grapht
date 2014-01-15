@@ -19,7 +19,6 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.junit.Assert;
@@ -32,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class QualifierMatcherTest {
-    private InjectSPI spi;
+    private ReflectionInjectSPI spi;
     
     @Before
     public void setup() {
@@ -41,7 +40,7 @@ public class QualifierMatcherTest {
     
     @Test
     public void testAnnotationInstanceMatch() {
-        QualifierMatcher matcher = spi.match(new AnnotationBuilder<Named>(Named.class).set("value", "test").build());
+        QualifierMatcher matcher = Qualifiers.match(new AnnotationBuilder<Named>(Named.class).set("value", "test").build());
         Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
         Assert.assertFalse(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
         Assert.assertFalse(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
@@ -50,7 +49,7 @@ public class QualifierMatcherTest {
     
     @Test
     public void testAnnotationClassMatch() {
-        QualifierMatcher matcher = spi.match(Named.class);
+        QualifierMatcher matcher = Qualifiers.match(Named.class);
         Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
         Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
         Assert.assertFalse(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
@@ -59,7 +58,7 @@ public class QualifierMatcherTest {
     
     @Test
     public void testAnyMatch() {
-        QualifierMatcher matcher = spi.matchAny();
+        QualifierMatcher matcher = Qualifiers.matchAny();
         Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
         Assert.assertTrue(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
         Assert.assertTrue(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
@@ -68,7 +67,7 @@ public class QualifierMatcherTest {
     
     @Test
     public void testNoContextMatch() {
-        QualifierMatcher matcher = spi.matchNone();
+        QualifierMatcher matcher = Qualifiers.matchNone();
         Assert.assertFalse(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "test").build()));
         Assert.assertFalse(matcher.matches(new AnnotationBuilder<Named>(Named.class).set("value", "not-test").build()));
         Assert.assertFalse(matcher.matches(new AnnotationBuilder<RoleA>(RoleA.class).build()));
@@ -77,10 +76,10 @@ public class QualifierMatcherTest {
     
     @Test
     public void testComparator() {
-        QualifierMatcher m1 = spi.match(new AnnotationBuilder<Named>(Named.class).set("value", "test").build());
-        QualifierMatcher m2 = spi.match(Named.class);
-        QualifierMatcher m3 = spi.matchAny();
-        QualifierMatcher m4 = spi.matchNone();
+        QualifierMatcher m1 = Qualifiers.match(new AnnotationBuilder<Named>(Named.class).set("value", "test").build());
+        QualifierMatcher m2 = Qualifiers.match(Named.class);
+        QualifierMatcher m3 = Qualifiers.matchAny();
+        QualifierMatcher m4 = Qualifiers.matchNone();
         
         List<QualifierMatcher> ordered = Arrays.asList(m3, m2, m4, m1); // purposely unordered
         List<QualifierMatcher> expected = Arrays.asList(m4, m1, m2, m3); // m4, and m1 are equal, but its a consistent ordering

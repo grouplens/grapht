@@ -23,7 +23,6 @@ import com.google.common.collect.Multimap;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.spi.InjectSPI;
 import org.grouplens.grapht.spi.context.ContextMatcher;
 import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
@@ -63,7 +62,7 @@ public class BindingFunctionBuilder implements Cloneable {
         SUPER_TYPES
     }
     
-    private final InjectSPI spi;
+    private final ReflectionInjectSPI spi;
     private final Context root;
     
     private final Set<Class<?>> defaultExcludes;
@@ -103,7 +102,7 @@ public class BindingFunctionBuilder implements Cloneable {
      *            for intermediate and super types
      * @throws NullPointerException if spi is null
      */
-    public BindingFunctionBuilder(InjectSPI spi, boolean generateRules) {
+    public BindingFunctionBuilder(ReflectionInjectSPI spi, boolean generateRules) {
         if (spi == null) {
             throw new NullPointerException("SPI cannot be null");
         }
@@ -151,7 +150,7 @@ public class BindingFunctionBuilder implements Cloneable {
     /**
      * @return The SPI used by this builder
      */
-    public InjectSPI getSPI() {
+    public ReflectionInjectSPI getSPI() {
         return spi;
     }
     
