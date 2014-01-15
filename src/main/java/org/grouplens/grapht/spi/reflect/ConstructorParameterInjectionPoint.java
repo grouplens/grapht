@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.ConstructorProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -61,7 +62,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
 
         constructor = ctor;
         paramIndex = pIndex;
-        attributes = new AttributesImpl(ctor.getParameterAnnotations()[pIndex]);
+        attributes = Desires.createAttributes(ctor.getParameterAnnotations()[pIndex]);
     }
 
     /**

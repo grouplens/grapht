@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.spi;
 
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.Types;
 
 import java.lang.annotation.Annotation;
@@ -49,7 +48,7 @@ public class MockInjectionPoint implements InjectionPoint {
     
     public MockInjectionPoint(Class<?> type, Annotation[] annots, boolean nullable) {
         this.type = Types.box(type);
-        this.attrs = new AttributesImpl(annots);
+        this.attrs = Desires.createAttributes(annots);
         this.nullable = nullable;
     }
     

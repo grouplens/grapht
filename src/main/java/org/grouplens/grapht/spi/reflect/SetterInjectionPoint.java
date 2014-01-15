@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -51,7 +52,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
         Preconditions.notNull("setter method", setter);
         Preconditions.inRange(parameter, 0, setter.getParameterTypes().length);
         
-        this.attributes = new AttributesImpl(setter.getParameterAnnotations()[parameter]);
+        this.attributes = Desires.createAttributes(setter.getParameterAnnotations()[parameter]);
         this.setter = setter;
         this.parameter = parameter;
     }

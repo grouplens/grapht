@@ -20,10 +20,7 @@ package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.solver.*;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectionPoint;
-import org.grouplens.grapht.spi.MockInjectionPoint;
+import org.grouplens.grapht.spi.*;
 import org.grouplens.grapht.spi.reflect.types.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,7 +33,7 @@ import java.util.List;
 
 public class ReflectionDesireTest {
     private static <T extends Annotation> Attributes qualifier(Class<T> qtype) {
-        return new AttributesImpl(new Annotation[] { AnnotationBuilder.of(qtype).build() });
+        return Desires.createAttributes(new Annotation[]{AnnotationBuilder.of(qtype).build()});
     }
     
     @Test

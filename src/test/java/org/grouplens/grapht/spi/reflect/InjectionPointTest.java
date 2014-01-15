@@ -21,6 +21,7 @@ package org.grouplens.grapht.spi.reflect;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
@@ -44,17 +45,17 @@ import java.util.Set;
 public class InjectionPointTest {
     private static <T extends Annotation> Attributes qualifier(Class<T> qtype, boolean hasAttr) {
         if (hasAttr) {
-            return new AttributesImpl(AnnotationBuilder.of(qtype).build(), AnnotationBuilder.of(Transient.class).build());
+            return Desires.createAttributes(AnnotationBuilder.of(qtype).build(), AnnotationBuilder.of(Transient.class).build());
         } else {
-            return new AttributesImpl(AnnotationBuilder.of(qtype).build());
+            return Desires.createAttributes(AnnotationBuilder.of(qtype).build());
         }
     }
     
     private static <T extends Annotation> Attributes named(String name, boolean hasAttr) {
         if (hasAttr) {
-            return new AttributesImpl(AnnotationBuilder.of(Named.class).setValue(name).build(), AnnotationBuilder.of(Transient.class).build());
+            return Desires.createAttributes(AnnotationBuilder.of(Named.class).setValue(name).build(), AnnotationBuilder.of(Transient.class).build());
         } else {
-            return new AttributesImpl(AnnotationBuilder.of(Named.class).setValue(name).build());
+            return Desires.createAttributes(AnnotationBuilder.of(Named.class).setValue(name).build());
         }
     }
     
@@ -115,7 +116,7 @@ public class InjectionPointTest {
         // verify that the qualifiers, types, attrs are identified properly
         Assert.assertEquals(qualifier(RoleA.class, true), p1.getAttributes());
         Assert.assertEquals(qualifier(RoleB.class, false), p2.getAttributes());
-        Assert.assertEquals(new AttributesImpl(), p3.getAttributes());
+        Assert.assertEquals(Desires.createAttributes(), p3.getAttributes());
         Assert.assertEquals(qualifier(RoleD.class, false), p4.getAttributes());
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());

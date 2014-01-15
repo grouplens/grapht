@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht.spi;
 
-import org.grouplens.grapht.spi.reflect.SimpleInjectionPoint;
-
 import java.lang.annotation.Annotation;
 
 /**
@@ -71,7 +69,7 @@ public class MockDesire implements Desire {
 
     @Override
     public InjectionPoint getInjectionPoint() {
-        return new SimpleInjectionPoint(qualifier, getDesiredType(), false);
+        return Desires.createInjectionPoint(qualifier, getDesiredType(), false);
     }
 
     @Override

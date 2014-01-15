@@ -20,8 +20,8 @@ package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nullable;
@@ -56,7 +56,7 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
      * @return The injection context.
      */
     public static InjectionContext singleton(Satisfaction satisfaction) {
-        return singleton(satisfaction, new AttributesImpl());
+        return singleton(satisfaction, Desires.createAttributes());
     }
 
     private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {

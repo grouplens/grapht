@@ -1,5 +1,6 @@
 package org.grouplens.grapht.spi;
 
+import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.grouplens.grapht.spi.reflect.ReflectionDesire;
 import org.grouplens.grapht.spi.reflect.SimpleInjectionPoint;
 
@@ -20,6 +21,14 @@ public final class Desires {
      * @return The desire.
      */
     public static Desire create(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
-        return new ReflectionDesire(new SimpleInjectionPoint(qualifier, type, nullable));
+        return new ReflectionDesire(createInjectionPoint(qualifier, type, nullable));
+    }
+
+    public static InjectionPoint createInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
+        return new SimpleInjectionPoint(qualifier, type, nullable);
+    }
+
+    public static AttributesImpl createAttributes(Annotation... annots) {
+        return new AttributesImpl(annots);
     }
 }

@@ -21,8 +21,8 @@ package org.grouplens.grapht.spi.context;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.MockSatisfaction;
-import org.grouplens.grapht.spi.reflect.AttributesImpl;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -277,7 +277,7 @@ public class ContextPatternTest {
         InjectionContext context = DependencySolver.initialContext();
         for (Class<?> type: types) {
             MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
-            context = context.extend(sat, new AttributesImpl());
+            context = context.extend(sat, Desires.createAttributes());
         }
         return context;
     }

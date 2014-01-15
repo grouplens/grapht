@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -49,7 +50,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     public FieldInjectionPoint(@Nonnull Field field) {
         Preconditions.notNull("field", field);
         this.field = field;
-        attributes = new AttributesImpl(field.getAnnotations());
+        attributes = Desires.createAttributes(field.getAnnotations());
     }
     
     @Override

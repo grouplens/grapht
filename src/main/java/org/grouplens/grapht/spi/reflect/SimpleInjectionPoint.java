@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -50,7 +51,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
             Preconditions.isQualifier(qualifier.annotationType());
         }
 
-        this.attrs = (qualifier == null ? new AttributesImpl() : new AttributesImpl(qualifier));
+        this.attrs = (qualifier == null ? Desires.createAttributes() : Desires.createAttributes(qualifier));
         this.type = type;
         this.nullable = nullable;
     }
@@ -126,7 +127,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
 
         public Object readResolve() throws ObjectStreamException {
             try {
-                return new SimpleInjectionPoint(qualifier, type.resolve(), nullable);
+                return Desires.createInjectionPoint(qualifier, type.resolve(), nullable);
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex =
                         new InvalidObjectException("cannot resolve class " + type.getClassName());

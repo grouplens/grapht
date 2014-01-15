@@ -19,6 +19,7 @@
 package org.grouplens.grapht.spi.reflect;
 
 import org.grouplens.grapht.spi.Attributes;
+import org.grouplens.grapht.spi.Desires;
 import org.grouplens.grapht.spi.InjectionPoint;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -75,7 +76,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
 
     @Override
     public Attributes getAttributes() {
-        return new AttributesImpl();
+        return Desires.createAttributes();
     }
     
     @Override
