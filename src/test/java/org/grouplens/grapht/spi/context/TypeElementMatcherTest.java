@@ -16,13 +16,16 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.spi.context;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.spi.reflect.ClassSatisfaction;
+import org.grouplens.grapht.spi.reflect.Qualifiers;
+import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 import org.grouplens.grapht.spi.reflect.types.RoleA;
 import org.grouplens.grapht.spi.reflect.types.RoleB;
 import org.grouplens.grapht.spi.reflect.types.RoleD;
@@ -36,20 +39,20 @@ import java.util.Collections;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-public class ReflectionContextElementMatcherTest {
+public class TypeElementMatcherTest {
     @Test
     public void testEquals() {
         ReflectionInjectSPI spi = new ReflectionInjectSPI();
         
-        ReflectionContextElementMatcher m1 = new ReflectionContextElementMatcher(A.class);
-        ReflectionContextElementMatcher m2 = new ReflectionContextElementMatcher(B.class);
-        ReflectionContextElementMatcher m3 = new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleA.class));
-        ReflectionContextElementMatcher m4 = new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleB.class));
+        TypeElementMatcher m1 = new TypeElementMatcher(A.class);
+        TypeElementMatcher m2 = new TypeElementMatcher(B.class);
+        TypeElementMatcher m3 = new TypeElementMatcher(A.class, Qualifiers.match(RoleA.class));
+        TypeElementMatcher m4 = new TypeElementMatcher(A.class, Qualifiers.match(RoleB.class));
         
-        Assert.assertEquals(m1, new ReflectionContextElementMatcher(A.class));
-        Assert.assertEquals(m2, new ReflectionContextElementMatcher(B.class));
-        Assert.assertEquals(m3, new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleA.class)));
-        Assert.assertEquals(m4, new ReflectionContextElementMatcher(A.class, Qualifiers.match(RoleB.class)));
+        Assert.assertEquals(m1, new TypeElementMatcher(A.class));
+        Assert.assertEquals(m2, new TypeElementMatcher(B.class));
+        Assert.assertEquals(m3, new TypeElementMatcher(A.class, Qualifiers.match(RoleA.class)));
+        Assert.assertEquals(m4, new TypeElementMatcher(A.class, Qualifiers.match(RoleB.class)));
         
         Assert.assertFalse(m1.equals(m2));
         Assert.assertFalse(m2.equals(m3));
@@ -118,7 +121,7 @@ public class ReflectionContextElementMatcherTest {
         };
         Pair<Satisfaction, Attributes> node = Pair.of(sat, attrs);
         
-        ReflectionContextElementMatcher cm = new ReflectionContextElementMatcher(matcherType, mr);
+        TypeElementMatcher cm = new TypeElementMatcher(matcherType, mr);
         if (expected) {
             Assert.assertThat(cm.apply(node, 1), notNullValue());
         } else {

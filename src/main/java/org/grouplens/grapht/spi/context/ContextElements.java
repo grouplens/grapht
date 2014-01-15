@@ -22,7 +22,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionContextElementMatcher;
 
 /**
  * Utilities for context matching.
@@ -33,7 +32,7 @@ public final class ContextElements {
     private ContextElements() {}
 
     public static ContextElementMatcher contextElement(QualifierMatcher qualifier, Class<?> type) {
-        return new ReflectionContextElementMatcher(type, qualifier);
+        return new TypeElementMatcher(type, qualifier);
     }
 
     /**
@@ -50,11 +49,11 @@ public final class ContextElements {
     }
 
     public static ContextElementMatcher matchType(Class<?> type) {
-        return new ReflectionContextElementMatcher(type);
+        return new TypeElementMatcher(type);
     }
 
     public static ContextElementMatcher matchType(Class<?> type,  QualifierMatcher qual) {
-        return new ReflectionContextElementMatcher(type, qual);
+        return new TypeElementMatcher(type, qual);
     }
 
     public static ContextElementMatcher invertMatch(ContextElementMatcher matcher) {

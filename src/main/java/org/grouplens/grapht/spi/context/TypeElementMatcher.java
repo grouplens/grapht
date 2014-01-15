@@ -16,7 +16,7 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.spi.reflect;
+package org.grouplens.grapht.spi.context;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -24,9 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.spi.Attributes;
 import org.grouplens.grapht.spi.QualifierMatcher;
 import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
-import org.grouplens.grapht.spi.context.ContextElements;
-import org.grouplens.grapht.spi.context.MatchElement;
+import org.grouplens.grapht.spi.reflect.Qualifiers;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Types;
 
@@ -44,7 +42,7 @@ import java.io.Serializable;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class ReflectionContextElementMatcher implements ContextElementMatcher, Serializable {
+class TypeElementMatcher implements ContextElementMatcher, Serializable {
     private static final long serialVersionUID = -1L;
 
     @Nullable
@@ -58,7 +56,7 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
      * @param type The type to match
      * @throws NullPointerException if type is null
      */
-    public ReflectionContextElementMatcher(Class<?> type) {
+    public TypeElementMatcher(Class<?> type) {
         this(type, Qualifiers.matchDefault());
     }
 
@@ -70,7 +68,7 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
      * @param qualifier The QualifierMatcher that determines how qualifiers are matched
      * @throws NullPointerException if type or qualifier is null
      */
-    public ReflectionContextElementMatcher(Class<?> type, QualifierMatcher qualifier) {
+    public TypeElementMatcher(Class<?> type, QualifierMatcher qualifier) {
         this.type = type;
         this.qualifier = qualifier;
     }
@@ -115,8 +113,8 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (o instanceof ReflectionContextElementMatcher) {
-            ReflectionContextElementMatcher r = (ReflectionContextElementMatcher) o;
+        } else if (o instanceof TypeElementMatcher) {
+            TypeElementMatcher r = (TypeElementMatcher) o;
             return new EqualsBuilder().append(type, r.type)
                                       .append(qualifier, r.qualifier)
                                       .isEquals();
@@ -212,7 +210,7 @@ public class ReflectionContextElementMatcher implements ContextElementMatcher, S
         @SuppressWarnings("unchecked")
         private Object readResolve() throws ObjectStreamException {
             try {
-                return new ReflectionContextElementMatcher(type.resolve(),
+                return new TypeElementMatcher(type.resolve(),
                                                            qualifier);
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex = new InvalidObjectException("cannot resolve " + type);
