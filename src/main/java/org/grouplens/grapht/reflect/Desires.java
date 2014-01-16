@@ -46,7 +46,7 @@ public final class Desires {
         return new SimpleInjectionPoint(qualifier, type, nullable);
     }
 
-    public static AttributesImpl createAttributes(Annotation... annots) {
+    public static Attributes createAttributes(Annotation... annots) {
         return new AttributesImpl(annots);
     }
 }

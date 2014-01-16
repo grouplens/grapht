@@ -31,10 +31,6 @@ import org.grouplens.grapht.reflect.Satisfaction;
 public final class ContextElements {
     private ContextElements() {}
 
-    public static ContextElementMatcher contextElement(QualifierMatcher qualifier, Class<?> type) {
-        return new TypeElementMatcher(type, qualifier);
-    }
-
     /**
      * Match priority constants.
      */
