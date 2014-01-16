@@ -20,11 +20,10 @@ package org.grouplens.grapht;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.grouplens.grapht.context.ContextMatcher;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.context.ContextMatcher;
-import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 
 import java.io.Externalizable;
 import java.io.Serializable;
@@ -62,7 +61,6 @@ public class BindingFunctionBuilder implements Cloneable {
         SUPER_TYPES
     }
     
-    private final ReflectionInjectSPI spi;
     private final Context root;
     
     private final Set<Class<?>> defaultExcludes;
@@ -73,8 +71,7 @@ public class BindingFunctionBuilder implements Cloneable {
     private final Multimap<ContextMatcher,BindRule> superRules; // "generated"
 
     /**
-     * Create a new InjectorConfigurationBuilder that uses a
-     * {@link ReflectionInjectSPI} and automatically generates bind rules for
+     * Create a new InjectorConfigurationBuilder that automatically generates bind rules for
      * super and intermediate types.
      */
     public BindingFunctionBuilder() {
@@ -82,34 +79,15 @@ public class BindingFunctionBuilder implements Cloneable {
     }
 
     /**
-     * Create a new InjectorConfigurationBuilder that uses a
-     * {@link ReflectionInjectSPI}. If <tt>generateRules</tt> is true, bind
+     * Create a new InjectorConfigurationBuilder. If <tt>generateRules</tt> is true, bind
      * rules for super and intermediate types are generated. If it is false,
      * only one bind rule is created per binding.
      * 
      * @param generateRules True if additional bind rules should be generated
      */
     public BindingFunctionBuilder(boolean generateRules) {
-        this(new ReflectionInjectSPI(), generateRules);
-    }
-    
-    /**
-     * Create a new InjectorConfigurationBuilder that uses the given
-     * {@link InjectSPI} instance.
-     * 
-     * @param spi The injection service provider to use
-     * @param generateRules True if additional bind rules should be generated
-     *            for intermediate and super types
-     * @throws NullPointerException if spi is null
-     */
-    public BindingFunctionBuilder(ReflectionInjectSPI spi, boolean generateRules) {
-        if (spi == null) {
-            throw new NullPointerException("SPI cannot be null");
-        }
-        
-        this.spi = spi;
         this.generateRules = generateRules;
-        
+
         defaultExcludes = new HashSet<Class<?>>();
         defaultExcludes.add(Object.class);
         defaultExcludes.add(Comparable.class);
@@ -125,7 +103,6 @@ public class BindingFunctionBuilder implements Cloneable {
     }
     
     private BindingFunctionBuilder(BindingFunctionBuilder clone) {
-        spi = clone.spi;
         generateRules = clone.generateRules;
         defaultExcludes = new HashSet<Class<?>>(clone.defaultExcludes);
         manualRules = ArrayListMultimap.create(clone.manualRules);
@@ -145,13 +122,6 @@ public class BindingFunctionBuilder implements Cloneable {
      */
     public boolean getGenerateRules() {
         return generateRules;
-    }
-    
-    /**
-     * @return The SPI used by this builder
-     */
-    public ReflectionInjectSPI getSPI() {
-        return spi;
     }
     
     /**

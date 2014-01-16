@@ -32,7 +32,6 @@ import org.grouplens.grapht.context.ContextElements;
 import org.grouplens.grapht.context.ContextMatcher;
 import org.grouplens.grapht.context.ContextPattern;
 import org.grouplens.grapht.reflect.internal.Qualifiers;
-import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 import org.grouplens.grapht.reflect.internal.types.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,13 +46,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class BindingFunctionBuilderTest {
-    private ReflectionInjectSPI spi;
-    
-    @Before
-    public void setup() {
-        spi = new ReflectionInjectSPI();
-    }
-    
     @Test
     public void testCachePolicy() throws Exception {
         doCachePolicyTest(CachePolicy.MEMOIZE);
@@ -62,7 +54,7 @@ public class BindingFunctionBuilderTest {
     }
     
     private void doCachePolicyTest(CachePolicy expectedPolicy) throws Exception {
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
         
         if (expectedPolicy.equals(CachePolicy.MEMOIZE)) {
             builder.getRootContext().bind(InterfaceA.class).shared().to(TypeA.class);
@@ -84,7 +76,7 @@ public class BindingFunctionBuilderTest {
     public void testBindToType() throws Exception {
         // Test that the fluent api creates type-to-type bind rules in 
         // the root context
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).to(TypeA.class);
         
@@ -100,7 +92,7 @@ public class BindingFunctionBuilderTest {
     public void testBindToInstance() throws Exception {
         // Test that the fluent api creates type-to-instance bind rules
         // in the root context
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         TypeA a = new TypeA();
         builder.getRootContext().bind(InterfaceA.class).to(a);
@@ -117,7 +109,7 @@ public class BindingFunctionBuilderTest {
     public void testBindToProviderType() throws Exception {
         // Test that the fluent api creates type-to-provider type bind rules
         // in the root context
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).toProvider(ProviderA.class);
         
@@ -133,7 +125,7 @@ public class BindingFunctionBuilderTest {
     public void testBindToProviderInstance() throws Exception {
         // Test that the fluent api creates type-to-provider instance bind rules
         // in the root context
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         ProviderA pa = new ProviderA();
         builder.getRootContext().bind(InterfaceA.class).toProvider(pa);
@@ -150,7 +142,7 @@ public class BindingFunctionBuilderTest {
     public void testBindToSatisfaction() throws Exception {
         // Test that the fluent api creates type-to-type bind rules in
         // the root context
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).toSatisfaction(Satisfactions.satisfy(TypeA.class));
 
@@ -167,7 +159,7 @@ public class BindingFunctionBuilderTest {
     public void testBindToWrongProvider() throws Exception {
         // Test that we get an exception when binding to a provider of an incompatible type
         // generics prevent this, but groovy bypasses it
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
         try {
             builder.getRootContext()
                    .bind((Class) InterfaceA.class)
@@ -183,7 +175,7 @@ public class BindingFunctionBuilderTest {
     @Test
     public void testBindToBadProvider() throws Exception {
         // Test that we get an exception when binding to a provider of an overly generic type
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
         try {
             builder.getRootContext()
                    .bind((Class) InputStream.class)
@@ -198,7 +190,7 @@ public class BindingFunctionBuilderTest {
     public void testInjectorContextSpecificBindRules() throws Exception {
         // Test that using contexts with the fluent api properly restricts
         // created bind rules
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).to(TypeA.class);
         builder.getRootContext().in(TypeC.class).bind(InterfaceA.class).to(TypeB.class);
@@ -220,7 +212,7 @@ public class BindingFunctionBuilderTest {
     @Test
     public void testFinalBindRule() throws Exception {
         // Test that type-to-type bind rules are properly terminated
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).to(TypeA.class, false);
         
@@ -235,7 +227,7 @@ public class BindingFunctionBuilderTest {
     @Test
     public void testAnnotatedBindings() throws Exception {
         // Test that bind rules properly record the qualifier they're bound with
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).withQualifier(RoleD.class).to(TypeA.class);
         
@@ -250,7 +242,7 @@ public class BindingFunctionBuilderTest {
     @Test
     public void testAnyQualifierBindings() throws Exception {
         // Test that bind rules properly record the qualifier they're bound with
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(InterfaceA.class).withAnyQualifier().to(TypeA.class);
 
@@ -265,7 +257,7 @@ public class BindingFunctionBuilderTest {
     @Test
     public void testNamedBindings() throws Exception {
         // Test that bind rules properly record the name they're bound with
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(false);
 
         builder.getRootContext().bind(String.class).withQualifier(Names.named("test1")).to("hello world");
         
@@ -280,7 +272,7 @@ public class BindingFunctionBuilderTest {
     @Test
     public void testBindRuleGeneration() throws Exception {
         // Test that bind rules are properly generated
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(true);
 
         builder.getRootContext().bind(TypeA.class).to(TypeBp.class);
         
@@ -305,7 +297,7 @@ public class BindingFunctionBuilderTest {
     public void testBindRuleGenerationExcludesDefault() throws Exception {
         // Test that bind rules are properly generated, and that
         // customized default types are ignored
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(true);
         builder.addDefaultExclusion(TypeA.class); // this causes TypeA and InterfaceA to be excluded
         
         builder.getRootContext().bind(TypeB.class).to(TypeBp.class);
@@ -330,7 +322,7 @@ public class BindingFunctionBuilderTest {
     public void testBindRuleGenerationWithBindingExclude() throws Exception {
         // Test that bind rules are properly generated, taking into
         // account per-binding exclusions
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(true);
         
         builder.getRootContext().bind(TypeB.class).exclude(TypeA.class).to(TypeBp.class);
         
@@ -353,7 +345,7 @@ public class BindingFunctionBuilderTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRejectInvalidBinding() {
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(true);
         // need to go to raw types so we don't get type-check errors
         try {
             builder.getRootContext().bind((Class) OutputStream.class).to(String.class);
@@ -366,7 +358,7 @@ public class BindingFunctionBuilderTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRejectInvalidInstanceBinding() {
-        BindingFunctionBuilder builder = new BindingFunctionBuilder(spi, true);
+        BindingFunctionBuilder builder = new BindingFunctionBuilder(true);
         // need to go to raw types so we don't get type-check errors
         try {
             builder.getRootContext().bind((Class) OutputStream.class).to("wombat");

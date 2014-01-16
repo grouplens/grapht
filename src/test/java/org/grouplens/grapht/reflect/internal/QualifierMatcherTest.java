@@ -22,7 +22,6 @@ import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.internal.types.RoleA;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.inject.Named;
@@ -31,13 +30,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class QualifierMatcherTest {
-    private ReflectionInjectSPI spi;
-    
-    @Before
-    public void setup() {
-        spi = new ReflectionInjectSPI();
-    }
-    
     @Test
     public void testAnnotationInstanceMatch() {
         QualifierMatcher matcher = Qualifiers.match(new AnnotationBuilder<Named>(Named.class).set("value", "test").build());

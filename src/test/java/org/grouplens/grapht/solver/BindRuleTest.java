@@ -23,7 +23,6 @@ import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.reflect.internal.*;
 import org.grouplens.grapht.reflect.internal.types.*;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
@@ -32,13 +31,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class BindRuleTest {
-    private ReflectionInjectSPI spi;
-    
-    @Before
-    public void setup() {
-        spi = new ReflectionInjectSPI();
-    }
-    
     @Test
     public void testEquals() {
         // test various permutations of bind rule configurations

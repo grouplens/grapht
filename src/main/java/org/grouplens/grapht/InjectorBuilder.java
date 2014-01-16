@@ -25,7 +25,7 @@ import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.context.ContextPattern;
-import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
+import org.grouplens.grapht.util.Types;
 
 import java.lang.annotation.Annotation;
 
@@ -38,12 +38,12 @@ import java.lang.annotation.Annotation;
  * </p>
  * <p>
  * Internally, it uses an {@link BindingFunctionBuilder} to accumulate
- * bind rules, a {@link DefaultInjector} to resolve dependencies, and the
- * {@link ReflectionInjectSPI} to access dependency information.
+ * bind rules and a {@link DefaultInjector} to resolve dependencies.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectorBuilder extends AbstractContext {
+    private final ClassLoader classLoader;
     private final BindingFunctionBuilder builder;
     private CachePolicy cachePolicy;
     private boolean enableProviderInjection;
@@ -52,7 +52,8 @@ public class InjectorBuilder extends AbstractContext {
      * Create a new injector builder.
      * @param bld The binding function builder.
      */
-    private InjectorBuilder(BindingFunctionBuilder bld) {
+    private InjectorBuilder(ClassLoader loader, BindingFunctionBuilder bld) {
+        classLoader = loader;
         builder = bld;
         cachePolicy = CachePolicy.MEMOIZE;
         enableProviderInjection = false;
@@ -69,24 +70,10 @@ public class InjectorBuilder extends AbstractContext {
      */
     @Deprecated
     public InjectorBuilder(Module... modules) {
-        this(new BindingFunctionBuilder());
+        this(Types.getDefaultClassLoader(), new BindingFunctionBuilder());
         for (Module m: modules) {
             applyModule(m);
         }
-    }
-
-    /**
-     * Create a new injector builder.
-     * @param spi The SPI.
-     * @param modules The initial modules to configure.
-     * @return The injector builder.
-     */
-    public static InjectorBuilder create(ReflectionInjectSPI spi, Module... modules) {
-        InjectorBuilder bld = new InjectorBuilder(new BindingFunctionBuilder(spi, true));
-        for (Module m: modules) {
-            bld.applyModule(m);
-        }
-        return bld;
     }
 
     /**
@@ -96,8 +83,11 @@ public class InjectorBuilder extends AbstractContext {
      * @return The injector builder.
      */
     public static InjectorBuilder create(ClassLoader loader, Module... modules) {
-        return create(ReflectionInjectSPI.forClassLoader(loader),
-                      modules);
+        InjectorBuilder bld = new InjectorBuilder(loader, new BindingFunctionBuilder(true));
+        for (Module m: modules) {
+            bld.applyModule(m);
+        }
+        return bld;
     }
 
     /**
@@ -106,7 +96,7 @@ public class InjectorBuilder extends AbstractContext {
      * @return The injector builder.
      */
     public static InjectorBuilder create(Module... modules) {
-        return create(new ReflectionInjectSPI(), modules);
+        return create(Types.getDefaultClassLoader(), modules);
     }
     
     /**
@@ -202,18 +192,18 @@ public class InjectorBuilder extends AbstractContext {
                 builder.build(RuleSet.EXPLICIT),
                 builder.build(RuleSet.INTERMEDIATE_TYPES),
                 builder.build(RuleSet.SUPER_TYPES),
-                new ProviderBindingFunction(builder.getSPI()), // insert extra provider injection
-                DefaultDesireBindingFunction.create()
+                new ProviderBindingFunction(), // insert extra provider injection
+                DefaultDesireBindingFunction.create(classLoader)
             };
         } else {
             functions = new BindingFunction[] { 
                 builder.build(RuleSet.EXPLICIT),
                 builder.build(RuleSet.INTERMEDIATE_TYPES),
                 builder.build(RuleSet.SUPER_TYPES),
-                DefaultDesireBindingFunction.create()
+                DefaultDesireBindingFunction.create(classLoader)
             };
         }
         
-        return new DefaultInjector(builder.getSPI(), cachePolicy, 100, functions);
+        return new DefaultInjector(cachePolicy, 100, functions);
     }
 }

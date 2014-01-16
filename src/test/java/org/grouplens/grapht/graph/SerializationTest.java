@@ -29,7 +29,6 @@ import org.grouplens.grapht.reflect.CachedSatisfaction;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.reflect.internal.InstanceSatisfaction;
-import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 import org.grouplens.grapht.reflect.internal.types.NamedType;
 import org.junit.After;
 import org.junit.Assert;
@@ -58,7 +57,6 @@ public class SerializationTest {
     
     @Test
     public void testSharedNodesGraph() throws Exception {
-        ReflectionInjectSPI spi = new ReflectionInjectSPI();
         CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
         CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.satisfy(Object.class), CachePolicy.MEMOIZE);
 

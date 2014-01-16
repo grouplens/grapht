@@ -19,7 +19,6 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.reflect.*;
-import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -45,11 +44,7 @@ import java.util.List;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ProviderBindingFunction implements BindingFunction {
-    private final ReflectionInjectSPI spi;
-    
-    public ProviderBindingFunction(ReflectionInjectSPI spi) {
-        Preconditions.notNull("spi", spi);
-        this.spi = spi;
+    public ProviderBindingFunction() {
     }
     
     @Override

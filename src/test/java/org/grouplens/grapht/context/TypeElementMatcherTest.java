@@ -25,7 +25,6 @@ import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.ClassSatisfaction;
 import org.grouplens.grapht.reflect.internal.Qualifiers;
-import org.grouplens.grapht.reflect.internal.ReflectionInjectSPI;
 import org.grouplens.grapht.reflect.internal.types.RoleA;
 import org.grouplens.grapht.reflect.internal.types.RoleB;
 import org.grouplens.grapht.reflect.internal.types.RoleD;
@@ -42,8 +41,6 @@ import static org.hamcrest.Matchers.nullValue;
 public class TypeElementMatcherTest {
     @Test
     public void testEquals() {
-        ReflectionInjectSPI spi = new ReflectionInjectSPI();
-        
         TypeElementMatcher m1 = new TypeElementMatcher(A.class);
         TypeElementMatcher m2 = new TypeElementMatcher(B.class);
         TypeElementMatcher m3 = new TypeElementMatcher(A.class, Qualifiers.match(RoleA.class));

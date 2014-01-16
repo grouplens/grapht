@@ -25,14 +25,14 @@ import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
-import org.grouplens.grapht.solver.DefaultInjector;
-import org.grouplens.grapht.solver.DesireChain;
 import org.grouplens.grapht.reflect.CachedSatisfaction;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.internal.types.*;
+import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
+import org.grouplens.grapht.solver.DefaultInjector;
+import org.grouplens.grapht.solver.DesireChain;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,9 +79,8 @@ public class ReflectionInjectionTest {
     public void testTypeCInjectionWithDefaults() throws Exception {
         // Test that TypeC can be resolved successfully without any bind rules.
         // All of TypeC's dependencies have defaults or are satisfiable.
-        ReflectionInjectSPI spi = new ReflectionInjectSPI();
         Desire rootDesire = Desires.create(null, TypeC.class, false);
-        DefaultInjector r = new DefaultInjector(spi, DefaultDesireBindingFunction.create());
+        DefaultInjector r = new DefaultInjector(DefaultDesireBindingFunction.create());
         
         TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(5, instance.getIntValue());
@@ -156,20 +155,19 @@ public class ReflectionInjectionTest {
         // Test that TypeC can be injected correctly using bind rules, although
         // the bind rule configuration does not need to be very complicated, since
         // the resolver and bind rules are already tested.
-        ReflectionInjectSPI spi = new ReflectionInjectSPI();
         Desire rootDesire = Desires.create(null, TypeC.class, false);
         
         TypeA a = new TypeA();
         TypeB b = new TypeB();
         
-        BindingFunctionBuilder bindRules = new BindingFunctionBuilder(spi, false);
+        BindingFunctionBuilder bindRules = new BindingFunctionBuilder(false);
         bindRules.getRootContext().bind(Integer.class).withQualifier(ParameterA.class).to(10);
         bindRules.getRootContext().bind(InterfaceA.class).withQualifier(RoleA.class).to(PrimeA.class);
         bindRules.getRootContext().bind(InterfaceB.class).withQualifier(RoleD.class).to(PrimeB.class);
         bindRules.getRootContext().bind(TypeA.class).to(a);
         bindRules.getRootContext().bind(TypeB.class).to(b);
         
-        DefaultInjector r = new DefaultInjector(spi, bindRules.build(RuleSet.EXPLICIT), DefaultDesireBindingFunction.create());
+        DefaultInjector r = new DefaultInjector(bindRules.build(RuleSet.EXPLICIT), DefaultDesireBindingFunction.create());
 
         TypeC instance = r.getInstance(TypeC.class);
         Assert.assertEquals(10, instance.getIntValue());
