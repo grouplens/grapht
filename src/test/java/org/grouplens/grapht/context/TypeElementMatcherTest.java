@@ -25,7 +25,7 @@ import org.grouplens.grapht.reflect.MockInjectionPoint;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.ClassSatisfaction;
-import org.grouplens.grapht.reflect.internal.Qualifiers;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.grouplens.grapht.reflect.internal.types.RoleA;
 import org.grouplens.grapht.reflect.internal.types.RoleB;
 import org.grouplens.grapht.reflect.internal.types.RoleD;

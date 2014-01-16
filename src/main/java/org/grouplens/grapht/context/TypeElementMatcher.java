@@ -24,7 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
-import org.grouplens.grapht.reflect.internal.Qualifiers;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Types;
 

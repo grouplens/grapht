@@ -16,11 +16,12 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.reflect.internal;
+package org.grouplens.grapht.reflect;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.junit.Test;
 
 import javax.annotation.Nullable;

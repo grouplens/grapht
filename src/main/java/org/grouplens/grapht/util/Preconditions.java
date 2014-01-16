@@ -20,7 +20,7 @@ package org.grouplens.grapht.util;
 
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.InvalidBindingException;
-import org.grouplens.grapht.reflect.internal.Qualifiers;
+import org.grouplens.grapht.reflect.Qualifiers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;

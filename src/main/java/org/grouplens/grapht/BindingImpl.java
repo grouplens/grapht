@@ -28,7 +28,7 @@ import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.context.ContextMatcher;
-import org.grouplens.grapht.reflect.internal.Qualifiers;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;

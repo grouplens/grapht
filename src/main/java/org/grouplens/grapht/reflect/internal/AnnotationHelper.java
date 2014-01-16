@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.annotation.Attribute;
+import org.grouplens.grapht.reflect.Qualifiers;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;

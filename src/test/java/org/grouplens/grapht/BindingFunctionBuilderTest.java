@@ -31,7 +31,7 @@ import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.context.ContextElements;
 import org.grouplens.grapht.context.ContextMatcher;
 import org.grouplens.grapht.context.ContextPattern;
-import org.grouplens.grapht.reflect.internal.Qualifiers;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.grouplens.grapht.reflect.internal.types.*;
 import org.junit.Assert;
 import org.junit.Before;
