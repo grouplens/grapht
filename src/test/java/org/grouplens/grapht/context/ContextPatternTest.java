@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.context;
 
+import org.grouplens.grapht.reflect.MockInjectionPoint;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.reflect.Desire;
@@ -277,7 +278,7 @@ public class ContextPatternTest {
         InjectionContext context = DependencySolver.initialContext();
         for (Class<?> type: types) {
             MockSatisfaction sat = new MockSatisfaction(type, new ArrayList<Desire>());
-            context = context.extend(sat, Desires.createAttributes());
+            context = context.extend(sat, new MockInjectionPoint(type, null, false));
         }
         return context;
     }

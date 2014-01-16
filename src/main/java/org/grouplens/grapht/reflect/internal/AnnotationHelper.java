@@ -19,24 +19,23 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.annotation.Attribute;
-import org.grouplens.grapht.reflect.Attributes;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Basic implementation of {@link Attributes} based on the {@link Annotation}
- * array reported by the injection point.
+ * Helper class for managing annotations on an injection point.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class AttributesImpl implements Attributes {
+class AnnotationHelper {
     private final Map<Class<? extends Annotation>, Annotation> attrs;
     private final Annotation qualifier;
     
-    public AttributesImpl(Annotation... annots) {
+    public AnnotationHelper(Annotation... annots) {
         attrs = new HashMap<Class<? extends Annotation>, Annotation>();
         Annotation foundQualifier = null;
         for (Annotation a: annots) {
@@ -53,33 +52,15 @@ public class AttributesImpl implements Attributes {
         qualifier = foundQualifier;
     }
     
-    @Override
     public Annotation getQualifier() {
         return qualifier;
     }
 
-    @Override
     public <A extends Annotation> A getAttribute(Class<A> atype) {
         return atype.cast(attrs.get(atype));
     }
     
-    @Override
     public Collection<Annotation> getAttributes() {
-        return attrs.values();
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof AttributesImpl)) {
-            return false;
-        }
-        
-        AttributesImpl a = (AttributesImpl) o;
-        return (qualifier == null ? a.qualifier == null : qualifier.equals(a.qualifier)) && attrs.equals(a.attrs);
-    }
-    
-    @Override
-    public int hashCode() {
-        return (qualifier == null ? 0 : qualifier.hashCode()) ^ attrs.hashCode();
+        return Collections.unmodifiableCollection(attrs.values());
     }
 }

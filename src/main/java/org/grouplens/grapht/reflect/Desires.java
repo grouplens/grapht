@@ -18,7 +18,6 @@
  */
 package org.grouplens.grapht.reflect;
 
-import org.grouplens.grapht.reflect.internal.AttributesImpl;
 import org.grouplens.grapht.reflect.internal.ReflectionDesire;
 import org.grouplens.grapht.reflect.internal.SimpleInjectionPoint;
 
@@ -44,9 +43,5 @@ public final class Desires {
 
     public static InjectionPoint createInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         return new SimpleInjectionPoint(qualifier, type, nullable);
-    }
-
-    public static Attributes createAttributes(Annotation... annots) {
-        return new AttributesImpl(annots);
     }
 }

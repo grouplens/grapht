@@ -18,19 +18,21 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.reflect.Attributes;
-import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
 
 public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
@@ -74,11 +76,23 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
         return Void.class;
     }
 
+    @Nullable
     @Override
-    public Attributes getAttributes() {
-        return Desires.createAttributes();
+    public Annotation getQualifier() {
+        return null;
     }
-    
+
+    @Nullable
+    @Override
+    public <A extends Annotation> A getAttribute(Class<A> atype) {
+        return null;
+    }
+
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return Collections.emptyList();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof NoArgumentInjectionPoint)) {

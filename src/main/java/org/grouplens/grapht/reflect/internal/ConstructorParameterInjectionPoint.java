@@ -18,19 +18,20 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.reflect.Attributes;
-import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.ConstructorProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 /**
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter
@@ -44,7 +45,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     // transient because of serialization proxy
     private final transient Constructor<?> constructor;
     private final transient int paramIndex;
-    private final transient Attributes attributes;
+    private final transient AnnotationHelper annotations;
 
     /**
      * Create a ConstructorParameterInjectionPoint that wraps the given parameter index for the
@@ -62,7 +63,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
 
         constructor = ctor;
         paramIndex = pIndex;
-        attributes = Desires.createAttributes(ctor.getParameterAnnotations()[pIndex]);
+        annotations = new AnnotationHelper(ctor.getParameterAnnotations()[pIndex]);
     }
 
     /**
@@ -95,12 +96,25 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     public Class<?> getErasedType() {
         return Types.box(constructor.getParameterTypes()[paramIndex]);
     }
-    
+
+    @Nullable
     @Override
-    public Attributes getAttributes() {
-        return attributes;
+    public Annotation getQualifier() {
+        return annotations.getQualifier();
     }
-    
+
+    @Nullable
+    @Override
+    public <A extends Annotation> A getAttribute(Class<A> atype) {
+        return annotations.getAttribute(atype);
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return annotations.getAttributes();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ConstructorParameterInjectionPoint)) {
@@ -117,9 +131,19 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     
     @Override
     public String toString() {
-        String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
+        StringBuilder sb = new StringBuilder();
         String p = constructor.getParameterTypes()[paramIndex].getSimpleName();
-        return constructor.getDeclaringClass().getSimpleName() + "(" + paramIndex + ", " + q + p + ")";
+        sb.append(constructor.getDeclaringClass().getSimpleName())
+          .append("(")
+          .append(paramIndex)
+          .append(", ");
+        if (annotations.getQualifier() != null) {
+            sb.append(annotations.getQualifier())
+              .append(":");
+        }
+        return sb.append(p)
+                 .append(")")
+                 .toString();
     }
 
     private Object writeReplace() {

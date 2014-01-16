@@ -308,8 +308,7 @@ public class DependencySolver {
                                                            .getSatisfaction(),
                                                        edge.getLabel()
                                                            .getInitialDesire()
-                                                           .getInjectionPoint()
-                                                           .getAttributes());
+                                                           .getInjectionPoint());
                 walkGraphForReplacements(edge.getTail(), next, replacements);
             } else {
                 // trigger binding, add a replacement
@@ -338,7 +337,7 @@ public class DependencySolver {
         Resolution result = resolve(desire, context);
         CachedSatisfaction sat = new CachedSatisfaction(result.satisfaction, result.policy);
 
-        InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint().getAttributes());
+        InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint());
 
         DAGNode<CachedSatisfaction,DesireChain> node;
         if (result.deferDependencies) {

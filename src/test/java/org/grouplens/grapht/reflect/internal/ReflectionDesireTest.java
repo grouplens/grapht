@@ -18,24 +18,23 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.solver.*;
-import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.MockInjectionPoint;
 import org.grouplens.grapht.reflect.internal.types.*;
+import org.grouplens.grapht.solver.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
+
 public class ReflectionDesireTest {
-    private static <T extends Annotation> Attributes qualifier(Class<T> qtype) {
-        return Desires.createAttributes(new Annotation[]{AnnotationBuilder.of(qtype).build()});
-    }
-    
     @Test
     public void testSubtypeInjectionPointSatisfactionConstructor() throws Exception {
         ClassSatisfaction satis = new ClassSatisfaction(B.class);
@@ -55,7 +54,8 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleD", InterfaceB.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
-        Assert.assertEquals(qualifier(RoleD.class), dflt.getInjectionPoint().getAttributes());
+        Assert.assertThat(dflt.getInjectionPoint().getQualifier(),
+                          instanceOf(RoleD.class));
         Assert.assertEquals(TypeB.class, ((ClassSatisfaction) dflt.getSatisfaction()).getErasedType());
         Assert.assertEquals(TypeB.class, dflt.getDesiredType());
     }
@@ -68,7 +68,8 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(0, desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof InstanceSatisfaction);
-        Assert.assertEquals(qualifier(ParameterA.class), dflt.getInjectionPoint().getAttributes());
+        Assert.assertThat(dflt.getInjectionPoint().getQualifier(),
+                          instanceOf(ParameterA.class));
         Assert.assertEquals(Integer.class, dflt.getDesiredType());
         Assert.assertEquals(5, ((InstanceSatisfaction) dflt.getSatisfaction()).getInstance());
     }
@@ -81,7 +82,8 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setTypeA", TypeA.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ProviderClassSatisfaction);
-        Assert.assertNull(dflt.getInjectionPoint().getAttributes().getQualifier());
+        Assert.assertThat(dflt.getInjectionPoint().getQualifier(),
+                          nullValue());
         Assert.assertEquals(TypeA.class, dflt.getDesiredType());
         Assert.assertEquals(ProviderA.class, ((ProviderClassSatisfaction) dflt.getSatisfaction()).getProviderType());
     }
@@ -94,7 +96,8 @@ public class ReflectionDesireTest {
         ReflectionDesire dflt = getDefaultDesire(TypeC.class.getMethod("setRoleA", InterfaceA.class), desires);
         
         Assert.assertTrue(dflt.getSatisfaction() instanceof ClassSatisfaction);
-        Assert.assertEquals(qualifier(RoleA.class), dflt.getInjectionPoint().getAttributes());
+        Assert.assertThat(dflt.getInjectionPoint().getQualifier(),
+                          instanceOf(RoleA.class));
         Assert.assertEquals(TypeA.class, ((ClassSatisfaction) dflt.getSatisfaction()).getErasedType());
         Assert.assertEquals(TypeA.class, dflt.getDesiredType());
     }

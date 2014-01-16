@@ -19,7 +19,6 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.reflect.Attributes;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
@@ -55,7 +54,7 @@ public class SolverException extends Exception {
         // type path
         sb.append("Context:\n");
         sb.append("  Type path:\n");
-        for (Pair<Satisfaction, Attributes> path: ctx) {
+        for (Pair<Satisfaction, InjectionPoint> path: ctx) {
             Satisfaction sat = path.getLeft();
             Class<?> type = sat == null ? null : sat.getErasedType();
             sb.append("    ")
@@ -68,19 +67,22 @@ public class SolverException extends Exception {
         sb.append("  Prior desires:\n");
         for (Desire desire: desires.getPreviousDesires()) {
             sb.append("    ")
-              .append(format(desire.getInjectionPoint().getAttributes(), desire.getDesiredType()))
+              .append(format(desire.getInjectionPoint(), desire.getDesiredType()))
               .append('\n');
         }
 
         return sb.toString();
     }
-    
+
     protected String format(InjectionPoint ip) {
-        return format(ip.getAttributes(), ip.getErasedType());
+        return format(ip, ip.getErasedType());
     }
 
-    protected String format(Attributes attr, Class<?> type) {
-        String base = (attr.getQualifier() != null ? attr.getQualifier() + ":" : "");
+    protected String format(InjectionPoint ip, Class<?> type) {
+        if (type == null) {
+            type = ip.getErasedType();
+        }
+        String base = (ip.getQualifier() != null ? ip.getQualifier() + ":" : "");
         String name = type == null ? null : type.getName();
         return base + name;
     }

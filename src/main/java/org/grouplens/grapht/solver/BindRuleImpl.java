@@ -154,7 +154,7 @@ final class BindRuleImpl implements BindRule, Serializable {
         // bind rules match type by equality
         if (desire.getDesiredType().equals(depType)) {
             // if the type is equal, then rely on the qualifier matcher
-            return qualifier.matches(desire.getInjectionPoint().getAttributes().getQualifier());
+            return qualifier.matches(desire.getInjectionPoint().getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false

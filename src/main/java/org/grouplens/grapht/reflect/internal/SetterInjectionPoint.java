@@ -18,17 +18,21 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.reflect.Attributes;
-import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import javax.annotation.Nullable;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 /**
  * SetterInjectionPoint represents an injection point via a setter method.
@@ -40,7 +44,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     // transient because we use a serialization proxy
     private final transient Method setter;
     private final transient int parameter;
-    private final transient Attributes attributes;
+    private final transient AnnotationHelper annotations;
 
     /**
      * Create a SetterInjectionPoint that wraps the given setter method.
@@ -52,7 +56,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
         Preconditions.notNull("setter method", setter);
         Preconditions.inRange(parameter, 0, setter.getParameterTypes().length);
         
-        this.attributes = Desires.createAttributes(setter.getParameterAnnotations()[parameter]);
+        this.annotations = new AnnotationHelper(setter.getParameterAnnotations()[parameter]);
         this.setter = setter;
         this.parameter = parameter;
     }
@@ -90,9 +94,22 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
         return Types.box(setter.getParameterTypes()[parameter]);
     }
 
+    @Nullable
     @Override
-    public Attributes getAttributes() {
-        return attributes;
+    public Annotation getQualifier() {
+        return annotations.getQualifier();
+    }
+
+    @Nullable
+    @Override
+    public <A extends Annotation> A getAttribute(Class<A> atype) {
+        return annotations.getAttribute(atype);
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return annotations.getAttributes();
     }
     
     @Override
@@ -111,7 +128,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     
     @Override
     public String toString() {
-        String q = (attributes.getQualifier() == null ? "" : attributes.getQualifier() + ":");
+        String q = (annotations.getQualifier() == null ? "" : annotations.getQualifier() + ":");
         String p = setter.getParameterTypes()[parameter].getSimpleName();
         return setter.getName() + "(" + parameter + ", " + q + p + ")";
     }

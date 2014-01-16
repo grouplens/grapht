@@ -18,10 +18,13 @@
  */
 package org.grouplens.grapht.reflect;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 
 /**
@@ -44,9 +47,33 @@ public interface InjectionPoint extends Serializable {
     Class<?> getErasedType();
 
     /**
-     * @return The attributes of this injection point
+     * Return the qualifier annotation added to the injection point. The
+     * returned annotation's type will have been annotated with
+     * {@link javax.inject.Qualifier}. If the injection point is not qualified, this will
+     * return null.
+     *
+     * @return Any qualifier applied to the injection point
      */
-    Attributes getAttributes();
+    @Nullable
+    Annotation getQualifier();
+
+    /**
+     * Return the attribute of type A that is applied to the injection point. If
+     * the injection point does not have an attribute of type {@code A}, then null is
+     * returned.
+     *
+     * @param atype Attribute annotation type.  It must be annotated with {@link org.grouplens.grapht.annotation.Attribute}.
+     * @return The instance of A applied to the injection point, or null
+     * @throws NullPointerException if atype is null
+     */
+    @Nullable <A extends Annotation> A getAttribute(Class<A> atype);
+
+    /**
+     * @return Immutable collection of attribute annotations (does not include
+     *         the qualifier)
+     */
+    @Nonnull
+    Collection<Annotation> getAttributes();
     
     /**
      * Return the Member that produced this injection point. Synthetic injection

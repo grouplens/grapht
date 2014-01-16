@@ -77,7 +77,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         Desire desire = dchain.getCurrentDesire();
         BindingResult result = null;
 
-        Annotation qualifier = desire.getInjectionPoint().getAttributes().getQualifier();
+        Annotation qualifier = desire.getInjectionPoint().getQualifier();
 
         // Only use qualifier defaults if this is the first desire 
         // (i.e. the desire that declared any qualifier)

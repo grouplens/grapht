@@ -20,8 +20,6 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
-import org.grouplens.grapht.reflect.Attributes;
-import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.internal.types.RoleA;
 import org.grouplens.grapht.reflect.internal.types.RoleB;
@@ -42,21 +40,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.*;
+
 public class InjectionPointTest {
-    private static <T extends Annotation> Attributes qualifier(Class<T> qtype, boolean hasAttr) {
-        if (hasAttr) {
-            return Desires.createAttributes(AnnotationBuilder.of(qtype).build(), AnnotationBuilder.of(Transient.class).build());
-        } else {
-            return Desires.createAttributes(AnnotationBuilder.of(qtype).build());
-        }
-    }
-    
-    private static <T extends Annotation> Attributes named(String name, boolean hasAttr) {
-        if (hasAttr) {
-            return Desires.createAttributes(AnnotationBuilder.of(Named.class).setValue(name).build(), AnnotationBuilder.of(Transient.class).build());
-        } else {
-            return Desires.createAttributes(AnnotationBuilder.of(Named.class).setValue(name).build());
-        }
+    private static <T extends Annotation> Annotation named(String name) {
+        return AnnotationBuilder.of(Named.class).setValue(name).build();
     }
     
     @Test
@@ -66,10 +54,10 @@ public class InjectionPointTest {
         ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
         
         // p1 has the transient attribute, p2 does not
-        Assert.assertNotNull(p1.getAttributes().getAttribute(Transient.class));
-        Assert.assertNull(p2.getAttributes().getAttribute(Transient.class));
-        Assert.assertEquals(1, p1.getAttributes().getAttributes().size());
-        Assert.assertEquals(0, p2.getAttributes().getAttributes().size());
+        Assert.assertNotNull(p1.getAttribute(Transient.class));
+        Assert.assertNull(p2.getAttribute(Transient.class));
+        Assert.assertEquals(1, p1.getAttributes().size());
+        Assert.assertEquals(0, p2.getAttributes().size());
     }
     
     @Test
@@ -84,8 +72,13 @@ public class InjectionPointTest {
         expected.add(p2);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(qualifier(RoleA.class, true), p1.getAttributes());
-        Assert.assertEquals(qualifier(RoleB.class, false), p2.getAttributes());
+        Assert.assertThat(p1.getQualifier(), instanceOf(RoleA.class));
+        Assert.assertThat(p2.getQualifier(), instanceOf(RoleB.class));
+        Assert.assertThat(p1.getAttribute(Transient.class), notNullValue());
+        Assert.assertThat(p1.getAttributes(), contains(instanceOf(Transient.class)));
+        Assert.assertThat(p2.getAttributes(), hasSize(0));
+        Assert.assertThat(p2.getAttribute(Transient.class), nullValue());
+
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         
@@ -114,10 +107,21 @@ public class InjectionPointTest {
         expected.add(p4);
         
         // verify that the qualifiers, types, attrs are identified properly
-        Assert.assertEquals(qualifier(RoleA.class, true), p1.getAttributes());
-        Assert.assertEquals(qualifier(RoleB.class, false), p2.getAttributes());
-        Assert.assertEquals(Desires.createAttributes(), p3.getAttributes());
-        Assert.assertEquals(qualifier(RoleD.class, false), p4.getAttributes());
+        Assert.assertThat(p1.getQualifier(), instanceOf(RoleA.class));
+        Assert.assertThat(p1.getAttribute(Transient.class), notNullValue());
+        Assert.assertThat(p1.getAttributes(), contains(instanceOf(Transient.class)));
+
+        Assert.assertThat(p2.getQualifier(), instanceOf(RoleB.class));
+        Assert.assertThat(p2.getAttributes(), hasSize(0));
+        Assert.assertThat(p2.getAttribute(Transient.class), nullValue());
+
+        Assert.assertThat(p3.getQualifier(), nullValue());
+        Assert.assertThat(p3.getAttributes(), hasSize(0));
+
+        Assert.assertThat(p4.getQualifier(), instanceOf(RoleD.class));
+        Assert.assertThat(p4.getAttributes(), hasSize(0));
+        Assert.assertThat(p4.getAttribute(Transient.class), nullValue());
+
         Assert.assertEquals(Object.class, p1.getType());
         Assert.assertEquals(String.class, p2.getType());
         Assert.assertEquals(Object.class, p3.getType());
@@ -156,8 +160,9 @@ public class InjectionPointTest {
         expected.add(p2);
         
         // verify that the qualifiers and types are identified properly
-        Assert.assertEquals(named("test1", false), p1.getAttributes());
-        Assert.assertEquals(named("test2", false), p2.getAttributes());
+        Assert.assertThat(p1.getQualifier(), equalTo(named("test1")));
+        Assert.assertThat(p2.getQualifier(), equalTo(named("test2")));
+
         Assert.assertEquals(String.class, p1.getType());
         Assert.assertEquals(Integer.class, p2.getType());
         

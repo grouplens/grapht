@@ -21,7 +21,7 @@ package org.grouplens.grapht.context;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.reflect.Attributes;
+import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.Qualifiers;
@@ -88,7 +88,7 @@ class TypeElementMatcher implements ContextElementMatcher, Serializable {
     }
     
     @Override
-    public MatchElement apply(Pair<Satisfaction, Attributes> n, int pos) {
+    public MatchElement apply(Pair<Satisfaction, InjectionPoint> n, int pos) {
         // we must check for nulls in case it is a synthetic satisfaction
         Satisfaction sat = n.getLeft();
         boolean typeMatches;

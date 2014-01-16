@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.annotation;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.AnnotationUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.grouplens.grapht.util.ClassProxy;
@@ -27,8 +28,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -47,7 +46,7 @@ class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serial
     public AnnotationProxy(Class<T> type, Map<String, Object> attrs) {
         annotationType = ClassProxy.of(type);
         cachedType = type;
-        attributes = Collections.unmodifiableMap(new HashMap<String, Object>(attrs));
+        attributes = ImmutableMap.copyOf(attrs);
     }
 
     /**
@@ -125,8 +124,7 @@ class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serial
     }
 
     private boolean proxyEquals(Object o1, Object o2) {
-        return cachedType.isInstance(o2)
-               && AnnotationUtils.equals((Annotation) o1, (Annotation) o2);
+        return AnnotationUtils.equals((Annotation) o1, (Annotation) o2);
     }
 
     /**

@@ -20,7 +20,8 @@ package org.grouplens.grapht.context;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.reflect.Attributes;
+import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.MockInjectionPoint;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.ClassSatisfaction;
@@ -32,8 +33,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -100,23 +99,8 @@ public class TypeElementMatcherTest {
         if (satisfactionType != null) {
             sat = new ClassSatisfaction(satisfactionType);
         }
-        Attributes attrs = new Attributes() {
-            @Override
-            public Annotation getQualifier() {
-                return sr;
-            }
-
-            @Override
-            public <T extends Annotation> T getAttribute(Class<T> atype) {
-                return null;
-            }
-
-            @Override
-            public Collection<Annotation> getAttributes() {
-                return Collections.emptyList();
-            }
-        };
-        Pair<Satisfaction, Attributes> node = Pair.of(sat, attrs);
+        InjectionPoint ip = new MockInjectionPoint(satisfactionType, sr, false);
+        Pair<Satisfaction, InjectionPoint> node = Pair.of(sat, ip);
         
         TypeElementMatcher cm = new TypeElementMatcher(matcherType, mr);
         if (expected) {

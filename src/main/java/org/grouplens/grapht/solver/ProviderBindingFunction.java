@@ -20,7 +20,6 @@ package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.InstanceProvider;
-import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.inject.Provider;
@@ -64,7 +63,7 @@ public class ProviderBindingFunction implements BindingFunction {
                     
                     // Create a desire for the provided type, cloning the attributes
                     // and nullability from the original desire
-                    Desire providedDesire = Desires.create(desire.getInjectionPoint().getAttributes().getQualifier(),
+                    Desire providedDesire = Desires.create(desire.getInjectionPoint().getQualifier(),
                                                            providedType, desire.getInjectionPoint().isNullable());
                     // Satisfied JIT desire for this injection point
                     Desire jitDesire = desire.restrict(new ProviderInjectionSatisfaction(providedDesire));

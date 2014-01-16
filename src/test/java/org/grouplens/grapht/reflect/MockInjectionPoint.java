@@ -20,9 +20,13 @@ package org.grouplens.grapht.reflect;
 
 import org.grouplens.grapht.util.Types;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * MockInjectionPoint is a simple injection point that wraps a type, qualifier, and a
@@ -35,20 +39,16 @@ public class MockInjectionPoint implements InjectionPoint {
     private static final long serialVersionUID = 1L;
 
     private final Class<?> type;
-    private final Attributes attrs;
     private final boolean nullable;
+    private final Annotation qualifier;
     
     public MockInjectionPoint(Class<?> type, boolean nullable) {
-        this(type, new Annotation[0], nullable);
+        this(type, null, nullable);
     }
     
     public MockInjectionPoint(Class<?> type, Annotation qualifier, boolean nullable) {
-        this(type, (qualifier == null ? new Annotation[0] : new Annotation[] { qualifier }), nullable);
-    }
-    
-    public MockInjectionPoint(Class<?> type, Annotation[] annots, boolean nullable) {
         this.type = Types.box(type);
-        this.attrs = Desires.createAttributes(annots);
+        this.qualifier = qualifier;
         this.nullable = nullable;
     }
     
@@ -87,11 +87,24 @@ public class MockInjectionPoint implements InjectionPoint {
         return type;
     }
 
+    @Nullable
     @Override
-    public Attributes getAttributes() {
-        return attrs;
+    public Annotation getQualifier() {
+        return qualifier;
     }
-    
+
+    @Nullable
+    @Override
+    public <A extends Annotation> A getAttribute(Class<A> atype) {
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return Collections.emptySet();
+    }
+
     @Override
     public boolean isNullable() {
         return nullable;
@@ -105,11 +118,11 @@ public class MockInjectionPoint implements InjectionPoint {
         MockInjectionPoint m = (MockInjectionPoint) o;
         return m.type.equals(type) && 
                m.nullable == nullable && 
-               m.attrs.equals(attrs);
+               (m.qualifier == qualifier || (qualifier != null && qualifier.equals(m.qualifier)));
     }
     
     @Override
     public int hashCode() {
-        return type.hashCode() ^ attrs.hashCode() ^ (nullable ? 2 : 4);
+        return type.hashCode() ^ (qualifier == null ? 0 : qualifier.hashCode()) ^ (nullable ? 2 : 4);
     }
 }

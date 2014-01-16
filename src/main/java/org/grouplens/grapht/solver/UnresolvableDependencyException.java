@@ -19,8 +19,8 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.reflect.Attributes;
 import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public class UnresolvableDependencyException extends SolverException {
     public String getMessage() {
         StringBuilder sb = new StringBuilder("Unable to satisfy desire ")
                 .append(format(desires.getCurrentDesire().getInjectionPoint()));
-        List<Pair<Satisfaction, Attributes>> path = context;
+        List<Pair<Satisfaction, InjectionPoint>> path = context;
         if (!path.isEmpty()) {
             sb.append(" of ")
               .append(path.get(0).getLeft());

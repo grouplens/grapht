@@ -19,9 +19,9 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.reflect.Attributes;
-import org.grouplens.grapht.reflect.Desires;
+import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.internal.SimpleInjectionPoint;
 import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nullable;
@@ -37,17 +37,17 @@ import javax.annotation.Nullable;
  *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes>> {
+public class InjectionContext extends AbstractChain<Pair<Satisfaction,InjectionPoint>> {
     private static final long serialVersionUID = 1L;
 
     /**
      * Construct a singleton injection context.
      * @param satisfaction The satisfaction.
-     * @param attrs The attributes.
+     * @param ip The injection point.
      * @return The injection context.
      */
-    public static InjectionContext singleton(Satisfaction satisfaction, Attributes attrs) {
-        return new InjectionContext(null, satisfaction, attrs);
+    public static InjectionContext singleton(Satisfaction satisfaction, InjectionPoint ip) {
+        return new InjectionContext(null, satisfaction, ip);
     }
 
     /**
@@ -56,11 +56,11 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
      * @return The injection context.
      */
     public static InjectionContext singleton(Satisfaction satisfaction) {
-        return singleton(satisfaction, Desires.createAttributes());
+        return singleton(satisfaction, new SimpleInjectionPoint(null, satisfaction.getErasedType(), true));
     }
 
-    private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
-        super(prior, Pair.of(satisfaction, attrs));
+    private InjectionContext(InjectionContext prior, Satisfaction satisfaction, InjectionPoint ip) {
+        super(prior, Pair.of(satisfaction, ip));
     }
 
     /**
@@ -68,12 +68,11 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,Attributes
      * end of its type path. The value cache for the new context will be empty.
      * 
      * @param satisfaction The next satisfaction in the dependency graph
-     * @param attrs The attributes of the injection point receiving the
-     *            satisfaction
+     * @param ip The injection point receiving the satisfaction
      * @return A new context with updated type path
      */
-    public InjectionContext extend(Satisfaction satisfaction, Attributes attrs) {
-        return new InjectionContext(this, satisfaction, attrs);
+    public InjectionContext extend(Satisfaction satisfaction, InjectionPoint ip) {
+        return new InjectionContext(this, satisfaction, ip);
     }
 
     /**

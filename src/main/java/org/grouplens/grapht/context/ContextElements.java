@@ -19,7 +19,7 @@
 package org.grouplens.grapht.context;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.reflect.Attributes;
+import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 
@@ -60,7 +60,7 @@ public final class ContextElements {
         INSTANCE;
 
         @Override
-        public MatchElement apply(Pair<Satisfaction, Attributes> n, int position) {
+        public MatchElement apply(Pair<Satisfaction,InjectionPoint> n, int position) {
             return MatchElementImpl.ANY;
         }
     }
@@ -75,7 +75,7 @@ public final class ContextElements {
         }
 
         @Override
-        public MatchElement apply(Pair<Satisfaction, Attributes> elem, int position) {
+        public MatchElement apply(Pair<Satisfaction, InjectionPoint> elem, int position) {
             MatchElement result = delegate.apply(elem, position);
             if (result == null) {
                 return MatchElementImpl.INVERTED;

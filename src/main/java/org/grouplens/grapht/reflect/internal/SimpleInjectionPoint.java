@@ -18,12 +18,14 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.reflect.Attributes;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -31,17 +33,18 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
- * SimpleInjectionPoint is a synthetic injection point used for
- * {@link InjectSPI#desire(Annotation, Class, boolean)}.
+ * Synthetic injection point used for {@link Desires#create(java.lang.annotation.Annotation, Class, boolean)}.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
     // fields marked as transient since direct serialization is disabled
-    private final transient Attributes attrs;
+    private final transient Annotation qualifier;
     private final transient Class<?> type;
     private final transient boolean nullable;
     
@@ -50,8 +53,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         if (qualifier != null) {
             Preconditions.isQualifier(qualifier.annotationType());
         }
-
-        this.attrs = (qualifier == null ? Desires.createAttributes() : Desires.createAttributes(qualifier));
+        this.qualifier = qualifier;
         this.type = type;
         this.nullable = nullable;
     }
@@ -76,33 +78,54 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         return type;
     }
 
+    @Nullable
     @Override
-    public Attributes getAttributes() {
-        return attrs;
+    public Annotation getQualifier() {
+        return qualifier;
     }
-    
+
+    @Nullable
+    @Override
+    public <A extends Annotation> A getAttribute(Class<A> atype) {
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return Collections.emptyList();
+    }
+
     @Override
     public int hashCode() {
-        return type.hashCode() ^ attrs.hashCode();
+        return new HashCodeBuilder().append(type).append(qualifier).toHashCode();
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof SimpleInjectionPoint)) {
             return false;
         }
         SimpleInjectionPoint p = (SimpleInjectionPoint) o;
-        return p.type.equals(type) && p.attrs.equals(attrs) && p.nullable == nullable;
+        EqualsBuilder eqb = new EqualsBuilder();
+        return eqb.append(type, p.type)
+                  .append(qualifier, p.qualifier)
+                  .append(nullable, p.nullable)
+                  .isEquals();
     }
     
     @Override
     public String toString() {
-        String q = (attrs.getQualifier() == null ? "" : attrs.getQualifier() + ":");
-        return q + type.getSimpleName();
+        StringBuilder sb = new StringBuilder();
+        if (qualifier != null) {
+            sb.append(qualifier)
+              .append(":");
+        }
+        return sb.append(type.getSimpleName()).toString();
     }
 
     private Object writeReplace() {
-        return new SerialProxy(type, nullable, attrs.getQualifier());
+        return new SerialProxy(type, nullable, qualifier);
     }
 
     private void readObject(ObjectInputStream stream) throws InvalidObjectException {

@@ -18,17 +18,18 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.reflect.Attributes;
-import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 /**
  * FieldInjectionPoint is an injection point wrapping a field.
@@ -39,7 +40,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
     // transient because we use a serialization proxy
     private final transient Field field;
-    private final transient Attributes attributes;
+    private final transient AnnotationHelper annotations;
     
     /**
      * Create an injection point wrapping the given field
@@ -50,7 +51,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     public FieldInjectionPoint(@Nonnull Field field) {
         Preconditions.notNull("field", field);
         this.field = field;
-        attributes = Desires.createAttributes(field.getAnnotations());
+        annotations = new AnnotationHelper(field.getAnnotations());
     }
     
     @Override
@@ -63,9 +64,22 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
         return Types.box(field.getType());
     }
 
+    @Nullable
     @Override
-    public Attributes getAttributes() {
-        return attributes;
+    public Annotation getQualifier() {
+        return annotations.getQualifier();
+    }
+
+    @Nullable
+    @Override
+    public <A extends Annotation> A getAttribute(Class<A> atype) {
+        return annotations.getAttribute(atype);
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Annotation> getAttributes() {
+        return annotations.getAttributes();
     }
 
     @Override @Nonnull

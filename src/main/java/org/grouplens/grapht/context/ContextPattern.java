@@ -19,9 +19,9 @@
 package org.grouplens.grapht.context;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.solver.InjectionContext;
-import org.grouplens.grapht.reflect.Attributes;
+import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nullable;
@@ -191,7 +191,7 @@ public class ContextPattern implements ContextMatcher, Serializable {
         }
         // non-empty pattern, non-empty context, go
         Element matcher = pattern.getTailValue();
-        Pair<Satisfaction, Attributes> ctxElem = context.getTailValue();
+        Pair<Satisfaction,InjectionPoint> ctxElem = context.getTailValue();
         MatchElement match = matcher.getMatcher().apply(ctxElem, context.size() - 1);
         if (match == null) {
             // no match, what do we do?
