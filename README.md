@@ -33,6 +33,20 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
+### 0.7.0
+
+See [closed issues][issues-0.7] for more details.
+
+- Enable regular expression matching for contexts (#83)
+- Allow binding to satisfactions
+- Refactor the reflection abstractions, dropping the SPI in favor of the `reflect` package.
+- Use an immutable DAG instead of the old mutable Graph
+- Support rewriting graphs using bind rules
+- Make more use of Guava
+- Support custom/arbitrary class loaders (typically the thread's context class loader)
+
+[issues-0.7]: https://github.com/grouplens/grapht/issues?milestone=10&state=closed
+
 ### 0.6.0
 
 See [closed issues][issues-0.6] for more details.
