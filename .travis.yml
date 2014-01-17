@@ -1,0 +1,16 @@
+language: java
+jdk:
+- oraclejdk7
+- oraclejdk8
+- openjdk6
+install: mvn dependency:go-offline
+script: mvn install
+after_success:
+- ./etc/maybe-deploy.sh
+branches:
+  except:
+  - stable
+env:
+  global:
+  - secure: A1Cszv1Ihv12UZxScXrYvifNyZjZ5ONMDz4GCBJp9Req9VLoyLf6Efz0RcguKv4lEAqJRCWZYsbAM1nY8+Y/7IMo5uEleDnK5WHQHXZP2RatzKRNKLB2Ml4SW5Br4YO+M92qM0H6tHvDzsIU6T9GMtnVJkV077Y2xxRa8cqM4yc=
+  - secure: YXg/tYKM5SCELLQcyNo6yQT4OsbCLVJqXFXd/n0f9J/KY1A8IeIgqYe59X67IIdufm2zOyGvnHapuj5M3fsBdnp5kBwW+Hd7ZiMUaiNFTLCAMaBiw2NIBlkEDFcICak1yH3MawfBcKBNkqcmy6l8hOK6uxEsE+iFExyl0XhmnlE=

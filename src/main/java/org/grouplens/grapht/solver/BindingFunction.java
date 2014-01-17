@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.Desire;
-
 import javax.annotation.Nullable;
 
 /**
@@ -37,5 +35,5 @@ public interface BindingFunction {
      * @throws SolverException If there is an error (such as ambiguous bindings).
      */
     @Nullable
-    BindingResult bind(InjectionContext context, Desire desire) throws SolverException;
+    BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException;
 }

@@ -18,9 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.InstanceProvider;
-import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
 import javax.inject.Provider;
@@ -44,15 +43,12 @@ import java.util.List;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ProviderBindingFunction implements BindingFunction {
-    private final InjectSPI spi;
-    
-    public ProviderBindingFunction(InjectSPI spi) {
-        Preconditions.notNull("spi", spi);
-        this.spi = spi;
+    public ProviderBindingFunction() {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, Desire desire) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain desires) throws SolverException {
+        Desire desire = desires.getCurrentDesire();
         if (Provider.class.equals(desire.getDesiredType())) {
             // Look at the parameterized type of the injection point to
             // find what type of object should be provided
@@ -67,8 +63,8 @@ public class ProviderBindingFunction implements BindingFunction {
                     
                     // Create a desire for the provided type, cloning the attributes
                     // and nullability from the original desire
-                    Desire providedDesire = spi.desire(desire.getInjectionPoint().getAttributes().getQualifier(), 
-                                                       providedType, desire.getInjectionPoint().isNullable());
+                    Desire providedDesire = Desires.create(desire.getInjectionPoint().getQualifier(),
+                                                           providedType, desire.getInjectionPoint().isNullable());
                     // Satisfied JIT desire for this injection point
                     Desire jitDesire = desire.restrict(new ProviderInjectionSatisfaction(providedDesire));
                     // Make sure to defer this binding since the single dependency
@@ -125,7 +121,7 @@ public class ProviderBindingFunction implements BindingFunction {
         @SuppressWarnings("unchecked")
         @Override
         public <T> T visit(SatisfactionVisitor<T> visitor) {
-            return visitor.visitProviderClass((Class) InstanceProvider.class);
+            return (T) visitor.visitProviderClass((Class) InstanceProvider.class);
         }
 
         @Override

@@ -20,14 +20,17 @@ package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -48,15 +51,29 @@ import java.util.*;
 @Immutable
 public final class ClassProxy implements Serializable {
     private static final long serialVersionUID = 1;
+    private static final Logger logger = LoggerFactory.getLogger(ClassProxy.class);
 
     private final String className;
     private final long checksum;
     @Nullable
     private transient volatile WeakReference<Class<?>> theClass;
+    private transient ClassLoader classLoader;
 
     private ClassProxy(String name, long check) {
         className = name;
         checksum = check;
+        classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = ClassProxy.class.getClassLoader();
+        }
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = ClassProxy.class.getClassLoader();
+        }
     }
 
     /**
@@ -98,12 +115,20 @@ public final class ClassProxy implements Serializable {
         WeakReference<Class<?>> ref = theClass;
         Class<?> cls = ref == null ? null : ref.get();
         if (cls == null) {
-            cls = ClassUtils.getClass(className);
-            long check = checksumClass(cls);
-            if (checksum == check) {
-                theClass = new WeakReference<Class<?>>(cls);
+            if(className.equals("void")) {
+                // special case
+                cls = Void.TYPE;
             } else {
+                cls = ClassUtils.getClass(classLoader, className);
+            }
+            long check = checksumClass(cls);
+            if (!isSerializationPermissive() && checksum != check) {
                 throw new ClassNotFoundException("checksum mismatch for " + cls.getName());
+            } else {
+                if (checksum != check) {
+                    logger.warn("checksum mismatch for {}", cls);
+                }
+                theClass = new WeakReference<Class<?>>(cls);
             }
         }
         return cls;
@@ -128,6 +153,10 @@ public final class ClassProxy implements Serializable {
     }
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    public static boolean isSerializationPermissive() {
+        return Boolean.getBoolean("grapht.deserialization.permissive");
+    }
 
     /**
      * Compute a checksum for a class. These checksums are used to see if a class has changed
@@ -160,16 +189,22 @@ public final class ClassProxy implements Serializable {
 
         List<String> members = new ArrayList<String>();
         for (Constructor<?> c: type.getDeclaredConstructors()) {
-            members.add(String.format("%s(%s)", c.getName(),
-                                      StringUtils.join(c.getParameterTypes(), ", ")));
+            if (isInjectionSensitive(c)) {
+                members.add(String.format("%s(%s)", c.getName(),
+                                          StringUtils.join(c.getParameterTypes(), ", ")));
+            }
         }
         for (Method m: type.getDeclaredMethods()) {
-            members.add(String.format("%s(%s): %s", m.getName(),
-                                      StringUtils.join(m.getParameterTypes(), ", "),
-                                      m.getReturnType()));
+            if (isInjectionSensitive(m)) {
+                members.add(String.format("%s(%s): %s", m.getName(),
+                                          StringUtils.join(m.getParameterTypes(), ", "),
+                                          m.getReturnType()));
+            }
         }
         for (Field f: type.getDeclaredFields()) {
-            members.add(f.getName() + ":" + f.getType().getName());
+            if (isInjectionSensitive(f)) {
+                members.add(f.getName() + ":" + f.getType().getName());
+            }
         }
 
         Collections.sort(members);
@@ -181,5 +216,28 @@ public final class ClassProxy implements Serializable {
         for (String mem: members) {
             digest.update(mem.getBytes(UTF8));
         }
+    }
+
+    /**
+     * Check whether a member is injection-sensitive and should be checked for validity in
+     * deserialization.
+     *
+     * @param m The member.
+     * @param <M> The type of member (done so we can check multiple types).
+     * @return {@code true} if the member should be checksummed, {@code false} to ignore it.
+     */
+    private static <M extends Member & AnnotatedElement>boolean isInjectionSensitive(M m) {
+        // static methods are not sensitive
+        if (Modifier.isStatic(m.getModifiers())) {
+            return false;
+        }
+
+        // private members w/o @Inject are not sensitive
+        if (Modifier.isPrivate(m.getModifiers()) && m.getAnnotation(Inject.class) == null) {
+            return false;
+        }
+
+        // public, protected, or @Inject - it's sensitive (be conservative)
+        return true;
     }
 }

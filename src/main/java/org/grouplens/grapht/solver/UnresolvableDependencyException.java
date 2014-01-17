@@ -19,9 +19,9 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.Satisfaction;
 
 import java.util.List;
 
@@ -33,11 +33,11 @@ import java.util.List;
 public class UnresolvableDependencyException extends SolverException {
     private static final long serialVersionUID = 1L;
 
-    private final Desire desire;
+    private final DesireChain desires;
     private final InjectionContext context;
     
-    public UnresolvableDependencyException(Desire desire, InjectionContext context) {
-        this.desire = desire;
+    public UnresolvableDependencyException(DesireChain chain, InjectionContext context) {
+        this.desires = chain;
         this.context = context;
     }
     
@@ -52,20 +52,20 @@ public class UnresolvableDependencyException extends SolverException {
      * @return The unresolvable desire
      */
     public Desire getDesire() {
-        return desire;
+        return desires.getCurrentDesire();
     }
     
     @Override
     public String getMessage() {
         StringBuilder sb = new StringBuilder("Unable to satisfy desire ")
-                .append(format(desire.getInjectionPoint()));
-        List<Pair<Satisfaction, Attributes>> path = context.getTypePath();
+                .append(format(desires.getCurrentDesire().getInjectionPoint()));
+        List<Pair<Satisfaction, InjectionPoint>> path = context;
         if (!path.isEmpty()) {
             sb.append(" of ")
               .append(path.get(0).getLeft());
         }
         sb.append('\n')
-          .append(format(context));
+          .append(format(context, desires));
         return sb.toString();
     }
 }

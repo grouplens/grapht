@@ -18,11 +18,13 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.ContextMatch;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.context.ContextMatch;
+import org.grouplens.grapht.context.ContextMatcher;
+import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +36,8 @@ import java.util.*;
  * BindingFunction that uses BindRules created by the fluent API to bind desires
  * to other desires or satisfactions.
  * <p>
- * For more details on context management, see {@link org.grouplens.grapht.spi.ElementChainContextMatcher},
- * {@link org.grouplens.grapht.spi.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
+ * For more details on context management, see {@link org.grouplens.grapht.context.ContextPattern},
+ * {@link org.grouplens.grapht.context.ContextElementMatcher}, and {@link QualifierMatcher}. This function uses the
  * context to activate and select BindRules. A number of rules are used to order
  * applicable BindRules and choose the best. When any of these rules rely on the
  * current dependency context, the deepest node in the context has the most
@@ -53,33 +55,39 @@ import java.util.*;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class RuleBasedBindingFunction implements BindingFunction {
-    private static final String APPLIED_RULES = "APPLIED_BIND_RULES";
-    
+    private static final Map<Object,Set<BindRule>> bindRuleMemory
+            = new WeakHashMap<Object, Set<BindRule>>();
+
     private static final Logger logger = LoggerFactory.getLogger(RuleBasedBindingFunction.class);
     
-    private final Map<ContextMatcher, Collection<BindRule>> rules;
+    private final ImmutableListMultimap<ContextMatcher, BindRule> rules;
     
-    public RuleBasedBindingFunction(Map<ContextMatcher, Collection<BindRule>> rules) {
+    public RuleBasedBindingFunction(Multimap<ContextMatcher, BindRule> rules) {
         Preconditions.notNull("rules", rules);
         
-        this.rules = Collections.unmodifiableMap(new HashMap<ContextMatcher, Collection<BindRule>>(rules));
+        this.rules = ImmutableListMultimap.copyOf(rules);
     }
     
     /**
+     * Get the rules underlying this binding function.
      * @return The rules used by this BindingFunction
      */
-    public Map<ContextMatcher, Collection<BindRule>> getRules() {
+    public ListMultimap<ContextMatcher, BindRule> getRules() {
         return rules;
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, Desire desire) throws SolverException {
-        Set<BindRule> appliedRules = context.getValue(APPLIED_RULES);
-        if (appliedRules == null) {
-            appliedRules = new HashSet<BindRule>();
-            context.putValue(APPLIED_RULES, appliedRules);
+    public BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException {
+        // FIXME Build a better way to remember the applied rules
+        Set<BindRule> appliedRules;
+        synchronized (bindRuleMemory) {
+            appliedRules = bindRuleMemory.get(desire.getKey());
+            if (appliedRules == null) {
+                appliedRules = new HashSet<BindRule>();
+                bindRuleMemory.put(desire.getKey(), appliedRules);
+            }
         }
-        
+
         // collect all bind rules that apply to this desire
         List<Pair<ContextMatch, BindRule>> validRules = new ArrayList<Pair<ContextMatch, BindRule>>();
         for (ContextMatcher matcher: rules.keySet()) {
@@ -88,7 +96,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
                 // the context applies to the current context, so go through all
                 // bind rules within it and record those that match the desire
                 for (BindRule br: rules.get(matcher)) {
-                    if (br.matches(desire) && !appliedRules.contains(br)) {
+                    if (br.matches(desire.getCurrentDesire()) && !appliedRules.contains(br)) {
                         validRules.add(Pair.of(match, br));
                         logger.trace("Matching rule, context: {}, rule: {}", matcher, br);
                     }
@@ -123,7 +131,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
             appliedRules.add(selectedRule);
             
             logger.debug("Applying rule: {} to desire: {}", selectedRule, desire);
-            return new BindingResult(selectedRule.apply(desire), selectedRule.getCachePolicy(),
+            return new BindingResult(selectedRule.apply(desire.getCurrentDesire()), selectedRule.getCachePolicy(),
                                      false, selectedRule.isTerminal());
         }
         

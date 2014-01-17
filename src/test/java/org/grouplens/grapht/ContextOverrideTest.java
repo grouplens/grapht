@@ -19,6 +19,9 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.annotation.DefaultImplementation;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.context.Multiplicity;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -117,6 +120,51 @@ public class ContextOverrideTest {
         assertThat(out.inner.plug, instanceOf(Plug.class));
     }
 
+    /**
+     * Test anchored root binding.
+     */
+    @Test
+    public void testAnchoredToRoot() {
+        build.bind(IPlug.class)
+             .to(PlugA.class);
+        build.at(null)
+             .bind(IPlug.class)
+             .to(PlugH.class);
+        Injector inj = build.build();
+
+        // Does directly requesting a plug get us the anchored binding?
+        assertThat(inj.getInstance(IPlug.class),
+                   instanceOf(PlugH.class));
+
+        // Is the non-anchored binding used for dependencies?
+        Outer out = inj.getInstance(Outer.class);
+        assertThat(out.plug,
+                   instanceOf(PlugA.class));
+        assertThat(out.inner.plug,
+                   instanceOf(PlugA.class));
+        assertThat(out.plug, sameInstance(out.inner.plug));
+
+        // quick check this again, make sure nothing changed
+        assertThat(inj.getInstance(IPlug.class),
+                   instanceOf(PlugH.class));
+    }
+
+    @Test
+    public void testPatternForPlug() {
+        build.matching(ContextPattern.any()
+                                     .append(CInner.class)
+                                     .append(ContextElements.invertMatch(ContextElements.matchType(PlugW.class)),
+                                             Multiplicity.ZERO_OR_MORE))
+             .bind(Plug.class)
+             .to(PlugW.class);
+        Injector inj = build.build();
+        CInner c = inj.getInstance(CInner.class);
+        assertThat(c.plug, instanceOf(PlugW.class));
+        assert c.plug != null;
+        assertThat(((PlugW) c.plug).inner.getClass(),
+                   equalTo((Class) Plug.class));
+    }
+
     @DefaultImplementation(PlugA.class)
     public static interface IPlug {}
     public static class PlugA implements IPlug {}
@@ -161,6 +209,15 @@ public class ContextOverrideTest {
         public COuter(CInner in, @Nullable Plug p) {
             plug = p;
             inner = in;
+        }
+    }
+
+    public static class PlugW extends Plug {
+        private final Plug inner;
+
+        @Inject
+        public PlugW(Plug wrapped) {
+            inner = wrapped;
         }
     }
 }

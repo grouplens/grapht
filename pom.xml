@@ -5,7 +5,7 @@
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
-  <version>0.6.1-SNAPSHOT</version>
+  <version>0.7.0</version>
   <artifactId>grapht</artifactId>
   <groupId>org.grouplens.grapht</groupId>
   <name>Grapht Dependency Injector</name>
@@ -27,21 +27,21 @@
     </license>
   </licenses>
   <issueManagement>
-    <system>bitbucket</system>
-    <url>http://bitbucket.org/grouplens/grapht/issues</url>
+    <system>GitHub</system>
+    <url>http://github.com/grouplens/grapht/issues</url>
   </issueManagement>
   <scm>
-    <connection>scm:hg:https://bitbucket.org/grouplens/grapht</connection>
-    <developerConnection>scm:hg:https://bitbucket.org/grouplens/grapht</developerConnection>
-    <url>https://bitbucket.org/grouplens/grapht</url>
+    <connection>scm:git:https://github.com/grouplens/grapht</connection>
+    <developerConnection>scm:git:https://github.com/grouplens/grapht</developerConnection>
+    <url>https://github.com/grouplens/grapht</url>
   </scm>
   <ciManagement>
-    <system>jenkins</system>
-    <url>http://dev.grouplens.org/jenkins</url>
+    <system>travis</system>
+    <url>https://travis-ci.org/grouplens/grapht</url>
   </ciManagement>
 
   <properties>
-    <grapht.web.path>scpexe://medusa.cs.umn.edu/srv/www/grapht</grapht.web.path>
+    <grapht.web.path>scpexe://www.grouplens.org/export/scratch/grplens/dev.grouplens.org/grapht</grapht.web.path>
   </properties>
 
   <distributionManagement>
@@ -68,9 +68,14 @@
       <version>3.1</version>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>14.0.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.4</version>
+      <version>1.7.5</version>
     </dependency>
 
     <dependency>
@@ -182,12 +187,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>3.2</version>
+        <version>3.3</version>
         <dependencies>
           <dependency>
             <groupId>org.apache.maven.wagon</groupId>
             <artifactId>wagon-ssh-external</artifactId>
-            <version>2.2</version>
+            <version>2.5</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-file</artifactId>
+            <version>2.5</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -207,7 +217,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.6</version>
+        <version>2.7</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -243,6 +253,12 @@
   <profiles>
     <profile>
       <id>lint</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS</name>
+          <value>true</value>
+        </property>
+      </activation>
       <reporting>
         <plugins>
           <plugin>
@@ -250,6 +266,52 @@
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
               <show>package</show>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <inherited>false</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-changes-plugin</artifactId>
+            <version>2.9</version>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>github-report</report>
+                </reports>
+                <configuration>
+                  <includeOpenIssues>false</includeOpenIssues>
+                  <onlyCurrentVersion>true</onlyCurrentVersion>
+                  <columnNames>Id,Summary,Status,Created,Updated,Fix Version</columnNames>
+                </configuration>
+              </reportSet>
+            </reportSets>
+          </plugin>
+
+          <plugin>
+            <inherited>false</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-changelog-plugin</artifactId>
+            <version>2.2</version>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>changelog</report>
+                </reports>
+                <configuration>
+                  <issueIDRegexPattern>(?&lt;=#)\d+\b</issueIDRegexPattern>
+                  <issueLinkUrl>https://github.com/grouplens/lenskit/issues/</issueLinkUrl>
+                </configuration>
+              </reportSet>
+            </reportSets>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>clirr-maven-plugin</artifactId>
+            <version>2.6.1</version>
+            <configuration>
+              <minSeverity>info</minSeverity>
             </configuration>
           </plugin>
         </plugins>

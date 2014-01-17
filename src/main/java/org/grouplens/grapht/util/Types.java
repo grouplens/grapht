@@ -197,7 +197,7 @@ public final class Types {
         final Class<?> inferredType = TypeUtils.getRawType(bindings.get(PROVIDER_TYPE_VAR), null);
         try{
             final Class<?> observedType = providerClass.getMethod("get").getReturnType();
-            if(inferredType.isAssignableFrom(observedType)) {
+            if (inferredType != null && inferredType.isAssignableFrom(observedType)) {
                 return observedType;
             } else {
                 return inferredType;
@@ -289,18 +289,17 @@ public final class Types {
     }
 
     /**
-     * Load a class by name, even if it is a primitive type..
-     * @param name The name of the class.
-     * @return The class.
-     * @throws ClassNotFoundException
+     * Infer a default class loader.
+     * @return A reasonable default class loader.
      */
-    @Nonnull
-    private static Class<?> classByName(@Nonnull String name) throws ClassNotFoundException {
-        for (Class<?> cls: PRIMITIVE_TYPES) {
-            if (cls.getName().equals(name)) {
-                return cls;
-            }
+    public static ClassLoader getDefaultClassLoader() {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+            loader = Types.class.getClassLoader();
         }
-        return Class.forName(name);
+        if (loader == null) {
+            loader = ClassLoader.getSystemClassLoader();
+        }
+        return loader;
     }
 }

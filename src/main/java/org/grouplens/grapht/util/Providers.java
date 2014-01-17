@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.util;
 
+import com.google.common.base.Supplier;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -41,5 +43,26 @@ public final class Providers {
 
     public static <T> Provider<T> memoize(@Nonnull Provider<T> inner) {
         return new MemoizingProvider<T>(inner);
+    }
+
+    /**
+     * Convert a supplier to a provider.
+     * @param supplier The supplier.
+     * @param type The supplier's return type (to help the injector).
+     * @param <T> The type returned from the supplier.
+     * @return A provider.
+     */
+    public static <T> Provider<T> fromSupplier(final Supplier<T> supplier, final Class<T> type) {
+        return new TypedProvider<T>() {
+            @Override
+            public Class<?> getProvidedType() {
+                return type;
+            }
+
+            @Override
+            public T get() {
+                return supplier.get();
+            }
+        };
     }
 }

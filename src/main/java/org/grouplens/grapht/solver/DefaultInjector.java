@@ -18,16 +18,13 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Predicate;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
-import org.grouplens.grapht.graph.Edge;
-import org.grouplens.grapht.graph.Node;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.ProviderSource;
+import org.grouplens.grapht.graph.DAGEdge;
+import org.grouplens.grapht.graph.DAGNode;
+import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.MemoizingProvider;
-import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +48,8 @@ import java.util.Map;
 public class DefaultInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
     
-    private final InjectSPI spi;
     private final DependencySolver solver;
-    private final Map<Node, Provider<?>> providerCache;
+    private final Map<DAGNode<CachedSatisfaction, DesireChain>, Provider<?>> providerCache;
     
 
     /**
@@ -63,13 +59,12 @@ public class DefaultInjector implements Injector {
      * hierarchy. Bindings with a NO_PREFERENCE cache policy will be treated as
      * NEW_INSTANCE.
      * 
-     * @param spi The InjectSPI to use
      * @param functions The BindingFunctions to use, ordered with highest
      *            priority function first
      * @throws NullPointerException if spi or functions ar enull
      */
-    public DefaultInjector(InjectSPI spi, BindingFunction... functions) {
-        this(spi, CachePolicy.MEMOIZE, functions);
+    public DefaultInjector(BindingFunction... functions) {
+        this(CachePolicy.MEMOIZE, functions);
     }
     
     /**
@@ -79,15 +74,14 @@ public class DefaultInjector implements Injector {
      * hierarchy. Bindings with a NO_PREFERENCE cache policy will use
      * <tt>defaultPolicy</tt>.
      * 
-     * @param spi The InjectSPI to use
      * @param defaultPolicy The CachePolicy used in place of NO_PREFERENCE
      * @param functions The BindingFunctions to use, ordered with highest
      *            priority functions first
      * @throws IllegalArgumentException if defaultPolicy is NO_PREFERENCE
      * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectSPI spi, CachePolicy defaultPolicy, BindingFunction... functions) {
-        this(spi, defaultPolicy, 100, functions);
+    public DefaultInjector(CachePolicy defaultPolicy, BindingFunction... functions) {
+        this(defaultPolicy, 100, functions);
     }
 
     /**
@@ -101,7 +95,6 @@ public class DefaultInjector implements Injector {
      * configuration requires it, although for most purposes the default 100
      * should be sufficient.
      * 
-     * @param spi The InjectSPI to use
      * @param defaultPolicy The CachePolicy used in place of NO_PREFERENCE
      * @param maxDepth The maximum depth of the dependency hierarchy
      * @param functions The BindingFunctions to use, ordered with highest
@@ -110,19 +103,17 @@ public class DefaultInjector implements Injector {
      *             defaultPolicy is NO_PREFERENCE
      * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectSPI spi, CachePolicy defaultPolicy, int maxDepth, BindingFunction... functions) {
-        Preconditions.notNull("spi", spi);
+    public DefaultInjector(CachePolicy defaultPolicy, int maxDepth, BindingFunction... functions) {
         if (defaultPolicy.equals(CachePolicy.NO_PREFERENCE)) {
             throw new IllegalArgumentException("Default CachePolicy cannot be NO_PREFERENCE");
         }
 
-        this.spi = spi;
         solver = DependencySolver.newBuilder()
                                  .addBindingFunctions(functions)
                                  .setDefaultPolicy(defaultPolicy)
                                  .setMaxDepth(maxDepth)
                                  .build();
-        providerCache = new HashMap<Node, Provider<?>>();
+        providerCache = new HashMap<DAGNode<CachedSatisfaction, DesireChain>, Provider<?>>();
     }
     
     /**
@@ -144,10 +135,13 @@ public class DefaultInjector implements Injector {
         // within this exclusive lock so we know everything is thread safe
         // albeit in a non-optimal way.
         synchronized(this) {
-            Desire desire = spi.desire(qualifier, type, false);
+            Desire desire = Desires.create(qualifier, type, false);
+
+            Predicate<DesireChain> pred = DesireChain.hasInitialDesire(desire);
 
             // check if the desire is already in the graph
-            Edge resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
+            DAGEdge<CachedSatisfaction, DesireChain> resolved =
+                    solver.getGraph().getOutgoingEdgeWithLabel(pred);
 
             // The edge is only non-null if getInstance() has been called before,
             // it may be present in the graph at a deeper node. If that's the case
@@ -159,17 +153,17 @@ public class DefaultInjector implements Injector {
                 } catch(SolverException e) {
                     throw new InjectionException(type, null, e);
                 }
-                resolved = solver.getGraph().getOutgoingEdge(solver.getRootNode(), desire);
+                resolved = solver.getGraph().getOutgoingEdgeWithLabel(pred);
             }
 
             // Check if the provider for the resolved node is in our cache
-            Node resolvedNode = resolved.getTail();
+            DAGNode<CachedSatisfaction, DesireChain> resolvedNode = resolved.getTail();
             return (T) getProvider(resolvedNode).get();
         }
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Provider<?> getProvider(Node node) {
+    private Provider<?> getProvider(DAGNode<CachedSatisfaction, DesireChain> node) {
         Provider<?> cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
@@ -191,16 +185,26 @@ public class DefaultInjector implements Injector {
     }
     
     private class DesireProviderMapper implements ProviderSource {
-        private final Node forNode;
+        private final DAGNode<CachedSatisfaction, DesireChain> forNode;
         
-        public DesireProviderMapper(Node forNode) {
+        public DesireProviderMapper(DAGNode<CachedSatisfaction, DesireChain> forNode) {
             this.forNode = forNode;
         }
         
         @Override
         public Provider<?> apply(Desire desire) {
-            Edge edge = solver.getGraph().getOutgoingEdge(forNode, desire);
-            Node dependency = edge.getTail();
+            DAGEdge<CachedSatisfaction, DesireChain> edge =
+                    forNode.getOutgoingEdgeWithLabel(DesireChain.hasInitialDesire(desire));
+            DAGNode<CachedSatisfaction, DesireChain> dependency;
+            if (edge != null) {
+                dependency = edge.getTail();
+            } else {
+                dependency = solver.getBackEdge(forNode, desire);
+            }
+            if (dependency == null) {
+                // we have an unresolved graph, that can't happen
+                throw new RuntimeException("unresolved dependency " + desire + " for " + forNode.getLabel().getSatisfaction());
+            }
             return getProvider(dependency);
         }
     }

@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.MockQualifierMatcher;
-import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.MockQualifierMatcher;
+import org.grouplens.grapht.reflect.QualifierMatcher;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,6 +85,11 @@ public class MockBindRule implements BindRule {
     
     public QualifierMatcher getQualifier() {
         return MockQualifierMatcher.any();
+    }
+
+    @Override
+    public BindRuleBuilder newCopyBuilder() {
+        throw new UnsupportedOperationException("cannot configure mock bind rules");
     }
 
     public int compareTo(BindRule other) {

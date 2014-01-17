@@ -18,10 +18,10 @@
  */
 package org.grouplens.grapht.util;
 
-import org.grouplens.grapht.spi.reflect.types.InterfaceA;
-import org.grouplens.grapht.spi.reflect.types.InterfaceB;
-import org.grouplens.grapht.spi.reflect.types.TypeA;
-import org.grouplens.grapht.spi.reflect.types.TypeB;
+import org.grouplens.grapht.reflect.internal.types.InterfaceA;
+import org.grouplens.grapht.reflect.internal.types.InterfaceB;
+import org.grouplens.grapht.reflect.internal.types.TypeA;
+import org.grouplens.grapht.reflect.internal.types.TypeB;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import static org.junit.Assert.fail;

@@ -18,10 +18,11 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.util.Preconditions;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.List;
  */
 public class DependencySolverBuilder {
     private List<BindingFunction> bindingFunctions = new LinkedList<BindingFunction>();
+    private List<BindingFunction> triggerFunctions = new LinkedList<BindingFunction>();
     private CachePolicy defaultPolicy = CachePolicy.NO_PREFERENCE;
     private int maxDepth = 100;
 
@@ -47,13 +49,43 @@ public class DependencySolverBuilder {
     }
 
     /**
+     * Get the current list of trigger binding functions.  These are the binding functions for which
+     * {@code canTriggerRewrite} is {@code true} in {@link #addBindingFunction(BindingFunction,boolean)}.
+     *
+     * @return The current list of trigger binding functions.
+     */
+    public List<BindingFunction> getTriggerFunctions() {
+        return Collections.unmodifiableList(triggerFunctions);
+    }
+
+    /**
      * Add a binding function to the dependency solver.
      * @param func The binding function.
      * @return The builder (for chaining).
      */
     public DependencySolverBuilder addBindingFunction(@Nonnull BindingFunction func) {
+        return addBindingFunction(func, true);
+    }
+
+    /**
+     * Add a binding function to the dependency solver.
+     * @param func The binding function.
+     * @param canTriggerRewrite Controls whether this binding function can activate re-resolution
+     *                          when doing a graph rewrite.  If {@code true} (the value passed by
+     *                          all other binding function adders), this binding function returning
+     *                          a binding will cause a graph rewrite; if {@code false}, it will be
+     *                          ignored during rewrites until the rewrite has been triggered by some
+     *                          other binding function.  Register the default binding function with
+     *                          {@code false} here to keep default bindings from triggering rewrites.
+     * @return The builder (for chaining).
+     */
+    public DependencySolverBuilder addBindingFunction(@Nonnull BindingFunction func,
+                                                      boolean canTriggerRewrite) {
         Preconditions.notNull("binding function", func);
         bindingFunctions.add(func);
+        if (canTriggerRewrite) {
+            triggerFunctions.add(func);
+        }
         return this;
     }
 
@@ -63,10 +95,7 @@ public class DependencySolverBuilder {
      * @return The builder (for chaining).
      */
     public DependencySolverBuilder addBindingFunctions(@Nonnull BindingFunction... funcs) {
-        for (BindingFunction fn: funcs) {
-            addBindingFunction(fn);
-        }
-        return this;
+        return addBindingFunctions(Arrays.asList(funcs));
     }
 
     /**
@@ -127,6 +156,6 @@ public class DependencySolverBuilder {
      * @return The dependency solver.
      */
     public DependencySolver build() {
-        return new DependencySolver(bindingFunctions, defaultPolicy, maxDepth);
+        return new DependencySolver(bindingFunctions, triggerFunctions, defaultPolicy, maxDepth);
     }
 }

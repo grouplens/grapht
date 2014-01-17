@@ -18,19 +18,18 @@
  */
 package org.grouplens.grapht;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.grouplens.grapht.context.ContextMatcher;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.spi.ContextElementMatcher;
-import org.grouplens.grapht.spi.ContextMatcher;
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
 
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * BindingFunctionBuilder provides a convenient access to the fluent API and
@@ -62,19 +61,17 @@ public class BindingFunctionBuilder implements Cloneable {
         SUPER_TYPES
     }
     
-    private final InjectSPI spi;
     private final Context root;
     
     private final Set<Class<?>> defaultExcludes;
     private final boolean generateRules;
     
-    private final Map<ContextMatcher, Collection<BindRule>> manualRules;
-    private final Map<ContextMatcher, Collection<BindRule>> intermediateRules; // "generated"
-    private final Map<ContextMatcher, Collection<BindRule>> superRules; // "generated"
+    private final Multimap<ContextMatcher,BindRule> manualRules;
+    private final Multimap<ContextMatcher,BindRule> intermediateRules; // "generated"
+    private final Multimap<ContextMatcher,BindRule> superRules; // "generated"
 
     /**
-     * Create a new InjectorConfigurationBuilder that uses a
-     * {@link ReflectionInjectSPI} and automatically generates bind rules for
+     * Create a new InjectorConfigurationBuilder that automatically generates bind rules for
      * super and intermediate types.
      */
     public BindingFunctionBuilder() {
@@ -82,56 +79,36 @@ public class BindingFunctionBuilder implements Cloneable {
     }
 
     /**
-     * Create a new InjectorConfigurationBuilder that uses a
-     * {@link ReflectionInjectSPI}. If <tt>generateRules</tt> is true, bind
+     * Create a new InjectorConfigurationBuilder. If <tt>generateRules</tt> is true, bind
      * rules for super and intermediate types are generated. If it is false,
      * only one bind rule is created per binding.
      * 
      * @param generateRules True if additional bind rules should be generated
      */
     public BindingFunctionBuilder(boolean generateRules) {
-        this(new ReflectionInjectSPI(), generateRules);
-    }
-    
-    /**
-     * Create a new InjectorConfigurationBuilder that uses the given
-     * {@link InjectSPI} instance.
-     * 
-     * @param spi The injection service provider to use
-     * @param generateRules True if additional bind rules should be generated
-     *            for intermediate and super types
-     * @throws NullPointerException if spi is null
-     */
-    public BindingFunctionBuilder(InjectSPI spi, boolean generateRules) {
-        if (spi == null) {
-            throw new NullPointerException("SPI cannot be null");
-        }
-        
-        this.spi = spi;
         this.generateRules = generateRules;
-        
+
         defaultExcludes = new HashSet<Class<?>>();
         defaultExcludes.add(Object.class);
         defaultExcludes.add(Comparable.class);
         defaultExcludes.add(Serializable.class);
         defaultExcludes.add(Externalizable.class);
         defaultExcludes.add(Cloneable.class);
-        
-        manualRules = new HashMap<ContextMatcher, Collection<BindRule>>();
-        intermediateRules = new HashMap<ContextMatcher, Collection<BindRule>>();
-        superRules = new HashMap<ContextMatcher, Collection<BindRule>>();
-        
-        root = new ContextImpl(this, new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()));
+
+        manualRules = ArrayListMultimap.create();
+        intermediateRules = ArrayListMultimap.create();
+        superRules = ArrayListMultimap.create();
+
+        root = ContextImpl.root(this);
     }
     
     private BindingFunctionBuilder(BindingFunctionBuilder clone) {
-        spi = clone.spi;
         generateRules = clone.generateRules;
         defaultExcludes = new HashSet<Class<?>>(clone.defaultExcludes);
-        manualRules = deepCloneRules(clone.manualRules);
-        intermediateRules = deepCloneRules(clone.intermediateRules);
-        superRules = deepCloneRules(clone.superRules);
-        root = new ContextImpl(this, new ElementChainContextMatcher(new ArrayList<ContextElementMatcher>()));
+        manualRules = ArrayListMultimap.create(clone.manualRules);
+        intermediateRules = ArrayListMultimap.create(clone.intermediateRules);
+        superRules = ArrayListMultimap.create(clone.superRules);
+        root = ContextImpl.root(this);
     }
     
     @Override
@@ -145,13 +122,6 @@ public class BindingFunctionBuilder implements Cloneable {
      */
     public boolean getGenerateRules() {
         return generateRules;
-    }
-    
-    /**
-     * @return The SPI used by this builder
-     */
-    public InjectSPI getSPI() {
-        return spi;
     }
     
     /**
@@ -209,31 +179,16 @@ public class BindingFunctionBuilder implements Cloneable {
         return new RuleBasedBindingFunction(getMap(set));
     }
     
-    void addBindRule(RuleSet set, ElementChainContextMatcher context, BindRule rule) {
-        Map<ContextMatcher, Collection<BindRule>> map = getMap(set);
-        
-        Collection<BindRule> inContext = map.get(context);
-        if (inContext == null) {
-            inContext = new ArrayList<BindRule>();
-            map.put(context, inContext);
-        }
-        
-        inContext.add(rule);
+    void addBindRule(RuleSet set, ContextMatcher context, BindRule rule) {
+        Multimap<ContextMatcher, BindRule> map = getMap(set);
+        map.put(context, rule);
     }
 
     Set<Class<?>> getDefaultExclusions() {
         return Collections.unmodifiableSet(defaultExcludes);
     }
-    
-    private static Map<ContextMatcher, Collection<BindRule>> deepCloneRules(Map<ContextMatcher, Collection<BindRule>> bindRules) {
-        Map<ContextMatcher, Collection<BindRule>> rules = new HashMap<ContextMatcher, Collection<BindRule>>();
-        for (Entry<ContextMatcher, Collection<BindRule>> e: bindRules.entrySet()) {
-            rules.put(e.getKey(), new ArrayList<BindRule>(e.getValue()));
-        }
-        return rules;
-    }
-    
-    private Map<ContextMatcher, Collection<BindRule>> getMap(RuleSet set) {
+
+    private Multimap<ContextMatcher, BindRule> getMap(RuleSet set) {
         switch(set) {
         case EXPLICIT:
             return manualRules;

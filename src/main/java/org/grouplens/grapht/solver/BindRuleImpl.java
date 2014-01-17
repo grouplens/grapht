@@ -20,16 +20,20 @@ package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * Foundational implementation of {@link BindRule}.
@@ -62,8 +66,11 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()}).
      * @throws NullPointerException if arguments are null
      */
-    public BindRuleImpl(Class<?> depType, Satisfaction satisfaction, CachePolicy policy,
-                        QualifierMatcher qualifier, boolean terminal) {
+    public BindRuleImpl(@Nonnull Class<?> depType,
+                        @Nonnull Satisfaction satisfaction,
+                        @Nonnull CachePolicy policy,
+                        @Nonnull QualifierMatcher qualifier,
+                        boolean terminal) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
@@ -92,8 +99,11 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()})
      * @throws NullPointerException if arguments are null
      */
-    public BindRuleImpl(Class<?> depType, Class<?> implType, CachePolicy policy,
-                        QualifierMatcher qualifier, boolean terminal) {
+    public BindRuleImpl(@Nonnull Class<?> depType,
+                        @Nonnull Class<?> implType,
+                        @Nonnull CachePolicy policy,
+                        @Nonnull QualifierMatcher qualifier,
+                        boolean terminal) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("implementation type", implType);
         Preconditions.notNull("policy", policy);
@@ -144,11 +154,26 @@ final class BindRuleImpl implements BindRule, Serializable {
         // bind rules match type by equality
         if (desire.getDesiredType().equals(depType)) {
             // if the type is equal, then rely on the qualifier matcher
-            return qualifier.matches(desire.getInjectionPoint().getAttributes().getQualifier());
+            return qualifier.matches(desire.getInjectionPoint().getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false
         return false;
+    }
+
+    @Override
+    public BindRuleBuilder newCopyBuilder() {
+        BindRuleBuilder bld = new BindRuleBuilder();
+        bld.setDependencyType(depType)
+           .setQualifierMatcher(qualifier)
+           .setCachePolicy(policy)
+           .setTerminal(terminal);
+        if (satisfaction != null) {
+            bld.setSatisfaction(satisfaction);
+        } else {
+            bld.setImplementation(implType);
+        }
+        return bld;
     }
 
     @Override

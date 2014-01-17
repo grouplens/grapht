@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.reflect.Satisfaction;
 
 /**
  * Utility methods for {@link BindRule}.
@@ -38,11 +38,19 @@ public final class BindRules {
      * @param policy       The cache policy.
      * @param terminal     Whether this binding is terminal.
      * @return A new bind rule.
+     * @deprecated Use {@link BindRuleBuilder}.
      */
+    @Deprecated
     public static BindRule toSatisfaction(Class<?> depType, QualifierMatcher qualifier,
                                           Satisfaction satisfaction, CachePolicy policy,
                                           boolean terminal) {
-        return new BindRuleImpl(depType, satisfaction, policy, qualifier, terminal);
+        return BindRuleBuilder.create()
+                .setDependencyType(depType)
+                .setQualifierMatcher(qualifier)
+                .setSatisfaction(satisfaction)
+                .setCachePolicy(policy)
+                .setTerminal(terminal)
+                .build();
     }
 
     /**
@@ -55,10 +63,18 @@ public final class BindRules {
      * @param policy    The cache policy.
      * @param terminal  Whether this binding is terminal.
      * @return A new bind rule.
+     * @deprecated Use {@link BindRuleBuilder}.
      */
+    @Deprecated
     public static BindRule toClass(Class<?> depType, QualifierMatcher qualifier,
                                    Class<?> implType, CachePolicy policy,
                                    boolean terminal) {
-        return new BindRuleImpl(depType, implType, policy, qualifier, terminal);
+        return BindRuleBuilder.create()
+                              .setDependencyType(depType)
+                              .setQualifierMatcher(qualifier)
+                              .setImplementation(implType)
+                              .setCachePolicy(policy)
+                              .setTerminal(terminal)
+                              .build();
     }
 }

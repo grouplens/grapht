@@ -18,14 +18,15 @@
  */
 package org.grouplens.grapht;
 
-import org.grouplens.grapht.spi.ContextElementMatcher;
-import org.grouplens.grapht.spi.ElementChainContextMatcher;
-import org.grouplens.grapht.spi.QualifierMatcher;
+import org.grouplens.grapht.context.ContextElementMatcher;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.context.Multiplicity;
+import org.grouplens.grapht.reflect.Qualifiers;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ContextImpl is the basic implementation of Context.
@@ -33,13 +34,25 @@ import java.util.List;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 class ContextImpl extends AbstractContext {
-    private final ElementChainContextMatcher context;
-    
     private final BindingFunctionBuilder config;
-    
-    public ContextImpl(BindingFunctionBuilder config, ElementChainContextMatcher context) {
+    private final ContextPattern pattern;
+    private final boolean anchored;
+
+    /**
+     * Construct a new context implementation.
+     * @param config The function builder.
+     * @param context The context pattern.
+     * @param anchored Whether this is anchored.  If it is not anchored, {@code .*} will be appended
+     *                 to the context pattern for any calls other than to {@link #matching(ContextPattern)}.
+     */
+    private ContextImpl(BindingFunctionBuilder config, ContextPattern context, boolean anchored) {
         this.config = config;
-        this.context = context;
+        this.pattern = context;
+        this.anchored = anchored;
+    }
+
+    public static ContextImpl root(BindingFunctionBuilder config) {
+        return new ContextImpl(config, ContextPattern.empty(), false);
     }
     
     public BindingFunctionBuilder getBuilder() {
@@ -47,10 +60,17 @@ class ContextImpl extends AbstractContext {
     }
     
     /**
-     * @return The context chain of this context
+     * Get the context pattern for this builder.  It will never return {@code null}; for the root
+     * context, it will return {@link ContextPattern#any()}.
+     *
+     * @return The context pattern for this builder.
      */
-    public ElementChainContextMatcher getContextChain() {
-        return context;
+    public ContextPattern getContextPattern() {
+        if (anchored) {
+            return pattern;
+        } else {
+            return pattern.appendDotStar();
+        }
     }
     
     @Override
@@ -60,39 +80,43 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context within(Class<?> type) {
-        return in(config.getSPI().matchDefault(), type, false);
+        return in(Qualifiers.matchDefault(), type, false);
     }
 
     @Override
     public Context within(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        return in(config.getSPI().match(qualifier), type, false);
+        return in(Qualifiers.match(qualifier), type, false);
     }
     
     @Override
     public Context within(@Nullable Annotation annot, Class<?> type) {
-        return in(config.getSPI().match(annot), type, false);
+        return in(Qualifiers.match(annot), type, false);
+    }
+
+    @Override
+    public Context matching(ContextPattern pat) {
+        return new ContextImpl(config, pattern.append(pat), true);
     }
 
     @Override
     public Context at(Class<?> type) {
-        return in(config.getSPI().matchDefault(), type, true);
+        return in(Qualifiers.matchDefault(), type, true);
     }
 
     @Override
     public Context at(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        return in(config.getSPI().match(qualifier), type, true);
+        return in(Qualifiers.match(qualifier), type, true);
     }
 
     @Override
     public Context at(@Nullable Annotation annot, Class<?> type) {
-        return in(config.getSPI().match(annot), type, true);
+        return in(Qualifiers.match(annot), type, true);
     }
     
     private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
-        ContextElementMatcher nextMatcher = config.getSPI().context(q, type, anchored);
-        
-        List<ContextElementMatcher> nextChain = new ArrayList<ContextElementMatcher>(context.getContexts());
-        nextChain.add(nextMatcher);
-        return new ContextImpl(config, new ElementChainContextMatcher(nextChain));
+        ContextElementMatcher nextMatcher = ContextElements.matchType(type, q);
+        ContextPattern pat = getContextPattern().append(nextMatcher, Multiplicity.ONE);
+
+        return new ContextImpl(config, pat, anchored);
     }
 }

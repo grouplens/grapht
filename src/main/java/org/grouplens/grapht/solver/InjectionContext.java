@@ -19,137 +19,70 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.spi.Attributes;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.internal.SimpleInjectionPoint;
+import org.grouplens.grapht.util.AbstractChain;
 
-import java.io.Serializable;
-import java.util.*;
+import javax.annotation.Nullable;
 
 /**
  * <p>
  * InjectionContext represents the current path through the dependency graph to
  * the desire being resolved by
- * {@link BindingFunction#bind(InjectionContext, Desire)}. The InjectionContext
+ * {@link BindingFunction#bind(InjectionContext, DesireChain)}. The InjectionContext
  * is most significantly represented as a list of satisfactions and the
  * associated injection point attributes. This list represents the "type path"
  * from the root node in the graph to the previously resolved satisfaction.
- * <p>
- * Although the type path for an InjectionContext instance is immutable, it does
- * maintain mutable state to assist BindingFunction implementations. When
- * resolving a dependency desire, the BindingFunctions might produce a chain of
- * desires before reaching an instantiable one. This chain is recorded as
- * mutable state within a context instance. To allow functions more flexibility,
- * each context instance provides a String-based map.
- * <p>
- * Essentially, each InjectionContext instance is associated with a single
- * resolution attempt for an injection point.
- * 
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class InjectionContext implements Serializable {
+public class InjectionContext extends AbstractChain<Pair<Satisfaction,InjectionPoint>> {
     private static final long serialVersionUID = 1L;
-    
-    private final List<Pair<Satisfaction, Attributes>> context;
-    
-    // mutable
-    private final List<Desire> desires;
-    private final transient Map<String, Object> values;
-    
+
     /**
-     * Create a new InjectionContext that has an empty context.
+     * Construct a singleton injection context.
+     * @param satisfaction The satisfaction.
+     * @param ip The injection point.
+     * @return The injection context.
      */
-    public InjectionContext() {
-        // The default context starts out with an empty type path, no prior
-        // desires and no stored values
-        context = Collections.emptyList();
-        desires = new ArrayList<Desire>();
-        values = new HashMap<String, Object>();
+    public static InjectionContext singleton(Satisfaction satisfaction, InjectionPoint ip) {
+        return new InjectionContext(null, satisfaction, ip);
     }
-    
-    private InjectionContext(InjectionContext prior, Satisfaction satisfaction, Attributes attrs) {
-        // A context with a pushed satisfaction inherits and updates the type
-        // path, but resets the desires and stored values
-        List<Pair<Satisfaction, Attributes>> newCtx = new ArrayList<Pair<Satisfaction, Attributes>>(prior.context);
-        newCtx.add(Pair.of(satisfaction, attrs));
-        
-        context = Collections.unmodifiableList(newCtx);
-        desires = new ArrayList<Desire>();
-        values = new HashMap<String, Object>();
-    }
-    
+
     /**
-     * Create a new context that is updated to have the satisfaction and
-     * attribute pushed to the end of its type path. The prior desires and value
-     * cache for the new context will be empty.
+     * Construct a singleton injection context with no attributes.
+     * @param satisfaction The satisfaction.
+     * @return The injection context.
+     */
+    public static InjectionContext singleton(Satisfaction satisfaction) {
+        return singleton(satisfaction, new SimpleInjectionPoint(null, satisfaction.getErasedType(), true));
+    }
+
+    private InjectionContext(InjectionContext prior, Satisfaction satisfaction, InjectionPoint ip) {
+        super(prior, Pair.of(satisfaction, ip));
+    }
+
+    /**
+     * Create a new context that is updated to have the satisfaction and attribute pushed to the
+     * end of its type path. The value cache for the new context will be empty.
      * 
      * @param satisfaction The next satisfaction in the dependency graph
-     * @param attrs The attributes of the injection point receiving the
-     *            satisfaction
+     * @param ip The injection point receiving the satisfaction
      * @return A new context with updated type path
      */
-    public InjectionContext push(Satisfaction satisfaction, Attributes attrs) {
-        return new InjectionContext(this, satisfaction, attrs);
+    public InjectionContext extend(Satisfaction satisfaction, InjectionPoint ip) {
+        return new InjectionContext(this, satisfaction, ip);
     }
-    
+
     /**
-     * Push the given desire onto this context's list of prior desires. This is
-     * useful to keep track of the chain of desires processed until an
-     * instantiable desire is found.
-     * 
-     * @param desire The desire to push
+     * Get everything except the last element of this context.
+     *
+     * @return Everything except the last element of this context, or {@code null} if the context is
+     *         a singleton.
      */
-    public void recordDesire(Desire desire) {
-        Preconditions.notNull("desire", desire);
-        desires.add(desire);
-    }
-    
-    /**
-     * @return The type path of this context, usable by {@link org.grouplens.grapht.spi.ContextElementMatcher}
-     */
-    public List<Pair<Satisfaction, Attributes>> getTypePath() {
-        return context;
-    }
-    
-    /**
-     * @return Prior generated desires before invoking the function
-     */
-    public List<Desire> getPriorDesires() {
-        return  Collections.unmodifiableList(desires);
-    }
-    
-    /**
-     * Retrieve the object associated with the given String key. This will
-     * return null if there is no value associated with the key.
-     * 
-     * @param key The String key
-     * @return The value associated to key by a BindingFunction for this context
-     *         instance
-     * @throws NullPointerException if key is null
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getValue(String key) {
-        Preconditions.notNull("key", key);
-        return (T) values.get(key);
-    }
-    
-    /**
-     * <p>
-     * Associated <tt>value</tt> with <tt>key</tt> for this context instance.
-     * This can be used to store values that might affect behavior of a future
-     * invocation of {@link BindingFunction#bind(InjectionContext, Desire)} with
-     * this context instance.
-     * <p>
-     * One such example would be to ensure that a BindRule is not applied more
-     * than once within a given context.
-     * 
-     * @param key The String key
-     * @param value The value to store
-     * @throws NullPointerException if key is null
-     */
-    public void putValue(String key, Object value) {
-        Preconditions.notNull("key", key);
-        values.put(key, value);
+    @Nullable
+    public InjectionContext getLeading() {
+        return (InjectionContext) previous;
     }
 }

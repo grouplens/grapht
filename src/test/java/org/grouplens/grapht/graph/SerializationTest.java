@@ -21,71 +21,55 @@ package org.grouplens.grapht.graph;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.CachedSatisfaction;
+import org.grouplens.grapht.reflect.Desires;
+import org.grouplens.grapht.reflect.Satisfactions;
+import org.grouplens.grapht.reflect.internal.InstanceSatisfaction;
+import org.grouplens.grapht.reflect.internal.types.NamedType;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DependencySolver;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
-import org.grouplens.grapht.spi.reflect.types.NamedType;
+import org.grouplens.grapht.solver.DesireChain;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.inject.Named;
 import java.io.*;
-import java.util.Arrays;
+
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 
 public class SerializationTest {
     private static File GRAPH_FILE = new File("graph.dump");
     
     @Test
     public void testEmptyGraph() throws Exception {
-        Graph g = new Graph();
+        DAGNode<CachedSatisfaction, DesireChain> g =
+                DAGNode.singleton(DependencySolver.ROOT_SATISFACTION);
         write(g);
-        Graph read = read();
-        
-        Assert.assertTrue(read.getNodes().isEmpty());
+        DAGNode<CachedSatisfaction, DesireChain> read = read();
+
+        assertThat(read.getReachableNodes(),
+                   contains(read));
     }
     
     @Test
     public void testSharedNodesGraph() throws Exception {
-        InjectSPI spi = new ReflectionInjectSPI();
-        CachedSatisfaction s1 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
-        CachedSatisfaction s2 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.MEMOIZE);
+        CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.NEW_INSTANCE);
+        CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.MEMOIZE);
+
+        DAGNode<CachedSatisfaction, String> n2 = DAGNode.singleton(s2);
+        DAGNodeBuilder<CachedSatisfaction, String> bld = DAGNode.newBuilder(s1);
+        bld.addEdge(n2, "wombat");
+        bld.addEdge(n2, "foobar");
+        write(bld.build());
+        DAGNode<Object, Object> read = read();
         
-        Graph g = new Graph();
-        Node n1 = new Node(s1);
-        Node n2 = new Node(s2);
-        g.addEdge(new Edge(n1, n2, null));
-        g.addEdge(new Edge(n1, n2, null));
-        write(g);
-        Graph read = read();
-        
-        Assert.assertEquals(2, read.getNodes().size());
-        n1 = read.getNode(s1);
-        n2 = read.getNode(s2);
-        Assert.assertEquals(2, read.getOutgoingEdges(n1).size());
-        Assert.assertEquals(2, read.getEdges(n1, n2).size());
-    }
-    
-    @Test
-    public void testNullLabels() throws Exception {
-        InjectSPI spi = new ReflectionInjectSPI();
-        CachedSatisfaction rootLabel = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
-        Graph g = new Graph();
-        Node n1 = new Node(rootLabel);
-        Node n2 = new Node();
-        g.addEdge(new Edge(n1, n2, null));
-        write(g);
-        Graph read = read();
-        
-        Assert.assertEquals(2, read.getNodes().size());
-        n1 = read.getNode(rootLabel);
-        n2 = read.getNode(null);
-        Assert.assertEquals(1, read.getEdges(n1, n2).size());
-        Assert.assertEquals(null, read.getEdges(n1, n2).iterator().next().getDesireChain());
+        Assert.assertEquals(2, read.getReachableNodes().size());
+        assertThat(read.getOutgoingEdges(),
+                   hasSize(2));
     }
     
     @Test
@@ -98,33 +82,32 @@ public class SerializationTest {
                                                   .addBindingFunction(b.build(RuleSet.EXPLICIT))
                                                   .addBindingFunction(b.build(RuleSet.INTERMEDIATE_TYPES))
                                                   .addBindingFunction(b.build(RuleSet.SUPER_TYPES))
-                                                  .addBindingFunction(new DefaultDesireBindingFunction(b.getSPI()))
+                                                  .addBindingFunction(DefaultDesireBindingFunction.create())
                                                   .build();
-        solver.resolve(b.getSPI().desire(null, NamedType.class, false));
+        solver.resolve(Desires.create(null, NamedType.class, false));
         
-        Graph g = solver.getGraph();
+        DAGNode<CachedSatisfaction,DesireChain> g = solver.getGraph();
         write(g);
-        Graph read = read();
+        DAGNode<CachedSatisfaction, DesireChain> root = read();
         
-        Node root = read.getNode(null);
-        Assert.assertEquals(1, read.getOutgoingEdges(root).size());
-        Edge rootEdge = read.getOutgoingEdges(root).iterator().next();
-        Node namedType = rootEdge.getTail();
+        Assert.assertEquals(1, root.getOutgoingEdges().size());
+        DAGEdge<CachedSatisfaction, DesireChain> rootEdge = root.getOutgoingEdges().iterator().next();
+        DAGNode<CachedSatisfaction, DesireChain> namedType = rootEdge.getTail();
         
         Assert.assertEquals(NamedType.class, namedType.getLabel().getSatisfaction().getErasedType());
-        Assert.assertEquals(NamedType.class, rootEdge.getDesire().getDesiredType());
-        Assert.assertEquals(rootEdge.getDesire().getSatisfaction(), namedType.getLabel().getSatisfaction());
-        Assert.assertNull(rootEdge.getDesire().getInjectionPoint().getAttributes().getQualifier());
-        Assert.assertTrue(rootEdge.getDesire().getInjectionPoint().getAttributes().getAttributes().isEmpty());
+        Assert.assertEquals(NamedType.class, rootEdge.getLabel().getInitialDesire().getDesiredType());
+        Assert.assertEquals(rootEdge.getLabel().getInitialDesire().getSatisfaction(), namedType.getLabel().getSatisfaction());
+        Assert.assertNull(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getQualifier());
+        Assert.assertTrue(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().isEmpty());
         
-        Assert.assertEquals(1, read.getOutgoingEdges(namedType).size());
-        Edge nameEdge = read.getOutgoingEdges(namedType).iterator().next();
-        Node string = nameEdge.getTail();
+        Assert.assertEquals(1, namedType.getOutgoingEdges().size());
+        DAGEdge<CachedSatisfaction, DesireChain> nameEdge = namedType.getOutgoingEdges().iterator().next();
+        DAGNode<CachedSatisfaction, DesireChain> string = nameEdge.getTail();
         
         Assert.assertEquals(String.class, string.getLabel().getSatisfaction().getErasedType());
-        Assert.assertEquals(String.class, nameEdge.getDesire().getDesiredType());
-        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getDesire().getInjectionPoint().getAttributes().getQualifier());
-        Assert.assertTrue(nameEdge.getDesire().getInjectionPoint().getAttributes().getAttributes().isEmpty());
+        Assert.assertEquals(String.class, nameEdge.getLabel().getInitialDesire().getDesiredType());
+        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getInitialDesire().getInjectionPoint().getQualifier());
+        Assert.assertTrue(nameEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().isEmpty());
         
         Assert.assertTrue(string.getLabel().getSatisfaction() instanceof InstanceSatisfaction);
         Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel().getSatisfaction()).getInstance());
@@ -135,17 +118,20 @@ public class SerializationTest {
         GRAPH_FILE.delete();
     }
     
-    private <N, E> void write(Graph g) throws IOException {
+    private <V, E> void write(DAGNode<V, E> g) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(GRAPH_FILE));
         out.writeObject(g);
         out.flush();
         out.close();
     }
     
-    private Graph read() throws IOException, ClassNotFoundException {
+    private <V,E> DAGNode<V,E> read() throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(GRAPH_FILE));
-        Graph g = (Graph) in.readObject();
-        in.close();
-        return g;
+        try {
+            DAGNode<V,E> g = (DAGNode<V,E>) in.readObject();
+            return g;
+        } finally {
+            in.close();
+        }
     }
 }
