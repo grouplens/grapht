@@ -123,22 +123,22 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         // FIXME Check whether the annotation type is actually relevant for the desire
         DefaultDouble dfltDouble = type.getAnnotation(DefaultDouble.class);
         if (dfltDouble != null) {
-            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltDouble.value())),
+            return new BindingResult(desire.restrict(Satisfactions.instance(dfltDouble.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultInteger dfltInt = type.getAnnotation(DefaultInteger.class);
         if (dfltInt != null) {
-            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltInt.value())),
+            return new BindingResult(desire.restrict(Satisfactions.instance(dfltInt.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultBoolean dfltBool = type.getAnnotation(DefaultBoolean.class);
         if (dfltBool != null) {
-            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltBool.value())),
+            return new BindingResult(desire.restrict(Satisfactions.instance(dfltBool.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         DefaultString dfltStr = type.getAnnotation(DefaultString.class);
         if (dfltStr != null) {
-            return new BindingResult(desire.restrict(Satisfactions.satisfy(dfltStr.value())),
+            return new BindingResult(desire.restrict(Satisfactions.instance(dfltStr.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
         return null;
@@ -153,14 +153,14 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
         DefaultProvider provided = type.getAnnotation(DefaultProvider.class);
         if (provided != null) {
-            return new BindingResult(desire.restrict(Satisfactions.satisfyWithProvider(provided.value())),
+            return new BindingResult(desire.restrict(Satisfactions.providerType(provided.value())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
 
         DefaultImplementation impl = type.getAnnotation(DefaultImplementation.class);
         if (impl != null) {
             if (Types.isInstantiable(impl.value())) {
-                return new BindingResult(desire.restrict(Satisfactions.satisfy(impl.value())),
+                return new BindingResult(desire.restrict(Satisfactions.type(impl.value())),
                                          CachePolicy.NO_PREFERENCE, false, false);
             } else {
                 return new BindingResult(desire.restrict(impl.value()),
@@ -170,7 +170,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
 
         DefaultNull dnull = type.getAnnotation(DefaultNull.class);
         if (dnull != null) {
-            return new BindingResult(desire.restrict(Satisfactions.satisfyWithNull(desire.getDesiredType())),
+            return new BindingResult(desire.restrict(Satisfactions.nullOfType(desire.getDesiredType())),
                                      CachePolicy.NO_PREFERENCE, false, true);
         }
 
@@ -214,7 +214,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                 try {
                     logger.debug("found provider {} for {}", providerName, type);
                     Class<?> clazz = classLoader.loadClass(providerName);
-                    Satisfaction sat = Satisfactions.satisfyWithProvider((Class<Provider<?>>) clazz.asSubclass(Provider.class));
+                    Satisfaction sat = Satisfactions.providerType((Class<Provider<?>>) clazz.asSubclass(Provider.class));
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " does not provide " + type);
                     }
@@ -231,7 +231,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                 try {
                     logger.debug("found implementation {} for {}", implName, type);
                     Class<?> clazz = classLoader.loadClass(implName);
-                    Satisfaction sat = Satisfactions.satisfy(clazz);
+                    Satisfaction sat = Satisfactions.type(clazz);
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " not compatible with " + type);
                     }

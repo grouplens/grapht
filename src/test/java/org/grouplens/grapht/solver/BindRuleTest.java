@@ -124,7 +124,7 @@ public class BindRuleTest {
     
     @Test
     public void testSatisfiableClassBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.satisfy(TypeB.class), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
+        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.type(TypeB.class), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -150,7 +150,7 @@ public class BindRuleTest {
     @Test
     public void testInstanceBindRuleSuccess() throws Exception {
         TypeA instance = new TypeB();
-        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.satisfy(instance), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
+        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.instance(instance), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -163,7 +163,7 @@ public class BindRuleTest {
     
     @Test
     public void testNullInstanceBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.satisfyWithNull(TypeA.class), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
+        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.nullOfType(TypeA.class), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, true));
         
         Assert.assertTrue(rule.matches(desire));
@@ -175,7 +175,7 @@ public class BindRuleTest {
     
     @Test
     public void testProviderClassBindRuleSuccess() throws Exception {
-        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.satisfyWithProvider(ProviderA.class), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
+        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.providerType(ProviderA.class), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Assert.assertTrue(rule.matches(desire));
@@ -189,7 +189,7 @@ public class BindRuleTest {
     @Test
     public void testProviderInstanceBindRuleSuccess() throws Exception {
         ProviderA instance = new ProviderA();
-        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.satisfyWithProvider(instance), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
+        BindRule rule = new BindRuleImpl(TypeA.class, Satisfactions.providerInstance(instance), CachePolicy.NO_PREFERENCE, Qualifiers.matchAny(), false);
         ReflectionDesire desire = new ReflectionDesire(new MockInjectionPoint(TypeA.class, false));
         
         Desire applied = rule.apply(desire);

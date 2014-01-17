@@ -32,23 +32,23 @@ import javax.inject.Provider;
 public final class Satisfactions {
     private Satisfactions() {}
 
-    public static Satisfaction satisfy(@Nonnull Class<?> type) {
+    public static Satisfaction type(@Nonnull Class<?> type) {
         return new ClassSatisfaction(type);
     }
 
-    public static Satisfaction satisfyWithNull(@Nonnull Class<?> type) {
+    public static Satisfaction nullOfType(@Nonnull Class<?> type) {
         return new NullSatisfaction(type);
     }
 
-    public static Satisfaction satisfy(@Nonnull Object o) {
+    public static Satisfaction instance(@Nonnull Object o) {
         return new InstanceSatisfaction(o);
     }
 
-    public static Satisfaction satisfyWithProvider(@Nonnull Class<? extends Provider<?>> providerType) {
+    public static Satisfaction providerType(@Nonnull Class<? extends Provider<?>> providerType) {
         return new ProviderClassSatisfaction(providerType);
     }
 
-    public static Satisfaction satisfyWithProvider(@Nonnull Provider<?> provider) {
+    public static Satisfaction providerInstance(@Nonnull Provider<?> provider) {
         return new ProviderInstanceSatisfaction(provider);
     }
 }

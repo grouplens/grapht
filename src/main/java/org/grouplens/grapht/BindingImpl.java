@@ -145,7 +145,7 @@ class BindingImpl<T> implements Binding<T> {
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
                 if (useSatisfaction) {
                     config.addBindRule(e.getValue(), matcher,
-                                       BindRules.toSatisfaction(e.getKey(), qualifier, Satisfactions.satisfy(impl),
+                                       BindRules.toSatisfaction(e.getKey(), qualifier, Satisfactions.type(impl),
                                                                 cachePolicy, !chained));
                 } else {
                     config.addBindRule(e.getValue(), matcher,
@@ -156,7 +156,7 @@ class BindingImpl<T> implements Binding<T> {
         } else {
             if (useSatisfaction) {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
-                                   BindRules.toSatisfaction(sourceType, qualifier, Satisfactions.satisfy(impl),
+                                   BindRules.toSatisfaction(sourceType, qualifier, Satisfactions.type(impl),
                                                             cachePolicy, !chained));
             } else {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
@@ -188,7 +188,7 @@ class BindingImpl<T> implements Binding<T> {
 
         // Apply some type coercing if we're dealing with primitive types
         Object coerced = coerce(instance);
-        Satisfaction s = Satisfactions.satisfy(coerced);
+        Satisfaction s = Satisfactions.instance(coerced);
         
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(coerced.getClass());
@@ -206,7 +206,7 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
-        Satisfaction s = Satisfactions.satisfyWithProvider(provider);
+        Satisfaction s = Satisfactions.providerType(provider);
         
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
@@ -224,7 +224,7 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(@Nonnull Provider<? extends T> provider) {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
-        Satisfaction s = Satisfactions.satisfyWithProvider(provider);
+        Satisfaction s = Satisfactions.providerInstance(provider);
 
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
@@ -248,7 +248,7 @@ class BindingImpl<T> implements Binding<T> {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
 
-        Satisfaction s = Satisfactions.satisfyWithNull(type);
+        Satisfaction s = Satisfactions.nullOfType(type);
 
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
