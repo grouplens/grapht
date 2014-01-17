@@ -88,7 +88,7 @@ class TypeElementMatcher implements ContextElementMatcher, Serializable {
     }
     
     @Override
-    public MatchElement apply(Pair<Satisfaction, InjectionPoint> n, int pos) {
+    public MatchElement apply(Pair<Satisfaction, InjectionPoint> n) {
         // we must check for nulls in case it is a synthetic satisfaction
         Satisfaction sat = n.getLeft();
         boolean typeMatches;

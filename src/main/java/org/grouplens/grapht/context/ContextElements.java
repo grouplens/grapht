@@ -60,7 +60,7 @@ public final class ContextElements {
         INSTANCE;
 
         @Override
-        public MatchElement apply(Pair<Satisfaction,InjectionPoint> n, int position) {
+        public MatchElement apply(Pair<Satisfaction, InjectionPoint> n) {
             return MatchElementImpl.ANY;
         }
     }
@@ -75,8 +75,8 @@ public final class ContextElements {
         }
 
         @Override
-        public MatchElement apply(Pair<Satisfaction, InjectionPoint> elem, int position) {
-            MatchElement result = delegate.apply(elem, position);
+        public MatchElement apply(Pair<Satisfaction, InjectionPoint> elem) {
+            MatchElement result = delegate.apply(elem);
             if (result == null) {
                 return MatchElementImpl.INVERTED;
             } else {

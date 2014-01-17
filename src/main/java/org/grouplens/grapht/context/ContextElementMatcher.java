@@ -44,11 +44,9 @@ public interface ContextElementMatcher extends Serializable {
      * Return true if this ContextElementMatcher matches or applies to the given Satisfaction and
      * Qualifier.
      *
-     *
      * @param n The node and attributes in the current dependency context
-     * @param position The position, from the beginning (to help in ordering match elements).
      * @return A match if this matcher matches the provided node label, or {@code false} if there is
      *         no match.
      */
-    MatchElement apply(Pair<Satisfaction,InjectionPoint> n, int position);
+    MatchElement apply(Pair<Satisfaction, InjectionPoint> n);
 }

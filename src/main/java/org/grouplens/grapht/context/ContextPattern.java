@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.context;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
@@ -26,6 +28,8 @@ import org.grouplens.grapht.util.AbstractChain;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A regular pattern matching contexts.
@@ -36,18 +40,14 @@ import java.io.Serializable;
 public class ContextPattern implements ContextMatcher, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final Chain<Element> tokenChain;
+    private final List<Element> tokenChain;
 
     private ContextPattern() {
-        tokenChain = new Chain<Element>();
+        tokenChain = Collections.emptyList();
     }
 
-    private ContextPattern(Chain<Element> tokens) {
-        if (tokens == null) {
-            tokenChain = new Chain<Element>();
-        } else {
-            tokenChain = tokens;
-        }
+    private ContextPattern(List<Element> tokens) {
+        tokenChain = ImmutableList.copyOf(tokens);
     }
 
     /**
@@ -107,8 +107,11 @@ public class ContextPattern implements ContextMatcher, Serializable {
      */
     public ContextPattern append(ContextElementMatcher match, Multiplicity mult) {
         Element elem = new Element(match, mult);
-        Chain<Element> chain = tokenChain.extend(elem);
-        return new ContextPattern(chain);
+        List<Element> extended = ImmutableList.<Element>builder()
+                                              .addAll(tokenChain)
+                                              .add(elem)
+                                              .build();
+        return new ContextPattern(extended);
     }
 
     /**
@@ -149,7 +152,7 @@ public class ContextPattern implements ContextMatcher, Serializable {
      */
     public ContextPattern appendDotStar() {
         if (!tokenChain.isEmpty()) {
-            Element elem = tokenChain.getTailValue();
+            Element elem = tokenChain.get(tokenChain.size() - 1);
             if (elem.getMatcher().equals(ContextElements.matchAny()) && elem.getMultiplicity().equals(Multiplicity.ZERO_OR_MORE)) {
                 return this;
             }
@@ -160,7 +163,7 @@ public class ContextPattern implements ContextMatcher, Serializable {
 
     @Override
     public ContextMatch matches(InjectionContext context) {
-        Chain<MatchElement> result = recursiveMatch(tokenChain, context);
+        List<MatchElement> result = recursiveMatch(tokenChain, ImmutableList.copyOf(context));
         if (result == null) {
             return null;
         } else {
@@ -171,49 +174,58 @@ public class ContextPattern implements ContextMatcher, Serializable {
     /**
      * Recursive matching routine.  Matches the pattern via backtracking.  Returns the matched
      * elements.
+     *
      * @param pattern The pattern.
      * @param context The context.
-     * @return The chain of match elements.
+     * @return The chain of match elements (in reverse order).
      */
-    private Chain<MatchElement> recursiveMatch(Chain<Element> pattern, InjectionContext context) {
-        if (pattern == null || pattern.isEmpty()) {
-            if (context == null || context.isEmpty()) {
-                return new Chain<MatchElement>();
+    private List<MatchElement> recursiveMatch(List<Element> pattern, List<Pair<Satisfaction, InjectionPoint>> context) {
+        if (pattern.isEmpty()) {
+            if (context.isEmpty()) {
+                return Collections.emptyList();
             } else {
                 return null;
             }
-        } else if (context == null || context.isEmpty()) {
-            if (pattern.getTailValue().getMultiplicity().isOptional()) {
-                return recursiveMatch(pattern.getLeading(), context);
+        }
+
+        Element element = listHead(pattern);
+
+        // matching against the empty string with a nonempty pattern
+        if (context.isEmpty()) {
+            if (element.getMultiplicity().isOptional()) {
+                return recursiveMatch(pattern.subList(1, pattern.size()), context);
             } else {
                 return null;
             }
         }
         // non-empty pattern, non-empty context, go
-        Element matcher = pattern.getTailValue();
-        Pair<Satisfaction,InjectionPoint> ctxElem = context.getTailValue();
-        MatchElement match = matcher.getMatcher().apply(ctxElem, context.size() - 1);
+        Pair<Satisfaction,InjectionPoint> ctxElem = listHead(context);
+        MatchElement match = element.getMatcher().apply(ctxElem);
         if (match == null) {
             // no match, what do we do?
-            if (matcher.getMultiplicity().isOptional()) {
+            if (element.getMultiplicity().isOptional()) {
                 // skip this element, keep going
-                return recursiveMatch(pattern.getLeading(), context);
+                return recursiveMatch(listTail(pattern), context);
             } else {
                 // oops, we must match
                 return null;
             }
         } else {
             // we have a match, try recursion
-            Chain<Element> nextPat =
-                    matcher.getMultiplicity().isConsumed() ? pattern.getLeading() : pattern;
-            Chain<MatchElement> result = recursiveMatch(nextPat,
-                                                        context.getLeading());
-            if (result == null && matcher.getMultiplicity().isOptional()) {
+            List<Element> nextPat = pattern;
+            if (element.getMultiplicity().isConsumed()) {
+                nextPat = listTail(nextPat);
+            }
+            List<MatchElement> result = recursiveMatch(nextPat, listTail(context));
+            if (result == null && element.getMultiplicity().isOptional()) {
                 // recursive match failed, but element is optional. Try again without it.
-                return recursiveMatch(pattern.getLeading(), context);
+                return recursiveMatch(listTail(pattern), context);
             }
             if (result != null) {
-                return result.extend(match);
+                return ImmutableList.<MatchElement>builder()
+                                    .add(match)
+                                    .addAll(result)
+                                    .build();
             } else {
                 return result;
             }
@@ -306,5 +318,15 @@ public class ContextPattern implements ContextMatcher, Serializable {
         public Chain<E> getLeading() {
             return (Chain<E>) previous;
         }
+    }
+
+    private static <E> E listHead(List<E> lst) {
+        Preconditions.checkArgument(!lst.isEmpty(), "list cannot be empty");
+        return lst.get(0);
+    }
+
+    private static <E> List<E> listTail(List<E> lst) {
+        Preconditions.checkArgument(!lst.isEmpty(), "list cannot be empty");
+        return lst.subList(1, lst.size());
     }
 }

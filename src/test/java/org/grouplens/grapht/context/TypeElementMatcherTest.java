@@ -104,9 +104,9 @@ public class TypeElementMatcherTest {
         
         TypeElementMatcher cm = new TypeElementMatcher(matcherType, mr);
         if (expected) {
-            Assert.assertThat(cm.apply(node, 1), notNullValue());
+            Assert.assertThat(cm.apply(node), notNullValue());
         } else {
-            Assert.assertThat(cm.apply(node, 1), nullValue());
+            Assert.assertThat(cm.apply(node), nullValue());
         }
     }
     
