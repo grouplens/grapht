@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.reflect.Desire;
 
 /**
  * Thrown by when a cyclic dependency is detected and could not be broken or

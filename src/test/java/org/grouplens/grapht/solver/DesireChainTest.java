@@ -18,8 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.MockDesire;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.MockDesire;
 import org.junit.Test;
 
 import java.io.FileInputStream;

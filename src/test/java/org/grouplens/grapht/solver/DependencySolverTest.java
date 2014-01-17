@@ -23,10 +23,10 @@ import com.google.common.collect.*;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.spi.*;
-import org.grouplens.grapht.spi.context.ContextMatcher;
-import org.grouplens.grapht.spi.context.ContextPattern;
-import org.grouplens.grapht.spi.context.MockContextElementMatcher;
+import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextMatcher;
+import org.grouplens.grapht.context.ContextPattern;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -68,7 +68,9 @@ public class DependencySolverTest {
         Desire rb = new MockDesire(sb);
         
         ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(B.class)),
+        final Class<?> type = B.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(da, ra).setCachePolicy(CachePolicy.MEMOIZE));
         bindings.put(ContextPattern.any(),
                      new MockBindRule(da, ra).setCachePolicy(CachePolicy.NEW_INSTANCE));
@@ -250,9 +252,13 @@ public class DependencySolverTest {
         bindings.putAll(ContextPattern.any(),
                         new MockBindRule(dr1, br1),
                         new MockBindRule(dr2, br2));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(Object.class, MockQualifierMatcher.match(qualifier1))),
+        final Class<?> type = Object.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.match(qualifier1);
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d3, b3));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(Object.class, MockQualifierMatcher.match(qualifier2))),
+        final Class<?> type1 = Object.class;
+        final MockQualifierMatcher qualifier3 = MockQualifierMatcher.match(qualifier2);
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier3)),
                      new MockBindRule(d3, ob3));
         
         Desire rootDesire = new MockDesire(r1);
@@ -295,7 +301,9 @@ public class DependencySolverTest {
         ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(ContextPattern.any(),
                      new MockBindRule(d1, b1));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(A.class)),
+        final Class<?> type = A.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d1, ob1));
 
         Desire rootDesire = new MockDesire(r1);
@@ -328,9 +336,13 @@ public class DependencySolverTest {
         bindings.put(ContextPattern.any(),
                      new MockBindRule(d1, b1));
         // for this test, CycleA is farther than B so b2 should be selected over ob2
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(A.class)),
+        final Class<?> type = A.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d2, ob2));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(B.class)),
+        final Class<?> type1 = B.class;
+        final MockQualifierMatcher qualifier1 = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier1)),
                      new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(r1);
@@ -375,9 +387,16 @@ public class DependencySolverTest {
         bindings.put(ContextPattern.any(),
                      new MockBindRule(d1, b1));
         // for this test, AB is longer than CycleA so b2 is selected over ob2
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(A.class)),
+        final Class<?> type = A.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d2, ob2));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(A.class), new MockContextElementMatcher(B.class)),
+        final Class<?> type1 = A.class;
+        final MockQualifierMatcher qualifier1 = MockQualifierMatcher.any();
+        final Class<?> type2 = B.class;
+        final MockQualifierMatcher qualifier2 = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier1), ContextElements.matchType(type2, qualifier2)
+        ),
                      new MockBindRule(d2, b2));
         
         Desire rootDesire = new MockDesire(r1);
@@ -420,7 +439,9 @@ public class DependencySolverTest {
         // for this test, CycleA is more specific than default, so b2 is selected
         bindings.put(ContextPattern.any(),
                      new MockBindRule(d1, ob1));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(A.class)),
+        final Class<?> type = A.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d1, b1));
         
         Desire rootDesire = new MockDesire(r1);
@@ -604,10 +625,17 @@ public class DependencySolverTest {
                         new MockBindRule(d5, b4), // d5 -> s5
                         new MockBindRule(d6, b4), // d6 -> s5
                         new MockBindRule(d7, b5)); // d7 -> s6
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(B.class, MockQualifierMatcher.match(r1))),
+        final Class<?> type = B.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.match(r1);
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d3, b2)); // r1s1:d3 -> s3
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(B.class, MockQualifierMatcher.match(r2)),
-                                                new MockContextElementMatcher(D.class, MockQualifierMatcher.match(r4))),
+        final Class<?> type1 = B.class;
+        final MockQualifierMatcher qualifier1 = MockQualifierMatcher.match(r2);
+        final Class<?> type2 = D.class;
+        final MockQualifierMatcher qualifier2 = MockQualifierMatcher.match(r4);
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier1),
+                                                ContextElements.matchType(type2, qualifier2)
+        ),
                      new MockBindRule(d7, b6)); // r2s1,r4s2:d7 -> s7
         
         Desire rootDesire = new MockDesire(s1);
@@ -691,8 +719,13 @@ public class DependencySolverTest {
         bindings.putAll(ContextPattern.any(),
                         new MockBindRule(d1, b1),
                         new MockBindRule(d2, b2));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(B.class),
-                                                new MockContextElementMatcher(B.class)),
+        final Class<?> type = B.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        final Class<?> type1 = B.class;
+        final MockQualifierMatcher qualifier1 = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier),
+                                                ContextElements.matchType(type1, qualifier1)
+        ),
                      new MockBindRule(d1, ob1));
         
         Desire rootDesire = new MockDesire(s1);
@@ -759,7 +792,9 @@ public class DependencySolverTest {
         ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(ContextPattern.any(),
                      new MockBindRule(d1, b1));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(Bp.class)),
+        final Class<?> type = Bp.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d1, ob1));
         
         Desire rootDesire = new MockDesire(s1);
@@ -791,7 +826,9 @@ public class DependencySolverTest {
         ImmutableListMultimap.Builder<ContextMatcher, BindRule> bindings = ImmutableListMultimap.builder();
         bindings.put(ContextPattern.any(),
                      new MockBindRule(d1, b1));
-        bindings.put(ContextPattern.subsequence(new MockContextElementMatcher(A.class)),
+        final Class<?> type = A.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                      new MockBindRule(d1, d1));
         
         Desire rootDesire = new MockDesire(s1);
@@ -888,7 +925,9 @@ public class DependencySolverTest {
                         new MockBindRule(a1, new MockDesire(sd)),
                         new MockBindRule(d1, new MockDesire(sb)),
                         new MockBindRule(d2, new MockDesire(sc)));
-        bindings.putAll(ContextPattern.subsequence(new MockContextElementMatcher(Ap.class)),
+        final Class<?> type = Ap.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.putAll(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                         new MockBindRule(d1, new MockDesire(sbp)),
                         new MockBindRule(d2, new MockDesire(scp)));
         
@@ -983,7 +1022,9 @@ public class DependencySolverTest {
                         new MockBindRule(a1, new MockDesire(sd)),
                         new MockBindRule(d1, new MockDesire(sbp)),
                         new MockBindRule(d2, new MockDesire(scp)));
-        bindings.putAll(ContextPattern.subsequence(new MockContextElementMatcher(A.class)),
+        final Class<?> type = A.class;
+        final MockQualifierMatcher qualifier = MockQualifierMatcher.any();
+        bindings.putAll(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
                         new MockBindRule(d1, new MockDesire(sb)),
                         new MockBindRule(d2, new MockDesire(sc)));
         

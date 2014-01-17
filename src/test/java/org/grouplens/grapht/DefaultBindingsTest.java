@@ -37,7 +37,7 @@ public class DefaultBindingsTest {
 
     @Before
     public void setup() {
-        b = new InjectorBuilder();
+        b = InjectorBuilder.create(DefaultBindingsTest.class.getClassLoader());
     }
 
     @Test

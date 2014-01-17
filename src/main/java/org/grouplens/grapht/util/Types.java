@@ -287,4 +287,19 @@ public final class Types {
         }
         return false;
     }
+
+    /**
+     * Infer a default class loader.
+     * @return A reasonable default class loader.
+     */
+    public static ClassLoader getDefaultClassLoader() {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+            loader = Types.class.getClassLoader();
+        }
+        if (loader == null) {
+            loader = ClassLoader.getSystemClassLoader();
+        }
+        return loader;
+    }
 }

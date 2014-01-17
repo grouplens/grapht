@@ -21,15 +21,15 @@ package org.grouplens.grapht.graph;
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.CachedSatisfaction;
+import org.grouplens.grapht.reflect.Desires;
+import org.grouplens.grapht.reflect.Satisfactions;
+import org.grouplens.grapht.reflect.internal.InstanceSatisfaction;
+import org.grouplens.grapht.reflect.internal.types.NamedType;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.DesireChain;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.InjectSPI;
-import org.grouplens.grapht.spi.reflect.InstanceSatisfaction;
-import org.grouplens.grapht.spi.reflect.ReflectionInjectSPI;
-import org.grouplens.grapht.spi.reflect.types.NamedType;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,9 +57,8 @@ public class SerializationTest {
     
     @Test
     public void testSharedNodesGraph() throws Exception {
-        InjectSPI spi = new ReflectionInjectSPI();
-        CachedSatisfaction s1 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.NEW_INSTANCE);
-        CachedSatisfaction s2 = new CachedSatisfaction(spi.satisfy(Object.class), CachePolicy.MEMOIZE);
+        CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.NEW_INSTANCE);
+        CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.MEMOIZE);
 
         DAGNode<CachedSatisfaction, String> n2 = DAGNode.singleton(s2);
         DAGNodeBuilder<CachedSatisfaction, String> bld = DAGNode.newBuilder(s1);
@@ -83,9 +82,9 @@ public class SerializationTest {
                                                   .addBindingFunction(b.build(RuleSet.EXPLICIT))
                                                   .addBindingFunction(b.build(RuleSet.INTERMEDIATE_TYPES))
                                                   .addBindingFunction(b.build(RuleSet.SUPER_TYPES))
-                                                  .addBindingFunction(new DefaultDesireBindingFunction(b.getSPI()))
+                                                  .addBindingFunction(DefaultDesireBindingFunction.create())
                                                   .build();
-        solver.resolve(b.getSPI().desire(null, NamedType.class, false));
+        solver.resolve(Desires.create(null, NamedType.class, false));
         
         DAGNode<CachedSatisfaction,DesireChain> g = solver.getGraph();
         write(g);
@@ -98,8 +97,8 @@ public class SerializationTest {
         Assert.assertEquals(NamedType.class, namedType.getLabel().getSatisfaction().getErasedType());
         Assert.assertEquals(NamedType.class, rootEdge.getLabel().getInitialDesire().getDesiredType());
         Assert.assertEquals(rootEdge.getLabel().getInitialDesire().getSatisfaction(), namedType.getLabel().getSatisfaction());
-        Assert.assertNull(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().getQualifier());
-        Assert.assertTrue(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().getAttributes().isEmpty());
+        Assert.assertNull(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getQualifier());
+        Assert.assertTrue(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().isEmpty());
         
         Assert.assertEquals(1, namedType.getOutgoingEdges().size());
         DAGEdge<CachedSatisfaction, DesireChain> nameEdge = namedType.getOutgoingEdges().iterator().next();
@@ -107,8 +106,8 @@ public class SerializationTest {
         
         Assert.assertEquals(String.class, string.getLabel().getSatisfaction().getErasedType());
         Assert.assertEquals(String.class, nameEdge.getLabel().getInitialDesire().getDesiredType());
-        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().getQualifier());
-        Assert.assertTrue(nameEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().getAttributes().isEmpty());
+        Assert.assertEquals(AnnotationBuilder.of(Named.class).setValue("test1").build(), nameEdge.getLabel().getInitialDesire().getInjectionPoint().getQualifier());
+        Assert.assertTrue(nameEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().isEmpty());
         
         Assert.assertTrue(string.getLabel().getSatisfaction() instanceof InstanceSatisfaction);
         Assert.assertEquals("hello world", ((InstanceSatisfaction) string.getLabel().getSatisfaction()).getInstance());

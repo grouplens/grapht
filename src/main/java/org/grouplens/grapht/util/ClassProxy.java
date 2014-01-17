@@ -25,14 +25,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -191,23 +189,22 @@ public final class ClassProxy implements Serializable {
 
         List<String> members = new ArrayList<String>();
         for (Constructor<?> c: type.getDeclaredConstructors()) {
-            members.add(String.format("%s(%s)", c.getName(),
-                                      StringUtils.join(c.getParameterTypes(), ", ")));
+            if (isInjectionSensitive(c)) {
+                members.add(String.format("%s(%s)", c.getName(),
+                                          StringUtils.join(c.getParameterTypes(), ", ")));
+            }
         }
         for (Method m: type.getDeclaredMethods()) {
-            if (Modifier.isPrivate(m.getModifiers()) || Modifier.isStatic(m.getModifiers())) {
-                // FIXME Respect injectable methods
-                continue;
+            if (isInjectionSensitive(m)) {
+                members.add(String.format("%s(%s): %s", m.getName(),
+                                          StringUtils.join(m.getParameterTypes(), ", "),
+                                          m.getReturnType()));
             }
-            members.add(String.format("%s(%s): %s", m.getName(),
-                                      StringUtils.join(m.getParameterTypes(), ", "),
-                                      m.getReturnType()));
         }
         for (Field f: type.getDeclaredFields()) {
-            if (Modifier.isPrivate(f.getModifiers()) || Modifier.isStatic(f.getModifiers())) {
-                continue;
+            if (isInjectionSensitive(f)) {
+                members.add(f.getName() + ":" + f.getType().getName());
             }
-            members.add(f.getName() + ":" + f.getType().getName());
         }
 
         Collections.sort(members);
@@ -219,5 +216,28 @@ public final class ClassProxy implements Serializable {
         for (String mem: members) {
             digest.update(mem.getBytes(UTF8));
         }
+    }
+
+    /**
+     * Check whether a member is injection-sensitive and should be checked for validity in
+     * deserialization.
+     *
+     * @param m The member.
+     * @param <M> The type of member (done so we can check multiple types).
+     * @return {@code true} if the member should be checksummed, {@code false} to ignore it.
+     */
+    private static <M extends Member & AnnotatedElement>boolean isInjectionSensitive(M m) {
+        // static methods are not sensitive
+        if (Modifier.isStatic(m.getModifiers())) {
+            return false;
+        }
+
+        // private members w/o @Inject are not sensitive
+        if (Modifier.isPrivate(m.getModifiers()) && m.getAnnotation(Inject.class) == null) {
+            return false;
+        }
+
+        // public, protected, or @Inject - it's sensitive (be conservative)
+        return true;
     }
 }

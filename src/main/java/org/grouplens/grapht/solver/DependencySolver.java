@@ -26,11 +26,11 @@ import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.graph.DAGNodeBuilder;
 import org.grouplens.grapht.graph.MergePool;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.CachedSatisfaction;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.reflect.NullSatisfaction;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.CachedSatisfaction;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.internal.NullSatisfaction;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,8 +308,7 @@ public class DependencySolver {
                                                            .getSatisfaction(),
                                                        edge.getLabel()
                                                            .getInitialDesire()
-                                                           .getInjectionPoint()
-                                                           .getAttributes());
+                                                           .getInjectionPoint());
                 walkGraphForReplacements(edge.getTail(), next, replacements);
             } else {
                 // trigger binding, add a replacement
@@ -338,7 +337,7 @@ public class DependencySolver {
         Resolution result = resolve(desire, context);
         CachedSatisfaction sat = new CachedSatisfaction(result.satisfaction, result.policy);
 
-        InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint().getAttributes());
+        InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint());
 
         DAGNode<CachedSatisfaction,DesireChain> node;
         if (result.deferDependencies) {

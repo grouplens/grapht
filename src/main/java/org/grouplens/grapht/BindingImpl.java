@@ -23,10 +23,12 @@ import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.solver.BindRules;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
-import org.grouplens.grapht.spi.context.ContextMatcher;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.Satisfactions;
+import org.grouplens.grapht.context.ContextMatcher;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -65,7 +67,7 @@ class BindingImpl<T> implements Binding<T> {
     
     public BindingImpl(ContextImpl context, Class<T> type) {
         this(context, type, context.getBuilder().getDefaultExclusions(),
-             context.getBuilder().getSPI().matchDefault(),
+             Qualifiers.matchDefault(),
              CachePolicy.NO_PREFERENCE);
     }
     
@@ -81,25 +83,25 @@ class BindingImpl<T> implements Binding<T> {
 
     @Override
     public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
-        QualifierMatcher q = context.getBuilder().getSPI().match(qualifier);
+        QualifierMatcher q = Qualifiers.match(qualifier);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
     
     @Override
     public Binding<T> withQualifier(@Nonnull Annotation annot) {
-        QualifierMatcher q = context.getBuilder().getSPI().match(annot);
+        QualifierMatcher q = Qualifiers.match(annot);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
 
     @Override
     public Binding<T> withAnyQualifier() {
-        QualifierMatcher q = context.getBuilder().getSPI().matchAny();
+        QualifierMatcher q = Qualifiers.matchAny();
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
     
     @Override
     public Binding<T> unqualified() {
-        QualifierMatcher q = context.getBuilder().getSPI().matchNone();
+        QualifierMatcher q = Qualifiers.matchNone();
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
     }
 
@@ -143,7 +145,7 @@ class BindingImpl<T> implements Binding<T> {
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
                 if (useSatisfaction) {
                     config.addBindRule(e.getValue(), matcher,
-                                       BindRules.toSatisfaction(e.getKey(), qualifier, config.getSPI().satisfy(impl),
+                                       BindRules.toSatisfaction(e.getKey(), qualifier, Satisfactions.type(impl),
                                                                 cachePolicy, !chained));
                 } else {
                     config.addBindRule(e.getValue(), matcher,
@@ -154,7 +156,7 @@ class BindingImpl<T> implements Binding<T> {
         } else {
             if (useSatisfaction) {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
-                                   BindRules.toSatisfaction(sourceType, qualifier, config.getSPI().satisfy(impl),
+                                   BindRules.toSatisfaction(sourceType, qualifier, Satisfactions.type(impl),
                                                             cachePolicy, !chained));
             } else {
                 config.addBindRule(RuleSet.EXPLICIT, matcher,
@@ -186,7 +188,7 @@ class BindingImpl<T> implements Binding<T> {
 
         // Apply some type coercing if we're dealing with primitive types
         Object coerced = coerce(instance);
-        Satisfaction s = config.getSPI().satisfy(coerced);
+        Satisfaction s = Satisfactions.instance(coerced);
         
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(coerced.getClass());
@@ -204,7 +206,7 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
-        Satisfaction s = config.getSPI().satisfyWithProvider(provider);
+        Satisfaction s = Satisfactions.providerType(provider);
         
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
@@ -222,7 +224,7 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(@Nonnull Provider<? extends T> provider) {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
-        Satisfaction s = config.getSPI().satisfyWithProvider(provider);
+        Satisfaction s = Satisfactions.providerInstance(provider);
 
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
@@ -246,7 +248,7 @@ class BindingImpl<T> implements Binding<T> {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
 
-        Satisfaction s = config.getSPI().satisfyWithNull(type);
+        Satisfaction s = Satisfactions.nullOfType(type);
 
         if (config.getGenerateRules()) {
             Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);

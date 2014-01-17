@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.Desire;
-
 import javax.annotation.Nullable;
 
 /**

@@ -23,9 +23,8 @@ import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.spi.*;
+import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.MemoizingProvider;
-import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,6 @@ import java.util.Map;
 public class DefaultInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
     
-    private final InjectSPI spi;
     private final DependencySolver solver;
     private final Map<DAGNode<CachedSatisfaction, DesireChain>, Provider<?>> providerCache;
     
@@ -61,13 +59,12 @@ public class DefaultInjector implements Injector {
      * hierarchy. Bindings with a NO_PREFERENCE cache policy will be treated as
      * NEW_INSTANCE.
      * 
-     * @param spi The InjectSPI to use
      * @param functions The BindingFunctions to use, ordered with highest
      *            priority function first
      * @throws NullPointerException if spi or functions ar enull
      */
-    public DefaultInjector(InjectSPI spi, BindingFunction... functions) {
-        this(spi, CachePolicy.MEMOIZE, functions);
+    public DefaultInjector(BindingFunction... functions) {
+        this(CachePolicy.MEMOIZE, functions);
     }
     
     /**
@@ -77,15 +74,14 @@ public class DefaultInjector implements Injector {
      * hierarchy. Bindings with a NO_PREFERENCE cache policy will use
      * <tt>defaultPolicy</tt>.
      * 
-     * @param spi The InjectSPI to use
      * @param defaultPolicy The CachePolicy used in place of NO_PREFERENCE
      * @param functions The BindingFunctions to use, ordered with highest
      *            priority functions first
      * @throws IllegalArgumentException if defaultPolicy is NO_PREFERENCE
      * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectSPI spi, CachePolicy defaultPolicy, BindingFunction... functions) {
-        this(spi, defaultPolicy, 100, functions);
+    public DefaultInjector(CachePolicy defaultPolicy, BindingFunction... functions) {
+        this(defaultPolicy, 100, functions);
     }
 
     /**
@@ -99,7 +95,6 @@ public class DefaultInjector implements Injector {
      * configuration requires it, although for most purposes the default 100
      * should be sufficient.
      * 
-     * @param spi The InjectSPI to use
      * @param defaultPolicy The CachePolicy used in place of NO_PREFERENCE
      * @param maxDepth The maximum depth of the dependency hierarchy
      * @param functions The BindingFunctions to use, ordered with highest
@@ -108,13 +103,11 @@ public class DefaultInjector implements Injector {
      *             defaultPolicy is NO_PREFERENCE
      * @throws NullPointerException if spi or functions are null
      */
-    public DefaultInjector(InjectSPI spi, CachePolicy defaultPolicy, int maxDepth, BindingFunction... functions) {
-        Preconditions.notNull("spi", spi);
+    public DefaultInjector(CachePolicy defaultPolicy, int maxDepth, BindingFunction... functions) {
         if (defaultPolicy.equals(CachePolicy.NO_PREFERENCE)) {
             throw new IllegalArgumentException("Default CachePolicy cannot be NO_PREFERENCE");
         }
 
-        this.spi = spi;
         solver = DependencySolver.newBuilder()
                                  .addBindingFunctions(functions)
                                  .setDefaultPolicy(defaultPolicy)
@@ -142,7 +135,7 @@ public class DefaultInjector implements Injector {
         // within this exclusive lock so we know everything is thread safe
         // albeit in a non-optimal way.
         synchronized(this) {
-            Desire desire = spi.desire(qualifier, type, false);
+            Desire desire = Desires.create(qualifier, type, false);
 
             Predicate<DesireChain> pred = DesireChain.hasInitialDesire(desire);
 

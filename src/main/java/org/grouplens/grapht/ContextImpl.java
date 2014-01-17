@@ -18,10 +18,12 @@
  */
 package org.grouplens.grapht;
 
-import org.grouplens.grapht.spi.context.ContextElementMatcher;
-import org.grouplens.grapht.spi.context.ContextPattern;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.context.Multiplicity;
+import org.grouplens.grapht.context.ContextElementMatcher;
+import org.grouplens.grapht.context.ContextElements;
+import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.context.Multiplicity;
+import org.grouplens.grapht.reflect.Qualifiers;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
@@ -78,17 +80,17 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context within(Class<?> type) {
-        return in(config.getSPI().matchDefault(), type, false);
+        return in(Qualifiers.matchDefault(), type, false);
     }
 
     @Override
     public Context within(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        return in(config.getSPI().match(qualifier), type, false);
+        return in(Qualifiers.match(qualifier), type, false);
     }
     
     @Override
     public Context within(@Nullable Annotation annot, Class<?> type) {
-        return in(config.getSPI().match(annot), type, false);
+        return in(Qualifiers.match(annot), type, false);
     }
 
     @Override
@@ -98,21 +100,21 @@ class ContextImpl extends AbstractContext {
 
     @Override
     public Context at(Class<?> type) {
-        return in(config.getSPI().matchDefault(), type, true);
+        return in(Qualifiers.matchDefault(), type, true);
     }
 
     @Override
     public Context at(@Nullable Class<? extends Annotation> qualifier, Class<?> type) {
-        return in(config.getSPI().match(qualifier), type, true);
+        return in(Qualifiers.match(qualifier), type, true);
     }
 
     @Override
     public Context at(@Nullable Annotation annot, Class<?> type) {
-        return in(config.getSPI().match(annot), type, true);
+        return in(Qualifiers.match(annot), type, true);
     }
     
     private Context in(QualifierMatcher q, Class<?> type, boolean anchored) {
-        ContextElementMatcher nextMatcher = config.getSPI().contextElement(q, type);
+        ContextElementMatcher nextMatcher = ContextElements.matchType(type, q);
         ContextPattern pat = getContextPattern().append(nextMatcher, Multiplicity.ONE);
 
         return new ContextImpl(config, pat, anchored);

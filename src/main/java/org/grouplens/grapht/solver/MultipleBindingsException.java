@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.Desire;
+import org.grouplens.grapht.reflect.Desire;
 
 import java.util.ArrayList;
 import java.util.Collection;

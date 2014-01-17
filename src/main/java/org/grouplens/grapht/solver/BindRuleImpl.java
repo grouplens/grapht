@@ -20,10 +20,10 @@ package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.grouplens.grapht.spi.CachePolicy;
-import org.grouplens.grapht.spi.Desire;
-import org.grouplens.grapht.spi.QualifierMatcher;
-import org.grouplens.grapht.spi.Satisfaction;
+import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -154,7 +154,7 @@ final class BindRuleImpl implements BindRule, Serializable {
         // bind rules match type by equality
         if (desire.getDesiredType().equals(depType)) {
             // if the type is equal, then rely on the qualifier matcher
-            return qualifier.matches(desire.getInjectionPoint().getAttributes().getQualifier());
+            return qualifier.matches(desire.getInjectionPoint().getQualifier());
         }
         
         // the type and {@link Qualifier}s are not a match, so return false

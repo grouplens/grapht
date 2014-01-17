@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.spi.CachePolicy;
+import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.util.Preconditions;
 
 import javax.annotation.Nonnull;
