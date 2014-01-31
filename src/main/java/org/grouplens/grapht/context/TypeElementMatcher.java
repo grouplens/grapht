@@ -23,8 +23,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.QualifierMatcher;
-import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.Qualifiers;
+import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Types;
 
@@ -133,7 +133,7 @@ class TypeElementMatcher implements ContextElementMatcher, Serializable {
     @Override
     public String toString() {
         String tname = type == null ? "null" : type.getSimpleName();
-        return "Context(" + qualifier + ":" + tname + ")";
+        return "[" + qualifier + ":" + tname + "]";
     }
 
     private static class MatchElem implements MatchElement {
