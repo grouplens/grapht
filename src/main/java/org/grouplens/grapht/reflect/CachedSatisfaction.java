@@ -34,10 +34,11 @@ import java.util.UUID;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class CachedSatisfaction implements Serializable {
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
     
     private final Satisfaction satisfaction;
     private final CachePolicy cachePolicy;
+    private final boolean fixed;
     private final UUID unique;
 
     /**
@@ -48,28 +49,44 @@ public class CachedSatisfaction implements Serializable {
      * @throws NullPointerException if satisfaction is null
      */
     public CachedSatisfaction(Satisfaction satisfaction) {
-        this(satisfaction, satisfaction.getDefaultCachePolicy());
-    }
-    
-    /**
-     * Create a new CachedSatisfaction wrapping the given satisfaction and cache
-     * policy. Providers from the given satisfaction, used in conjunction with
-     * this pair, must be wrapped to satisfy the chosen policy.
-     * 
-     * @param satisfaction The satisfaction to wrap
-     * @param policy The policy used with this satisfaction
-     * @throws NullPointerException if either argument is null
-     */
-    public CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy) {
-        this(satisfaction, policy, null);
+        this(satisfaction, satisfaction.getDefaultCachePolicy(), false);
     }
 
-    private CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy, UUID key) {
+    /**
+     * Create a new CachedSatisfaction wrapping the given satisfaction and cache policy. Providers
+     * from the given satisfaction, used in conjunction with this pair, must be wrapped to satisfy
+     * the chosen policy.
+     *
+     * @param satisfaction The satisfaction to wrap
+     * @param policy       The policy used with this satisfaction
+     * @throws NullPointerException the satisfaction or policy is null
+     */
+    public CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy) {
+        this(satisfaction, policy, false);
+    }
+
+    /**
+     * Create a new CachedSatisfaction wrapping the given satisfaction and cache policy. Providers
+     * from the given satisfaction, used in conjunction with this pair, must be wrapped to satisfy
+     * the chosen policy.
+     *
+     * @param satisfaction The satisfaction to wrap
+     * @param policy       The policy used with this satisfaction
+     * @param fixed        {@code true} if this satisfaction is <emph>fixed</emph>, meaning that it
+     *                     will not be removed by {@link org.grouplens.grapht.solver.DependencySolver#rewrite(org.grouplens.grapht.graph.DAGNode)}.
+     * @throws NullPointerException if either argument is null
+     */
+    public CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy, boolean fixed) {
+        this(satisfaction, policy, fixed, null);
+    }
+
+    private CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy, boolean fx, UUID key) {
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
 
         this.satisfaction = satisfaction;
         cachePolicy = policy;
+        fixed = fx;
         unique = key;
     }
 
@@ -93,7 +110,7 @@ public class CachedSatisfaction implements Serializable {
      * @return A unique copy of the satisfaction.
      */
     public CachedSatisfaction uniqueCopy() {
-        return new CachedSatisfaction(satisfaction, cachePolicy, UUID.randomUUID());
+        return new CachedSatisfaction(satisfaction, cachePolicy, fixed, UUID.randomUUID());
     }
     
     @Override

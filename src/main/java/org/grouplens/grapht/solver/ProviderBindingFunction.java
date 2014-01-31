@@ -70,7 +70,12 @@ public class ProviderBindingFunction implements BindingFunction {
                     // Make sure to defer this binding since the single dependency
                     // on the provided type might very well create a cycle that deferred
                     // injection must break.
-                    return new BindingResult(jitDesire, CachePolicy.NO_PREFERENCE, true, true);
+                    return BindingResult.newBuilder()
+                                        .setDesire(jitDesire)
+                                        .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                        .addFlag(BindingFlag.DEFERRED)
+                                        .addFlag(BindingFlag.TERMINAL)
+                                        .build();
                 }
             }
         }

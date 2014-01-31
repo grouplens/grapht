@@ -59,7 +59,7 @@ import java.util.*;
 public class DependencySolver {
     private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);
     public static final CachedSatisfaction ROOT_SATISFACTION =
-            new CachedSatisfaction(new NullSatisfaction(Void.TYPE), CachePolicy.NO_PREFERENCE);
+            new CachedSatisfaction(new NullSatisfaction(Void.TYPE), CachePolicy.NO_PREFERENCE, true);
 
     /**
      * Get an initial injection context.
@@ -333,9 +333,7 @@ public class DependencySolver {
         }
         
         // resolve the current node
-        //  - pair of pairs is a little awkward, but there's no triple type
         Resolution result = resolve(desire, context);
-        CachedSatisfaction sat = new CachedSatisfaction(result.satisfaction, result.policy);
 
         InjectionContext newContext = context.extend(result.satisfaction, desire.getInjectionPoint());
 
@@ -343,12 +341,12 @@ public class DependencySolver {
         if (result.deferDependencies) {
             // extend node onto deferred queue and skip its dependencies for now
             logger.debug("Deferring dependencies of {}", result.satisfaction);
-            node = DAGNode.singleton(sat);
+            node = DAGNode.singleton(result.makeSatisfaction());
             deferQueue.add(new Deferral(node, newContext));
         } else {
             // build up a node with its outgoing edges
             DAGNodeBuilder<CachedSatisfaction,DesireChain> nodeBuilder = DAGNode.newBuilder();
-            nodeBuilder.setLabel(sat);
+            nodeBuilder.setLabel(result.makeSatisfaction());
             for (Desire d: result.satisfaction.getDependencies()) {
                 // complete the sub graph for the given desire
                 // - the call to resolveFully() is responsible for adding the dependency edges
@@ -366,6 +364,7 @@ public class DependencySolver {
         DesireChain chain = DesireChain.singleton(desire);
 
         CachePolicy policy = CachePolicy.NO_PREFERENCE;
+        boolean fixed = false;
         while(true) {
             logger.debug("Current desire: {}", chain.getCurrentDesire());
             
@@ -386,6 +385,7 @@ public class DependencySolver {
 
                 terminate = binding.terminates();
                 defer = binding.isDeferred();
+                fixed |= binding.isFixed();
                 
                 // upgrade policy if needed
                 if (binding.getCachePolicy().compareTo(policy) > 0) {
@@ -404,7 +404,7 @@ public class DependencySolver {
                     }
                 }
                 
-                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, defer);
+                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, fixed, defer);
             } else if (binding == null) {
                 // no more desires to process, it cannot be satisfied
                 throw new UnresolvableDependencyException(chain, context);
@@ -419,14 +419,21 @@ public class DependencySolver {
         private final Satisfaction satisfaction;
         private final CachePolicy policy;
         private final DesireChain desires;
+        private final boolean fixed;
         private final boolean deferDependencies;
         
         public Resolution(Satisfaction satisfaction, CachePolicy policy, 
-                          DesireChain desires, boolean deferDependencies) {
+                          DesireChain desires, boolean fixed,
+                          boolean deferDependencies) {
             this.satisfaction = satisfaction;
             this.policy = policy;
             this.desires = desires;
+            this.fixed = fixed;
             this.deferDependencies = deferDependencies;
+        }
+
+        public CachedSatisfaction makeSatisfaction() {
+            return new CachedSatisfaction(satisfaction, policy, fixed);
         }
     }
     

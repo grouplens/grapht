@@ -57,8 +57,8 @@ public class SerializationTest {
     
     @Test
     public void testSharedNodesGraph() throws Exception {
-        CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.NEW_INSTANCE);
-        CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.MEMOIZE);
+        CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.NEW_INSTANCE, false);
+        CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.MEMOIZE, false);
 
         DAGNode<CachedSatisfaction, String> n2 = DAGNode.singleton(s2);
         DAGNodeBuilder<CachedSatisfaction, String> bld = DAGNode.newBuilder(s1);

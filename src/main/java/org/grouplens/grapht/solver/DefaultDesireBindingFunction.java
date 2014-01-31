@@ -121,27 +121,31 @@ public class DefaultDesireBindingFunction implements BindingFunction {
      */
     private BindingResult getDefaultValue(Desire desire, Class<?> type) {
         // FIXME Check whether the annotation type is actually relevant for the desire
+        BindingResult.Builder bld = null;
         DefaultDouble dfltDouble = type.getAnnotation(DefaultDouble.class);
         if (dfltDouble != null) {
-            return new BindingResult(desire.restrict(Satisfactions.instance(dfltDouble.value())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+            bld = BindingResult.newBuilder()
+                               .setDesire(desire.restrict(Satisfactions.instance(dfltDouble.value())));
         }
         DefaultInteger dfltInt = type.getAnnotation(DefaultInteger.class);
         if (dfltInt != null) {
-            return new BindingResult(desire.restrict(Satisfactions.instance(dfltInt.value())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+            bld = BindingResult.newBuilder().setDesire(desire.restrict(Satisfactions.instance(dfltInt.value())));
         }
         DefaultBoolean dfltBool = type.getAnnotation(DefaultBoolean.class);
         if (dfltBool != null) {
-            return new BindingResult(desire.restrict(Satisfactions.instance(dfltBool.value())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+            bld = BindingResult.newBuilder().setDesire(desire.restrict(Satisfactions.instance(dfltBool.value())));
         }
         DefaultString dfltStr = type.getAnnotation(DefaultString.class);
         if (dfltStr != null) {
-            return new BindingResult(desire.restrict(Satisfactions.instance(dfltStr.value())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+            bld = BindingResult.newBuilder().setDesire(desire.restrict(Satisfactions.instance(dfltStr.value())));
         }
-        return null;
+        if (bld != null) {
+            return bld.setCachePolicy(CachePolicy.NO_PREFERENCE)
+                      .addFlag(BindingFlag.TERMINAL)
+                      .build();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -153,25 +157,35 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
         DefaultProvider provided = type.getAnnotation(DefaultProvider.class);
         if (provided != null) {
-            return new BindingResult(desire.restrict(Satisfactions.providerType(provided.value())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+            return BindingResult.newBuilder()
+                                .setDesire(desire.restrict(Satisfactions.providerType(provided.value())))
+                                .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                .addFlag(BindingFlag.TERMINAL)
+                                .build();
         }
 
         DefaultImplementation impl = type.getAnnotation(DefaultImplementation.class);
         if (impl != null) {
             if (Types.isInstantiable(impl.value())) {
-                return new BindingResult(desire.restrict(Satisfactions.type(impl.value())),
-                                         CachePolicy.NO_PREFERENCE, false, false);
+                return BindingResult.newBuilder()
+                                    .setDesire(desire.restrict(Satisfactions.type(impl.value())))
+                                    .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                    .build();
             } else {
-                return new BindingResult(desire.restrict(impl.value()),
-                                         CachePolicy.NO_PREFERENCE, false, false);
+                return BindingResult.newBuilder()
+                                    .setDesire(desire.restrict(impl.value()))
+                                    .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                    .build();
             }
         }
 
         DefaultNull dnull = type.getAnnotation(DefaultNull.class);
         if (dnull != null) {
-            return new BindingResult(desire.restrict(Satisfactions.nullOfType(desire.getDesiredType())),
-                                     CachePolicy.NO_PREFERENCE, false, true);
+            return BindingResult.newBuilder()
+                                .setDesire(desire.restrict(Satisfactions.nullOfType(desire.getDesiredType())))
+                                .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                .addFlag(BindingFlag.TERMINAL)
+                                .build();
         }
 
         return null;
@@ -219,8 +233,11 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                         throw new SolverException(providerName + " does not provide " + type);
                     }
                     // QUESTION: why should the last parameter be true?
-                    result = new BindingResult(desire.restrict(sat),
-                                               CachePolicy.NO_PREFERENCE, false, true);
+                    result = BindingResult.newBuilder()
+                                          .setDesire(desire.restrict(sat))
+                                          .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                          .addFlag(BindingFlag.TERMINAL)
+                                          .build();
                 } catch (ClassNotFoundException e) {
                     throw new SolverException("cannot find default provider for " + type, e);
                 }
@@ -235,8 +252,10 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " not compatible with " + type);
                     }
-                    result = new BindingResult(desire.restrict(sat),
-                                               CachePolicy.NO_PREFERENCE, false, false);
+                    result = BindingResult.newBuilder()
+                                          .setDesire(desire.restrict(sat))
+                                          .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                          .build();
                 } catch (ClassNotFoundException e) {
                     throw new SolverException("cannot find default implementation for " + type, e);
                 }
