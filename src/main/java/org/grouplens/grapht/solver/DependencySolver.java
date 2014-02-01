@@ -259,6 +259,8 @@ public class DependencySolver {
         if (!graph.getLabel().getSatisfaction().getErasedType().equals(Void.TYPE)) {
             throw new IllegalArgumentException("only full dependency graphs can be rewritten");
         }
+
+        logger.debug("rewriting graph with {} nodes", graph.getReachableNodes().size());
         // We proceed in three stages.
         Map<DAGEdge<CachedSatisfaction, DesireChain>, DAGEdge<CachedSatisfaction,DesireChain>> replacementSubtrees =
                 Maps.newHashMap();
@@ -269,6 +271,7 @@ public class DependencySolver {
         DAGNode<CachedSatisfaction, DesireChain> stage2 =
                 graph.transformEdges(Functions.forMap(replacementSubtrees, null));
 
+        logger.debug("merging rewritten graph");
         // Now we have a graph (stage2) with rewritten subtrees based on trigger rules
         // We merge this graph with the original to deduplicate.
         MergePool<CachedSatisfaction,DesireChain> pool = MergePool.create();
@@ -289,6 +292,7 @@ public class DependencySolver {
                                           Map<DAGEdge<CachedSatisfaction, DesireChain>, DAGEdge<CachedSatisfaction, DesireChain>> replacements) throws SolverException {
         assert context.getTailValue().getLeft().equals(root.getLabel().getSatisfaction());
         for (DAGEdge<CachedSatisfaction,DesireChain> edge: root.getOutgoingEdges()) {
+            logger.debug("considering {} for replacement", edge.getTail().getLabel());
             Desire desire = edge.getLabel().getInitialDesire();
             DesireChain chain = DesireChain.singleton(desire);
             Pair<DAGNode<CachedSatisfaction, DesireChain>,DesireChain> repl = null;
@@ -302,6 +306,8 @@ public class DependencySolver {
                         break;
                     }
                 }
+            } else {
+                logger.debug("{} is fixed, skipping", edge.getTail().getLabel());
             }
             if (repl == null) {
                 // no trigger bindings, walk the node's children
@@ -314,6 +320,9 @@ public class DependencySolver {
                 walkGraphForReplacements(edge.getTail(), next, replacements);
             } else {
                 // trigger binding, add a replacement
+                logger.debug("replacing {} with {}",
+                             edge.getTail().getLabel(),
+                             repl.getLeft().getLabel());
                 replacements.put(edge, DAGEdge.create(root, repl.getLeft(), repl.getRight()));
             }
         }
