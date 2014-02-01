@@ -21,8 +21,10 @@ package org.grouplens.grapht.solver;
 import com.google.common.base.Preconditions;
 import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.QualifierMatcher;
-import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.Qualifiers;
+import org.grouplens.grapht.reflect.Satisfaction;
+
+import java.util.EnumSet;
 
 /**
  * Builder for bind rules.
@@ -38,7 +40,7 @@ public class BindRuleBuilder {
     private Class<?> implementation;
 
     private CachePolicy cachePolicy = CachePolicy.NO_PREFERENCE;
-    private boolean terminal = false;
+    private EnumSet<BindingFlag> flags = BindingFlag.emptySet();
 
     public static BindRuleBuilder create() {
         return new BindRuleBuilder();
@@ -121,17 +123,41 @@ public class BindRuleBuilder {
      * @return {@code true} if the binding will be terminal.
      */
     public boolean isTerminal() {
-        return terminal;
+        return flags.contains(BindingFlag.TERMINAL);
     }
 
     /**
      * Set whether the binding will be terminal.
      *
      * @param term {@code true} to create a terminal binding.
-     * @see org.grouplens.grapht.solver.BindRule#isTerminal()
+     * @see BindingFlag#TERMINAL
      */
     public BindRuleBuilder setTerminal(boolean term) {
-        terminal = term;
+        if (term) {
+            flags.add(BindingFlag.TERMINAL);
+        } else {
+            flags.remove(BindingFlag.TERMINAL);
+        }
+        return this;
+    }
+
+    /**
+     * Set the flags on this bind rule.
+     * @param fs The flags.
+     * @return The builder (for chaining).
+     */
+    public BindRuleBuilder setFlags(EnumSet<BindingFlag> fs) {
+        flags = fs.clone();
+        return this;
+    }
+
+    /**
+     * Add a flag to the constructed bind rule.
+     * @param flag The flag to add.
+     * @return The builder (for chaining).
+     */
+    public BindRuleBuilder addFlag(BindingFlag flag) {
+        flags.add(flag);
         return this;
     }
 
@@ -156,9 +182,9 @@ public class BindRuleBuilder {
         Preconditions.checkState(dependencyType != null, "no dependency type specified");
         if (implementation != null) {
             assert satisfaction == null;
-            return new BindRuleImpl(dependencyType, implementation, cachePolicy, qualifierMatcher, terminal);
+            return new BindRuleImpl(dependencyType, implementation, cachePolicy, qualifierMatcher, flags);
         } else if (satisfaction != null) {
-            return new BindRuleImpl(dependencyType, satisfaction, cachePolicy, qualifierMatcher, terminal);
+            return new BindRuleImpl(dependencyType, satisfaction, cachePolicy, qualifierMatcher, flags);
         } else {
             throw new IllegalStateException("no binding target specified");
         }

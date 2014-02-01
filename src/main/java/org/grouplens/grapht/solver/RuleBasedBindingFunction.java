@@ -131,13 +131,11 @@ public class RuleBasedBindingFunction implements BindingFunction {
             appliedRules.add(selectedRule);
             
             logger.debug("Applying rule: {} to desire: {}", selectedRule, desire);
-            BindingResult.Builder bld = BindingResult.newBuilder()
-                                                    .setDesire(selectedRule.apply(desire.getCurrentDesire()))
-                                                    .setCachePolicy(selectedRule.getCachePolicy());
-            if (selectedRule.isTerminal()) {
-                bld.addFlag(BindingFlag.TERMINAL);
-            }
-            return bld.build();
+            return BindingResult.newBuilder()
+                                .setDesire(selectedRule.apply(desire.getCurrentDesire()))
+                                .setCachePolicy(selectedRule.getCachePolicy())
+                                .setFlags(selectedRule.getFlags())
+                                .build();
         }
         
         // No rule to apply, so return null to delegate to the next binding function

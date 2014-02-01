@@ -122,6 +122,11 @@ public class BindingResult {
             return this;
         }
 
+        public Builder setFlags(EnumSet<BindingFlag> flags) {
+            this.flags = flags.clone();
+            return this;
+        }
+
         public BindingResult build() {
             com.google.common.base.Preconditions.checkState(desire != null, "no desire set");
             com.google.common.base.Preconditions.checkState(policy != null, "no policy set");
