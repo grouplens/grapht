@@ -318,29 +318,6 @@ public class ContextPattern implements ContextMatcher, Serializable {
         }
     }
 
-    /**
-     * A chain of context pattern elements.
-     */
-    private static class Chain<E> extends AbstractChain<E> {
-        private static final long serialVersionUID = 1L;
-        public Chain() {
-            super();
-        }
-
-        private Chain(Chain<E> head, E val) {
-            super(head, val);
-        }
-
-        public Chain<E> extend(E elem) {
-            return new Chain<E>(this, elem);
-        }
-
-        @Nullable
-        public Chain<E> getLeading() {
-            return (Chain<E>) previous;
-        }
-    }
-
     private static <E> E listHead(List<E> lst) {
         Preconditions.checkArgument(!lst.isEmpty(), "list cannot be empty");
         return lst.get(0);
