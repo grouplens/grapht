@@ -292,13 +292,15 @@ public class DependencySolver {
             Desire desire = edge.getLabel().getInitialDesire();
             DesireChain chain = DesireChain.singleton(desire);
             Pair<DAGNode<CachedSatisfaction, DesireChain>,DesireChain> repl = null;
-            for (BindingFunction bf: triggerFunctions) {
-                BindingResult result = bf.bind(context, chain);
-                if (result != null) {
-                    // resolve the node
-                    // we could reuse the resolution, but perf savings isn't worth complexity
-                    repl = resolveFully(desire, context, null);
-                    break;
+            if (!edge.getTail().getLabel().isFixed()) {
+                for (BindingFunction bf: triggerFunctions) {
+                    BindingResult result = bf.bind(context, chain);
+                    if (result != null) {
+                        // resolve the node
+                        // we could reuse the resolution, but perf savings isn't worth complexity
+                        repl = resolveFully(desire, context, null);
+                        break;
+                    }
                 }
             }
             if (repl == null) {

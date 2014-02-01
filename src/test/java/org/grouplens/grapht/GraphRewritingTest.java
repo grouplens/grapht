@@ -183,6 +183,38 @@ public class GraphRewritingTest {
                    equalTo((Class) W.class));
     }
 
+    @Test
+    public void testRewriteFixed() throws SolverException {
+        // based on testRewriteDependency, but with a fixed binding to prevent rewrite
+        BindingFunctionBuilder config = new BindingFunctionBuilder();
+        config.getRootContext()
+              .bind(I.class)
+              .to(C.class);
+        config.getRootContext()
+              .bind(I2.class)
+              .fixed()
+              .to(A.class);
+        DependencySolver initial =
+                DependencySolver.newBuilder()
+                                .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT))
+                                .build();
+        initial.resolve(Desires.create(null, I.class, false));
+        DAGNode<CachedSatisfaction, DesireChain> graph = initial.getGraph();
+
+        BindingFunctionBuilder config2 = new BindingFunctionBuilder();
+        config2.getRootContext()
+               .bind(I2.class)
+               .to(B.class);
+        DependencySolver rewriter =
+                DependencySolver.newBuilder()
+                                .addBindingFunction(config2.build(BindingFunctionBuilder.RuleSet.EXPLICIT), true)
+                                .build();
+
+        DAGNode<CachedSatisfaction, DesireChain> graph2 = rewriter.rewrite(graph);
+        // should be unchanged, because of fixed binding
+        assertThat(graph2, sameInstance(graph));
+    }
+
     public static interface I {}
     public static interface I2 {}
     public static class C implements I {

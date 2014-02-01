@@ -25,6 +25,7 @@ import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.context.ContextMatcher;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.solver.BindRuleBuilder;
+import org.grouplens.grapht.solver.BindingFlag;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -60,45 +61,48 @@ class BindingImpl<T> implements Binding<T> {
     private final QualifierMatcher qualifier;
 
     private final CachePolicy cachePolicy;
-    
+    private final boolean fixed;
+
     public BindingImpl(ContextImpl context, Class<T> type) {
         this(context, type, context.getBuilder().getDefaultExclusions(),
              Qualifiers.matchDefault(),
-             CachePolicy.NO_PREFERENCE);
+             CachePolicy.NO_PREFERENCE,
+             false);
     }
-    
-    public BindingImpl(ContextImpl context, Class<T> type, 
+
+    public BindingImpl(ContextImpl context, Class<T> type,
                        Set<Class<?>> excludes, QualifierMatcher matcher, 
-                       CachePolicy cachePolicy) {
+                       CachePolicy cachePolicy, boolean fixed) {
         this.context = context;
         this.cachePolicy = cachePolicy;
         sourceType = type;
         excludeTypes = excludes;
         qualifier = matcher;
+        this.fixed = fixed;
     }
 
     @Override
     public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
         QualifierMatcher q = Qualifiers.match(qualifier);
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
     
     @Override
     public Binding<T> withQualifier(@Nonnull Annotation annot) {
         QualifierMatcher q = Qualifiers.match(annot);
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
 
     @Override
     public Binding<T> withAnyQualifier() {
         QualifierMatcher q = Qualifiers.matchAny();
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
     
     @Override
     public Binding<T> unqualified() {
         QualifierMatcher q = Qualifiers.matchNone();
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
 
     @Override
@@ -106,19 +110,24 @@ class BindingImpl<T> implements Binding<T> {
         Preconditions.notNull("exclude type", exclude);
         Set<Class<?>> excludes = new HashSet<Class<?>>(excludeTypes);
         excludes.add(exclude);
-        return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy, fixed);
     }
     
     @Override
     public Binding<T> shared() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.MEMOIZE);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.MEMOIZE, fixed);
     }
     
     @Override
     public Binding<T> unshared() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.NEW_INSTANCE);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.NEW_INSTANCE, fixed);
     }
-    
+
+    @Override
+    public Binding<T> fixed() {
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, cachePolicy, true);
+    }
+
     @Override
     public void to(@Nonnull Class<? extends T> impl, boolean chained) {
         Preconditions.isAssignable(sourceType, impl);
@@ -223,10 +232,14 @@ class BindingImpl<T> implements Binding<T> {
      * @return A bind rule builder, with the common configuration already applied.
      */
     private BindRuleBuilder startRule() {
-        return new BindRuleBuilder()
-                .setQualifierMatcher(qualifier)
-                .setCachePolicy(cachePolicy)
-                .setTerminal(true);
+        BindRuleBuilder brb = new BindRuleBuilder();
+        brb.setQualifierMatcher(qualifier)
+           .setCachePolicy(cachePolicy)
+           .setTerminal(true);
+        if (fixed) {
+            brb.addFlag(BindingFlag.FIXED);
+        }
+        return brb;
     }
 
     private Object coerce(Object in) {

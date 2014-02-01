@@ -117,6 +117,13 @@ public interface Binding<T> {
     Binding<T> unshared();
 
     /**
+     * Configure the binding so that its results are 'fixed'.  Fixed results will not be rewritten
+     * by the dependency solver in rewrite mode.
+     * @return A newly configured binding.
+     */
+    Binding<T> fixed();
+
+    /**
      * <p>
      * Complete this binding by specifying a subtype that will satisfy the
      * desired type. The implementation does not have to be instantiable; if

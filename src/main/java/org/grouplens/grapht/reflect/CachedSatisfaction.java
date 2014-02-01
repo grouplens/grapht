@@ -106,6 +106,14 @@ public class CachedSatisfaction implements Serializable {
     }
 
     /**
+     * Query whether this satifsaction should be subject to rewriting.
+     * @return {@code true} if dependencies on this node can be rewritten, {@code false} otherwise.
+     */
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    /**
      * Make a copy of this satisfaction which will not compare equal to any other satisfaction.
      * @return A unique copy of the satisfaction.
      */
