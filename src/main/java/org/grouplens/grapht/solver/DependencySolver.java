@@ -320,9 +320,9 @@ public class DependencySolver {
                 walkGraphForReplacements(edge.getTail(), next, replacements);
             } else {
                 // trigger binding, add a replacement
-                logger.debug("replacing {} with {}",
-                             edge.getTail().getLabel(),
-                             repl.getLeft().getLabel());
+                logger.info("replacing {} with {}",
+                            edge.getTail().getLabel(),
+                            repl.getLeft().getLabel());
                 replacements.put(edge, DAGEdge.create(root, repl.getLeft(), repl.getRight()));
             }
         }
@@ -445,6 +445,11 @@ public class DependencySolver {
 
         public CachedSatisfaction makeSatisfaction() {
             return new CachedSatisfaction(satisfaction, policy, fixed);
+        }
+
+        @Override
+        public String toString() {
+            return "(" + satisfaction + ", " + policy + ")";
         }
     }
     

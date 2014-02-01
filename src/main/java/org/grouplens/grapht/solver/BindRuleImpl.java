@@ -228,7 +228,7 @@ final class BindRuleImpl implements BindRule, Serializable {
     @Override
     public String toString() {
         String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
-        return "Bind(" + qualifier + ":" + depType.getSimpleName() + " -> " + i + ")";
+        return "Bind(" + qualifier + ":" + depType.getSimpleName() + " -> " + i + ", " + flags + ")";
     }
 
     private Object writeReplace() {
