@@ -19,7 +19,6 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Functions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,7 +36,6 @@ import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -62,7 +60,7 @@ import java.util.*;
 public class DependencySolver {
     private static final Logger logger = LoggerFactory.getLogger(DependencySolver.class);
     public static final CachedSatisfaction ROOT_SATISFACTION =
-            new CachedSatisfaction(new NullSatisfaction(Void.TYPE), CachePolicy.NO_PREFERENCE, true);
+            new CachedSatisfaction(new NullSatisfaction(Void.TYPE), CachePolicy.NO_PREFERENCE);
 
     /**
      * Get an initial injection context.
@@ -300,7 +298,7 @@ public class DependencySolver {
             Desire desire = edge.getLabel().getDesireChain().getInitialDesire();
             DesireChain chain = DesireChain.singleton(desire);
             Pair<DAGNode<CachedSatisfaction, Dependency>, Dependency> repl = null;
-            if (!edge.getTail().getLabel().isFixed()) {
+            if (!edge.getLabel().isFixed()) {
                 for (BindingFunction bf: triggerFunctions) {
                     BindingResult result = bf.bind(context, chain);
                     if (result != null) {
@@ -449,7 +447,7 @@ public class DependencySolver {
         }
 
         public CachedSatisfaction makeSatisfaction() {
-            return new CachedSatisfaction(satisfaction, policy, fixed);
+            return new CachedSatisfaction(satisfaction, policy);
         }
 
         public Dependency makeDependency() {

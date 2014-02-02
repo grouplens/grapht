@@ -71,6 +71,14 @@ public class Dependency implements Serializable {
     }
 
     /**
+     * Query whether this dependency is immune to rewriting.
+     * @return {@code true} if this dependency is immune to rewriting.
+     */
+    public boolean isFixed() {
+        return flags.contains(Flag.FIXED);
+    }
+
+    /**
      * Create a predicate matching dependencies with the specified initial desire.
      * @param d The desire.
      * @return A predicate that accepts dependencies whose initial desire is {@code d}.
@@ -113,6 +121,9 @@ public class Dependency implements Serializable {
      * Flags associated with a dependency.
      */
     public static enum Flag {
+        /**
+         * Indicates that a dependency is immune to rewriting.
+         */
         FIXED;
 
         public static EnumSet<Flag> emptySet() {

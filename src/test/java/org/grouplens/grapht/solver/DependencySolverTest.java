@@ -211,9 +211,9 @@ public class DependencySolverTest {
         Assert.assertEquals(s1, rootNode.getLabel().getSatisfaction());
         
         DAGNode<CachedSatisfaction, Dependency> n1 =
-                getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(s3, CachePolicy.NO_PREFERENCE, false));
+                getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(s3, CachePolicy.NO_PREFERENCE));
 
         assertThat(Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))),
                    hasSize(1));
@@ -268,11 +268,11 @@ public class DependencySolverTest {
         DAGNode<CachedSatisfaction, Dependency> rootNode = getRoot(r, rootDesire);
         
         Assert.assertEquals(5 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(r3, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n4 = getNode(r.getGraph(), new CachedSatisfaction(r4, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> on4 = getNode(r.getGraph(), new CachedSatisfaction(or4, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(r3, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n4 = getNode(r.getGraph(), new CachedSatisfaction(r4, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> on4 = getNode(r.getGraph(), new CachedSatisfaction(or4, CachePolicy.NO_PREFERENCE));
 
         Assert.assertEquals(n1, rootNode);
         Assert.assertEquals(2, n1.getOutgoingEdges().size());
@@ -350,10 +350,10 @@ public class DependencySolverTest {
         DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(r3, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> on3 = getNode(r.getGraph(), new CachedSatisfaction(or3, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(r3, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> on3 = getNode(r.getGraph(), new CachedSatisfaction(or3, CachePolicy.NO_PREFERENCE));
 
         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         Assert.assertNotNull(n1);
@@ -404,10 +404,10 @@ public class DependencySolverTest {
         DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(r3, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> on3 = getNode(r.getGraph(), new CachedSatisfaction(or3, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(r3, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> on3 = getNode(r.getGraph(), new CachedSatisfaction(or3, CachePolicy.NO_PREFERENCE));
 
         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         Assert.assertNotNull(n1);
@@ -449,9 +449,9 @@ public class DependencySolverTest {
         DependencySolver r = createSolver(bindings.build());
         r.resolve(rootDesire);
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> on2 = getNode(r.getGraph(), new CachedSatisfaction(or2, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(r1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(r2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> on2 = getNode(r.getGraph(), new CachedSatisfaction(or2, CachePolicy.NO_PREFERENCE));
 
         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         Assert.assertNotNull(n1);
@@ -493,9 +493,9 @@ public class DependencySolverTest {
         Assert.assertEquals(r1, rootNode.getLabel().getSatisfaction());
         Assert.assertEquals(3, rootNode.getOutgoingEdges().size());
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(sd1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(sd2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(sd3, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(sd1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(sd2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(sd3, CachePolicy.NO_PREFERENCE));
         
         Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n1))).size());
         Assert.assertEquals(d1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n1))).iterator().next().getLabel().getInitialDesire());
@@ -574,9 +574,9 @@ public class DependencySolverTest {
         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         Assert.assertEquals(s1, rootNode.getLabel().getSatisfaction());
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(s3, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n3 = getNode(r.getGraph(), new CachedSatisfaction(s3, CachePolicy.NO_PREFERENCE));
         
         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
@@ -804,8 +804,8 @@ public class DependencySolverTest {
         
         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE));
         
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
@@ -838,8 +838,8 @@ public class DependencySolverTest {
         
         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         
-        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE, false));
-        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE, false));
+        DAGNode<CachedSatisfaction, Dependency> n1 = getNode(r.getGraph(), new CachedSatisfaction(s1, CachePolicy.NO_PREFERENCE));
+        DAGNode<CachedSatisfaction, Dependency> n2 = getNode(r.getGraph(), new CachedSatisfaction(s2, CachePolicy.NO_PREFERENCE));
         
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
@@ -897,7 +897,7 @@ public class DependencySolverTest {
 
         DAGNode<CachedSatisfaction, Dependency> node =
                 Iterables.find(r.getGraph().getReachableNodes(),
-                               DAGNode.labelMatches(Predicates.equalTo(new CachedSatisfaction(sd, CachePolicy.NO_PREFERENCE, false))));
+                               DAGNode.labelMatches(Predicates.equalTo(new CachedSatisfaction(sd, CachePolicy.NO_PREFERENCE))));
         assertThat(r.getGraph().getIncomingEdges(node),
                    hasSize(2));
     }
