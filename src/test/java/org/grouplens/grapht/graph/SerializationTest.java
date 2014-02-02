@@ -20,6 +20,7 @@ package org.grouplens.grapht.graph;
 
 import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
+import org.grouplens.grapht.Dependency;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.CachedSatisfaction;
@@ -86,13 +87,13 @@ public class SerializationTest {
                                                   .build();
         solver.resolve(Desires.create(null, NamedType.class, false));
         
-        DAGNode<CachedSatisfaction,DesireChain> g = solver.getGraph();
+        DAGNode<CachedSatisfaction,Dependency> g = solver.getGraph();
         write(g);
-        DAGNode<CachedSatisfaction, DesireChain> root = read();
+        DAGNode<CachedSatisfaction, Dependency> root = read();
         
         Assert.assertEquals(1, root.getOutgoingEdges().size());
-        DAGEdge<CachedSatisfaction, DesireChain> rootEdge = root.getOutgoingEdges().iterator().next();
-        DAGNode<CachedSatisfaction, DesireChain> namedType = rootEdge.getTail();
+        DAGEdge<CachedSatisfaction, Dependency> rootEdge = root.getOutgoingEdges().iterator().next();
+        DAGNode<CachedSatisfaction, Dependency> namedType = rootEdge.getTail();
         
         Assert.assertEquals(NamedType.class, namedType.getLabel().getSatisfaction().getErasedType());
         Assert.assertEquals(NamedType.class, rootEdge.getLabel().getInitialDesire().getDesiredType());
@@ -101,8 +102,8 @@ public class SerializationTest {
         Assert.assertTrue(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().isEmpty());
         
         Assert.assertEquals(1, namedType.getOutgoingEdges().size());
-        DAGEdge<CachedSatisfaction, DesireChain> nameEdge = namedType.getOutgoingEdges().iterator().next();
-        DAGNode<CachedSatisfaction, DesireChain> string = nameEdge.getTail();
+        DAGEdge<CachedSatisfaction, Dependency> nameEdge = namedType.getOutgoingEdges().iterator().next();
+        DAGNode<CachedSatisfaction, Dependency> string = nameEdge.getTail();
         
         Assert.assertEquals(String.class, string.getLabel().getSatisfaction().getErasedType());
         Assert.assertEquals(String.class, nameEdge.getLabel().getInitialDesire().getDesiredType());
