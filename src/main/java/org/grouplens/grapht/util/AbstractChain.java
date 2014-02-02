@@ -44,26 +44,13 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
      * @param tv The value to go at the end of the chain.
      */
     protected AbstractChain(AbstractChain<E> prev, E tv) {
-        if (prev != null && prev.length == 0) {
-            previous = null;
-        } else {
-            previous = prev;
-        }
+        previous = prev;
         tailValue = tv;
         if (prev == null) {
             length = 1;
         } else {
             length = prev.length + 1;
         }
-    }
-
-    /**
-     * Construct a empty chain.
-     */
-    protected AbstractChain() {
-        previous = null;
-        tailValue = null;
-        length = 0;
     }
 
     public E getTailValue() {
@@ -88,9 +75,6 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
 
     @Override
     public Iterator<E> iterator() {
-        if (length == 0) {
-            return Iterators.emptyIterator();
-        }
         Iterator<E> current = Iterators.singletonIterator(tailValue);
         if (previous == null) {
             return current;
@@ -104,9 +88,6 @@ public abstract class AbstractChain<E> extends AbstractList<E> implements Serial
      * @return An iterator over the chain's elements in reverse order (current first).
      */
     public Iterator<E> reverseIterator() {
-        if (length == 0) {
-            return Iterators.emptyIterator();
-        }
         return new Iterator<E>() {
             AbstractChain<E> cur = AbstractChain.this;
             @Override

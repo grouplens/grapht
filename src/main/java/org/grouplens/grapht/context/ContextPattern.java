@@ -234,7 +234,12 @@ public class ContextPattern implements ContextMatcher, Serializable {
 
     @Override
     public String toString() {
-        return tokenChain.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("ContextPattern(");
+        for (Element tok: tokenChain) {
+            sb.append(tok);
+        }
+        return sb.append(")").toString();
     }
 
     @Override
@@ -295,28 +300,21 @@ public class ContextPattern implements ContextMatcher, Serializable {
             result = 31 * result + multiplicity.hashCode();
             return result;
         }
-    }
 
-    /**
-     * A chain of context pattern elements.
-     */
-    private static class Chain<E> extends AbstractChain<E> {
-        private static final long serialVersionUID = 1L;
-        public Chain() {
-            super();
-        }
-
-        private Chain(Chain<E> head, E val) {
-            super(head, val);
-        }
-
-        public Chain<E> extend(E elem) {
-            return new Chain<E>(this, elem);
-        }
-
-        @Nullable
-        public Chain<E> getLeading() {
-            return (Chain<E>) previous;
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(matcher);
+            switch (multiplicity) {
+            case ONE:
+                break;
+            case ZERO_OR_MORE:
+                sb.append("*");
+                break;
+            default:
+                throw new IllegalStateException("unknown multiplicity");
+            }
+            return sb.toString();
         }
     }
 

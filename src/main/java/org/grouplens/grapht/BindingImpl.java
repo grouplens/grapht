@@ -22,13 +22,10 @@ import org.apache.commons.lang3.ClassUtils;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
-import org.grouplens.grapht.solver.BindRules;
-import org.grouplens.grapht.reflect.CachePolicy;
-import org.grouplens.grapht.reflect.QualifierMatcher;
-import org.grouplens.grapht.reflect.Satisfaction;
-import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.context.ContextMatcher;
-import org.grouplens.grapht.reflect.Qualifiers;
+import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.solver.BindRuleBuilder;
+import org.grouplens.grapht.solver.BindingFlag;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -64,45 +61,48 @@ class BindingImpl<T> implements Binding<T> {
     private final QualifierMatcher qualifier;
 
     private final CachePolicy cachePolicy;
-    
+    private final boolean fixed;
+
     public BindingImpl(ContextImpl context, Class<T> type) {
         this(context, type, context.getBuilder().getDefaultExclusions(),
              Qualifiers.matchDefault(),
-             CachePolicy.NO_PREFERENCE);
+             CachePolicy.NO_PREFERENCE,
+             false);
     }
-    
-    public BindingImpl(ContextImpl context, Class<T> type, 
+
+    public BindingImpl(ContextImpl context, Class<T> type,
                        Set<Class<?>> excludes, QualifierMatcher matcher, 
-                       CachePolicy cachePolicy) {
+                       CachePolicy cachePolicy, boolean fixed) {
         this.context = context;
         this.cachePolicy = cachePolicy;
         sourceType = type;
         excludeTypes = excludes;
         qualifier = matcher;
+        this.fixed = fixed;
     }
 
     @Override
     public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
         QualifierMatcher q = Qualifiers.match(qualifier);
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
     
     @Override
     public Binding<T> withQualifier(@Nonnull Annotation annot) {
         QualifierMatcher q = Qualifiers.match(annot);
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
 
     @Override
     public Binding<T> withAnyQualifier() {
         QualifierMatcher q = Qualifiers.matchAny();
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
     
     @Override
     public Binding<T> unqualified() {
         QualifierMatcher q = Qualifiers.matchNone();
-        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
 
     @Override
@@ -110,19 +110,24 @@ class BindingImpl<T> implements Binding<T> {
         Preconditions.notNull("exclude type", exclude);
         Set<Class<?>> excludes = new HashSet<Class<?>>(excludeTypes);
         excludes.add(exclude);
-        return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy);
+        return new BindingImpl<T>(context, sourceType, excludes, qualifier, cachePolicy, fixed);
     }
     
     @Override
     public Binding<T> shared() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.MEMOIZE);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.MEMOIZE, fixed);
     }
     
     @Override
     public Binding<T> unshared() {
-        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.NEW_INSTANCE);
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, CachePolicy.NEW_INSTANCE, fixed);
     }
-    
+
+    @Override
+    public Binding<T> fixed() {
+        return new BindingImpl<T>(context, sourceType, excludeTypes, qualifier, cachePolicy, true);
+    }
+
     @Override
     public void to(@Nonnull Class<? extends T> impl, boolean chained) {
         Preconditions.isAssignable(sourceType, impl);
@@ -135,35 +140,14 @@ class BindingImpl<T> implements Binding<T> {
             }
         }
         
-        boolean useSatisfaction = Types.isInstantiable(impl);
-        
-        ContextMatcher matcher = context.getContextPattern();
-        BindingFunctionBuilder config = context.getBuilder();
-
-        if (config.getGenerateRules()) {
-            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(impl);
-            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                if (useSatisfaction) {
-                    config.addBindRule(e.getValue(), matcher,
-                                       BindRules.toSatisfaction(e.getKey(), qualifier, Satisfactions.type(impl),
-                                                                cachePolicy, !chained));
-                } else {
-                    config.addBindRule(e.getValue(), matcher,
-                                       BindRules.toClass(e.getKey(), qualifier, impl,
-                                                         cachePolicy, !chained));
-                }
-            }
+        BindRuleBuilder brb = startRule();
+        if (Types.isInstantiable(impl)) {
+            brb.setSatisfaction(Satisfactions.type(impl));
         } else {
-            if (useSatisfaction) {
-                config.addBindRule(RuleSet.EXPLICIT, matcher,
-                                   BindRules.toSatisfaction(sourceType, qualifier, Satisfactions.type(impl),
-                                                            cachePolicy, !chained));
-            } else {
-                config.addBindRule(RuleSet.EXPLICIT, matcher,
-                                   BindRules.toClass(sourceType, qualifier, impl,
-                                                     cachePolicy, !chained));
-            }
+            brb.setImplementation(impl);
         }
+        brb.setTerminal(!chained);
+        generateBindings(brb, impl);
     }
 
     @Override
@@ -183,59 +167,26 @@ class BindingImpl<T> implements Binding<T> {
                                        instance, sourceType);
             throw new InvalidBindingException(sourceType, msg);
         }
-        ContextMatcher matcher = context.getContextPattern();
-        BindingFunctionBuilder config = context.getBuilder();
 
         // Apply some type coercing if we're dealing with primitive types
         Object coerced = coerce(instance);
         Satisfaction s = Satisfactions.instance(coerced);
-        
-        if (config.getGenerateRules()) {
-            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(coerced.getClass());
-            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher,
-                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
-            }
-        } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher,
-                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
-        }
+        BindRuleBuilder brb = startRule().setSatisfaction(s);
+        generateBindings(brb, coerced.getClass());
     }
     
     @Override
     public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
-        ContextMatcher matcher = context.getContextPattern();
-        BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = Satisfactions.providerType(provider);
-        
-        if (config.getGenerateRules()) {
-            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
-            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher,
-                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
-            }
-        } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher,
-                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
-        }
+        BindRuleBuilder brb = startRule().setSatisfaction(s);
+        generateBindings(brb, Types.getProvidedType(provider));
     }
 
     @Override
     public void toProvider(@Nonnull Provider<? extends T> provider) {
-        ContextMatcher matcher = context.getContextPattern();
-        BindingFunctionBuilder config = context.getBuilder();
         Satisfaction s = Satisfactions.providerInstance(provider);
-
-        if (config.getGenerateRules()) {
-            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(Types.getProvidedType(provider));
-            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher,
-                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
-            }
-        } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher,
-                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
-        }
+        BindRuleBuilder brb = startRule().setSatisfaction(s);
+        generateBindings(brb, Types.getProvidedType(provider));
     }
 
     @Override
@@ -245,44 +196,52 @@ class BindingImpl<T> implements Binding<T> {
 
     @Override
     public void toNull(Class<? extends T> type) {
-        ContextMatcher matcher = context.getContextPattern();
-        BindingFunctionBuilder config = context.getBuilder();
-
         Satisfaction s = Satisfactions.nullOfType(type);
-
-        if (config.getGenerateRules()) {
-            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
-            for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher,
-                                   BindRules.toSatisfaction(e.getKey(), qualifier, s, cachePolicy, true));
-            }
-        } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher,
-                               BindRules.toSatisfaction(sourceType, qualifier, s, cachePolicy, true));
-        }
+        BindRuleBuilder brb = startRule().setSatisfaction(s);
+        generateBindings(brb, type);
     }
 
     @Override
     public void toSatisfaction(@Nonnull Satisfaction sat) {
         Preconditions.notNull("satisfaction", sat);
 
+        BindRuleBuilder brb = startRule().setSatisfaction(sat);
+        generateBindings(brb, sat.getErasedType());
+    }
+
+    /**
+     * Generate bindings.
+     * @param brb A bind rule builder, completely populated except for its {@linkplain BindRuleBuilder#setDependencyType(Class) dependency type}.
+     * @param type The search type for {@link #generateBindPoints(Class)}.
+     */
+    private void generateBindings(BindRuleBuilder brb, Class<?> type) {
         ContextMatcher matcher = context.getContextPattern();
         BindingFunctionBuilder config = context.getBuilder();
-
         if (config.getGenerateRules()) {
-            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(sat.getErasedType());
+            Map<Class<?>, RuleSet> bindPoints = generateBindPoints(type);
             for (Entry<Class<?>, RuleSet> e: bindPoints.entrySet()) {
-                config.addBindRule(e.getValue(), matcher,
-                                   BindRules.toSatisfaction(e.getKey(), qualifier,
-                                                            sat, cachePolicy, true));
+                config.addBindRule(e.getValue(), matcher, brb.setDependencyType(e.getKey()).build());
             }
         } else {
-            config.addBindRule(RuleSet.EXPLICIT, matcher,
-                               BindRules.toSatisfaction(sourceType, qualifier,
-                                                        sat, cachePolicy, true));
+            config.addBindRule(RuleSet.EXPLICIT, matcher, brb.setDependencyType(sourceType).build());
         }
     }
-    
+
+    /**
+     * Start building a bind rule.
+     * @return A bind rule builder, with the common configuration already applied.
+     */
+    private BindRuleBuilder startRule() {
+        BindRuleBuilder brb = new BindRuleBuilder();
+        brb.setQualifierMatcher(qualifier)
+           .setCachePolicy(cachePolicy)
+           .setTerminal(true);
+        if (fixed) {
+            brb.addFlag(BindingFlag.FIXED);
+        }
+        return brb;
+    }
+
     private Object coerce(Object in) {
         Class<?> boxedSource = Types.box(sourceType);
         if (Integer.class.equals(boxedSource)) {

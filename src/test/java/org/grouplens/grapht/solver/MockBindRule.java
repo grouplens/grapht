@@ -23,6 +23,7 @@ import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.MockQualifierMatcher;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,6 +77,15 @@ public class MockBindRule implements BindRule {
     @Override
     public Desire apply(Desire desire) {
         return bindings.get(desire);
+    }
+
+    @Override
+    public EnumSet<BindingFlag> getFlags() {
+        if (terminate) {
+            return EnumSet.of(BindingFlag.TERMINAL);
+        } else {
+            return BindingFlag.emptySet();
+        }
     }
 
     @Override

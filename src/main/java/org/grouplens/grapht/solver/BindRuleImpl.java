@@ -34,6 +34,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.EnumSet;
 
 /**
  * Foundational implementation of {@link BindRule}.
@@ -44,7 +45,7 @@ final class BindRuleImpl implements BindRule, Serializable {
     private static final long serialVersionUID = -1L;
 
     private final Satisfaction satisfaction;
-    private final boolean terminal;
+    private final EnumSet<BindingFlag> flags;
     
     private final QualifierMatcher qualifier;
     private final Class<?> depType;
@@ -63,14 +64,14 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param satisfaction The Satisfaction used by applied desires
      * @param policy The CachePolicy for nodes created by this bind rule
      * @param qualifier The Qualifier the bind rule applies to
-     * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()}).
+     * @param flags The flags to apply to this bind rule and its results.
      * @throws NullPointerException if arguments are null
      */
     public BindRuleImpl(@Nonnull Class<?> depType,
                         @Nonnull Satisfaction satisfaction,
                         @Nonnull CachePolicy policy,
                         @Nonnull QualifierMatcher qualifier,
-                        boolean terminal) {
+                        EnumSet<BindingFlag> flags) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
@@ -81,7 +82,7 @@ final class BindRuleImpl implements BindRule, Serializable {
         this.implType = satisfaction.getErasedType();
         this.policy = policy;
         this.depType = Types.box(depType);
-        this.terminal = terminal;
+        this.flags = flags.clone();
         
         // verify that the satisfaction produces proper types
         Preconditions.isAssignable(this.depType, this.implType);
@@ -96,14 +97,14 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param implType The implementation type that is bound
      * @param policy The CachePolicy for nodes created by this bind rule
      * @param qualifier The Qualifier the bind rule applies to
-     * @param terminal True if the bind rule is a terminating rule (see {@link #isTerminal()})
+     * @param flags The flags to apply to this bind rule and its results.
      * @throws NullPointerException if arguments are null
      */
     public BindRuleImpl(@Nonnull Class<?> depType,
                         @Nonnull Class<?> implType,
                         @Nonnull CachePolicy policy,
                         @Nonnull QualifierMatcher qualifier,
-                        boolean terminal) {
+                        EnumSet<BindingFlag> flags) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("implementation type", implType);
         Preconditions.notNull("policy", policy);
@@ -114,7 +115,7 @@ final class BindRuleImpl implements BindRule, Serializable {
         this.implType = Types.box(implType);
         this.policy = policy;
         this.depType = Types.box(depType);
-        this.terminal = terminal;
+        this.flags = flags.clone();
         
         // verify that implType extends depType
         Preconditions.isAssignable(this.depType, this.implType);
@@ -145,8 +146,13 @@ final class BindRuleImpl implements BindRule, Serializable {
     }
 
     @Override
+    public EnumSet<BindingFlag> getFlags() {
+        return flags;
+    }
+
+    @Override
     public boolean isTerminal() {
-        return terminal;
+        return flags.contains(BindingFlag.TERMINAL);
     }
     
     @Override
@@ -167,7 +173,7 @@ final class BindRuleImpl implements BindRule, Serializable {
         bld.setDependencyType(depType)
            .setQualifierMatcher(qualifier)
            .setCachePolicy(policy)
-           .setTerminal(terminal);
+           .setFlags(flags);
         if (satisfaction != null) {
             bld.setSatisfaction(satisfaction);
         } else {
@@ -194,7 +200,7 @@ final class BindRuleImpl implements BindRule, Serializable {
             BindRuleImpl or = (BindRuleImpl) o;
             return eq.append(depType, or.depType)
                     .append(implType, or.implType)
-                    .append(terminal, or.terminal)
+                    .append(flags, or.flags)
                     .append(qualifier, or.qualifier)
                     .append(policy, or.policy)
                     .append(satisfaction, or.satisfaction)
@@ -208,7 +214,7 @@ final class BindRuleImpl implements BindRule, Serializable {
     public int hashCode() {
         if (hashCode == 0) {
             HashCodeBuilder hcb = new HashCodeBuilder();
-            hashCode = hcb.append(terminal)
+            hashCode = hcb.append(flags)
                           .append(depType)
                           .append(implType)
                           .append(qualifier)
@@ -222,11 +228,11 @@ final class BindRuleImpl implements BindRule, Serializable {
     @Override
     public String toString() {
         String i = (satisfaction == null ? implType.getSimpleName() : satisfaction.toString());
-        return "Bind(" + qualifier + ":" + depType.getSimpleName() + " -> " + i + ")";
+        return "Bind(" + qualifier + ":" + depType.getSimpleName() + " -> " + i + ", " + flags + ")";
     }
 
     private Object writeReplace() {
-        return new SerialProxy(satisfaction, terminal, qualifier,
+        return new SerialProxy(satisfaction, flags, qualifier,
                                depType, implType, policy);
     }
 
@@ -238,7 +244,7 @@ final class BindRuleImpl implements BindRule, Serializable {
      * Serialization proxy class.
      */
     private static class SerialProxy implements Serializable {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2L;
 
         private final ClassProxy depType;
         private final QualifierMatcher qualifier;
@@ -246,13 +252,13 @@ final class BindRuleImpl implements BindRule, Serializable {
 
         @Nullable
         private final Satisfaction satisfaction;
-        private final boolean terminal;
+        private final EnumSet<BindingFlag> flags;
         private final CachePolicy cachePolicy;
 
-        private SerialProxy(@Nullable Satisfaction sat, boolean term, QualifierMatcher qmatch,
+        private SerialProxy(@Nullable Satisfaction sat, EnumSet<BindingFlag> flags, QualifierMatcher qmatch,
                             Class<?> stype, Class<?> itype, CachePolicy policy) {
             satisfaction = sat;
-            terminal = term;
+            this.flags = flags;
             qualifier = qmatch;
             depType = ClassProxy.of(stype);
             implType = ClassProxy.of(itype);
@@ -263,10 +269,10 @@ final class BindRuleImpl implements BindRule, Serializable {
             try {
                 if (satisfaction == null) {
                     return new BindRuleImpl(depType.resolve(), implType.resolve(),
-                                        cachePolicy, qualifier, terminal);
+                                            cachePolicy, qualifier, flags);
                 } else {
                     return new BindRuleImpl(depType.resolve(), satisfaction,
-                                        cachePolicy, qualifier, terminal);
+                                            cachePolicy, qualifier, flags);
                 }
             } catch (ClassNotFoundException e) {
                 InvalidObjectException ex = new InvalidObjectException("cannot resolve type");

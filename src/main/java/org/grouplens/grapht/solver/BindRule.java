@@ -21,6 +21,9 @@ package org.grouplens.grapht.solver;
 import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.Desire;
 
+import java.nio.file.attribute.AclEntryFlag;
+import java.util.EnumSet;
+
 /**
  * BindRule is a partial function from desire to desire that acts as a binding.
  * The {@link RuleBasedBindingFunction} takes a collection of BindRules grouped
@@ -56,6 +59,13 @@ public interface BindRule extends Comparable<BindRule> {
      *         chain when attempting to find a satisfaction
      */
     boolean isTerminal();
+
+    /**
+     * Get the flags attached to this bind rule.
+     *
+     * @return The flags attached to the bind rule.
+     */
+    EnumSet<BindingFlag> getFlags();
 
     /**
      * @param desire The input desire

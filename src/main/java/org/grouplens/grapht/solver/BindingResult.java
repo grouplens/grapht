@@ -22,6 +22,8 @@ import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.util.Preconditions;
 
+import java.util.EnumSet;
+
 /**
  * BindingResult is the result tuple of a {@link BindingFunction}. It is
  * effectively a {@link Desire} with additional metadata needed to implement
@@ -32,31 +34,34 @@ import org.grouplens.grapht.util.Preconditions;
 public class BindingResult {
     private final Desire desire;
     private final CachePolicy policy;
-    private final boolean defer;
-    private final boolean terminate;
-    
+    private final EnumSet<BindingFlag> flags;
+
     /**
      * Create a new result that wraps the given Desire.
      * 
      * @param desire The resultant desire from a BindingFunction
      * @param policy The CachePolicy for this binding
-     * @param defer True if the desire should be processed later (including any
-     *            dependencies)
-     * @param terminate True if no more functions should be applied to the
-     *            desire
      * @throws NullPointerException if desire or policy is null
      */
-    public BindingResult(Desire desire, CachePolicy policy, 
-                         boolean defer, boolean terminate) {
+    BindingResult(Desire desire, CachePolicy policy, EnumSet<BindingFlag> flags) {
         Preconditions.notNull("desire", desire);
         Preconditions.notNull("policy", policy);
         
         this.policy = policy;
         this.desire = desire;
-        this.defer = defer;
-        this.terminate = terminate;
+        this.flags = flags.clone();
     }
-    
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(Desire desire, CachePolicy policy) {
+        return newBuilder()
+                .setDesire(desire)
+                .setCachePolicy(policy);
+    }
+
     /**
      * @return The restricted desire result of the binding function
      */
@@ -70,13 +75,21 @@ public class BindingResult {
     public CachePolicy getCachePolicy() {
         return policy;
     }
+
+    /**
+     * Query if the binding result is fixed.
+     * @return {@code true} if the resulting satisfaction should refuse to be rewritten.
+     */
+    public boolean isFixed() {
+        return flags.contains(BindingFlag.FIXED);
+    }
     
     /**
      * @return True if the resulting desire should be deferred until all other
      *         desires in this phase have been completed
      */
     public boolean isDeferred() {
-        return defer;
+        return flags.contains(BindingFlag.DEFERRED);
     }
     
     /**
@@ -84,6 +97,40 @@ public class BindingResult {
      *         desire
      */
     public boolean terminates() {
-        return terminate;
+        return flags.contains(BindingFlag.TERMINAL);
+    }
+
+    public static class Builder {
+        private Desire desire;
+        private CachePolicy policy;
+        private EnumSet<BindingFlag> flags = BindingFlag.emptySet();
+
+        private Builder() {}
+
+        public Builder setDesire(Desire desire) {
+            this.desire = desire;
+            return this;
+        }
+
+        public Builder setCachePolicy(CachePolicy policy) {
+            this.policy = policy;
+            return this;
+        }
+
+        public Builder addFlag(BindingFlag flag) {
+            flags.add(flag);
+            return this;
+        }
+
+        public Builder setFlags(EnumSet<BindingFlag> flags) {
+            this.flags = flags.clone();
+            return this;
+        }
+
+        public BindingResult build() {
+            com.google.common.base.Preconditions.checkState(desire != null, "no desire set");
+            com.google.common.base.Preconditions.checkState(policy != null, "no policy set");
+            return new BindingResult(desire, policy, flags);
+        }
     }
 }

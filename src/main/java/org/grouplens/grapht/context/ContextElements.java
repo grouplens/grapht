@@ -63,6 +63,12 @@ public final class ContextElements {
         public MatchElement apply(Pair<Satisfaction, InjectionPoint> n) {
             return MatchElementImpl.ANY;
         }
+
+
+        @Override
+        public String toString() {
+            return "{Object}";
+        }
     }
 
     private static class InvertedMatcher implements ContextElementMatcher {
@@ -82,6 +88,11 @@ public final class ContextElements {
             } else {
                 return null;
             }
+        }
+
+        @Override
+        public String toString() {
+            return "!" + delegate.toString();
         }
     }
 
