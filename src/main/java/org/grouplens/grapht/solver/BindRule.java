@@ -21,7 +21,6 @@ package org.grouplens.grapht.solver;
 import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.Desire;
 
-import java.nio.file.attribute.AclEntryFlag;
 import java.util.EnumSet;
 
 /**
