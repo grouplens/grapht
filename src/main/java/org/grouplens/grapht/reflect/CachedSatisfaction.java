@@ -23,7 +23,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.grouplens.grapht.util.Preconditions;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * CachedSatisfaction is the pairing of a {@link Satisfaction} and
@@ -34,12 +33,11 @@ import java.util.UUID;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class CachedSatisfaction implements Serializable {
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 5L;
     
     private final Satisfaction satisfaction;
     private final CachePolicy cachePolicy;
     private final boolean fixed;
-    private final UUID unique;
 
     /**
      * Create a new CachedSatisfaction wrapping the given satisfaction and the
@@ -77,17 +75,12 @@ public class CachedSatisfaction implements Serializable {
      * @throws NullPointerException if either argument is null
      */
     public CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy, boolean fixed) {
-        this(satisfaction, policy, fixed, null);
-    }
-
-    private CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy, boolean fx, UUID key) {
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
 
         this.satisfaction = satisfaction;
         cachePolicy = policy;
-        fixed = fx;
-        unique = key;
+        this.fixed = fixed;
     }
 
     /**
@@ -113,14 +106,6 @@ public class CachedSatisfaction implements Serializable {
         return fixed;
     }
 
-    /**
-     * Make a copy of this satisfaction which will not compare equal to any other satisfaction.
-     * @return A unique copy of the satisfaction.
-     */
-    public CachedSatisfaction uniqueCopy() {
-        return new CachedSatisfaction(satisfaction, cachePolicy, fixed, UUID.randomUUID());
-    }
-    
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof CachedSatisfaction)) {
@@ -131,7 +116,6 @@ public class CachedSatisfaction implements Serializable {
         EqualsBuilder eqb = new EqualsBuilder();
         return eqb.append(satisfaction, c.satisfaction)
                   .append(cachePolicy, c.cachePolicy)
-                  .append(unique, c.unique)
                   .isEquals();
     }
     
@@ -140,7 +124,6 @@ public class CachedSatisfaction implements Serializable {
         HashCodeBuilder hcb = new HashCodeBuilder();
         return hcb.append(satisfaction)
                   .append(cachePolicy)
-                  .append(unique)
                   .toHashCode();
     }
     
