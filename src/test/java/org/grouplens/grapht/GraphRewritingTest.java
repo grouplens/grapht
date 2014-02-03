@@ -19,7 +19,6 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.reflect.CachedSatisfaction;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.solver.DependencySolver;
 import org.grouplens.grapht.solver.SolverException;
@@ -51,12 +50,12 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT), false)
                                 .build();
         initial.resolve(Desires.create(null, I.class, false));
-        DAGNode<CachedSatisfaction, Dependency> graph = initial.getGraph();
+        DAGNode<Component, Dependency> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) C.class));
-        DAGNode<CachedSatisfaction, Dependency> graph2 = initial.rewrite(graph);
+        DAGNode<Component, Dependency> graph2 = initial.rewrite(graph);
         assertThat(graph2, sameInstance(graph));
     }
 
@@ -74,12 +73,12 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT), true)
                                 .build();
         initial.resolve(Desires.create(null, I.class, false));
-        DAGNode<CachedSatisfaction, Dependency> graph = initial.getGraph();
+        DAGNode<Component, Dependency> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
                         .getTail().getLabel().getSatisfaction().getErasedType(),
                    equalTo((Class) C.class));
-        DAGNode<CachedSatisfaction, Dependency> graph2 = initial.rewrite(graph);
+        DAGNode<Component, Dependency> graph2 = initial.rewrite(graph);
         // should trigger a rewrite, but the graph should be unchanged
         assertThat(graph2, sameInstance(graph));
     }
@@ -98,7 +97,7 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT))
                                 .build();
         initial.resolve(Desires.create(null, I.class, false));
-        DAGNode<CachedSatisfaction, Dependency> graph = initial.getGraph();
+        DAGNode<Component, Dependency> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
                         .getTail().getLabel().getSatisfaction().getErasedType(),
@@ -117,7 +116,7 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config2.build(BindingFunctionBuilder.RuleSet.EXPLICIT), true)
                                 .build();
 
-        DAGNode<CachedSatisfaction, Dependency> graph2 = rewriter.rewrite(graph);
+        DAGNode<Component, Dependency> graph2 = rewriter.rewrite(graph);
         // should change the dependency
         assertThat(graph2, not(sameInstance(graph)));
         assertThat(graph2.getOutgoingEdges(), hasSize(1));
@@ -144,7 +143,7 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT))
                                 .build();
         initial.resolve(Desires.create(null, I.class, false));
-        DAGNode<CachedSatisfaction, Dependency> graph = initial.getGraph();
+        DAGNode<Component, Dependency> graph = initial.getGraph();
         assertThat(graph.getOutgoingEdges(), hasSize(1));
         assertThat(graph.getOutgoingEdges().iterator().next()
                         .getTail().getLabel().getSatisfaction().getErasedType(),
@@ -168,7 +167,7 @@ public class GraphRewritingTest {
                                 .addBindingFunction(rewriteDeps.build(BindingFunctionBuilder.RuleSet.EXPLICIT), false)
                                 .build();
 
-        DAGNode<CachedSatisfaction, Dependency> graph2 = rewriter.rewrite(graph);
+        DAGNode<Component, Dependency> graph2 = rewriter.rewrite(graph);
         // should change the dependency
         assertThat(graph2, not(sameInstance(graph)));
         assertThat(graph2.getOutgoingEdges(), hasSize(1));
@@ -197,7 +196,7 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config.build(BindingFunctionBuilder.RuleSet.EXPLICIT))
                                 .build();
         initial.resolve(Desires.create(null, I.class, false));
-        DAGNode<CachedSatisfaction, Dependency> graph = initial.getGraph();
+        DAGNode<Component, Dependency> graph = initial.getGraph();
 
         BindingFunctionBuilder config2 = new BindingFunctionBuilder();
         config2.getRootContext()
@@ -208,7 +207,7 @@ public class GraphRewritingTest {
                                 .addBindingFunction(config2.build(BindingFunctionBuilder.RuleSet.EXPLICIT), true)
                                 .build();
 
-        DAGNode<CachedSatisfaction, Dependency> graph2 = rewriter.rewrite(graph);
+        DAGNode<Component, Dependency> graph2 = rewriter.rewrite(graph);
         // should be unchanged, because of fixed binding
         assertThat(graph2, sameInstance(graph));
     }

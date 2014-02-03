@@ -19,7 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.annotation.*;
-import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.Satisfactions;

@@ -16,54 +16,46 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.reflect;
+package org.grouplens.grapht;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.util.Preconditions;
 
 import java.io.Serializable;
 
 /**
- * CachedSatisfaction is the pairing of a {@link Satisfaction} and
- * {@link CachePolicy}. Satisfaction cannot specify its own cache policy because
- * the policy is dependent on the edges and bindings taken to reach a particular
- * node in the graph.
- * 
+ * A component to be instantiated in the final dependency plan.  A component consists of a {@link
+ * Satisfaction} and related information for instantiating it (such as the {@link CachePolicy}).
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class CachedSatisfaction implements Serializable {
+public class Component implements Serializable {
     private static final long serialVersionUID = 5L;
     
     private final Satisfaction satisfaction;
     private final CachePolicy cachePolicy;
 
-    /**
-     * Create a new CachedSatisfaction wrapping the given satisfaction and the
-     * satisfaction's default cache policy.
-     * 
-     * @param satisfaction The satisfaction to wrap
-     * @throws NullPointerException if satisfaction is null
-     */
-    public CachedSatisfaction(Satisfaction satisfaction) {
-        this(satisfaction, satisfaction.getDefaultCachePolicy());
-    }
-
-    /**
-     * Create a new CachedSatisfaction wrapping the given satisfaction and cache policy. Providers
-     * from the given satisfaction, used in conjunction with this pair, must be wrapped to satisfy
-     * the chosen policy.
-     *
-     * @param satisfaction The satisfaction to wrap
-     * @param policy       The policy used with this satisfaction
-     * @throws NullPointerException the satisfaction or policy is null
-     */
-    public CachedSatisfaction(Satisfaction satisfaction, CachePolicy policy) {
+    private Component(Satisfaction satisfaction, CachePolicy policy) {
         Preconditions.notNull("satisfaction", satisfaction);
         Preconditions.notNull("policy", policy);
 
         this.satisfaction = satisfaction;
         cachePolicy = policy;
+    }
+
+    /**
+     * Create a new Component wrapping the given satisfaction and cache policy.  The injector is
+     * responsible for using the satisfaction to implement this component consistent with its
+     * cache policy.
+     *
+     * @param satisfaction The satisfaction to wrap
+     * @param policy       The policy used with this satisfaction
+     * @throws NullPointerException the satisfaction or policy is null
+     */
+    public static Component create(Satisfaction satisfaction, CachePolicy policy) {
+        return new Component(satisfaction, policy);
     }
 
     /**
@@ -83,11 +75,11 @@ public class CachedSatisfaction implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CachedSatisfaction)) {
+        if (!(o instanceof Component)) {
             return false;
         }
             
-        CachedSatisfaction c = (CachedSatisfaction) o;
+        Component c = (Component) o;
         EqualsBuilder eqb = new EqualsBuilder();
         return eqb.append(satisfaction, c.satisfaction)
                   .append(cachePolicy, c.cachePolicy)

@@ -22,8 +22,8 @@ import org.grouplens.grapht.BindingFunctionBuilder;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.Dependency;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.reflect.CachePolicy;
-import org.grouplens.grapht.reflect.CachedSatisfaction;
+import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.Component;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.reflect.internal.InstanceSatisfaction;
@@ -47,10 +47,10 @@ public class SerializationTest {
     
     @Test
     public void testEmptyGraph() throws Exception {
-        DAGNode<CachedSatisfaction, DesireChain> g =
+        DAGNode<Component, DesireChain> g =
                 DAGNode.singleton(DependencySolver.ROOT_SATISFACTION);
         write(g);
-        DAGNode<CachedSatisfaction, DesireChain> read = read();
+        DAGNode<Component, DesireChain> read = read();
 
         assertThat(read.getReachableNodes(),
                    contains(read));
@@ -58,11 +58,11 @@ public class SerializationTest {
     
     @Test
     public void testSharedNodesGraph() throws Exception {
-        CachedSatisfaction s1 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.NEW_INSTANCE);
-        CachedSatisfaction s2 = new CachedSatisfaction(Satisfactions.type(Object.class), CachePolicy.MEMOIZE);
+        Component s1 = Component.create(Satisfactions.type(Object.class), CachePolicy.NEW_INSTANCE);
+        Component s2 = Component.create(Satisfactions.type(Object.class), CachePolicy.MEMOIZE);
 
-        DAGNode<CachedSatisfaction, String> n2 = DAGNode.singleton(s2);
-        DAGNodeBuilder<CachedSatisfaction, String> bld = DAGNode.newBuilder(s1);
+        DAGNode<Component, String> n2 = DAGNode.singleton(s2);
+        DAGNodeBuilder<Component, String> bld = DAGNode.newBuilder(s1);
         bld.addEdge(n2, "wombat");
         bld.addEdge(n2, "foobar");
         write(bld.build());
@@ -87,13 +87,13 @@ public class SerializationTest {
                                                   .build();
         solver.resolve(Desires.create(null, NamedType.class, false));
         
-        DAGNode<CachedSatisfaction,Dependency> g = solver.getGraph();
+        DAGNode<Component,Dependency> g = solver.getGraph();
         write(g);
-        DAGNode<CachedSatisfaction, Dependency> root = read();
+        DAGNode<Component, Dependency> root = read();
         
         Assert.assertEquals(1, root.getOutgoingEdges().size());
-        DAGEdge<CachedSatisfaction, Dependency> rootEdge = root.getOutgoingEdges().iterator().next();
-        DAGNode<CachedSatisfaction, Dependency> namedType = rootEdge.getTail();
+        DAGEdge<Component, Dependency> rootEdge = root.getOutgoingEdges().iterator().next();
+        DAGNode<Component, Dependency> namedType = rootEdge.getTail();
         
         Assert.assertEquals(NamedType.class, namedType.getLabel().getSatisfaction().getErasedType());
         Assert.assertEquals(NamedType.class, rootEdge.getLabel().getInitialDesire().getDesiredType());
@@ -102,8 +102,8 @@ public class SerializationTest {
         Assert.assertTrue(rootEdge.getLabel().getInitialDesire().getInjectionPoint().getAttributes().isEmpty());
         
         Assert.assertEquals(1, namedType.getOutgoingEdges().size());
-        DAGEdge<CachedSatisfaction, Dependency> nameEdge = namedType.getOutgoingEdges().iterator().next();
-        DAGNode<CachedSatisfaction, Dependency> string = nameEdge.getTail();
+        DAGEdge<Component, Dependency> nameEdge = namedType.getOutgoingEdges().iterator().next();
+        DAGNode<Component, Dependency> string = nameEdge.getTail();
         
         Assert.assertEquals(String.class, string.getLabel().getSatisfaction().getErasedType());
         Assert.assertEquals(String.class, nameEdge.getLabel().getInitialDesire().getDesiredType());

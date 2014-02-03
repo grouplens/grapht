@@ -19,7 +19,6 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.internal.types.*;
 import org.junit.Assert;
 import org.junit.Test;

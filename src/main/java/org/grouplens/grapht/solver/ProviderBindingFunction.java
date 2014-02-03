@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Types;

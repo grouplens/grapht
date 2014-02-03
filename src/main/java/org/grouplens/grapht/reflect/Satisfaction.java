@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect;
 
+import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.Injector;
 
 import javax.inject.Provider;

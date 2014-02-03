@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;

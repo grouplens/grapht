@@ -27,7 +27,7 @@ import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.reflect.CachedSatisfaction;
+import org.grouplens.grapht.Component;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
@@ -50,28 +50,28 @@ public class ReflectionInjectionTest {
         Injector i = b.build();
         
         i.getInstance(CycleA.class);
-        DAGNode<CachedSatisfaction,Dependency> root = ((DefaultInjector) i).getSolver().getGraph();
+        DAGNode<Component,Dependency> root = ((DefaultInjector) i).getSolver().getGraph();
 
         assertThat(root.getReachableNodes(), hasSize(3 + 1));
 
         assertThat(root.getOutgoingEdges(), hasSize(1));
-        DAGNode<CachedSatisfaction, Dependency> anode = root.getOutgoingEdges().iterator().next().getTail();
+        DAGNode<Component, Dependency> anode = root.getOutgoingEdges().iterator().next().getTail();
         Assert.assertEquals(CycleA.class, anode.getLabel().getSatisfaction().getErasedType());
         
         Assert.assertEquals(1, anode.getOutgoingEdges().size());
-        DAGNode<CachedSatisfaction, Dependency> bnode = anode.getOutgoingEdges().iterator().next().getTail();
+        DAGNode<Component, Dependency> bnode = anode.getOutgoingEdges().iterator().next().getTail();
         Assert.assertEquals(CycleB.class, bnode.getLabel().getSatisfaction().getErasedType());
         
         Assert.assertEquals(1, bnode.getOutgoingEdges().size());
-        DAGNode<CachedSatisfaction, Dependency> pnode = bnode.getOutgoingEdges().iterator().next().getTail();
+        DAGNode<Component, Dependency> pnode = bnode.getOutgoingEdges().iterator().next().getTail();
         Assert.assertEquals(Provider.class, pnode.getLabel().getSatisfaction().getErasedType());
 
         // no outgoing edges...
         Assert.assertEquals(0, pnode.getOutgoingEdges().size());
         // but a back edge
-        ImmutableSet<DAGEdge<CachedSatisfaction, Dependency>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
+        ImmutableSet<DAGEdge<Component, Dependency>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
         assertThat(backEdges, hasSize(1));
-        DAGEdge<CachedSatisfaction, Dependency> edge = backEdges.iterator().next();
+        DAGEdge<Component, Dependency> edge = backEdges.iterator().next();
         Assert.assertSame(anode, edge.getTail());
     }
     
@@ -94,13 +94,13 @@ public class ReflectionInjectionTest {
         // also verify memoization
         Assert.assertSame(instance, r.getInstance(TypeC.class));
 
-        DAGNode<CachedSatisfaction, Dependency> resolvedRoot =
+        DAGNode<Component, Dependency> resolvedRoot =
                 r.getSolver().getGraph().getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(rootDesire)).getTail();
         assertThat(resolvedRoot.getOutgoingEdges(),
                    hasSize(5));
 
-        Map<InjectionPoint, DAGNode<CachedSatisfaction, Dependency>> deps = Maps.newHashMap();
-        for (DAGEdge<CachedSatisfaction, Dependency> e: resolvedRoot.getOutgoingEdges()) {
+        Map<InjectionPoint, DAGNode<Component, Dependency>> deps = Maps.newHashMap();
+        for (DAGEdge<Component, Dependency> e: resolvedRoot.getOutgoingEdges()) {
             ReflectionDesire d = (ReflectionDesire) e.getLabel().getInitialDesire();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
@@ -181,13 +181,13 @@ public class ReflectionInjectionTest {
         // also verify memoization
         Assert.assertSame(instance, r.getInstance(TypeC.class));
 
-        DAGNode<CachedSatisfaction, Dependency> resolvedRoot =
+        DAGNode<Component, Dependency> resolvedRoot =
                 r.getSolver().getGraph().getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(rootDesire)).getTail();
         assertThat(resolvedRoot.getOutgoingEdges(),
                    hasSize(5));
         
-        Map<InjectionPoint, DAGNode<CachedSatisfaction, Dependency>> deps = Maps.newHashMap();
-        for (DAGEdge<CachedSatisfaction, Dependency> e: resolvedRoot.getOutgoingEdges()) {
+        Map<InjectionPoint, DAGNode<Component, Dependency>> deps = Maps.newHashMap();
+        for (DAGEdge<Component, Dependency> e: resolvedRoot.getOutgoingEdges()) {
             ReflectionDesire d = (ReflectionDesire) e.getLabel().getInitialDesire();
             
             if (d.getInjectionPoint().equals(TypeC.CONSTRUCTOR)) {
