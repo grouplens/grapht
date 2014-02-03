@@ -19,9 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Predicate;
-import org.grouplens.grapht.Dependency;
-import org.grouplens.grapht.InjectionException;
-import org.grouplens.grapht.Injector;
+import org.grouplens.grapht.*;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.*;
@@ -50,7 +48,7 @@ public class DefaultInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
     
     private final DependencySolver solver;
-    private final Map<DAGNode<CachedSatisfaction, Dependency>, Provider<?>> providerCache;
+    private final Map<DAGNode<Component, Dependency>, Provider<?>> providerCache;
     
 
     /**
@@ -114,7 +112,7 @@ public class DefaultInjector implements Injector {
                                  .setDefaultPolicy(defaultPolicy)
                                  .setMaxDepth(maxDepth)
                                  .build();
-        providerCache = new HashMap<DAGNode<CachedSatisfaction, Dependency>, Provider<?>>();
+        providerCache = new HashMap<DAGNode<Component, Dependency>, Provider<?>>();
     }
     
     /**
@@ -141,7 +139,7 @@ public class DefaultInjector implements Injector {
             Predicate<Dependency> pred = Dependency.hasInitialDesire(desire);
 
             // check if the desire is already in the graph
-            DAGEdge<CachedSatisfaction, Dependency> resolved =
+            DAGEdge<Component, Dependency> resolved =
                     solver.getGraph().getOutgoingEdgeWithLabel(pred);
 
             // The edge is only non-null if getInstance() has been called before,
@@ -158,13 +156,13 @@ public class DefaultInjector implements Injector {
             }
 
             // Check if the provider for the resolved node is in our cache
-            DAGNode<CachedSatisfaction, Dependency> resolvedNode = resolved.getTail();
+            DAGNode<Component, Dependency> resolvedNode = resolved.getTail();
             return (T) getProvider(resolvedNode).get();
         }
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Provider<?> getProvider(DAGNode<CachedSatisfaction, Dependency> node) {
+    private Provider<?> getProvider(DAGNode<Component, Dependency> node) {
         Provider<?> cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
@@ -186,17 +184,17 @@ public class DefaultInjector implements Injector {
     }
     
     private class DesireProviderMapper implements ProviderSource {
-        private final DAGNode<CachedSatisfaction, Dependency> forNode;
+        private final DAGNode<Component, Dependency> forNode;
         
-        public DesireProviderMapper(DAGNode<CachedSatisfaction, Dependency> forNode) {
+        public DesireProviderMapper(DAGNode<Component, Dependency> forNode) {
             this.forNode = forNode;
         }
         
         @Override
         public Provider<?> apply(Desire desire) {
-            DAGEdge<CachedSatisfaction, Dependency> edge =
+            DAGEdge<Component, Dependency> edge =
                     forNode.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(desire));
-            DAGNode<CachedSatisfaction, Dependency> dependency;
+            DAGNode<Component, Dependency> dependency;
             if (edge != null) {
                 dependency = edge.getTail();
             } else {

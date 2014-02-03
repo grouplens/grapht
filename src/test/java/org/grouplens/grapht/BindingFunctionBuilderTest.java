@@ -26,7 +26,6 @@ import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.solver.BindRules;
 import org.grouplens.grapht.solver.RuleBasedBindingFunction;
-import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.context.ContextElements;
 import org.grouplens.grapht.context.ContextMatcher;

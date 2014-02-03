@@ -23,7 +23,6 @@ import org.grouplens.grapht.solver.BindingFunction;
 import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
-import org.grouplens.grapht.reflect.CachePolicy;
 import org.grouplens.grapht.context.ContextPattern;
 import org.grouplens.grapht.util.Types;
 

@@ -18,7 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
 

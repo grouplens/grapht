@@ -20,7 +20,7 @@ package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.grouplens.grapht.reflect.CachePolicy;
+import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.reflect.Satisfaction;
