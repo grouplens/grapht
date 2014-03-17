@@ -40,6 +40,10 @@ following to the dependencies section in your POM:
 
 ### 0.8.0
 
+- Dependency graphs now use `Dependency` and `Component` types, instead of `DesireChain` and
+  `CachedSatisfaction`, for greater forward flexibility.
+- Support fixed desires (will not be rewritten)
+
 ### 0.7.0
 
 See [closed issues][issues-0.7] for more details.
