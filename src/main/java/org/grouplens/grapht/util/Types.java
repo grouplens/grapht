@@ -291,15 +291,10 @@ public final class Types {
     /**
      * Infer a default class loader.
      * @return A reasonable default class loader.
+     * @deprecated Use {@link org.grouplens.grapht.util.ClassLoaders#inferDefault()} instead.
      */
+    @Deprecated
     public static ClassLoader getDefaultClassLoader() {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        if (loader == null) {
-            loader = Types.class.getClassLoader();
-        }
-        if (loader == null) {
-            loader = ClassLoader.getSystemClassLoader();
-        }
-        return loader;
+        return ClassLoaders.inferDefault();
     }
 }
