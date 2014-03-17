@@ -33,6 +33,13 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
+### 0.8.1
+
+- Move `Types.getDefaultClassLoader()` to `ClassLoaders.inferDefault()`
+- Add class loader context management
+
+### 0.8.0
+
 ### 0.7.0
 
 See [closed issues][issues-0.7] for more details.
