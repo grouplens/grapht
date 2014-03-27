@@ -63,6 +63,15 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
         return instance;
     }
 
+    @Override
+    public String toString() {
+        if (instance == null) {
+            return "InstanceProvider{null<" + providedType.getName() + ">}";
+        } else {
+            return "InstanceProvider{" + instance + "}";
+        }
+    }
+
     private Object writeReplace() {
         return new SerialProxy(providedType,  instance);
     }
