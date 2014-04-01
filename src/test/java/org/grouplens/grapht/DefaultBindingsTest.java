@@ -22,8 +22,7 @@ import org.grouplens.grapht.types.dft.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -106,6 +105,28 @@ public class DefaultBindingsTest {
         IPropDftProvider a = inj.getInstance(IPropDftProvider.class);
         assertThat(a, notNullValue());
         assertThat(a, instanceOf(CPropDftProvider.class));
+    }
+
+    @Test
+    public void testPropImplDoubleDepCache() {
+        Injector inj = b.build();
+        CPropImplDoubleDep obj = inj.getInstance(CPropImplDoubleDep.class);
+        assertThat(obj.right, sameInstance(obj.left));
+    }
+
+    @Test
+    public void testPropImplDoubleDepUncache() {
+        b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
+        Injector inj = b.build();
+        CPropImplDoubleDep obj = inj.getInstance(CPropImplDoubleDep.class);
+        assertThat(obj.right, not(sameInstance(obj.left)));
+    }
+
+    @Test
+    public void testPropImplDoubleDepPropUncache() {
+        Injector inj = b.build();
+        CPropImplDoubleDepNoCache obj = inj.getInstance(CPropImplDoubleDepNoCache.class);
+        assertThat(obj.right, not(sameInstance(obj.left)));
     }
 
     /**
