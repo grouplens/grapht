@@ -155,11 +155,11 @@ public class DefaultDesireBindingFunction implements BindingFunction {
      * @return A binding result, or {@code null} if no usable annotations are present.
      */
     private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
-        DefaultProvider provided = type.getAnnotation(DefaultProvider.class);
-        if (provided != null) {
+        DefaultProvider provider = type.getAnnotation(DefaultProvider.class);
+        if (provider != null) {
             return BindingResult.newBuilder()
-                                .setDesire(desire.restrict(Satisfactions.providerType(provided.value())))
-                                .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                .setDesire(desire.restrict(Satisfactions.providerType(provider.value())))
+                                .setCachePolicy(provider.cachePolicy())
                                 .addFlag(BindingFlag.TERMINAL)
                                 .build();
         }
@@ -169,12 +169,12 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             if (Types.isInstantiable(impl.value())) {
                 return BindingResult.newBuilder()
                                     .setDesire(desire.restrict(Satisfactions.type(impl.value())))
-                                    .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                    .setCachePolicy(impl.cachePolicy())
                                     .build();
             } else {
                 return BindingResult.newBuilder()
                                     .setDesire(desire.restrict(impl.value()))
-                                    .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                    .setCachePolicy(impl.cachePolicy())
                                     .build();
             }
         }

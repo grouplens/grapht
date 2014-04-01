@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.annotation;
 
+import org.grouplens.grapht.CachePolicy;
+
 import javax.inject.Qualifier;
 import java.lang.annotation.*;
 
@@ -31,4 +33,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface DefaultImplementation {
     Class<?> value();
+    CachePolicy cachePolicy() default CachePolicy.NO_PREFERENCE;
 }

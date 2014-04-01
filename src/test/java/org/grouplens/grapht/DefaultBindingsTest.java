@@ -129,6 +129,28 @@ public class DefaultBindingsTest {
         assertThat(obj.right, not(sameInstance(obj.left)));
     }
 
+    @Test
+    public void testDftImplDoubleDepCache() {
+        Injector inj = b.build();
+        CDoubleDep obj = inj.getInstance(CDoubleDep.class);
+        assertThat(obj.right, sameInstance(obj.left));
+    }
+
+    @Test
+    public void testDftImplDoubleDepUncache() {
+        b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
+        Injector inj = b.build();
+        CDoubleDep obj = inj.getInstance(CDoubleDep.class);
+        assertThat(obj.right, not(sameInstance(obj.left)));
+    }
+
+    @Test
+    public void testDftImplDoubleDepPropUncache() {
+        Injector inj = b.build();
+        CDoubleDepNoCache obj = inj.getInstance(CDoubleDepNoCache.class);
+        assertThat(obj.right, not(sameInstance(obj.left)));
+    }
+
     /**
      * Test that the DefaultImplementation annotation overrides META-INF.
      */
