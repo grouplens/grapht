@@ -34,9 +34,17 @@ public class InjectionException extends RuntimeException {
 
     private final Class<?> type;
     private final Member target;
+
+    private static String defaultMessage(Class<?> type, @Nullable Member target) {
+        if (target != null) {
+            return String.format("Error injecting into %s for %s", target, type);
+        } else {
+            return String.format("Error injecting for %s", type);
+        }
+    }
     
     public InjectionException(Class<?> type, @Nullable Member target) {
-        this(type, target, "");
+        this(type, target, defaultMessage(type, target));
     }
 
     public InjectionException(Class<?> type, @Nullable Member target, String message) {
@@ -44,13 +52,17 @@ public class InjectionException extends RuntimeException {
     }
 
     public InjectionException(Class<?> type, @Nullable Member target, Throwable cause) {
-        this(type, target, "", cause);
+        this(type, target, defaultMessage(type, target), cause);
     }
 
     public InjectionException(Class<?> type, @Nullable Member target, String message, Throwable cause) {
         super(message, cause);
         this.type = type;
         this.target = target;
+    }
+
+    public InjectionException(Member target, String message, Throwable cause) {
+        this(target.getDeclaringClass(), target, message, cause);
     }
 
     /**
@@ -68,14 +80,5 @@ public class InjectionException extends RuntimeException {
     @Nullable
     public Member getTarget() {
         return target;
-    }
-    
-    @Override
-    public String getMessage() {
-        if (target != null) {
-            return String.format("Error injecting into %s for %s: %s", target, type, super.getMessage());
-        } else {
-            return String.format("Error injecting for %s: %s", type, super.getMessage());
-        }
     }
 }

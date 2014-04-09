@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Provider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -88,10 +89,14 @@ public class InjectionProviderImpl<T> implements Provider<T> {
             logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
             ctor.setAccessible(true);
             instance = ctor.newInstance(ctorArgs);
-        } catch (Exception e) {
-            throw new InjectionException(type, ctor, e);
+        } catch (InvocationTargetException e) {
+            throw new InjectionException(ctor, "Constructor " + ctor + " failed", e);
+        } catch (InstantiationException e) {
+            throw new InjectionException(ctor, "Could not instantiate " + type, e);
+        } catch (IllegalAccessException e) {
+            throw new InjectionException(ctor, "Access violation on " + ctor, e);
         }
-        
+
         // satisfy dependencies in the order of the list, which was
         // prepared to comply with JSR 330
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
@@ -105,8 +110,8 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     logger.trace("Setting field {} with arguments {}", field, value);
                     field.setAccessible(true);
                     field.set(instance, value);
-                } catch (Exception e) {
-                    throw new InjectionException(type, fd.getMember(), e);
+                } catch (IllegalAccessException e) {
+                    throw new InjectionException(type, field, "Access violation setting " + fd, e);
                 }
             } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                 // collect parameters before invoking
@@ -129,8 +134,22 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                         logger.trace("Invoking setter {} with arguments {}", setter, args.arguments);
                         setter.setAccessible(true);
                         setter.invoke(instance, args.arguments);
-                    } catch (Exception e) {
-                        throw new InjectionException(type, setter, e);
+                    } catch (InvocationTargetException e) {
+                        String message = "Exception thrown by ";
+                        if (args.arguments.length == 1) {
+                            message += sd;
+                        } else {
+                            message += setter;
+                        }
+                        throw new InjectionException(type, setter, message, e);
+                    } catch (IllegalAccessException e) {
+                        String message = "Access violation calling ";
+                        if (args.arguments.length == 1) {
+                            message += sd;
+                        } else {
+                            message += setter;
+                        }
+                        throw new InjectionException(type, setter, message, e);
                     }
                 }
             } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
@@ -140,8 +159,10 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     logger.trace("Invoking no-argument injection point {}", d.getInjectionPoint());
                     method.setAccessible(true);
                     method.invoke(instance);
-                } catch (Exception e) {
-                    throw new InjectionException(type, method, e);
+                } catch (InvocationTargetException e) {
+                    throw new InjectionException(type, method, "Exception throw by " + method, e);
+                } catch (IllegalAccessException e) {
+                    throw new InjectionException(type, method, "Access violation invoking " + method, e);
                 }
             }
         }
