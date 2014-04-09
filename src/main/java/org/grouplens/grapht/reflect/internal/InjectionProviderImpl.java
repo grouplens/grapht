@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.NullComponentException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.ProviderSource;
 import org.grouplens.grapht.util.Preconditions;
@@ -174,9 +175,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     
     private static Object checkNull(InjectionPoint injectPoint, Object value) {
         if (value == null && !injectPoint.isNullable()) {
-            throw new InjectionException(injectPoint.getMember().getDeclaringClass(),
-                                         injectPoint.getMember(), 
-                                         "Injection point is not annotated with @Nullable, but binding configuration provided a null value");
+            throw new NullComponentException(injectPoint);
         } else {
             return value;
         }
