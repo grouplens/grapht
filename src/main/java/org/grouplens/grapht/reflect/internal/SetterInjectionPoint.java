@@ -128,9 +128,27 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     
     @Override
     public String toString() {
-        String q = (annotations.getQualifier() == null ? "" : annotations.getQualifier() + ":");
-        String p = setter.getParameterTypes()[parameter].getSimpleName();
-        return setter.getName() + "(" + parameter + ", " + q + p + ")";
+        // method setFoo(..., @Qual Type argN, ...)
+        StringBuilder sb = new StringBuilder();
+        sb.append("method ")
+          .append(setter.getName())
+          .append("(");
+        if (parameter > 0) {
+            sb.append("..., ");
+        }
+        if (annotations.getQualifier() != null) {
+            sb.append(annotations.getQualifier())
+              .append(" ");
+        }
+        sb.append(setter.getParameterTypes()[parameter].getName())
+          .append(" arg")
+          .append(parameter);
+        if (parameter < setter.getParameterTypes().length) {
+            sb.append(", ...");
+        }
+        sb.append(")");
+
+        return sb.toString();
     }
     
     private Object writeReplace() {

@@ -132,18 +132,26 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        String p = constructor.getParameterTypes()[paramIndex].getSimpleName();
-        sb.append(constructor.getDeclaringClass().getSimpleName())
-          .append("(")
-          .append(paramIndex)
-          .append(", ");
+        // constructor Foo(..., @Qual Type argN, ...)
+        sb.append("constructor ")
+          .append(constructor.getName())
+          .append("(");
+        if (paramIndex > 0) {
+            sb.append("..., ");
+        }
         if (annotations.getQualifier() != null) {
             sb.append(annotations.getQualifier())
-              .append(":");
+              .append(" ");
         }
-        return sb.append(p)
-                 .append(")")
-                 .toString();
+        sb.append(constructor.getParameterTypes()[paramIndex].getName())
+          .append(" arg")
+          .append(paramIndex);
+        if (paramIndex < constructor.getParameterTypes().length) {
+            sb.append(", ...");
+        }
+        sb.append(")");
+
+        return sb.toString();
     }
 
     private Object writeReplace() {
