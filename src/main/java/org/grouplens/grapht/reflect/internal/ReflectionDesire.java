@@ -269,12 +269,15 @@ public class ReflectionDesire implements Desire, Serializable {
     /*
      * Internal class to track a methods signature. Java's default reflection
      * doesn't give us a convenient way to record just this information.
+     *
+     * FIXME Document why we need this class more clearly
      */
     public static class Signature {
         private final String name;
         private final Type[] args;
         
         public Signature(Method m) {
+            // FIXME Make it clearer what this code is supposed to do
             int mods = m.getModifiers();
             if (Modifier.isPublic(mods) || Modifier.isProtected(mods)) {
                 // method overrides depends solely on method name
@@ -285,7 +288,12 @@ public class ReflectionDesire implements Desire, Serializable {
             } else {
                 // method overrides depend on method name and package,
                 // since it is package-private
-                name = m.getName() + m.getDeclaringClass().getPackage().getName();
+                Package pkg = m.getDeclaringClass().getPackage();
+                if (pkg != null) {
+                    name = m.getName() + pkg.getName();
+                } else {
+                    name = m.getName();
+                }
             }
             args = m.getGenericParameterTypes();
         }
