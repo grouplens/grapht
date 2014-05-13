@@ -1,6 +1,7 @@
 # Grapht
 
 [![Build Status](https://travis-ci.org/grouplens/grapht.png?branch=master)](https://travis-ci.org/grouplens/grapht)
+[![Coverage Status](https://coveralls.io/repos/grouplens/grapht/badge.png?branch=master)](https://coveralls.io/r/grouplens/grapht?branch=master)
 
 Grapht is a light-weight dependency injector. It converts the dependency
 injection problem into a graph-based problem that can be solved and analyzed
