@@ -43,6 +43,8 @@
   <properties>
     <grapht.web.path>/srv/www/grapht</grapht.web.path>
     <jacoco.version>0.7.1.201405082137</jacoco.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
   <distributionManagement>
