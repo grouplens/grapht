@@ -6,11 +6,16 @@ jdk:
 install: mvn dependency:go-offline
 script: mvn install
 after_success:
+- ./etc/maybe-coverage.sh
 - ./etc/maybe-deploy.sh
 branches:
   except:
   - stable
 env:
   global:
-  - secure: A1Cszv1Ihv12UZxScXrYvifNyZjZ5ONMDz4GCBJp9Req9VLoyLf6Efz0RcguKv4lEAqJRCWZYsbAM1nY8+Y/7IMo5uEleDnK5WHQHXZP2RatzKRNKLB2Ml4SW5Br4YO+M92qM0H6tHvDzsIU6T9GMtnVJkV077Y2xxRa8cqM4yc=
-  - secure: YXg/tYKM5SCELLQcyNo6yQT4OsbCLVJqXFXd/n0f9J/KY1A8IeIgqYe59X67IIdufm2zOyGvnHapuj5M3fsBdnp5kBwW+Hd7ZiMUaiNFTLCAMaBiw2NIBlkEDFcICak1yH3MawfBcKBNkqcmy6l8hOK6uxEsE+iFExyl0XhmnlE=
+  # CI_DEPLOY_USER
+  - secure: oclpqGyEnHYRhB6idw8rrh3HyHWl0gEQ4o4sOUqegLs+kNJ3Z8pwDSTf5BQzgQD6IQdPGLTTcGxrlrkVV4czZN2ZKvB5XrIIh46cXGTGNiBXL/anV8EXq5uixpDrJEYAQ865UFjVHA8i8i6BxJU7N/kvzXcNKmoNCgIPqPHs3Lc=
+  # CI_DEPLOY_PASSWORD
+  - secure: fj6wBnUfRIfylO9q3NmBOSFzgjSk+4O2z7ucBWAIGYWcTsviJgHs5ksNaARwe9NFhtMK8ozPfHhCRoJC1NE7j0ewmt44KOX7WegUgEwPlZUdHEyR5PGETKlZltcPGX9MA9C/foWzFq5uS2TxME9N4Ct5RyVqsk0ytgTq5Bk7AUU=
+  # COVERALLS_TOKEN
+  - secure: IxE/hQMkpTshpL4nCCmtp9bV/YH85Svwjl6epVfQaKOwhMVtj9YUCgeuFJwh4ZUB6n+bIQr9sAq5jbBeomWbA04AdbXjuYPTnVgWBqitnY0dVTMpa/WS5mLcOkJCbAnYstNNwmeEifrhHP5hEWBTU9dx1aUClbcR0l3grjZE5D0=
