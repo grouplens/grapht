@@ -67,7 +67,7 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
     }
     
     @Override
-    public List<? extends Desire> getDependencies() {
+    public List<Desire> getDependencies() {
         return Collections.emptyList();
     }
 

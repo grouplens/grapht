@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.google.common.collect.ImmutableList;
 import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
@@ -52,8 +53,8 @@ public class ReflectionDesire implements Desire, Serializable {
      * @return The dependency desires for the given type
      * @throws NullPointerException if the type is null
      */
-    public static List<ReflectionDesire> getDesires(Class<?> type) {
-        List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
+    public static List<Desire> getDesires(Class<?> type) {
+        ImmutableList.Builder<Desire> desires = ImmutableList.builder();
 
         boolean ctorFound = false;
         for (Constructor<?> ctor: type.getDeclaredConstructors()) {
@@ -111,7 +112,7 @@ public class ReflectionDesire implements Desire, Serializable {
         Collections.reverse(groupDesires);
         desires.addAll(groupDesires);
         
-        return Collections.unmodifiableList(desires);
+        return desires.build();
     }
     
     private final transient Class<?> desiredType;

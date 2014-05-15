@@ -47,7 +47,7 @@ public interface Satisfaction extends Serializable {
      * @return A list of dependencies which must be satisfied in order to
      *         instantiate this satisfaction.
      */
-    List<? extends Desire> getDependencies();
+    List<Desire> getDependencies();
 
     /**
      * Get the type of this satisfaction. If this is a synthetic Satisfaction,

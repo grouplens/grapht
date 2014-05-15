@@ -106,7 +106,7 @@ public class ProviderBindingFunction implements BindingFunction {
         }
         
         @Override
-        public List<? extends Desire> getDependencies() {
+        public List<Desire> getDependencies() {
             return Collections.singletonList(providedDesire);
         }
 
