@@ -29,12 +29,13 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 /**
  * Satisfaction implementation wrapping an existing Provider instance. It has no
  * dependencies and it always returns the same Provider when
- * {@link #makeProvider(ProviderSource)} is invoked.
+ * {@link #makeProvider(Map)} is invoked.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
@@ -59,7 +60,7 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
     }
     
     /**
-     * @return The provider instance returned by {@link #makeProvider(ProviderSource)}
+     * @return The provider instance returned by {@link #makeProvider(Map)}
      */
     public Provider<?> getProvider() {
         return provider;
@@ -91,7 +92,7 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
     }
 
     @Override
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
         return provider;
     }
     

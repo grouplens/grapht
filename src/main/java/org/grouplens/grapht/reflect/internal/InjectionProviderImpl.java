@@ -19,9 +19,9 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.NullComponentException;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.ProviderSource;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     
     private final Class<T> type;
     private final List<ReflectionDesire> desires;
-    private final ProviderSource providers;
+    private final Map<Desire, Provider<?>> providers;
 
     /**
      * Create an InjectionProviderImpl that will provide instances of the given
@@ -59,7 +59,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
      * @param desires The dependency desires for the instance
      * @param providers The providers that satisfy the desires of the type
      */
-    public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, ProviderSource providers) {
+    public InjectionProviderImpl(Class<T> type, List<ReflectionDesire> desires, Map<Desire,Provider<?>> providers) {
         Preconditions.notNull("type", type);
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
@@ -77,7 +77,10 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         for (ReflectionDesire d: desires) {
             if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                 // this desire is a constructor argument so create it now
-                Provider<?> provider = providers.apply(d);
+                Provider<?> provider = providers.get(d);
+                if (provider == null) {
+                    throw new RuntimeException("no provider for " + d);
+                }
                 ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                 ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.get());
             }
@@ -103,7 +106,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
         for (ReflectionDesire d: desires) {
             if (d.getInjectionPoint() instanceof FieldInjectionPoint) {
                 FieldInjectionPoint fd = (FieldInjectionPoint) d.getInjectionPoint();
-                Object value = checkNull(fd, providers.apply(d).get());
+                Object value = checkNull(fd, providers.get(d).get());
                 Field field = fd.getMember();
 
                 try {
@@ -125,7 +128,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     settersAndArguments.put(setter, args);
                 }
                 
-                Provider<?> provider = providers.apply(d);
+                Provider<?> provider = providers.get(d);
                 args.set(sd.getParameterIndex(), checkNull(sd, provider.get()));
                 
                 if (args.isCompleted()) {

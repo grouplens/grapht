@@ -29,6 +29,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Satisfaction implementation wrapping an instance. It has no dependencies, and
@@ -91,7 +92,7 @@ public class InstanceSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
         return new InstanceProvider(instance);
     }
     

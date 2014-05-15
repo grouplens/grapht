@@ -24,12 +24,13 @@ import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
  * MockSatisfaction is a simple implementation of Satisfactions for certain
  * types of test cases. It can be configured by its constructors, although
- * {@link #makeProvider(ProviderSource)} always returns the same provider.
+ * {@link #makeProvider(Map)} always returns the same provider.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
@@ -93,7 +94,7 @@ public class MockSatisfaction implements Satisfaction {
     }
 
     @Override
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
         return provider;
     }
 
