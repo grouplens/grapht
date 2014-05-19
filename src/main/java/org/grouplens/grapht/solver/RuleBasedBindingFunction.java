@@ -121,6 +121,11 @@ public class RuleBasedBindingFunction implements BindingFunction {
                 }
                 
                 if (topRules.size() > 1) {
+                    logger.error("{} bindings for {} in {}", topRules.size(),
+                                 desire, context);
+                    for (BindRule rule: topRules) {
+                        logger.info("matching rule: {}", rule);
+                    }
                     // additional rules match just as well as the first, so fail
                     throw new MultipleBindingsException(desire, context, topRules);
                 }
