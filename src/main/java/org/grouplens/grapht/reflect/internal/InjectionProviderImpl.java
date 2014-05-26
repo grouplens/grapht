@@ -105,7 +105,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     field.setAccessible(true);
                     field.set(instance, value);
                 } catch (Exception e) {
-                    throw new InjectionException(type, fd.getMember(), e);
+                    throw new InjectionException(fd, e);
                 }
             } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                 // collect parameters before invoking
@@ -129,7 +129,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                         setter.setAccessible(true);
                         setter.invoke(instance, args.arguments);
                     } catch (Exception e) {
-                        throw new InjectionException(type, setter, e);
+                        throw new InjectionException(sd, e);
                     }
                 }
             } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
@@ -140,7 +140,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     method.setAccessible(true);
                     method.invoke(instance);
                 } catch (Exception e) {
-                    throw new InjectionException(type, method, e);
+                    throw new InjectionException(d.getInjectionPoint(), e);
                 }
             }
         }
@@ -174,8 +174,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     
     private static Object checkNull(InjectionPoint injectPoint, Object value) {
         if (value == null && !injectPoint.isNullable()) {
-            throw new InjectionException(injectPoint.getMember().getDeclaringClass(),
-                                         injectPoint.getMember(), 
+            throw new InjectionException(injectPoint,
                                          "Injection point is not annotated with @Nullable, but binding configuration provided a null value");
         } else {
             return value;

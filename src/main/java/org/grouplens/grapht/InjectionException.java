@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht;
 
+import org.grouplens.grapht.reflect.InjectionPoint;
+
 import javax.annotation.Nullable;
 import java.lang.reflect.Member;
 
@@ -34,7 +36,23 @@ public class InjectionException extends RuntimeException {
 
     private final Class<?> type;
     private final Member target;
-    
+    private final InjectionPoint injectionPoint;
+
+    public InjectionException(InjectionPoint ip, String message) {
+        this(ip, message, null);
+    }
+
+    public InjectionException(InjectionPoint ip, Throwable cause) {
+        this(ip, null, cause);
+    }
+
+    public InjectionException(InjectionPoint ip, String message, Throwable cause) {
+        super(message, cause);
+        target = ip.getMember();
+        type = target.getDeclaringClass();
+        injectionPoint = ip;
+    }
+
     public InjectionException(Class<?> type, @Nullable Member target) {
         this(type, target, "");
     }
@@ -51,6 +69,7 @@ public class InjectionException extends RuntimeException {
         super(message, cause);
         this.type = type;
         this.target = target;
+        injectionPoint = null;
     }
 
     /**
@@ -69,10 +88,17 @@ public class InjectionException extends RuntimeException {
     public Member getTarget() {
         return target;
     }
+
+    @Nullable
+    public InjectionPoint getInjectionPoint() {
+        return injectionPoint;
+    }
     
     @Override
     public String getMessage() {
-        if (target != null) {
+        if (injectionPoint != null) {
+            return String.format("Error injecting into %s: %s", injectionPoint, super.getMessage());
+        } else if (target != null) {
             return String.format("Error injecting into %s for %s: %s", target, type, super.getMessage());
         } else {
             return String.format("Error injecting for %s: %s", type, super.getMessage());
