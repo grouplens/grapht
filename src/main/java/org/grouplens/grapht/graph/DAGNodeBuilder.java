@@ -58,6 +58,14 @@ public class DAGNodeBuilder<V,E> {
     }
 
     /**
+     * Get the label set for this node.
+     * @return The label currently set for the node builder.
+     */
+    public V getLabel() {
+        return label;
+    }
+
+    /**
      * Add an edge.
      * @param target The target node.
      * @param label The edge label.
@@ -83,6 +91,17 @@ public class DAGNodeBuilder<V,E> {
         Preconditions.checkNotNull(edge.getRight(), "edge label");
         edges.add(edge);
         return this;
+    }
+
+    /**
+     * Get the set of edges.  This set is live, and can be used to modify the edges that will
+     * be put in the final builder.
+     *
+     * @return The set of edges.
+     */
+    @Nonnull
+    public Set<Pair<DAGNode<V,E>,E>> getEdges() {
+        return edges;
     }
 
     @Nonnull
