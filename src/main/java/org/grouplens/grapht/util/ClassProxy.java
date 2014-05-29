@@ -62,18 +62,12 @@ public final class ClassProxy implements Serializable {
     private ClassProxy(String name, long check) {
         className = name;
         checksum = check;
-        classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = ClassProxy.class.getClassLoader();
-        }
+        classLoader = ClassLoaders.inferDefault(ClassProxy.class);
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = ClassProxy.class.getClassLoader();
-        }
+        classLoader = ClassLoaders.inferDefault(ClassProxy.class);
     }
 
     /**

@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -88,5 +89,22 @@ public class ClassProxyTest {
         ClassProxy proxy = roundTrip(double[][].class);
         assertThat(proxy.resolve(),
                    equalTo((Class) double[][].class));
+    }
+
+    @Test
+    public void testEquals() {
+        ClassProxy proxy = ClassProxy.of(String.class);
+        assertThat(proxy.equals(null), equalTo(false));
+        assertThat(proxy.equals(proxy), equalTo(true));
+        ClassProxy equal = ClassProxy.of(String.class);
+        ClassProxy unequal = ClassProxy.of(List.class);
+        assertThat(proxy.equals(equal), equalTo(true));
+        assertThat(proxy.equals(unequal), equalTo(false));
+
+        ClassProxy serialized = SerializationUtils.clone(proxy);
+        assertThat(proxy.equals(serialized), equalTo(true));
+
+        // and test the hash code
+        assertThat(equal.hashCode(), equalTo(proxy.hashCode()));
     }
 }
