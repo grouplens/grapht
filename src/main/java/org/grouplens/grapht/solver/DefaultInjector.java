@@ -22,16 +22,13 @@ import com.google.common.base.Predicate;
 import org.grouplens.grapht.*;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.reflect.*;
-import org.grouplens.grapht.util.MemoizingProvider;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Desires;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.inject.Provider;
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>
@@ -48,8 +45,7 @@ public class DefaultInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInjector.class);
     
     private final DependencySolver solver;
-    private final Map<DAGNode<Component, Dependency>, Provider<?>> providerCache;
-    
+    private final InjectionContainer instantiator;
 
     /**
      * <p>
@@ -109,10 +105,9 @@ public class DefaultInjector implements Injector {
 
         solver = DependencySolver.newBuilder()
                                  .addBindingFunctions(functions)
-                                 .setDefaultPolicy(defaultPolicy)
                                  .setMaxDepth(maxDepth)
                                  .build();
-        providerCache = new HashMap<DAGNode<Component, Dependency>, Provider<?>>();
+        instantiator = InjectionContainer.create(defaultPolicy);
     }
     
     /**
@@ -128,7 +123,6 @@ public class DefaultInjector implements Injector {
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T getInstance(Annotation qualifier, Class<T> type) {
         // All Provider cache access, graph resolution, etc. occur
         // within this exclusive lock so we know everything is thread safe
@@ -142,7 +136,7 @@ public class DefaultInjector implements Injector {
             DAGEdge<Component, Dependency> resolved =
                     solver.getGraph().getOutgoingEdgeWithLabel(pred);
 
-            // The edge is only non-null if getInstance() has been called before,
+            // The edge is only non-null if instantiate() has been called before,
             // it may be present in the graph at a deeper node. If that's the case
             // it will be properly merged after regenerating the graph at the root context.
             if (resolved == null) {
@@ -157,54 +151,7 @@ public class DefaultInjector implements Injector {
 
             // Check if the provider for the resolved node is in our cache
             DAGNode<Component, Dependency> resolvedNode = resolved.getTail();
-            return (T) getProvider(resolvedNode).get();
-        }
-    }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Provider<?> getProvider(DAGNode<Component, Dependency> node) {
-        Provider<?> cached = providerCache.get(node);
-        if (cached == null) {
-            logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
-            Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node));
-            
-            CachePolicy policy = node.getLabel().getCachePolicy();
-            if (policy.equals(CachePolicy.MEMOIZE)) {
-                // enforce memoization on providers for MEMOIZE policy
-                cached = new MemoizingProvider(raw);
-            } else {
-                // Satisfaction.makeProvider() returns providers that are expected
-                // to create new instances with each invocation
-                assert policy.equals(CachePolicy.NEW_INSTANCE);
-                cached = raw;
-            }
-            providerCache.put(node, cached);
-        }
-        return cached;
-    }
-    
-    private class DesireProviderMapper implements ProviderSource {
-        private final DAGNode<Component, Dependency> forNode;
-        
-        public DesireProviderMapper(DAGNode<Component, Dependency> forNode) {
-            this.forNode = forNode;
-        }
-        
-        @Override
-        public Provider<?> apply(Desire desire) {
-            DAGEdge<Component, Dependency> edge =
-                    forNode.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(desire));
-            DAGNode<Component, Dependency> dependency;
-            if (edge != null) {
-                dependency = edge.getTail();
-            } else {
-                dependency = solver.getBackEdge(forNode, desire);
-            }
-            if (dependency == null) {
-                // we have an unresolved graph, that can't happen
-                throw new RuntimeException("unresolved dependency " + desire + " for " + forNode.getLabel().getSatisfaction());
-            }
-            return getProvider(dependency);
+            return type.cast(instantiator.makeProvider(resolvedNode, solver.getBackEdges()).get());
         }
     }
 }

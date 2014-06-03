@@ -18,16 +18,12 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import org.grouplens.grapht.BindingFunctionBuilder;
+import com.google.common.collect.SetMultimap;
+import org.grouplens.grapht.*;
 import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
-import org.grouplens.grapht.Dependency;
-import org.grouplens.grapht.Injector;
-import org.grouplens.grapht.InjectorBuilder;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.Component;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
@@ -40,6 +36,7 @@ import org.junit.Test;
 import javax.inject.Provider;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -69,9 +66,9 @@ public class ReflectionInjectionTest {
         // no outgoing edges...
         Assert.assertEquals(0, pnode.getOutgoingEdges().size());
         // but a back edge
-        ImmutableSet<DAGEdge<Component, Dependency>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
-        assertThat(backEdges, hasSize(1));
-        DAGEdge<Component, Dependency> edge = backEdges.iterator().next();
+        SetMultimap<DAGNode<Component,Dependency>,DAGEdge<Component, Dependency>> backEdges = ((DefaultInjector) i).getSolver().getBackEdges();
+        assertThat(backEdges.entries(), hasSize(1));
+        DAGEdge<Component, Dependency> edge = backEdges.values().iterator().next();
         Assert.assertSame(anode, edge.getTail());
     }
     

@@ -19,16 +19,15 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Functions;
-import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.Component;
 import org.grouplens.grapht.Dependency;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.graph.DAGNodeBuilder;
 import org.grouplens.grapht.graph.MergePool;
-import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.Component;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.NullSatisfaction;
@@ -85,7 +84,7 @@ public class DependencySolver {
     private final List<BindingFunction> triggerFunctions;
     
     private DAGNode<Component,Dependency> graph;
-    private Set<DAGEdge<Component,Dependency>> backEdges;
+    private SetMultimap<DAGNode<Component,Dependency>, DAGEdge<Component,Dependency>> backEdges;
     private MergePool<Component,Dependency> mergePool;
 
     /**
@@ -113,7 +112,7 @@ public class DependencySolver {
         this.defaultPolicy = defaultPolicy;
         
         graph = DAGNode.singleton(ROOT_SATISFACTION);
-        backEdges = Sets.newHashSet();
+        backEdges = HashMultimap.create();
         mergePool = MergePool.create();
 
         logger.info("DependencySolver created, max depth: {}", maxDepth);
@@ -142,10 +141,12 @@ public class DependencySolver {
      * via provider injection, and only if {@link ProviderBindingFunction} is one of the binding
      * functions.  In such cases, there will be a back edge from the provider node to the actual
      * node being provided, and this map will report that edge.
-     * @return A snapshot of the map of back-edges.
+     *
+     * @return A snapshot of the map of back-edges.  This snapshot is entirely independent of the
+     *         back edge map maintained by the dependency solver.
      */
-    public ImmutableSet<DAGEdge<Component, Dependency>> getBackEdges() {
-        return ImmutableSet.copyOf(backEdges);
+    public SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> getBackEdges() {
+        return ImmutableSetMultimap.copyOf(backEdges);
     }
 
     /**
@@ -155,8 +156,7 @@ public class DependencySolver {
      */
     public synchronized DAGNode<Component, Dependency> getBackEdge(DAGNode<Component, Dependency> parent,
                                                                             Desire desire) {
-        return FluentIterable.from(backEdges)
-                             .filter(DAGEdge.headMatches(Predicates.equalTo(parent)))
+        return FluentIterable.from(backEdges.get(parent))
                              .filter(DAGEdge.labelMatches(Dependency.hasInitialDesire(desire)))
                              .first()
                              .transform(DAGEdge.<Component, Dependency>extractTail())
@@ -217,7 +217,7 @@ public class DependencySolver {
                     if (merged.getReachableNodes().contains(parent)) {
                         // parent node is referenced from merged, we have a circle!
                         // that means we need a back edge
-                        backEdges.add(DAGEdge.create(parent, merged, result.getRight()));
+                        backEdges.put(parent, DAGEdge.create(parent, merged, result.getRight()));
                     } else {
                         // an edge from parent to merged does not add a cycle
                         // we have to update graph right away so it's available to merge the next
@@ -242,8 +242,28 @@ public class DependencySolver {
         Map<DAGNode<Component,Dependency>,
                 DAGNode<Component,Dependency>> memory = Maps.newHashMap();
         graph = graph.replaceNode(old, repl, memory);
+
         // loop over a snapshot of the list, replacing nodes
-        backEdges = Sets.newHashSet(Iterables.transform(backEdges, DAGEdge.transformNodes(Functions.forMap(memory, null))));
+        Collection<DAGEdge<Component, Dependency>> oldBackEdges = backEdges.values();
+        backEdges = HashMultimap.create();
+        for (DAGEdge<Component,Dependency> edge: oldBackEdges) {
+            DAGNode<Component,Dependency> newHead, newTail;
+            newHead = memory.get(edge.getHead());
+            if (newHead == null) {
+                newHead = edge.getHead();
+            }
+            newTail = memory.get(edge.getTail());
+            if (newTail == null) {
+                newTail = edge.getTail();
+            }
+            DAGEdge<Component,Dependency> newEdge;
+            if (newHead.equals(edge.getHead()) && newTail.equals(edge.getTail())) {
+                newEdge = edge;
+            } else {
+                newEdge = DAGEdge.create(newHead, newTail, edge.getLabel());
+            }
+            backEdges.put(newHead, newEdge);
+        }
     }
 
     /**

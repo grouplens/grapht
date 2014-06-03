@@ -1,0 +1,146 @@
+/*
+ * Grapht, an open source dependency injector.
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+package org.grouplens.grapht;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.SetMultimap;
+import org.grouplens.grapht.graph.DAGEdge;
+import org.grouplens.grapht.graph.DAGNode;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.ProviderSource;
+import org.grouplens.grapht.util.Providers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Provider;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+/**
+ * Container for dependency-injected components.  A container is the scope of memoization, so
+ * components with a cache policy of {@link CachePolicy#MEMOIZE} will share an instance so long
+ * as they are instantiated by the same instantiator.
+ *
+ * @since 0.9
+ * @author <a href="http://www.grouplens.org">GroupLens Research</a>
+ */
+public class InjectionContainer {
+    private static final Logger logger = LoggerFactory.getLogger(InjectionContainer.class);
+
+    private final CachePolicy defaultCachePolicy;
+    private final Map<DAGNode<Component, Dependency>, Provider<?>> providerCache;
+
+    /**
+     * Create a new instantiator with a default policy of {@code MEMOIZE}.
+     * @return The instantiator.
+     */
+    public static InjectionContainer create() {
+        return create(CachePolicy.MEMOIZE);
+    }
+
+    /**
+     * Create a new instantiator.
+     * @param dft The default cache policy.
+     * @return The instantiator.
+     */
+    public static InjectionContainer create(CachePolicy dft) {
+        return new InjectionContainer(dft);
+    }
+
+    private InjectionContainer(CachePolicy dft) {
+        defaultCachePolicy = dft;
+        providerCache = new WeakHashMap<DAGNode<Component, Dependency>, Provider<?>>();
+    }
+
+    /**
+     * Get a provider that, when invoked, will return an instance of the component represented
+     * by a graph.
+     *
+     * @param node The graph.
+     * @return A provider to instantiate {@code graph}.
+     * @see #makeProvider(DAGNode, SetMultimap)
+     */
+    public Provider<?> makeProvider(DAGNode<Component, Dependency> node) {
+        return makeProvider(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
+    }
+
+    /**
+     * Get a provider that, when invoked, will return an instance of the component represented
+     * by a graph with back edges.  The provider will implement the cache policy, so cached nodes
+     * will return a memoized provider.
+     *
+     * @param node The graph.
+     * @param backEdges A multimap of back edges for cyclic dependencies.
+     * @return A provider to instantiate {@code graph}.
+     */
+    public Provider<?> makeProvider(DAGNode<Component, Dependency> node,
+                                    SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges) {
+        Provider<?> cached = providerCache.get(node);
+        if (cached == null) {
+            logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
+            Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node, backEdges));
+
+            CachePolicy policy = node.getLabel().getCachePolicy();
+            if (policy.equals(CachePolicy.NO_PREFERENCE)) {
+                policy = defaultCachePolicy;
+            }
+            if (policy.equals(CachePolicy.MEMOIZE)) {
+                // enforce memoization on providers for MEMOIZE policy
+                cached = Providers.memoize(raw);
+            } else {
+                // Satisfaction.makeProvider() returns providers that are expected
+                // to create new instances with each invocation
+                assert policy.equals(CachePolicy.NEW_INSTANCE);
+                cached = raw;
+            }
+            providerCache.put(node, cached);
+        }
+        return cached;
+    }
+
+
+    private class DesireProviderMapper implements ProviderSource {
+        private final DAGNode<Component, Dependency> forNode;
+        private final SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges;
+
+        public DesireProviderMapper(DAGNode<Component, Dependency> node, SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> back) {
+            forNode = node;
+            backEdges = back;
+        }
+
+        @Override
+        public Provider<?> apply(Desire desire) {
+            Predicate<Dependency> pred = Dependency.hasInitialDesire(desire);
+            DAGEdge<Component, Dependency> edge = forNode.getOutgoingEdgeWithLabel(pred);
+            if (edge == null) {
+                edge = Iterables.tryFind(backEdges.get(forNode),
+                                         DAGEdge.labelMatches(pred)).orNull();
+            }
+            if (edge != null) {
+                DAGNode<Component, Dependency> dependency = edge.getTail();
+                return makeProvider(dependency, backEdges);
+            } else {
+                // we have an unresolved graph, that can't happen
+                throw new RuntimeException("unresolved dependency " + desire + " for " + forNode.getLabel().getSatisfaction());
+            }
+        }
+    }
+}
