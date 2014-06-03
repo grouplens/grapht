@@ -25,7 +25,9 @@ import org.grouplens.grapht.util.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -107,7 +109,16 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     
     @Override
     public String toString() {
-        return field.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("field ");
+        if (getQualifier() != null) {
+            sb.append(getQualifier())
+              .append(" ");
+        }
+        sb.append(field.getType().toString())
+          .append(" ")
+          .append(field.getName());
+        return sb.toString();
     }
 
     private Object writeReplace() {

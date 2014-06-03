@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.NullComponentException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.ProviderSource;
 import org.grouplens.grapht.util.Preconditions;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Provider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -87,10 +89,14 @@ public class InjectionProviderImpl<T> implements Provider<T> {
             logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
             ctor.setAccessible(true);
             instance = ctor.newInstance(ctorArgs);
-        } catch (Exception e) {
-            throw new InjectionException(type, ctor, e);
+        } catch (InvocationTargetException e) {
+            throw new InjectionException(ctor, "Constructor " + ctor + " failed", e);
+        } catch (InstantiationException e) {
+            throw new InjectionException(ctor, "Could not instantiate " + type, e);
+        } catch (IllegalAccessException e) {
+            throw new InjectionException(ctor, "Access violation on " + ctor, e);
         }
-        
+
         // satisfy dependencies in the order of the list, which was
         // prepared to comply with JSR 330
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
@@ -104,7 +110,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     logger.trace("Setting field {} with arguments {}", field, value);
                     field.setAccessible(true);
                     field.set(instance, value);
-                } catch (Exception e) {
+                } catch (IllegalAccessException e) {
                     throw new InjectionException(fd, e);
                 }
             } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
@@ -128,8 +134,22 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                         logger.trace("Invoking setter {} with arguments {}", setter, args.arguments);
                         setter.setAccessible(true);
                         setter.invoke(instance, args.arguments);
-                    } catch (Exception e) {
-                        throw new InjectionException(sd, e);
+                    } catch (InvocationTargetException e) {
+                        String message = "Exception thrown by ";
+                        if (args.arguments.length == 1) {
+                            message += sd;
+                        } else {
+                            message += setter;
+                        }
+                        throw new InjectionException(sd, message, e);
+                    } catch (IllegalAccessException e) {
+                        String message = "Access violation calling ";
+                        if (args.arguments.length == 1) {
+                            message += sd;
+                        } else {
+                            message += setter;
+                        }
+                        throw new InjectionException(sd, message, e);
                     }
                 }
             } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
@@ -139,8 +159,10 @@ public class InjectionProviderImpl<T> implements Provider<T> {
                     logger.trace("Invoking no-argument injection point {}", d.getInjectionPoint());
                     method.setAccessible(true);
                     method.invoke(instance);
-                } catch (Exception e) {
-                    throw new InjectionException(d.getInjectionPoint(), e);
+                } catch (InvocationTargetException e) {
+                    throw new InjectionException(d.getInjectionPoint(), "Exception throw by " + method, e);
+                } catch (IllegalAccessException e) {
+                    throw new InjectionException(d.getInjectionPoint(), "Access violation invoking " + method, e);
                 }
             }
         }
@@ -174,8 +196,7 @@ public class InjectionProviderImpl<T> implements Provider<T> {
     
     private static Object checkNull(InjectionPoint injectPoint, Object value) {
         if (value == null && !injectPoint.isNullable()) {
-            throw new InjectionException(injectPoint,
-                                         "Injection point is not annotated with @Nullable, but binding configuration provided a null value");
+            throw new NullComponentException(injectPoint);
         } else {
             return value;
         }

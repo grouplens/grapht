@@ -117,11 +117,12 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("synthetic ");
         if (qualifier != null) {
             sb.append(qualifier)
-              .append(":");
+              .append(" ");
         }
-        return sb.append(type.getSimpleName()).toString();
+        return sb.append(type.getName()).toString();
     }
 
     private Object writeReplace() {

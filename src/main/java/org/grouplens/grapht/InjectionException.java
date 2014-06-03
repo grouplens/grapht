@@ -43,7 +43,7 @@ public class InjectionException extends RuntimeException {
     }
 
     public InjectionException(InjectionPoint ip, Throwable cause) {
-        this(ip, null, cause);
+        this(ip, defaultMessage(ip, null, null), cause);
     }
 
     public InjectionException(InjectionPoint ip, String message, Throwable cause) {
@@ -53,8 +53,19 @@ public class InjectionException extends RuntimeException {
         injectionPoint = ip;
     }
 
+
+    private static String defaultMessage(InjectionPoint ip, Class<?> type, @Nullable Member target) {
+        if (ip != null) {
+            return String.format("Error injecting into %s", ip);
+        } else if (target != null) {
+            return String.format("Error injecting into %s for %s", target, type);
+        } else {
+            return String.format("Error injecting for %s", type);
+        }
+    }
+    
     public InjectionException(Class<?> type, @Nullable Member target) {
-        this(type, target, "");
+        this(type, target, defaultMessage(null, type, target));
     }
 
     public InjectionException(Class<?> type, @Nullable Member target, String message) {
@@ -62,7 +73,7 @@ public class InjectionException extends RuntimeException {
     }
 
     public InjectionException(Class<?> type, @Nullable Member target, Throwable cause) {
-        this(type, target, "", cause);
+        this(type, target, defaultMessage(null, type, target), cause);
     }
 
     public InjectionException(Class<?> type, @Nullable Member target, String message, Throwable cause) {
@@ -70,6 +81,10 @@ public class InjectionException extends RuntimeException {
         this.type = type;
         this.target = target;
         injectionPoint = null;
+    }
+
+    public InjectionException(Member target, String message, Throwable cause) {
+        this(target.getDeclaringClass(), target, message, cause);
     }
 
     /**
@@ -87,21 +102,5 @@ public class InjectionException extends RuntimeException {
     @Nullable
     public Member getTarget() {
         return target;
-    }
-
-    @Nullable
-    public InjectionPoint getInjectionPoint() {
-        return injectionPoint;
-    }
-    
-    @Override
-    public String getMessage() {
-        if (injectionPoint != null) {
-            return String.format("Error injecting into %s: %s", injectionPoint, super.getMessage());
-        } else if (target != null) {
-            return String.format("Error injecting into %s for %s: %s", target, type, super.getMessage());
-        } else {
-            return String.format("Error injecting for %s: %s", type, super.getMessage());
-        }
     }
 }

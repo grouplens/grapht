@@ -109,7 +109,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     
     @Override
     public String toString() {
-        return method.getName() + "()";
+        return method.toString();
     }
 
     private Object writeReplace() {
