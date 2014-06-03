@@ -16,23 +16,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.annotation;
-
-import org.grouplens.grapht.CachePolicy;
-
-import javax.inject.Provider;
-import java.lang.annotation.*;
+package org.grouplens.grapht.types.dft;
 
 /**
- * DefaultProvider specifies a Provider implementation to act as a default binding
- * for types annotated with it.
- * 
- * @author <a href="http://grouplens.org">GroupLens Research</a>
+ * Created with IntelliJ IDEA. User: michael Date: 3/23/13 Time: 1:03 PM To change this template use
+ * File | Settings | File Templates.
  */
-@Documented
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultProvider {
-    Class<? extends Provider<?>> value();
-    CachePolicy cachePolicy() default CachePolicy.NO_PREFERENCE;
+public class CPropDftImplNoCache implements IPropDftImplNoCache {
 }

@@ -18,8 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.Satisfactions;
@@ -155,11 +155,11 @@ public class DefaultDesireBindingFunction implements BindingFunction {
      * @return A binding result, or {@code null} if no usable annotations are present.
      */
     private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
-        DefaultProvider provided = type.getAnnotation(DefaultProvider.class);
-        if (provided != null) {
+        DefaultProvider provider = type.getAnnotation(DefaultProvider.class);
+        if (provider != null) {
             return BindingResult.newBuilder()
-                                .setDesire(desire.restrict(Satisfactions.providerType(provided.value())))
-                                .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                .setDesire(desire.restrict(Satisfactions.providerType(provider.value())))
+                                .setCachePolicy(provider.cachePolicy())
                                 .addFlag(BindingFlag.TERMINAL)
                                 .build();
         }
@@ -169,12 +169,12 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             if (Types.isInstantiable(impl.value())) {
                 return BindingResult.newBuilder()
                                     .setDesire(desire.restrict(Satisfactions.type(impl.value())))
-                                    .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                    .setCachePolicy(impl.cachePolicy())
                                     .build();
             } else {
                 return BindingResult.newBuilder()
                                     .setDesire(desire.restrict(impl.value()))
-                                    .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                                    .setCachePolicy(impl.cachePolicy())
                                     .build();
             }
         }
@@ -199,7 +199,8 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             }
         }
 
-        BindingResult result = null;
+        BindingResult.Builder builder = BindingResult.newBuilder();
+        boolean found = false;
         String resourceName = META_INF_DEFAULTS + type.getCanonicalName() + ".properties";
         logger.debug("searching for defaults in {}", resourceName);
         URL url = classLoader.getResource(resourceName);
@@ -232,12 +233,9 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " does not provide " + type);
                     }
-                    // QUESTION: why should the last parameter be true?
-                    result = BindingResult.newBuilder()
-                                          .setDesire(desire.restrict(sat))
-                                          .setCachePolicy(CachePolicy.NO_PREFERENCE)
-                                          .addFlag(BindingFlag.TERMINAL)
-                                          .build();
+                    builder.setDesire(desire.restrict(sat))
+                           .addFlag(BindingFlag.TERMINAL);
+                    found = true;
                 } catch (ClassNotFoundException e) {
                     throw new SolverException("cannot find default provider for " + type, e);
                 }
@@ -252,15 +250,20 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                     if (!type.isAssignableFrom(sat.getErasedType())) {
                         throw new SolverException(providerName + " not compatible with " + type);
                     }
-                    result = BindingResult.newBuilder()
-                                          .setDesire(desire.restrict(sat))
-                                          .setCachePolicy(CachePolicy.NO_PREFERENCE)
-                                          .build();
+                    builder.setDesire(desire.restrict(sat));
+                    found = true;
                 } catch (ClassNotFoundException e) {
                     throw new SolverException("cannot find default implementation for " + type, e);
                 }
             }
+
+            if (found) {
+                String policy = props.getProperty("cachePolicy", "NO_PREFERENCE");
+                builder.setCachePolicy(CachePolicy.valueOf(policy));
+            }
         }
+
+        BindingResult result = found ? builder.build() : null;
         synchronized (metaInfCache) {
             metaInfCache.put(type, result);
         }
