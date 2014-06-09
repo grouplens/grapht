@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -46,7 +47,7 @@ public interface Satisfaction extends Serializable {
      * @return A list of dependencies which must be satisfied in order to
      *         instantiate this satisfaction.
      */
-    List<? extends Desire> getDependencies();
+    List<Desire> getDependencies();
 
     /**
      * Get the type of this satisfaction. If this is a synthetic Satisfaction,
@@ -106,11 +107,10 @@ public interface Satisfaction extends Serializable {
      * If the satisfaction is configured to use specific instances, this rule is
      * obviously void.
      * 
-     * @param dependencies A function mapping desires to providers of their
-     *            instances.
+     * @param dependencies Providers to obtain instances of this satisfaction's dependencies.
      * @return A provider of new instances of the type specified by this
      *         satisfaction, instantiated using the specified dependency
      *         mapping.
      */
-    Provider<?> makeProvider(ProviderSource dependencies);
+    Provider<?> makeProvider(Map<Desire, Provider<?>> dependencies);
 }

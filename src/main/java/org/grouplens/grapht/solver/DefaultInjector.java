@@ -18,20 +18,28 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.*;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
-import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.util.MemoizingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -166,7 +174,7 @@ public class DefaultInjector implements Injector {
         Provider<?> cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
-            Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node));
+            Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DepMap(node));
             
             CachePolicy policy = node.getLabel().getCachePolicy();
             if (policy.equals(CachePolicy.MEMOIZE)) {
@@ -182,29 +190,34 @@ public class DefaultInjector implements Injector {
         }
         return cached;
     }
-    
-    private class DesireProviderMapper implements ProviderSource {
-        private final DAGNode<Component, Dependency> forNode;
-        
-        public DesireProviderMapper(DAGNode<Component, Dependency> forNode) {
-            this.forNode = forNode;
+
+    /**
+     * Map that lazily extracts dependencies from the graph.  We need this because of circular
+     * dependencies.
+     */
+    private class DepMap extends AbstractMap<Desire,Provider<?>> {
+        private final DAGNode<Component, Dependency> focusNode;
+
+        public DepMap(DAGNode<Component, Dependency> node) {
+            focusNode = node;
         }
-        
         @Override
-        public Provider<?> apply(Desire desire) {
-            DAGEdge<Component, Dependency> edge =
-                    forNode.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(desire));
-            DAGNode<Component, Dependency> dependency;
-            if (edge != null) {
-                dependency = edge.getTail();
-            } else {
-                dependency = solver.getBackEdge(forNode, desire);
+        public Set<Entry<Desire, Provider<?>>> entrySet() {
+            return FluentIterable.from(Iterables.concat(focusNode.getOutgoingEdges(),
+                                                        solver.getBackEdges(focusNode)))
+                                 .transform(new EdgeToEntryFunction())
+                                 .toSet();
+        }
+
+        private class EdgeToEntryFunction implements Function<DAGEdge<Component, Dependency>, Entry<Desire,Provider<?>>> {
+            @Nullable
+            @Override
+            @SuppressWarnings({"rawtypes", "unchecked"})
+            public Entry<Desire, Provider<?>> apply(@Nullable DAGEdge<Component, Dependency> input) {
+                assert input != null;
+                return (Entry) Pair.of(input.getLabel().getInitialDesire(),
+                                       getProvider(input.getTail()));
             }
-            if (dependency == null) {
-                // we have an unresolved graph, that can't happen
-                throw new RuntimeException("unresolved dependency " + desire + " for " + forNode.getLabel().getSatisfaction());
-            }
-            return getProvider(dependency);
         }
     }
 }

@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -61,7 +62,7 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
     }
     
     @Override
-    public List<? extends Desire> getDependencies() {
+    public List<Desire> getDependencies() {
         return ReflectionDesire.getDesires(type);
     }
 
@@ -87,7 +88,7 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
         return new InjectionProviderImpl(type, getDependencies(), dependencies);
     }
     

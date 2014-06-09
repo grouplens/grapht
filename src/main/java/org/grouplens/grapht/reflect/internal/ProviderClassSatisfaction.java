@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -69,7 +70,7 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
     }
     
     @Override
-    public List<? extends Desire> getDependencies() {
+    public List<Desire> getDependencies() {
         return ReflectionDesire.getDesires(providerType);
     }
 
@@ -95,7 +96,7 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
         // we have to use the raw type because we don't have enough information,
         // but we can assume correctly that it will build a provider
         Provider<Provider<?>> providerBuilder = new InjectionProviderImpl(providerType, getDependencies(), dependencies);

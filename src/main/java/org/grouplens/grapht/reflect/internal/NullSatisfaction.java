@@ -31,6 +31,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the
@@ -60,7 +61,7 @@ public class NullSatisfaction implements Satisfaction, Serializable {
     }
     
     @Override
-    public List<? extends Desire> getDependencies() {
+    public List<Desire> getDependencies() {
         return Collections.emptyList();
     }
 
@@ -87,7 +88,7 @@ public class NullSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
         return new InstanceProvider(null);
     }
     

@@ -149,6 +149,18 @@ public class DependencySolver {
     }
 
     /**
+     * Get the back edges for a particular node, if any exist.
+     * @return The back edges from {@code parent}.  If {@code parent} has no back edges, an empty
+     * collection is returned.
+     * @see #getBackEdges()
+     */
+    public synchronized Iterable<DAGEdge<Component, Dependency>> getBackEdges(DAGNode<Component, Dependency> parent) {
+        return FluentIterable.from(backEdges)
+                             .filter(DAGEdge.headMatches(Predicates.equalTo(parent)))
+                             .toSet();
+    }
+
+    /**
      * Get the back edge for a particular node and desire, if one exists.
      * @return The back edge, or {@code null} if no edge exists.
      * @see #getBackEdges()

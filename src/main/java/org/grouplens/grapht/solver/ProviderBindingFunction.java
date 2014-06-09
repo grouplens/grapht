@@ -29,6 +29,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -105,7 +106,7 @@ public class ProviderBindingFunction implements BindingFunction {
         }
         
         @Override
-        public List<? extends Desire> getDependencies() {
+        public List<Desire> getDependencies() {
             return Collections.singletonList(providedDesire);
         }
 
@@ -131,8 +132,8 @@ public class ProviderBindingFunction implements BindingFunction {
         }
 
         @Override
-        public Provider<?> makeProvider(ProviderSource dependencies) {
-            Provider<?> trueProvider = dependencies.apply(providedDesire);
+        public Provider<?> makeProvider(Map<Desire,Provider<?>> dependencies) {
+            Provider<?> trueProvider = dependencies.get(providedDesire);
             
             // Return a provider wrapping this provider so the memoizing provider
             // is the final instance that is injected
