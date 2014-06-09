@@ -20,29 +20,29 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.ProviderSource;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.reflect.InstantiatorSource;
 
-import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MockProviderSource implements ProviderSource {
-    private final Map<ReflectionDesire, Provider<?>> providers;
+public class MockInstantiatorSource implements InstantiatorSource {
+    private final Map<ReflectionDesire, Instantiator> providers;
     
-    public MockProviderSource() {
-        providers = new HashMap<ReflectionDesire, Provider<?>>();
+    public MockInstantiatorSource() {
+        providers = new HashMap<ReflectionDesire, Instantiator>();
     }
     
-    public void add(ReflectionDesire desire, Provider<?> provider) {
+    public void add(ReflectionDesire desire, Instantiator provider) {
         providers.put(desire, provider);
     }
     
-    public void add(InjectionPoint injectPoint, Provider<?> provider) {
+    public void add(InjectionPoint injectPoint, Instantiator provider) {
         providers.put(new ReflectionDesire(injectPoint), provider);
     }
     
     @Override
-    public Provider<?> apply(Desire desire) {
+    public Instantiator apply(Desire desire) {
         return providers.get(desire);
     }
 }

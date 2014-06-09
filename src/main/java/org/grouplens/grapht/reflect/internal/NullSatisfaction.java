@@ -19,18 +19,24 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.Instantiators;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.SatisfactionVisitor;
 import org.grouplens.grapht.util.ClassProxy;
-import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * NullSatisfaction is a satisfaction that explicitly satisfies desires with the
@@ -87,8 +93,8 @@ public class NullSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
-        return new InstanceProvider(null);
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+        return Instantiators.ofNull(type);
     }
     
     @Override

@@ -18,22 +18,21 @@
  */
 package org.grouplens.grapht.reflect;
 
-import javax.inject.Provider;
-
+import org.grouplens.grapht.Instantiator;
 
 /**
- * ProviderSource provides a mapping from Desires to Providers that are
- * capable of creating instances satisfying the desire. 
- * 
+ * Mapping from desires to instantiators that are capable of creating instances satisfying the
+ * desire.
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface ProviderSource {
+public interface InstantiatorSource {
     /**
-     * Apply this function to the Desire and return a Provider that will create
-     * instances compatible with the desire.
-     * 
+     * Apply this function to the Desire and return a Provider that will create instances compatible
+     * with the desire.
+     *
      * @param desire The input Desire to the function
      * @return The output Provider
      */
-    Provider<?> apply(Desire desire);
+    Instantiator apply(Desire desire);
 }

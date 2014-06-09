@@ -19,16 +19,19 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.reflect.*;
-import org.grouplens.grapht.util.InstanceProvider;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.Instantiators;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.SatisfactionVisitor;
 import org.grouplens.grapht.util.Preconditions;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Satisfaction implementation wrapping an instance. It has no dependencies, and
@@ -91,8 +94,8 @@ public class InstanceSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
-        return new InstanceProvider(instance);
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+        return Instantiators.ofInstance(instance);
     }
     
     @Override

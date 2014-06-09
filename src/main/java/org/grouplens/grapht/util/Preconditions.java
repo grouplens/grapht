@@ -61,16 +61,4 @@ public final class Preconditions {
             throw new IndexOutOfBoundsException(value + " must be in [" + min + ", " + max + ")");
         }
     }
-    
-    public static void isInstantiable(Class<?> type) {
-        if (!Types.isInstantiable(type)) {
-            // either no injectable constructor or it's not a concrete class
-            int mods = type.getModifiers();
-            if (Modifier.isAbstract(mods) || Modifier.isInterface(mods)) {
-                throw new InjectionException(type, null, "Type is not concrete and cannot be instantiated");
-            } else {
-                throw new InjectionException(type, null, "No public default constructor or constructor annotated with @Inject");
-            }
-        }
-    }
 }

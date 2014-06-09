@@ -242,7 +242,7 @@ public class InjectorBuilderTest {
     }
 
     @Test
-    public void testNullBinding() {
+    public void testNullBinding() throws InjectionException {
         InjectorBuilder b = new InjectorBuilder();
         b.bind(InterfaceA.class).toNull();
         Injector i = b.build();
@@ -252,7 +252,7 @@ public class InjectorBuilderTest {
     }
 
     @Test(expected=InjectionException.class)
-    public void testBadNullBinding() {
+    public void testBadNullBinding() throws InjectionException {
         InjectorBuilder b = new InjectorBuilder();
         b.bind(InterfaceA.class).toNull();
         Injector i = b.build();

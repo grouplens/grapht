@@ -118,12 +118,13 @@ public class DefaultInjector implements Injector {
     }
     
     @Override
-    public <T> T getInstance(Class<T> type) {
+    public <T> T getInstance(Class<T> type) throws InjectionException {
         return getInstance(null, type);
     }
     
     @Override
-    public <T> T getInstance(Annotation qualifier, Class<T> type) {
+    @SuppressWarnings("unchecked")
+    public <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException {
         // All Provider cache access, graph resolution, etc. occur
         // within this exclusive lock so we know everything is thread safe
         // albeit in a non-optimal way.
@@ -151,7 +152,7 @@ public class DefaultInjector implements Injector {
 
             // Check if the provider for the resolved node is in our cache
             DAGNode<Component, Dependency> resolvedNode = resolved.getTail();
-            return type.cast(instantiator.makeProvider(resolvedNode, solver.getBackEdges()).get());
+            return type.cast(instantiator.makeInstantiator(resolvedNode, solver.getBackEdges()).call());
         }
     }
 }

@@ -20,12 +20,13 @@ package org.grouplens.grapht.reflect;
 
 import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.Injector;
+import org.grouplens.grapht.Instantiator;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -96,7 +97,7 @@ public interface Satisfaction extends Serializable {
 
     /**
      * <p>
-     * Create a provider from this satisfaction.
+     * Create an instantiator from this satisfaction.
      * <p>
      * If the details of the Satisfaction require instantiation (e.g. a class or
      * provider class satisfaction), the returned provider should be a new
@@ -108,9 +109,9 @@ public interface Satisfaction extends Serializable {
      * 
      * @param dependencies A function mapping desires to providers of their
      *            instances.
-     * @return A provider of new instances of the type specified by this
+     * @return An instantiator of new instances of the type specified by this
      *         satisfaction, instantiated using the specified dependency
      *         mapping.
      */
-    Provider<?> makeProvider(ProviderSource dependencies);
+    Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies);
 }

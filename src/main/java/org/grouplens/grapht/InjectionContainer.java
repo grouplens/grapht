@@ -18,20 +18,20 @@
  */
 package org.grouplens.grapht;
 
-import com.google.common.base.Predicate;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desire;
-import org.grouplens.grapht.reflect.ProviderSource;
-import org.grouplens.grapht.util.Providers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Provider;
+import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -46,7 +46,7 @@ public class InjectionContainer {
     private static final Logger logger = LoggerFactory.getLogger(InjectionContainer.class);
 
     private final CachePolicy defaultCachePolicy;
-    private final Map<DAGNode<Component, Dependency>, Provider<?>> providerCache;
+    private final Map<DAGNode<Component, Dependency>, Instantiator> providerCache;
 
     /**
      * Create a new instantiator with a default policy of {@code MEMOIZE}.
@@ -67,19 +67,20 @@ public class InjectionContainer {
 
     private InjectionContainer(CachePolicy dft) {
         defaultCachePolicy = dft;
-        providerCache = new WeakHashMap<DAGNode<Component, Dependency>, Provider<?>>();
+        providerCache = new WeakHashMap<DAGNode<Component, Dependency>, Instantiator>();
     }
 
     /**
      * Get a provider that, when invoked, will return an instance of the component represented
      * by a graph.
      *
+     *
      * @param node The graph.
      * @return A provider to instantiate {@code graph}.
-     * @see #makeProvider(DAGNode, SetMultimap)
+     * @see #makeInstantiator(DAGNode, SetMultimap)
      */
-    public Provider<?> makeProvider(DAGNode<Component, Dependency> node) {
-        return makeProvider(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
+    public Instantiator makeInstantiator(DAGNode<Component, Dependency> node) {
+        return makeInstantiator(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
     }
 
     /**
@@ -91,12 +92,14 @@ public class InjectionContainer {
      * @param backEdges A multimap of back edges for cyclic dependencies.
      * @return A provider to instantiate {@code graph}.
      */
-    public Provider<?> makeProvider(DAGNode<Component, Dependency> node,
-                                    SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges) {
-        Provider<?> cached = providerCache.get(node);
+    public Instantiator makeInstantiator(DAGNode<Component, Dependency> node,
+                                         SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges) {
+        Instantiator cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
-            Provider<?> raw = node.getLabel().getSatisfaction().makeProvider(new DesireProviderMapper(node, backEdges));
+            Map<Desire, Instantiator> depMap = makeDependencyMap(node, backEdges);
+
+            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap);
 
             CachePolicy policy = node.getLabel().getCachePolicy();
             if (policy.equals(CachePolicy.NO_PREFERENCE)) {
@@ -104,9 +107,9 @@ public class InjectionContainer {
             }
             if (policy.equals(CachePolicy.MEMOIZE)) {
                 // enforce memoization on providers for MEMOIZE policy
-                cached = Providers.memoize(raw);
+                cached = Instantiators.memoize(raw);
             } else {
-                // Satisfaction.makeProvider() returns providers that are expected
+                // Satisfaction.makeInstantiator() returns providers that are expected
                 // to create new instances with each invocation
                 assert policy.equals(CachePolicy.NEW_INSTANCE);
                 cached = raw;
@@ -116,31 +119,50 @@ public class InjectionContainer {
         return cached;
     }
 
-
-    private class DesireProviderMapper implements ProviderSource {
-        private final DAGNode<Component, Dependency> forNode;
-        private final SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges;
-
-        public DesireProviderMapper(DAGNode<Component, Dependency> node, SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> back) {
-            forNode = node;
-            backEdges = back;
+    private Map<Desire, Instantiator> makeDependencyMap(DAGNode<Component, Dependency> node, SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges) {
+        Set<DAGEdge<Component,Dependency>> edges = node.getOutgoingEdges();
+        if (backEdges.containsKey(node)) {
+            ImmutableSet.Builder<DAGEdge<Component,Dependency>> bld = ImmutableSet.builder();
+            edges = bld.addAll(edges)
+                       .addAll(backEdges.get(node))
+                       .build();
         }
 
+        ImmutableSet.Builder<Desire> desires = ImmutableSet.builder();
+        for (DAGEdge<Component,Dependency> edge: edges) {
+            desires.add(edge.getLabel().getInitialDesire());
+        }
+
+        return Maps.asMap(desires.build(), new DepLookup(edges, backEdges));
+    }
+
+    /**
+     * Function to look up a desire in a set of dependency edges.
+     */
+    private class DepLookup implements Function<Desire,Instantiator> {
+        private final Set<DAGEdge<Component, Dependency>> edges;
+        private final SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges;
+
+        /**
+         * Construct a depenency lookup funciton.
+         * @param edges The set of edges to consult.
+         * @param backEdges The back edge map (to pass to {@link #makeInstantiator(DAGNode,SetMultimap)}).
+         */
+        public DepLookup(Set<DAGEdge<Component,Dependency>> edges,
+                         SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges) {
+            this.edges = edges;
+            this.backEdges = backEdges;
+        }
+
+        @Nullable
         @Override
-        public Provider<?> apply(Desire desire) {
-            Predicate<Dependency> pred = Dependency.hasInitialDesire(desire);
-            DAGEdge<Component, Dependency> edge = forNode.getOutgoingEdgeWithLabel(pred);
-            if (edge == null) {
-                edge = Iterables.tryFind(backEdges.get(forNode),
-                                         DAGEdge.labelMatches(pred)).orNull();
+        public Instantiator apply(@Nullable Desire input) {
+            for (DAGEdge<Component,Dependency> edge: edges) {
+                if (edge.getLabel().getInitialDesire().equals(input)) {
+                    return makeInstantiator(edge.getTail(), backEdges);
+                }
             }
-            if (edge != null) {
-                DAGNode<Component, Dependency> dependency = edge.getTail();
-                return makeProvider(dependency, backEdges);
-            } else {
-                // we have an unresolved graph, that can't happen
-                throw new RuntimeException("unresolved dependency " + desire + " for " + forNode.getLabel().getSatisfaction());
-            }
+            return null;
         }
     }
 }

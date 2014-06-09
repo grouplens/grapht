@@ -33,7 +33,7 @@ import static org.junit.Assert.assertThat;
  */
 public class NullComponentTest {
     @Test
-    public void testDefaultNull() {
+    public void testDefaultNull() throws InjectionException {
         InjectorBuilder b = new InjectorBuilder();
         Injector inj = b.build();
         OptionalDep obj = inj.getInstance(OptionalDep.class);
@@ -42,7 +42,7 @@ public class NullComponentTest {
     }
 
     @Test(expected = InjectionException.class)
-    public void testBadNull() {
+    public void testBadNull() throws InjectionException {
         InjectorBuilder b = new InjectorBuilder();
         Injector inj = b.build();
         inj.getInstance(RequireDep.class);

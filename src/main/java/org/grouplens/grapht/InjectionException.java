@@ -31,7 +31,7 @@ import java.lang.reflect.Member;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class InjectionException extends RuntimeException {
+public class InjectionException extends Exception {
     private static final long serialVersionUID = 1L;
 
     private final Class<?> type;
@@ -60,10 +60,17 @@ public class InjectionException extends RuntimeException {
         } else if (target != null) {
             return String.format("Error injecting into %s for %s", target, type);
         } else {
-            return String.format("Error injecting for %s", type);
+            return String.format("Error injecting %s", type);
         }
     }
-    
+
+    public InjectionException(String msg, Throwable cause) {
+        super(msg, cause);
+        type = null;
+        target = null;
+        injectionPoint = null;
+    }
+
     public InjectionException(Class<?> type, @Nullable Member target) {
         this(type, target, defaultMessage(null, type, target));
     }

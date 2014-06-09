@@ -19,6 +19,8 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.Instantiators;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Types;
@@ -29,6 +31,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -105,7 +108,7 @@ public class ProviderBindingFunction implements BindingFunction {
         }
         
         @Override
-        public List<? extends Desire> getDependencies() {
+        public List<Desire> getDependencies() {
             return Collections.singletonList(providedDesire);
         }
 
@@ -131,12 +134,11 @@ public class ProviderBindingFunction implements BindingFunction {
         }
 
         @Override
-        public Provider<?> makeProvider(ProviderSource dependencies) {
-            Provider<?> trueProvider = dependencies.apply(providedDesire);
+        public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+            Instantiator instantiator = dependencies.get(providedDesire);
             
-            // Return a provider wrapping this provider so the memoizing provider
-            // is the final instance that is injected
-            return new InstanceProvider<Provider<?>>(trueProvider);
+            // Inject an instance of a provider wrapping this instantiator.
+            return Instantiators.ofInstance(Instantiators.toProvider(instantiator));
         }
 
         @Override

@@ -19,16 +19,23 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.SatisfactionVisitor;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -50,9 +57,15 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
      */
     public ClassSatisfaction(Class<?> type) {
         Preconditions.notNull("type", type);
+        int mods = type.getModifiers();
+        if (Modifier.isAbstract(mods) || Modifier.isInterface(mods)) {
+            throw new IllegalArgumentException("Satisfaction " + type + " is abstract");
+        }
+        if (!Types.isInstantiable(type)) {
+            throw new IllegalArgumentException("Satisfaction " + type + " is not instantiable");
+        }
 
         this.type = Types.box(type);
-        Preconditions.isInstantiable(this.type);
     }
     
     @Override
@@ -87,8 +100,8 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
-        return new InjectionProviderImpl(type, getDependencies(), dependencies);
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+        return new ClassInstantiator(type, getDependencies(), dependencies);
     }
     
     @Override

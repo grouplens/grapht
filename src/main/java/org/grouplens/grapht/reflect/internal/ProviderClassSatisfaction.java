@@ -19,6 +19,8 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.Instantiators;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -26,9 +28,14 @@ import org.grouplens.grapht.util.Types;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ProviderClassSatisfaction is a satisfaction implementation that satisfies a
@@ -50,7 +57,13 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
     public ProviderClassSatisfaction(Class<? extends Provider<?>> providerType) {
         Preconditions.notNull("provider type", providerType);
         Preconditions.isAssignable(Provider.class, providerType);
-        Preconditions.isInstantiable(providerType);
+        int mods = providerType.getModifiers();
+        if (Modifier.isAbstract(mods) || Modifier.isInterface(mods)) {
+            throw new IllegalArgumentException("Provider satisfaction " + providerType + " is abstract");
+        }
+        if (!Types.isInstantiable(providerType)) {
+            throw new IllegalArgumentException("Provider satisfaction " + providerType + " is not instantiable");
+        }
         
         this.providerType = providerType;
     }
@@ -95,11 +108,11 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Provider<?> makeProvider(ProviderSource dependencies) {
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
         // we have to use the raw type because we don't have enough information,
         // but we can assume correctly that it will build a provider
-        Provider<Provider<?>> providerBuilder = new InjectionProviderImpl(providerType, getDependencies(), dependencies);
-        return providerBuilder.get();
+        ClassInstantiator providerBuilder = new ClassInstantiator(providerType, getDependencies(), dependencies);
+        return Instantiators.ofProviderInstantiator(providerBuilder);
     }
     
     @Override

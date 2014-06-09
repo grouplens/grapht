@@ -18,17 +18,23 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.google.common.collect.Maps;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.Instantiators;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.types.*;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class SatisfactionTest {
@@ -75,16 +81,16 @@ public class SatisfactionTest {
         TypeA a2 = new TypeA();
         InterfaceB b1 = new TypeB();
         TypeB b2 = new TypeB();
+
+        Map<Desire,Instantiator> providers = Maps.newHashMap();
+        providers.put(new ReflectionDesire(TypeC.CONSTRUCTOR), Instantiators.ofInstance(10));
+        providers.put(new ReflectionDesire(TypeC.INTERFACE_A), Instantiators.ofInstance(a1));
+        providers.put(new ReflectionDesire(TypeC.TYPE_A), Instantiators.ofInstance(a2));
+        providers.put(new ReflectionDesire(TypeC.INTERFACE_B), Instantiators.ofInstance(b1));
+        providers.put(new ReflectionDesire(TypeC.TYPE_B), Instantiators.ofInstance(b2));
         
-        MockProviderSource providers = new MockProviderSource();
-        providers.add(TypeC.CONSTRUCTOR, new InstanceProvider<Integer>(10));
-        providers.add(TypeC.INTERFACE_A, new InstanceProvider<InterfaceA>(a1));
-        providers.add(TypeC.TYPE_A, new InstanceProvider<TypeA>(a2));
-        providers.add(TypeC.INTERFACE_B, new InstanceProvider<InterfaceB>(b1));
-        providers.add(TypeC.TYPE_B, new InstanceProvider<TypeB>(b2));
-        
-        Provider<?> provider = new ClassSatisfaction(TypeC.class).makeProvider(providers);
-        Object o = provider.get();
+        Instantiator provider = new ClassSatisfaction(TypeC.class).makeInstantiator(providers);
+        Object o = provider.call();
         
         Assert.assertTrue(o instanceof TypeC);
         
@@ -108,8 +114,8 @@ public class SatisfactionTest {
     @Test
     public void testInstanceSatisfactionProvider() throws Exception {
         TypeC c = new TypeC(4);
-        Provider<?> p = new InstanceSatisfaction(c).makeProvider(new MockProviderSource());
-        Assert.assertSame(c, p.get());
+        Instantiator p = new InstanceSatisfaction(c).makeInstantiator(Collections.EMPTY_MAP);
+        Assert.assertSame(c, p.call());
     }
     
     @Test
@@ -122,13 +128,13 @@ public class SatisfactionTest {
     
     @Test
     public void testProviderClassSatisfactionProvider() throws Exception {
-        MockProviderSource providers = new MockProviderSource();
-        providers.add(ctorProviderCIP, new InstanceProvider<Integer>(10));
+        Map<Desire,Instantiator> providers = Maps.newHashMap();
+        providers.put(new ReflectionDesire(ctorProviderCIP), Instantiators.ofInstance(10));
         
-        Provider<?> provider = new ProviderClassSatisfaction(ProviderC.class).makeProvider(providers);
-        Assert.assertTrue(provider instanceof ProviderC);
+        Instantiator provider = new ProviderClassSatisfaction(ProviderC.class).makeInstantiator(providers);
+        // Assert.assertTrue(provider instanceof ProviderC);
         
-        TypeC c = (TypeC) provider.get();
+        TypeC c = (TypeC) provider.call();
         Assert.assertEquals(10, c.getIntValue());
         Assert.assertNull(c.getInterfaceA());
         Assert.assertNull(c.getTypeA());
@@ -145,10 +151,10 @@ public class SatisfactionTest {
         Assert.assertSame(c, s.getProvider());
     }
     
-    @Test
+    @Test @Ignore("Not relevant for instantiators.")
     public void testProviderInstanceSatisfactionProvider() throws Exception {
         ProviderC instance = new ProviderC(10);
-        Provider<?> provider = new ProviderInstanceSatisfaction(instance).makeProvider(new MockProviderSource());
+        Instantiator provider = new ProviderInstanceSatisfaction(instance).makeInstantiator(Collections.EMPTY_MAP);
         Assert.assertSame(instance, provider);
     }
     

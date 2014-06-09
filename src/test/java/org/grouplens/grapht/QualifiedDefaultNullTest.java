@@ -36,7 +36,7 @@ import static org.junit.Assert.assertThat;
  */
 public class QualifiedDefaultNullTest {
     @Test
-    public void testQualifiedDefaultNull() {
+    public void testQualifiedDefaultNull() throws InjectionException {
         InjectorBuilder bld = new InjectorBuilder();
         Injector inj = bld.build();
 
@@ -47,7 +47,7 @@ public class QualifiedDefaultNullTest {
     }
 
     @Test
-    public void testQualifiedDefaultNullWithBinding() {
+    public void testQualifiedDefaultNullWithBinding() throws InjectionException {
         InjectorBuilder bld = new InjectorBuilder();
         bld.bind(TestQ.class, DepC.class)
            .to(DepC.class);
