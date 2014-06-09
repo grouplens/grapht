@@ -20,6 +20,7 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
+import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.internal.types.RoleA;
 import org.grouplens.grapht.reflect.internal.types.RoleB;
@@ -215,9 +216,9 @@ public class InjectionPointTest {
     }
     
     private Set<InjectionPoint> getInjectionPoints(Class<?> types) {
-        List<ReflectionDesire> desires = ReflectionDesire.getDesires(types);
+        List<Desire> desires = ReflectionDesire.getDesires(types);
         Set<InjectionPoint> points = new HashSet<InjectionPoint>();
-        for (ReflectionDesire rd: desires) {
+        for (Desire rd: desires) {
             points.add(rd.getInjectionPoint());
         }
         return points;

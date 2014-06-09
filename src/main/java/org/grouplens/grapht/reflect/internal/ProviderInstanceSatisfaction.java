@@ -59,14 +59,14 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
     }
     
     /**
-     * @return The provider instance returned by {@link #makeProvider(ProviderSource)}
+     * @return The provider instance returned by {@link #makeInstantiator(Map)}
      */
     public Provider<?> getProvider() {
         return provider;
     }
     
     @Override
-    public List<? extends Desire> getDependencies() {
+    public List<Desire> getDependencies() {
         return Collections.emptyList();
     }
 

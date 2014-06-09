@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.google.common.collect.Lists;
 import org.grouplens.grapht.InvalidBindingException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
@@ -52,8 +53,8 @@ public class ReflectionDesire implements Desire, Serializable {
      * @return The dependency desires for the given type
      * @throws NullPointerException if the type is null
      */
-    public static List<ReflectionDesire> getDesires(Class<?> type) {
-        List<ReflectionDesire> desires = new ArrayList<ReflectionDesire>();
+    public static List<Desire> getDesires(Class<?> type) {
+        List<Desire> desires = Lists.newArrayList();
 
         boolean ctorFound = false;
         for (Constructor<?> ctor: type.getDeclaredConstructors()) {
@@ -73,7 +74,7 @@ public class ReflectionDesire implements Desire, Serializable {
         // JSR 330 mandates that super class methods are injected first, so we
         // collect method injection points into a separate list and then reverse
         // it to get the ordering correct.
-        List<ReflectionDesire> groupDesires = new ArrayList<ReflectionDesire>();
+        List<Desire> groupDesires = Lists.newArrayList();
         
         // Must also keep track of methods overridden in the subtypes.
         Set<Signature> visitedMethods = new HashSet<Signature>();
