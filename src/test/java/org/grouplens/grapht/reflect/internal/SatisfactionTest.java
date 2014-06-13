@@ -90,7 +90,7 @@ public class SatisfactionTest {
         providers.put(new ReflectionDesire(TypeC.TYPE_B), Instantiators.ofInstance(b2));
         
         Instantiator provider = new ClassSatisfaction(TypeC.class).makeInstantiator(providers);
-        Object o = provider.call();
+        Object o = provider.instantiate();
         
         Assert.assertTrue(o instanceof TypeC);
         
@@ -115,7 +115,7 @@ public class SatisfactionTest {
     public void testInstanceSatisfactionProvider() throws Exception {
         TypeC c = new TypeC(4);
         Instantiator p = new InstanceSatisfaction(c).makeInstantiator(Collections.EMPTY_MAP);
-        Assert.assertSame(c, p.call());
+        Assert.assertSame(c, p.instantiate());
     }
     
     @Test
@@ -134,7 +134,7 @@ public class SatisfactionTest {
         Instantiator provider = new ProviderClassSatisfaction(ProviderC.class).makeInstantiator(providers);
         // Assert.assertTrue(provider instanceof ProviderC);
         
-        TypeC c = (TypeC) provider.call();
+        TypeC c = (TypeC) provider.instantiate();
         Assert.assertEquals(10, c.getIntValue());
         Assert.assertNull(c.getInterfaceA());
         Assert.assertNull(c.getTypeA());

@@ -152,7 +152,7 @@ public class DefaultInjector implements Injector {
 
             // Check if the provider for the resolved node is in our cache
             DAGNode<Component, Dependency> resolvedNode = resolved.getTail();
-            return type.cast(instantiator.makeInstantiator(resolvedNode, solver.getBackEdges()).call());
+            return type.cast(instantiator.makeInstantiator(resolvedNode, solver.getBackEdges()).instantiate());
         }
     }
 }

@@ -102,7 +102,7 @@ public final class Instantiators {
         }
 
         @Override
-        public Object call() throws InjectionException {
+        public Object instantiate() throws InjectionException {
             return instance;
         }
 
@@ -120,8 +120,8 @@ public final class Instantiators {
         }
 
         @Override
-        public Object call() throws InjectionException {
-            Provider<?> provider = (Provider) providerInstantiator.call();
+        public Object instantiate() throws InjectionException {
+            Provider<?> provider = (Provider) providerInstantiator.instantiate();
             try {
                 return provider.get();
             } catch (Throwable th) {
@@ -148,12 +148,12 @@ public final class Instantiators {
         }
 
         @Override
-        public Object call() throws InjectionException {
+        public Object instantiate() throws InjectionException {
             if (!instantiated) {
                 synchronized (this) {
                     if (!instantiated) {
                         try {
-                            instance = delegate.call();
+                            instance = delegate.instantiate();
                         } catch (Throwable th) {
                             error = th;
                         }
@@ -192,7 +192,7 @@ public final class Instantiators {
         @Override
         public Object get() {
             try {
-                return getProvidedType().cast(instantiator.call());
+                return getProvidedType().cast(instantiator.instantiate());
             } catch (InjectionException ex) {
                 throw new RuntimeException(ex);
             }

@@ -72,7 +72,7 @@ public class ClassInstantiator implements Instantiator {
     }
 
     @Override
-    public Object call() throws InjectionException {
+    public Object instantiate() throws InjectionException {
         // find constructor and build up necessary constructor arguments
         Constructor<?> ctor = getConstructor();
         Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
@@ -81,7 +81,7 @@ public class ClassInstantiator implements Instantiator {
                 // this desire is a constructor argument so create it now
                 Instantiator provider = providers.get(d);
                 ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
-                ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.call());
+                ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
             }
         }
         
@@ -105,7 +105,7 @@ public class ClassInstantiator implements Instantiator {
         for (Desire d: desires) {
             if (d.getInjectionPoint() instanceof FieldInjectionPoint) {
                 FieldInjectionPoint fd = (FieldInjectionPoint) d.getInjectionPoint();
-                Object value = checkNull(fd, providers.get(d).call());
+                Object value = checkNull(fd, providers.get(d).instantiate());
                 Field field = fd.getMember();
 
                 try {
@@ -128,7 +128,7 @@ public class ClassInstantiator implements Instantiator {
                 }
                 
                 Instantiator provider = providers.get(d);
-                args.set(sd.getParameterIndex(), checkNull(sd, provider.call()));
+                args.set(sd.getParameterIndex(), checkNull(sd, provider.instantiate()));
                 
                 if (args.isCompleted()) {
                     // all parameters initialized, invoke the setter with all arguments
