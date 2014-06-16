@@ -24,9 +24,9 @@ import org.grouplens.grapht.reflect.internal.types.TypeA;
 import org.grouplens.grapht.reflect.internal.types.TypeB;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import static org.junit.Assert.fail;
 
-import java.io.*;
+import javax.inject.Provider;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -37,8 +37,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-
-import javax.inject.Provider;
+import static org.junit.Assert.fail;
 
 @SuppressWarnings("rawtypes")
 public class TypesTest {
@@ -161,6 +160,24 @@ public class TypesTest {
     }
 
     @Test
+    public void testTypedProvider() {
+        Provider<String> string = Providers.of("string");
+        assertThat(Types.getProvidedType(string),
+                   equalTo((Class) String.class));
+    }
+
+    /**
+     * Test that the most specific type is retrieved when the inferred type is more specific
+     * than the observed type.
+     */
+    @Test
+    public void testProvidedTypeCheckInferred() {
+        Provider<String> string = new NastyStringProvider("foo");
+        assertThat(Types.getProvidedType(string),
+                   equalTo((Class) String.class));
+    }
+
+    @Test
     public void testBadTypeDistance() {
         try {
             Types.getTypeDistance(TypeB.class, String.class);
@@ -171,4 +188,23 @@ public class TypesTest {
     }
 
     public static class Inner {}
+
+    private static class UntypedInstProv<T> implements Provider<T> {
+        private final T instance;
+
+        public UntypedInstProv(T inst){
+            instance = inst;
+        }
+
+        @Override
+        public T get() {
+            return instance;
+        }
+    }
+
+    private static class NastyStringProvider extends UntypedInstProv<String> {
+        public NastyStringProvider(String foo) {
+            super(foo);
+        }
+    }
 }

@@ -25,10 +25,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.ArrayDeque;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * Static helper methods for working with types.
@@ -190,6 +187,8 @@ public final class Types {
      *             Provider
      */
     public static Class<?> getProvidedType(Class<? extends Provider<?>> providerClass) {
+        com.google.common.base.Preconditions.checkArgument(Provider.class.isAssignableFrom(providerClass),
+                                                           "class is not Provider class");
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
         if(!bindings.containsKey(PROVIDER_TYPE_VAR)){
             throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
