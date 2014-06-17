@@ -21,7 +21,6 @@ package org.grouplens.grapht;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.solver.DependencySolver;
-import org.grouplens.grapht.solver.SolverException;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -37,7 +36,7 @@ import static org.junit.Assert.assertThat;
  */
 public class GraphRewritingTest {
     @Test
-    public void testSimpleRewriteNoTrigger() throws SolverException {
+    public void testSimpleRewriteNoTrigger() throws ResolutionException {
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()
                 .bind(I.class)
@@ -60,7 +59,7 @@ public class GraphRewritingTest {
     }
 
     @Test
-    public void testRewriteToIdentical() throws SolverException {
+    public void testRewriteToIdentical() throws ResolutionException {
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()
               .bind(I.class)
@@ -84,7 +83,7 @@ public class GraphRewritingTest {
     }
 
     @Test
-    public void testRewriteDependency() throws SolverException {
+    public void testRewriteDependency() throws ResolutionException {
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()
               .bind(I.class)
@@ -130,7 +129,7 @@ public class GraphRewritingTest {
     }
 
     @Test
-    public void testRewriteNoTrigger() throws SolverException {
+    public void testRewriteNoTrigger() throws ResolutionException {
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()
               .bind(I.class)
@@ -181,7 +180,7 @@ public class GraphRewritingTest {
     }
 
     @Test
-    public void testRewriteFixed() throws SolverException {
+    public void testRewriteFixed() throws ResolutionException {
         // based on testRewriteDependency, but with a fixed binding to prevent rewrite
         BindingFunctionBuilder config = new BindingFunctionBuilder();
         config.getRootContext()

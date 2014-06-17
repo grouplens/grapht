@@ -220,7 +220,7 @@ public class InjectorBuilderTest {
         Assert.assertEquals("hello world", i.getInstance(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build(), String.class));
     }
     
-    @Test(expected=ConstructionException.class)
+    @Test(expected=InjectionException.class)
     public void testInjectorMissingNamedBinding() throws Exception {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
@@ -232,7 +232,7 @@ public class InjectorBuilderTest {
         i.getInstance(NamedType.class);
     }
     
-    @Test(expected=ConstructionException.class)
+    @Test(expected=InjectionException.class)
     public void testInjectorNoConstructor() throws Exception {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(ShouldWork.class).to(NotInjectable.class);
@@ -242,7 +242,7 @@ public class InjectorBuilderTest {
     }
 
     @Test
-    public void testNullBinding() throws ConstructionException {
+    public void testNullBinding() throws InjectionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(InterfaceA.class).toNull();
         Injector i = b.build();
@@ -252,7 +252,7 @@ public class InjectorBuilderTest {
     }
 
     @Test(expected=ConstructionException.class)
-    public void testBadNullBinding() throws ConstructionException {
+    public void testBadNullBinding() throws InjectionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(InterfaceA.class).toNull();
         Injector i = b.build();

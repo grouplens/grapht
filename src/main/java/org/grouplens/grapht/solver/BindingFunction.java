@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.ResolutionException;
+
 import javax.annotation.Nullable;
 
 /**
@@ -32,8 +34,8 @@ public interface BindingFunction {
      * @param context The context.
      * @param desire The desire.
      * @return The result of binding {@code desire}, or {@code null} if there is no binding.
-     * @throws SolverException If there is an error (such as ambiguous bindings).
+     * @throws ResolutionException If there is an error (such as ambiguous bindings).
      */
     @Nullable
-    BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException;
+    BindingResult bind(InjectionContext context, DesireChain desire) throws ResolutionException;
 }

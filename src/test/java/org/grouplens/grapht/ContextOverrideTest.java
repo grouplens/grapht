@@ -49,7 +49,7 @@ public class ContextOverrideTest {
      * interesting, the thing tweaked is a concrete class.
      */
     @Test
-    public void testDeeperOverride() throws ConstructionException {
+    public void testDeeperOverride() throws InjectionException {
         build.within(Outer.class)
              .bind(IPlug.class)
              .to(PlugH.class);
@@ -73,7 +73,7 @@ public class ContextOverrideTest {
      * Test bindings with a null, and a deeper context using a binding.
      */
     @Test
-    public void testNullDeepConcrete() throws ConstructionException {
+    public void testNullDeepConcrete() throws InjectionException {
         // this can be with or without the context
         // use context to match target use in LensKit
         build.within(COuter.class)
@@ -101,7 +101,7 @@ public class ContextOverrideTest {
      * an anchored matcher.
      */
     @Test
-    public void testNullDeepConcreteAnchored() throws ConstructionException {
+    public void testNullDeepConcreteAnchored() throws InjectionException {
         // immediate binding should allow inner to get a plug
         build.at(COuter.class)
              .bind(Plug.class)
@@ -124,7 +124,7 @@ public class ContextOverrideTest {
      * Test anchored root binding.
      */
     @Test
-    public void testAnchoredToRoot() throws ConstructionException {
+    public void testAnchoredToRoot() throws InjectionException {
         build.bind(IPlug.class)
              .to(PlugA.class);
         build.at(null)
@@ -150,7 +150,7 @@ public class ContextOverrideTest {
     }
 
     @Test
-    public void testPatternForPlug() throws ConstructionException {
+    public void testPatternForPlug() throws InjectionException {
         build.matching(ContextPattern.any()
                                      .append(CInner.class)
                                      .append(ContextElements.invertMatch(ContextElements.matchType(PlugW.class)),

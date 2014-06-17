@@ -21,6 +21,7 @@ package org.grouplens.grapht.solver;
 import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.Instantiators;
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Types;
@@ -51,7 +52,7 @@ public class ProviderBindingFunction implements BindingFunction {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, DesireChain desires) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain desires) throws ResolutionException {
         Desire desire = desires.getCurrentDesire();
         if (Provider.class.equals(desire.getDesiredType())) {
             // Look at the parameterized type of the injection point to

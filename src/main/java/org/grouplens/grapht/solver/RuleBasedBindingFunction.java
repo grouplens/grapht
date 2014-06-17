@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.context.ContextMatch;
 import org.grouplens.grapht.context.ContextMatcher;
 import org.grouplens.grapht.reflect.QualifierMatcher;
@@ -77,7 +78,7 @@ public class RuleBasedBindingFunction implements BindingFunction {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, DesireChain desire) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain desire) throws ResolutionException {
         // FIXME Build a better way to remember the applied rules
         Set<BindRule> appliedRules;
         synchronized (bindRuleMemory) {

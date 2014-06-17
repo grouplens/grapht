@@ -24,6 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.Component;
 import org.grouplens.grapht.Dependency;
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.graph.DAGNodeBuilder;
@@ -179,7 +180,7 @@ public class DependencySolver {
      * 
      * @param desire The desire to include in the graph
      */
-    public synchronized void resolve(Desire desire) throws SolverException {
+    public synchronized void resolve(Desire desire) throws ResolutionException {
         logger.info("Resolving desire: {}", desire);
 
         Queue<Deferral> deferralQueue = new ArrayDeque<Deferral>();
@@ -277,7 +278,7 @@ public class DependencySolver {
      * @param graph The graph to rewrite.
      * @return A rewritten version of the graph.
      */
-    public DAGNode<Component,Dependency> rewrite(DAGNode<Component,Dependency> graph) throws SolverException {
+    public DAGNode<Component,Dependency> rewrite(DAGNode<Component,Dependency> graph) throws ResolutionException {
         if (!graph.getLabel().getSatisfaction().getErasedType().equals(Void.TYPE)) {
             throw new IllegalArgumentException("only full dependency graphs can be rewritten");
         }
@@ -307,11 +308,11 @@ public class DependencySolver {
      * @param context The context leading to this node.
      * @param replacements The map of replacements to build. This maps edges to their replacement
      *                     targets and labels.
-     * @throws SolverException If there is a resolution error rewriting the graph.
+     * @throws ResolutionException If there is a resolution error rewriting the graph.
      */
     private void walkGraphForReplacements(DAGNode<Component, Dependency> root,
                                           InjectionContext context,
-                                          Map<DAGEdge<Component, Dependency>, DAGEdge<Component, Dependency>> replacements) throws SolverException {
+                                          Map<DAGEdge<Component, Dependency>, DAGEdge<Component, Dependency>> replacements) throws ResolutionException {
         assert context.getTailValue().getLeft().equals(root.getLabel().getSatisfaction());
         for (DAGEdge<Component, Dependency> edge: root.getOutgoingEdges()) {
             logger.debug("considering {} for replacement", edge.getTail().getLabel());
@@ -357,10 +358,10 @@ public class DependencySolver {
      * @param desire The desire to resolve.
      * @param context The context of {@code parent}.
      * @param deferQueue The queue of node deferrals.
-     * @throws SolverException if there is an error resolving the nodes.
+     * @throws ResolutionException if there is an error resolving the nodes.
      */
     private Pair<DAGNode<Component,Dependency>,Dependency>
-    resolveFully(Desire desire, InjectionContext context, Queue<Deferral> deferQueue) throws SolverException {
+    resolveFully(Desire desire, InjectionContext context, Queue<Deferral> deferQueue) throws ResolutionException {
         // check context depth against max to detect likely dependency cycles
         if (context.size() > maxDepth) {
             throw new CyclicDependencyException(desire, "Maximum context depth of " + maxDepth + " was reached");
@@ -394,7 +395,7 @@ public class DependencySolver {
         return Pair.of(node, result.makeDependency());
     }
     
-    private Resolution resolve(Desire desire, InjectionContext context) throws SolverException {
+    private Resolution resolve(Desire desire, InjectionContext context) throws ResolutionException {
         DesireChain chain = DesireChain.singleton(desire);
 
         CachePolicy policy = CachePolicy.NO_PREFERENCE;
