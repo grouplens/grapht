@@ -23,7 +23,7 @@ import org.grouplens.grapht.reflect.InjectionPoint;
 /**
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class NullComponentException extends InjectionException {
+public class NullComponentException extends ConstructionException {
     private final InjectionPoint injectionPoint;
 
     public NullComponentException(InjectionPoint point) {

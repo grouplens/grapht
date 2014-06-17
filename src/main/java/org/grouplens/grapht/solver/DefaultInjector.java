@@ -118,13 +118,13 @@ public class DefaultInjector implements Injector {
     }
     
     @Override
-    public <T> T getInstance(Class<T> type) throws InjectionException {
+    public <T> T getInstance(Class<T> type) throws ConstructionException {
         return getInstance(null, type);
     }
     
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException {
+    public <T> T getInstance(Annotation qualifier, Class<T> type) throws ConstructionException {
         // All Provider cache access, graph resolution, etc. occur
         // within this exclusive lock so we know everything is thread safe
         // albeit in a non-optimal way.
@@ -145,7 +145,7 @@ public class DefaultInjector implements Injector {
                 try {
                     solver.resolve(desire);
                 } catch(SolverException e) {
-                    throw new InjectionException(type, null, e);
+                    throw new ConstructionException(type, null, e);
                 }
                 resolved = solver.getGraph().getOutgoingEdgeWithLabel(pred);
             }

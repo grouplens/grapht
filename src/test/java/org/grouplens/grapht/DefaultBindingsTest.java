@@ -40,7 +40,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testDefaultImplementation() throws InjectionException {
+    public void testDefaultImplementation() throws ConstructionException {
         Injector inj = b.build();
         IDftImpl a = inj.getInstance(IDftImpl.class);
         assertThat(a, notNullValue());
@@ -48,7 +48,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testOverrideDefaultImplementation() throws InjectionException {
+    public void testOverrideDefaultImplementation() throws ConstructionException {
         b.bind(IDftImpl.class).to(CDftImplB.class);
         Injector inj = b.build();
         IDftImpl a = inj.getInstance(IDftImpl.class);
@@ -57,7 +57,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testDefaultProvider() throws InjectionException {
+    public void testDefaultProvider() throws ConstructionException {
         Injector inj = b.build();
         IDftProvider a = inj.getInstance(IDftProvider.class);
         assertThat(a, notNullValue());
@@ -65,7 +65,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testOverrideDefaultProvider() throws InjectionException {
+    public void testOverrideDefaultProvider() throws ConstructionException {
         b.bind(IDftProvider.class).to(CDftProvider.class);
         Injector inj = b.build();
         IDftProvider a = inj.getInstance(IDftProvider.class);
@@ -74,7 +74,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testPropDefaultImplementation() throws InjectionException {
+    public void testPropDefaultImplementation() throws ConstructionException {
         Injector inj = b.build();
         IPropDftImpl a = inj.getInstance(IPropDftImpl.class);
         assertThat(a, notNullValue());
@@ -82,7 +82,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testPropOverrideDefaultImplementation() throws InjectionException {
+    public void testPropOverrideDefaultImplementation() throws ConstructionException {
         b.bind(IPropDftImpl.class).to(CPropDftImplB.class);
         Injector inj = b.build();
         IPropDftImpl a = inj.getInstance(IPropDftImpl.class);
@@ -91,7 +91,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testPropDefaultProvider() throws InjectionException {
+    public void testPropDefaultProvider() throws ConstructionException {
         Injector inj = b.build();
         IPropDftProvider a = inj.getInstance(IPropDftProvider.class);
         assertThat(a, notNullValue());
@@ -99,7 +99,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testPropOverrideDefaultProvider() throws InjectionException {
+    public void testPropOverrideDefaultProvider() throws ConstructionException {
         b.bind(IPropDftProvider.class).to(CPropDftProvider.class);
         Injector inj = b.build();
         IPropDftProvider a = inj.getInstance(IPropDftProvider.class);
@@ -108,14 +108,14 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testPropImplDoubleDepCache() throws InjectionException {
+    public void testPropImplDoubleDepCache() throws ConstructionException {
         Injector inj = b.build();
         CPropImplDoubleDep obj = inj.getInstance(CPropImplDoubleDep.class);
         assertThat(obj.right, sameInstance(obj.left));
     }
 
     @Test
-    public void testPropImplDoubleDepUncache() throws InjectionException {
+    public void testPropImplDoubleDepUncache() throws ConstructionException {
         b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
         Injector inj = b.build();
         CPropImplDoubleDep obj = inj.getInstance(CPropImplDoubleDep.class);
@@ -123,21 +123,21 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testPropImplDoubleDepPropUncache() throws InjectionException {
+    public void testPropImplDoubleDepPropUncache() throws ConstructionException {
         Injector inj = b.build();
         CPropImplDoubleDepNoCache obj = inj.getInstance(CPropImplDoubleDepNoCache.class);
         assertThat(obj.right, not(sameInstance(obj.left)));
     }
 
     @Test
-    public void testDftImplDoubleDepCache() throws InjectionException {
+    public void testDftImplDoubleDepCache() throws ConstructionException {
         Injector inj = b.build();
         CDoubleDep obj = inj.getInstance(CDoubleDep.class);
         assertThat(obj.right, sameInstance(obj.left));
     }
 
     @Test
-    public void testDftImplDoubleDepUncache() throws InjectionException {
+    public void testDftImplDoubleDepUncache() throws ConstructionException {
         b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
         Injector inj = b.build();
         CDoubleDep obj = inj.getInstance(CDoubleDep.class);
@@ -145,7 +145,7 @@ public class DefaultBindingsTest {
     }
 
     @Test
-    public void testDftImplDoubleDepPropUncache() throws InjectionException {
+    public void testDftImplDoubleDepPropUncache() throws ConstructionException {
         Injector inj = b.build();
         CDoubleDepNoCache obj = inj.getInstance(CDoubleDepNoCache.class);
         assertThat(obj.right, not(sameInstance(obj.left)));
@@ -155,7 +155,7 @@ public class DefaultBindingsTest {
      * Test that the DefaultImplementation annotation overrides META-INF.
      */
     @Test
-    public void testPreemptDefaultImplementation() throws InjectionException {
+    public void testPreemptDefaultImplementation() throws ConstructionException {
         Injector inj = b.build();
         IPreemptDftImpl a = inj.getInstance(IPreemptDftImpl.class);
         assertThat(a, notNullValue());

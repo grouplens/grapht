@@ -32,7 +32,7 @@ import java.math.BigInteger;
 
 public class ParameterAnnotationTest {
     @Test
-    public void testBoxedIntBinding() throws InjectionException {
+    public void testBoxedIntBinding() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(Integer.class).withQualifier(IntParameter.class).to(50);
         Type t = b.build().getInstance(Type.class);
@@ -41,7 +41,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testPrimitiveIntBinding() throws InjectionException {
+    public void testPrimitiveIntBinding() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(int.class).withQualifier(IntParameter.class).to(50);
         Type t = b.build().getInstance(Type.class);
@@ -50,7 +50,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testBoxedDoubleBinding() throws InjectionException {
+    public void testBoxedDoubleBinding() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(Double.class).withQualifier(DoubleParameter.class).to(50.0);
         Type t = b.build().getInstance(Type.class);
@@ -59,7 +59,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testPrimitiveDoubleBinding() throws InjectionException {
+    public void testPrimitiveDoubleBinding() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(double.class).withQualifier(DoubleParameter.class).to(50.0);
         Type t = b.build().getInstance(Type.class);
@@ -75,7 +75,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testDirectBinding() throws InjectionException {
+    public void testDirectBinding() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindInt(b, 50);
         bindDouble(b, 50.0);
@@ -86,7 +86,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testFromBigIntegerCoercion() throws InjectionException {
+    public void testFromBigIntegerCoercion() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindInt(b, BigInteger.valueOf(50));
         Type t = b.build().getInstance(Type.class);
@@ -95,7 +95,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testFromBigDecimalCoercion() throws InjectionException {
+    public void testFromBigDecimalCoercion() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindDouble(b, new BigDecimal(50.34));
         Type t = b.build().getInstance(Type.class);
@@ -104,7 +104,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testFromLongCoercion() throws InjectionException {
+    public void testFromLongCoercion() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindInt(b, Long.valueOf(50));
         Type t = b.build().getInstance(Type.class);
@@ -113,7 +113,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testFromFloatCoercion() throws InjectionException {
+    public void testFromFloatCoercion() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindDouble(b, Float.valueOf(50f));
         Type t = b.build().getInstance(Type.class);
@@ -122,7 +122,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testFromByteCoercion() throws InjectionException {
+    public void testFromByteCoercion() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindInt(b, Byte.valueOf((byte) 50));
         Type t = b.build().getInstance(Type.class);
@@ -131,7 +131,7 @@ public class ParameterAnnotationTest {
     }
     
     @Test
-    public void testDiscreteToFloatCoercion() throws InjectionException {
+    public void testDiscreteToFloatCoercion() throws ConstructionException {
         InjectorBuilder b = InjectorBuilder.create();
         bindDouble(b, Integer.valueOf(50));
         Type t = b.build().getInstance(Type.class);

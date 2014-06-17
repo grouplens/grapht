@@ -26,7 +26,7 @@ package org.grouplens.grapht;
  * @since 0.9
  */
 public interface Instantiator {
-    Object instantiate() throws InjectionException;
+    Object instantiate() throws ConstructionException;
 
     /**
      * Get the type that this instantiator will instantiate.

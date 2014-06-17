@@ -55,9 +55,9 @@ public interface Injector {
      * @param <T> The object type being created
      * @param type The class type
      * @return An instance of type T
-     * @throws InjectionException if type cannot be instantiated
+     * @throws ConstructionException if type cannot be instantiated
      */
-    <T> T getInstance(Class<T> type) throws InjectionException;
+    <T> T getInstance(Class<T> type) throws ConstructionException;
 
     /**
      * <p>
@@ -67,7 +67,7 @@ public interface Injector {
      * @param qualifier The qualifier on of the returned instance
      * @param type The class type
      * @return An instance of type T
-     * @throws InjectionException if type cannot be instantiated
+     * @throws ConstructionException if type cannot be instantiated
      */
-    <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException;
+    <T> T getInstance(Annotation qualifier, Class<T> type) throws ConstructionException;
 }
