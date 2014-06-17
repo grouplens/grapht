@@ -143,8 +143,7 @@ public final class Instantiators {
             try {
                 return provider.get();
             } catch (Throwable th) {
-                throw new ConstructionException(getType(), null,
-                                             "Error invoking provider " + providerInstantiator, th);
+                throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
             }
         }
 

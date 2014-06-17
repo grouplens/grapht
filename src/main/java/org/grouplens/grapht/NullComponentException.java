@@ -27,8 +27,7 @@ public class NullComponentException extends ConstructionException {
     private final InjectionPoint injectionPoint;
 
     public NullComponentException(InjectionPoint point) {
-        super(point.getMember().getDeclaringClass(), point.getMember(),
-              "No component available for non-nullable injection point " + point);
+        super(point, "No component available for non-nullable injection point " + point);
         injectionPoint = point;
     }
 

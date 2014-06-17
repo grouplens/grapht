@@ -35,7 +35,6 @@ public class ConstructionException extends InjectionException {
     private static final long serialVersionUID = 1L;
 
     private final Class<?> type;
-    private final Member target;
     private final InjectionPoint injectionPoint;
 
     public ConstructionException(InjectionPoint ip, String message) {
@@ -43,22 +42,18 @@ public class ConstructionException extends InjectionException {
     }
 
     public ConstructionException(InjectionPoint ip, Throwable cause) {
-        this(ip, defaultMessage(ip, null, null), cause);
+        this(ip, defaultMessage(ip, null), cause);
     }
 
     public ConstructionException(InjectionPoint ip, String message, Throwable cause) {
         super(message, cause);
-        target = ip.getMember();
-        type = target.getDeclaringClass();
+        type = null;
         injectionPoint = ip;
     }
 
-
-    private static String defaultMessage(InjectionPoint ip, Class<?> type, @Nullable Member target) {
+    private static String defaultMessage(InjectionPoint ip, Class<?> type) {
         if (ip != null) {
             return String.format("Error injecting into %s", ip);
-        } else if (target != null) {
-            return String.format("Error injecting into %s for %s", target, type);
         } else {
             return String.format("Error injecting %s", type);
         }
@@ -67,39 +62,34 @@ public class ConstructionException extends InjectionException {
     public ConstructionException(String msg, Throwable cause) {
         super(msg, cause);
         type = null;
-        target = null;
         injectionPoint = null;
     }
 
-    public ConstructionException(Class<?> type, @Nullable Member target) {
-        this(type, target, defaultMessage(null, type, target));
+    public ConstructionException(Class<?> type, Throwable cause) {
+        this(type, defaultMessage(null, type), cause);
     }
 
-    public ConstructionException(Class<?> type, @Nullable Member target, String message) {
-        this(type, target, message, null);
-    }
-
-    public ConstructionException(Class<?> type, @Nullable Member target, Throwable cause) {
-        this(type, target, defaultMessage(null, type, target), cause);
-    }
-
-    public ConstructionException(Class<?> type, @Nullable Member target, String message, Throwable cause) {
+    public ConstructionException(Class<?> type, String message, Throwable cause) {
         super(message, cause);
         this.type = type;
-        this.target = target;
         injectionPoint = null;
-    }
-
-    public ConstructionException(Member target, String message, Throwable cause) {
-        this(target.getDeclaringClass(), target, message, cause);
     }
 
     /**
      * @return The Class type that could not be instantiated, or configured by
-     *         injection
+     *         injection.
      */
     public Class<?> getType() {
-        return type;
+        if (type != null) {
+            return type;
+        } else if (injectionPoint != null) {
+            Member target = injectionPoint.getMember();
+            if (target != null) {
+                return target.getDeclaringClass();
+            }
+        }
+
+        return null;
     }
     
     /**
@@ -108,7 +98,11 @@ public class ConstructionException extends InjectionException {
      */
     @Nullable
     public Member getTarget() {
-        return target;
+        if (injectionPoint == null) {
+            return null;
+        } else {
+            return injectionPoint.getMember();
+        }
     }
 
     @Nullable
