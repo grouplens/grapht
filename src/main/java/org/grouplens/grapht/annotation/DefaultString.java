@@ -21,8 +21,7 @@ package org.grouplens.grapht.annotation;
 import java.lang.annotation.*;
 
 /**
- * A default string value for a parameter.
- * @see Parameter
+ * A default value for a string parameter.
  */
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)

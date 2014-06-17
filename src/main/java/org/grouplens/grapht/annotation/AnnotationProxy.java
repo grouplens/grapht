@@ -35,7 +35,7 @@ import java.util.Map;
  * contract by delegating to a map of named attribute values.  A new AnnotationProxy instance
  * should be created for each proxy annotation.
  *
- * @see {@link AnnotationBuilder}
+ * @see AnnotationBuilder
  */
 class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serializable {
     private static final long serialVersionUID = 1L;

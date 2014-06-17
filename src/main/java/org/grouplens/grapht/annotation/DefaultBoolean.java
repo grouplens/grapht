@@ -21,8 +21,7 @@ package org.grouplens.grapht.annotation;
 import java.lang.annotation.*;
 
 /**
- * A default boolean value for a parameter.
- * @see Parameter
+ * A default value for a qualified boolean.
  */
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)

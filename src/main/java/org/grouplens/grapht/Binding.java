@@ -136,7 +136,7 @@ public interface Binding<T> {
      * <code>A &rarr; B &rarr; C</code>. The {@code chained} parameter controls
      * whether the chain is followed.  If {@code chained == false} for the {@code A &rarr; B}
      * binding, then the {@code B &rarr; C} binding is not followed (and the {@code A &rarr; B}
-     * binding is called <emph>terminal</emph>).
+     * binding is called <em>terminal</em>).
      * 
      * @param impl The implementation type
      * @param chained Whether further binding lookup will be done on the implementation type.

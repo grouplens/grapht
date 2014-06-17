@@ -36,7 +36,7 @@ import java.lang.annotation.Annotation;
  * assert (i.getInstance(Foo.class) instanceof Bar);
  * </pre>
  * <p>
- * Alternatively, {@link BindingFunctionBuilder}, and {@link InjectSPI}
+ * Alternatively, {@link BindingFunctionBuilder} and {@link org.grouplens.grapht.solver.DependencySolver}
  * can be used to create your own Injector implementations.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>

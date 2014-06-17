@@ -26,7 +26,7 @@ import javax.inject.Provider;
  * @param <T> The type returned from this satisfaction's values.
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  * @since 0.5
- * @see {@link Satisfaction}
+ * @see Satisfaction
  */
 public interface SatisfactionVisitor<T> {
     /**

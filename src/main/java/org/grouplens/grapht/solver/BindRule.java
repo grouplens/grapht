@@ -28,10 +28,10 @@ import java.util.EnumSet;
  * The {@link RuleBasedBindingFunction} takes a collection of BindRules grouped
  * into their activating contexts to form a {@link BindingFunction}.
  *
- * <p><b>Note:</b> this interface's ordering is inconsistent with {@link #equals(Object)}. See
+ * <p><b>Note:</b> this interface's ordering is inconsistent with {@link Object#equals(Object)}. See
  * {@link #compareTo(BindRule)} for more details.
  *
- * @see {@link BindRules}
+ * @see BindRules
  */
 public interface BindRule extends Comparable<BindRule> {
     /**
@@ -87,7 +87,7 @@ public interface BindRule extends Comparable<BindRule> {
      * Compare this bind rule to another. More-specific bind rules compare less than less-specific
      * rules.
      *
-     * <p><b>Note:</b> This implements an ordering inconsistent with {@link #equals(Object)}. Equal
+     * <p><b>Note:</b> This implements an ordering inconsistent with {@link Object#equals(Object)}. Equal
      * rules will compare the same (and implementations are required to enforce this), but unequal
      * rules may compare equal to each other when compared with this method.
      *
