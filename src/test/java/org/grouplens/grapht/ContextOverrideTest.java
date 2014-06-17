@@ -41,7 +41,7 @@ public class ContextOverrideTest {
 
     @Before
     public void setup() {
-        build = new InjectorBuilder();
+        build = InjectorBuilder.create();
     }
 
     /**
@@ -50,10 +50,10 @@ public class ContextOverrideTest {
      */
     @Test
     public void testDeeperOverride() throws InjectionException {
-        build.in(Outer.class)
+        build.within(Outer.class)
              .bind(IPlug.class)
              .to(PlugH.class);
-        build.in(Inner.class)
+        build.within(Inner.class)
              .bind(IPlug.class)
              .to(PlugA.class);
         Injector inj = build.build();
@@ -76,10 +76,10 @@ public class ContextOverrideTest {
     public void testNullDeepConcrete() throws InjectionException {
         // this can be with or without the context
         // use context to match target use in LensKit
-        build.in(COuter.class)
+        build.within(COuter.class)
              .bind(Plug.class)
              .toNull();
-        build.in(CInner.class)
+        build.within(CInner.class)
              .bind(Plug.class)
              .to(Plug.class, false);
         Injector inj = build.build();

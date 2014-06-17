@@ -73,6 +73,7 @@ public class MockQualifierMatcher implements QualifierMatcher {
     }
 
     @Override
+    @Deprecated
     public boolean matches(Annotation q) {
         return apply(q);
     }

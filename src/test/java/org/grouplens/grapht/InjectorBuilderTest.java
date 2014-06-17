@@ -30,7 +30,7 @@ public class InjectorBuilderTest {
     public void testNewInstanceProviderCachePolicy() throws Exception {
         // Test that injecting a new-instance provider creates
         // new instances each time
-        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        InjectorBuilder b = InjectorBuilder.create().setProviderInjectionEnabled(true);
         b.bind(CycleA.class).unshared().to(CycleA.class);
         b.bind(CycleB.class).shared().to(CycleB.class);
         Injector i = b.build();
@@ -44,7 +44,7 @@ public class InjectorBuilderTest {
     public void testMemoizedProviderCachePolicy() throws Exception {
         // Test that injecting a memoized provider into a new instance
         // reuses the same instance
-        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        InjectorBuilder b = InjectorBuilder.create().setProviderInjectionEnabled(true);
         b.bind(CycleA.class).shared().to(CycleA.class);
         b.bind(CycleB.class).unshared().to(CycleB.class);
         Injector i = b.build();
@@ -59,7 +59,7 @@ public class InjectorBuilderTest {
     
     @Test
     public void testProviderInjectionCycleBreaking() throws Exception {
-        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        InjectorBuilder b = InjectorBuilder.create().setProviderInjectionEnabled(true);
         Injector i = b.build();
         
         CycleA cycleA = i.getInstance(CycleA.class);
@@ -69,7 +69,7 @@ public class InjectorBuilderTest {
     
     @Test
     public void testSimpleProviderInjection() throws Exception {
-        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        InjectorBuilder b = InjectorBuilder.create().setProviderInjectionEnabled(true);
         Injector i = b.build();
         
         TypeD d = i.getInstance(TypeD.class);
@@ -88,7 +88,7 @@ public class InjectorBuilderTest {
     public void testNewInstanceCachePolicy() throws Exception {
         // Test that setting the cache policy to NEW_INSTANCE 
         // overrides default MEMOIZE behavior
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(InterfaceA.class).unshared().to(TypeA.class);
         b.bind(InterfaceB.class).to(TypeB.class);
         Injector i = b.build();
@@ -111,7 +111,7 @@ public class InjectorBuilderTest {
     public void testMemoizeCachePolicy() throws Exception {
         // Test that setting the cache policy to MEMOIZE
         // overrides the default NEW_INSTANCE behavior
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
         b.bind(InterfaceA.class).shared().to(TypeA.class);
         b.bind(InterfaceB.class).to(TypeB.class);
@@ -135,7 +135,7 @@ public class InjectorBuilderTest {
     public void testMemoizeDefaultCachePolicy() throws Exception {
         // Test that using the default binding cache policy 
         // correctly uses the default MEMOIZE policy of the injector
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.setDefaultCachePolicy(CachePolicy.MEMOIZE);
         b.bind(InterfaceA.class).to(TypeA.class);
         b.bind(InterfaceB.class).to(TypeB.class);
@@ -159,7 +159,7 @@ public class InjectorBuilderTest {
     public void testNewInstanceDefaultCachePolicy() throws Exception {
         // Test that using the default binding cache policy 
         // correctly uses the default MEMOIZE policy of the injector
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.setDefaultCachePolicy(CachePolicy.NEW_INSTANCE);
         b.bind(InterfaceA.class).to(TypeA.class);
         b.bind(InterfaceB.class).to(TypeB.class);
@@ -187,7 +187,7 @@ public class InjectorBuilderTest {
         TypeB b1 = new TypeB();
         InterfaceB b2 = new TypeB();
         
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(TypeA.class).to(a1);
         b.bind(InterfaceA.class).withQualifier(RoleA.class).to(a2);
         b.bind(TypeB.class).to(b1);
@@ -210,7 +210,7 @@ public class InjectorBuilderTest {
     
     @Test
     public void testInjectorBuilderWithNamedBindings() throws Exception {
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
         b.bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "test1").build()).to("hello world");
         Injector i = b.build();
@@ -222,7 +222,7 @@ public class InjectorBuilderTest {
     
     @Test(expected=InjectionException.class)
     public void testInjectorMissingNamedBinding() throws Exception {
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(String.class).withQualifier(new AnnotationBuilder<Named>(Named.class).set("value", "unused").build()).to("shouldn't see this"); // extra binding to make sure it's skipped
         Injector i = b.build();
         
@@ -234,7 +234,7 @@ public class InjectorBuilderTest {
     
     @Test(expected=InjectionException.class)
     public void testInjectorNoConstructor() throws Exception {
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(ShouldWork.class).to(NotInjectable.class);
         Injector i = b.build();
         
@@ -243,7 +243,7 @@ public class InjectorBuilderTest {
 
     @Test
     public void testNullBinding() throws InjectionException {
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(InterfaceA.class).toNull();
         Injector i = b.build();
         TypeN n = i.getInstance(TypeN.class);
@@ -253,7 +253,7 @@ public class InjectorBuilderTest {
 
     @Test(expected=InjectionException.class)
     public void testBadNullBinding() throws InjectionException {
-        InjectorBuilder b = new InjectorBuilder();
+        InjectorBuilder b = InjectorBuilder.create();
         b.bind(InterfaceA.class).toNull();
         Injector i = b.build();
         i.getInstance(TypeN2.class);

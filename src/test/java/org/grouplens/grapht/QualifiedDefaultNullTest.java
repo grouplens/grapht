@@ -37,7 +37,7 @@ import static org.junit.Assert.assertThat;
 public class QualifiedDefaultNullTest {
     @Test
     public void testQualifiedDefaultNull() throws InjectionException {
-        InjectorBuilder bld = new InjectorBuilder();
+        InjectorBuilder bld = InjectorBuilder.create();
         Injector inj = bld.build();
 
         // With no bindings, we should get a null inner class.
@@ -48,7 +48,7 @@ public class QualifiedDefaultNullTest {
 
     @Test
     public void testQualifiedDefaultNullWithBinding() throws InjectionException {
-        InjectorBuilder bld = new InjectorBuilder();
+        InjectorBuilder bld = InjectorBuilder.create();
         bld.bind(TestQ.class, DepC.class)
            .to(DepC.class);
         Injector inj = bld.build();

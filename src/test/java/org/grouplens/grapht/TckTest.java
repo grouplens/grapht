@@ -27,7 +27,7 @@ import org.atinject.tck.auto.accessories.SpareTire;
 public class TckTest extends TestCase {
     
     public static Test suite() throws InjectionException {
-        InjectorBuilder ib = new InjectorBuilder()
+        InjectorBuilder ib = InjectorBuilder.create()
             .setDefaultCachePolicy(CachePolicy.NEW_INSTANCE)
             .setProviderInjectionEnabled(true);
         

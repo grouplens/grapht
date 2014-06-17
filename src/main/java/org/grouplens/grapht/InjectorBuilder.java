@@ -24,6 +24,7 @@ import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
 import org.grouplens.grapht.solver.DefaultInjector;
 import org.grouplens.grapht.solver.ProviderBindingFunction;
 import org.grouplens.grapht.context.ContextPattern;
+import org.grouplens.grapht.util.ClassLoaders;
 import org.grouplens.grapht.util.Types;
 
 import java.lang.annotation.Annotation;
@@ -95,7 +96,7 @@ public class InjectorBuilder extends AbstractContext {
      * @return The injector builder.
      */
     public static InjectorBuilder create(Module... modules) {
-        return create(Types.getDefaultClassLoader(), modules);
+        return create(ClassLoaders.inferDefault(), modules);
     }
     
     /**

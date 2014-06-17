@@ -43,7 +43,7 @@ import static org.junit.Assert.assertThat;
 public class ReflectionInjectionTest {
     @Test
     public void testProviderCycleInjection() throws Exception {
-        InjectorBuilder b = new InjectorBuilder().setProviderInjectionEnabled(true);
+        InjectorBuilder b = InjectorBuilder.create().setProviderInjectionEnabled(true);
         Injector i = b.build();
         
         i.getInstance(CycleA.class);

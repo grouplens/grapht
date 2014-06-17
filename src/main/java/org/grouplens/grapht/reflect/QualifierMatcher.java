@@ -51,9 +51,7 @@ public interface QualifierMatcher extends Predicate<Annotation>, Comparable<Qual
      * 
      * @param q The qualifier to match
      * @return True if matched
-     * @deprecated See {@link #apply(Object)}.
      */
-    @Deprecated
     boolean matches(@Nullable Annotation q);
 
     /**
