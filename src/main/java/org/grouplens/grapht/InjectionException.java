@@ -24,11 +24,10 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Member;
 
 /**
- * Thrown when an Injector fails to instantiate a requested object. In many ways
- * this is similar to {@link java.lang.InstantiationException} except that it
- * exposes the type that could not be instantiated, and possible the member
- * (method, construcotr, or field) that could not be injected into.
- * 
+ * Thrown when there is an error injecting a component.  This is can be the result of an error
+ * instantiating the object, one of its dependencies, or a run-time incompatibility (e.g. a null
+ * dependency for a non-nullable injection point; see {@link NullComponentException}).
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectionException extends Exception {
@@ -109,5 +108,10 @@ public class InjectionException extends Exception {
     @Nullable
     public Member getTarget() {
         return target;
+    }
+
+    @Nullable
+    public InjectionPoint getInjectionPoint() {
+        return injectionPoint;
     }
 }
