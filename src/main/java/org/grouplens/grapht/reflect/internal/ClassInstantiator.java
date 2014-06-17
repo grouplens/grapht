@@ -20,7 +20,7 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.NullComponentException;
+import org.grouplens.grapht.NullDependencyException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.Preconditions;
@@ -196,9 +196,9 @@ public class ClassInstantiator implements Instantiator {
         }
     }
     
-    private static Object checkNull(InjectionPoint injectPoint, Object value) throws NullComponentException {
+    private static Object checkNull(InjectionPoint injectPoint, Object value) throws NullDependencyException {
         if (value == null && !injectPoint.isNullable()) {
-            throw new NullComponentException(injectPoint);
+            throw new NullDependencyException(injectPoint);
         } else {
             return value;
         }

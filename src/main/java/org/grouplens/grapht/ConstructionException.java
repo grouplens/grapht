@@ -26,7 +26,7 @@ import java.lang.reflect.Member;
 /**
  * Thrown when there is an error constructing a component.  This is can be the result of an error
  * instantiating the object or a run-time incompatibility (e.g. a null dependency for a non-nullable
- * injection point; see {@link NullComponentException}).
+ * injection point; see {@link NullDependencyException}).
  *
  * @since 0.9
  * @author <a href="http://grouplens.org">GroupLens Research</a>
