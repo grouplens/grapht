@@ -3,8 +3,8 @@ jdk:
 - oraclejdk7
 - oraclejdk8
 - openjdk6
-install: mvn dependency:go-offline
-script: mvn install
+install: mvn --batch-mode dependency:go-offline
+script: mvn --batch-mode install
 after_success:
 - ./etc/maybe-coverage.sh
 - ./etc/maybe-deploy.sh
