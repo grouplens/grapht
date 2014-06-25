@@ -69,6 +69,10 @@ public class ConstructionException extends InjectionException {
         this(type, defaultMessage(null, type), cause);
     }
 
+    public ConstructionException(Member target, String message, Throwable cause) {
+        this(target.getDeclaringClass(), message, cause);
+    }
+
     public ConstructionException(Class<?> type, String message, Throwable cause) {
         super(message, cause);
         this.type = type;
@@ -90,19 +94,6 @@ public class ConstructionException extends InjectionException {
         }
 
         return null;
-    }
-    
-    /**
-     * @return The Member that is the target of injection, or null if the
-     *         failure had no injection point associated with it
-     */
-    @Nullable
-    public Member getTarget() {
-        if (injectionPoint == null) {
-            return null;
-        } else {
-            return injectionPoint.getMember();
-        }
     }
 
     @Nullable
