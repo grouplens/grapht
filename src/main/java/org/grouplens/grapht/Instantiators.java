@@ -56,7 +56,7 @@ public final class Instantiators {
 
     /**
      * Convert a providerInstantiator to an instantiator.  Any exception thrown by the provider - including a
-     * runtime exception - is wrapped in an {@link InjectionException}.
+     * runtime exception - is wrapped in an {@link ConstructionException}.
      * @param provider The providerInstantiator to wrap.
      * @return An instantiator wrapping {@code providerInstantiator}.
      */
@@ -68,7 +68,7 @@ public final class Instantiators {
     /**
      * Flatten an instnatiator of providers into an instantiator of the provided type.  Any
      * exception thrown by the provider - including a runtime exception - is wrapped in an
-     * {@link InjectionException}.
+     * {@link ConstructionException}.
      * @param pinst The providerInstantiator instantiator to wrap.
      * @return An instantiator wrapping {@code providerInstantiator}.
      */
@@ -120,7 +120,7 @@ public final class Instantiators {
         }
 
         @Override
-        public Object instantiate() throws InjectionException {
+        public Object instantiate() throws ConstructionException {
             return instance;
         }
 
@@ -138,13 +138,12 @@ public final class Instantiators {
         }
 
         @Override
-        public Object instantiate() throws InjectionException {
+        public Object instantiate() throws ConstructionException {
             Provider<?> provider = (Provider) providerInstantiator.instantiate();
             try {
                 return provider.get();
             } catch (Throwable th) {
-                throw new InjectionException(getType(), null,
-                                             "Error invoking provider " + providerInstantiator, th);
+                throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
             }
         }
 
@@ -166,7 +165,7 @@ public final class Instantiators {
         }
 
         @Override
-        public Object instantiate() throws InjectionException {
+        public Object instantiate() throws ConstructionException {
             if (!instantiated) {
                 synchronized (this) {
                     if (!instantiated) {
@@ -181,7 +180,7 @@ public final class Instantiators {
             }
 
             if (error != null) {
-                Throwables.propagateIfPossible(error, InjectionException.class);
+                Throwables.propagateIfPossible(error, ConstructionException.class);
                 // shouldn't happen, but hey.
                 throw new RuntimeException("Unexpected instantiation exception", error);
             } else {
@@ -211,7 +210,7 @@ public final class Instantiators {
         public Object get() {
             try {
                 return getProvidedType().cast(instantiator.instantiate());
-            } catch (InjectionException ex) {
+            } catch (ConstructionException ex) {
                 throw new RuntimeException(ex);
             }
         }

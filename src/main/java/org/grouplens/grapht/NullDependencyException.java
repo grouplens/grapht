@@ -21,18 +21,14 @@ package org.grouplens.grapht;
 import org.grouplens.grapht.reflect.InjectionPoint;
 
 /**
+ * A non-null dependency had a null resolution.
+ *
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class NullComponentException extends InjectionException {
-    private final InjectionPoint injectionPoint;
+public class NullDependencyException extends ConstructionException {
+    private static final long serialVersionUID = -5514033111218881507L;
 
-    public NullComponentException(InjectionPoint point) {
-        super(point.getMember().getDeclaringClass(), point.getMember(),
-              "No component available for non-nullable injection point " + point);
-        injectionPoint = point;
-    }
-
-    public InjectionPoint getInjectionPoint() {
-        return injectionPoint;
+    public NullDependencyException(InjectionPoint point) {
+        super(point, "No component available for non-nullable injection point " + point);
     }
 }

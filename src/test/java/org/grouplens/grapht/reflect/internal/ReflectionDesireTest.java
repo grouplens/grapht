@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.MockInjectionPoint;
@@ -118,7 +119,7 @@ public class ReflectionDesireTest {
      * on the restricted type.
      */
     @Test
-    public void testRestrictNullableDesire() throws NoSuchMethodException, SolverException {
+    public void testRestrictNullableDesire() throws NoSuchMethodException, ResolutionException {
         List<Desire> desires = ReflectionDesire.getDesires(ReqB.class);
         Assert.assertEquals(1, desires.size());
         Desire desire = desires.get(0);
@@ -126,7 +127,7 @@ public class ReflectionDesireTest {
         Assert.assertNotNull(restricted);
     }
     
-    private ReflectionDesire getDefaultDesire(Object methodOrCtorParam, List<Desire> desires) throws SolverException {
+    private ReflectionDesire getDefaultDesire(Object methodOrCtorParam, List<Desire> desires) throws ResolutionException {
         BindingResult result = null;
         for (Desire d: desires) {
             if (methodOrCtorParam instanceof Method) {

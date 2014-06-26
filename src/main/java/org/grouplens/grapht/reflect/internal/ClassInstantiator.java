@@ -18,9 +18,9 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.InjectionException;
+import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.NullComponentException;
+import org.grouplens.grapht.NullDependencyException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.Preconditions;
@@ -72,7 +72,7 @@ public class ClassInstantiator implements Instantiator {
     }
 
     @Override
-    public Object instantiate() throws InjectionException {
+    public Object instantiate() throws ConstructionException {
         // find constructor and build up necessary constructor arguments
         Constructor<?> ctor = getConstructor();
         Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
@@ -92,11 +92,11 @@ public class ClassInstantiator implements Instantiator {
             ctor.setAccessible(true);
             instance = ctor.newInstance(ctorArgs);
         } catch (InvocationTargetException e) {
-            throw new InjectionException(ctor, "Constructor " + ctor + " failed", e);
+            throw new ConstructionException(ctor, "Constructor " + ctor + " failed", e);
         } catch (InstantiationException e) {
-            throw new InjectionException(ctor, "Could not instantiate " + type, e);
+            throw new ConstructionException(ctor, "Could not instantiate " + type, e);
         } catch (IllegalAccessException e) {
-            throw new InjectionException(ctor, "Access violation on " + ctor, e);
+            throw new ConstructionException(ctor, "Access violation on " + ctor, e);
         }
 
         // satisfy dependencies in the order of the list, which was
@@ -113,7 +113,7 @@ public class ClassInstantiator implements Instantiator {
                     field.setAccessible(true);
                     field.set(instance, value);
                 } catch (IllegalAccessException e) {
-                    throw new InjectionException(fd, e);
+                    throw new ConstructionException(fd, e);
                 }
             } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                 // collect parameters before invoking
@@ -143,7 +143,7 @@ public class ClassInstantiator implements Instantiator {
                         } else {
                             message += setter;
                         }
-                        throw new InjectionException(sd, message, e);
+                        throw new ConstructionException(sd, message, e);
                     } catch (IllegalAccessException e) {
                         String message = "Access violation calling ";
                         if (args.arguments.length == 1) {
@@ -151,7 +151,7 @@ public class ClassInstantiator implements Instantiator {
                         } else {
                             message += setter;
                         }
-                        throw new InjectionException(sd, message, e);
+                        throw new ConstructionException(sd, message, e);
                     }
                 }
             } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
@@ -162,9 +162,9 @@ public class ClassInstantiator implements Instantiator {
                     method.setAccessible(true);
                     method.invoke(instance);
                 } catch (InvocationTargetException e) {
-                    throw new InjectionException(d.getInjectionPoint(), "Exception throw by " + method, e);
+                    throw new ConstructionException(d.getInjectionPoint(), "Exception throw by " + method, e);
                 } catch (IllegalAccessException e) {
-                    throw new InjectionException(d.getInjectionPoint(), "Access violation invoking " + method, e);
+                    throw new ConstructionException(d.getInjectionPoint(), "Access violation invoking " + method, e);
                 }
             }
         }
@@ -196,9 +196,9 @@ public class ClassInstantiator implements Instantiator {
         }
     }
     
-    private static Object checkNull(InjectionPoint injectPoint, Object value) throws NullComponentException {
+    private static Object checkNull(InjectionPoint injectPoint, Object value) throws NullDependencyException {
         if (value == null && !injectPoint.isNullable()) {
-            throw new NullComponentException(injectPoint);
+            throw new NullDependencyException(injectPoint);
         } else {
             return value;
         }

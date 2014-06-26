@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.reflect.Desire;
 
 /**
@@ -26,7 +27,7 @@ import org.grouplens.grapht.reflect.Desire;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class CyclicDependencyException extends SolverException {
+public class CyclicDependencyException extends ResolutionException {
     private static final long serialVersionUID = 1L;
 
     private final Desire desire;

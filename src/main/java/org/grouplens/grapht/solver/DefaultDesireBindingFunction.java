@@ -19,6 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Satisfaction;
@@ -73,7 +74,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     }
     
     @Override
-    public BindingResult bind(InjectionContext context, DesireChain dchain) throws SolverException {
+    public BindingResult bind(InjectionContext context, DesireChain dchain) throws ResolutionException {
         Desire desire = dchain.getCurrentDesire();
         BindingResult result = null;
 
@@ -192,7 +193,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
     }
 
     @SuppressWarnings("unchecked")
-    private BindingResult getMetaInfDefault(Desire desire, Class<?> type) throws SolverException {
+    private BindingResult getMetaInfDefault(Desire desire, Class<?> type) throws ResolutionException {
         synchronized (metaInfCache) {
             if (metaInfCache.containsKey(type)) {
                 return metaInfCache.get(type);
@@ -213,7 +214,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                 props = new Properties();
                 props.load(istr);
             } catch (IOException e) {
-                throw new SolverException("error reading " + resourceName, e);
+                throw new ResolutionException("error reading " + resourceName, e);
             } finally {
                 try {
                     if (istr != null) {
@@ -231,13 +232,13 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                     Class<?> clazz = classLoader.loadClass(providerName);
                     Satisfaction sat = Satisfactions.providerType((Class<Provider<?>>) clazz.asSubclass(Provider.class));
                     if (!type.isAssignableFrom(sat.getErasedType())) {
-                        throw new SolverException(providerName + " does not provide " + type);
+                        throw new ResolutionException(providerName + " does not provide " + type);
                     }
                     builder.setDesire(desire.restrict(sat))
                            .addFlag(BindingFlag.TERMINAL);
                     found = true;
                 } catch (ClassNotFoundException e) {
-                    throw new SolverException("cannot find default provider for " + type, e);
+                    throw new ResolutionException("cannot find default provider for " + type, e);
                 }
             }
 
@@ -248,12 +249,12 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                     Class<?> clazz = classLoader.loadClass(implName);
                     Satisfaction sat = Satisfactions.type(clazz);
                     if (!type.isAssignableFrom(sat.getErasedType())) {
-                        throw new SolverException(providerName + " not compatible with " + type);
+                        throw new ResolutionException(providerName + " not compatible with " + type);
                     }
                     builder.setDesire(desire.restrict(sat));
                     found = true;
                 } catch (ClassNotFoundException e) {
-                    throw new SolverException("cannot find default implementation for " + type, e);
+                    throw new ResolutionException("cannot find default implementation for " + type, e);
                 }
             }
 

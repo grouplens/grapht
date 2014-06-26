@@ -142,11 +142,7 @@ public class DefaultInjector implements Injector {
             // it will be properly merged after regenerating the graph at the root context.
             if (resolved == null) {
                 logger.info("Must resolve desire: {}", desire);
-                try {
-                    solver.resolve(desire);
-                } catch(SolverException e) {
-                    throw new InjectionException(type, null, e);
-                }
+                solver.resolve(desire);
                 resolved = solver.getGraph().getOutgoingEdgeWithLabel(pred);
             }
 

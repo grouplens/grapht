@@ -19,6 +19,7 @@
 package org.grouplens.grapht.solver;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.Satisfaction;
@@ -30,7 +31,7 @@ import java.util.List;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class UnresolvableDependencyException extends SolverException {
+public class UnresolvableDependencyException extends ResolutionException {
     private static final long serialVersionUID = 1L;
 
     private final DesireChain desires;

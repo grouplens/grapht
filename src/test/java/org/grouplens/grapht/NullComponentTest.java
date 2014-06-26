@@ -41,7 +41,7 @@ public class NullComponentTest {
         assertThat(obj.getDep(), nullValue());
     }
 
-    @Test(expected = InjectionException.class)
+    @Test(expected = ConstructionException.class)
     public void testBadNull() throws InjectionException {
         InjectorBuilder b = InjectorBuilder.create();
         Injector inj = b.build();

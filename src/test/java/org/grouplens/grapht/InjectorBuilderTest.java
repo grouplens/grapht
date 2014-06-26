@@ -251,7 +251,7 @@ public class InjectorBuilderTest {
         Assert.assertNull(n.getObject());
     }
 
-    @Test(expected=InjectionException.class)
+    @Test(expected=ConstructionException.class)
     public void testBadNullBinding() throws InjectionException {
         InjectorBuilder b = InjectorBuilder.create();
         b.bind(InterfaceA.class).toNull();

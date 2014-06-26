@@ -18,72 +18,28 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.grouplens.grapht.reflect.Desire;
-import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.InjectionException;
 
 /**
- * Thrown by {@link BindingFunction} or {@link DependencySolver} when a desire
- * cannot be satisfied.
- * 
- * @author <a href="http://grouplens.org">GroupLens Research</a>
+ * Deprecated alias for {@link org.grouplens.grapht.ResolutionException}.
+ * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class SolverException extends Exception {
-    private static final long serialVersionUID = 1L;
-
+@Deprecated
+public class SolverException extends InjectionException {
     public SolverException() {
         super();
     }
 
-    public SolverException(String msg) {
-        super(msg);
+    public SolverException(String message) {
+        super(message);
     }
 
-    public SolverException(Throwable throwable) {
-        super(throwable);
+
+    public SolverException(Throwable cause) {
+        super(cause);
     }
 
-    public SolverException(String msg, Throwable throwable) {
-        super(msg, throwable);
-    }
-    
-    protected String format(InjectionContext ctx, DesireChain desires) {
-        StringBuilder sb = new StringBuilder();
-        
-        // type path
-        sb.append("Context:\n");
-        sb.append("  Type path:\n");
-        for (Pair<Satisfaction, InjectionPoint> path: ctx) {
-            Satisfaction sat = path.getLeft();
-            Class<?> type = sat == null ? null : sat.getErasedType();
-            sb.append("    ")
-              .append(format(path.getRight(), type))
-              .append('\n');
-        }
-        sb.append('\n');
-        
-        // desire chain
-        sb.append("  Prior desires:\n");
-        for (Desire desire: desires.getPreviousDesires()) {
-            sb.append("    ")
-              .append(format(desire.getInjectionPoint(), desire.getDesiredType()))
-              .append('\n');
-        }
-
-        return sb.toString();
-    }
-
-    protected String format(InjectionPoint ip) {
-        return format(ip, ip.getErasedType());
-    }
-
-    protected String format(InjectionPoint ip, Class<?> type) {
-        if (type == null) {
-            type = ip.getErasedType();
-        }
-        String base = (ip.getQualifier() != null ? ip.getQualifier() + ":" : "");
-        String name = type == null ? null : type.getName();
-        return base + name;
+    public SolverException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
