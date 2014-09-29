@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import org.grouplens.grapht.CachePolicy;
@@ -897,9 +898,10 @@ public class DependencySolverTest {
         Assert.assertSame(sd, ra1p.getLabel().getSatisfaction());
         Assert.assertSame(ra1, ra1p);
 
+        Predicate<DAGNode<Component, ?>> tgt = DAGNode.labelMatches(Predicates.equalTo(Component.create(sd, CachePolicy.NO_PREFERENCE)));
         DAGNode<Component, Dependency> node =
                 Iterables.find(r.getGraph().getReachableNodes(),
-                               DAGNode.labelMatches(Predicates.equalTo(Component.create(sd, CachePolicy.NO_PREFERENCE))));
+                               tgt);
         assertThat(r.getGraph().getIncomingEdges(node),
                    hasSize(2));
     }
@@ -1190,9 +1192,8 @@ public class DependencySolverTest {
     }
     
     private DAGNode<Component, Dependency> getNode(DAGNode<Component, Dependency> g, Component s) {
-        return Iterables.find(g.getReachableNodes(),
-                              DAGNode.labelMatches(Predicates.equalTo(s)),
-                              null);
+        Predicate<DAGNode<Component, ?>> pred = DAGNode.labelMatches(Predicates.equalTo(s));
+        return Iterables.find(g.getReachableNodes(), pred, null);
     }
     
     @Qualifier

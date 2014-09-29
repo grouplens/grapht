@@ -20,6 +20,7 @@ package org.grouplens.grapht.graph;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import org.junit.Test;
@@ -310,7 +311,8 @@ public class TestDAGNode {
                                             .addEdge(foo, "-> foo")
                                             .addEdge(baz, "-> baz")
                                             .build();
-        DAGEdge<String,String> edge = bar.findEdgeBFS(DAGEdge.labelMatches(Predicates.equalTo("-> baz")));
+        Predicate<DAGEdge<?, String>> pred = DAGEdge.labelMatches(Predicates.equalTo("-> baz"));
+        DAGEdge<String,String> edge = bar.findEdgeBFS(pred);
         // we should find the correct edge
         assertThat(edge, isIn(bar.getOutgoingEdges()));
         assertThat(edge.getTail(), equalTo(baz));

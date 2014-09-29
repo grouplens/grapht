@@ -19,6 +19,7 @@
 package org.grouplens.grapht.graph;
 
 import com.google.common.collect.Lists;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -120,8 +121,8 @@ public class MergePoolTest {
         assertThat(merged.getReachableNodes(), hasSize(3));
         // it has one of the leaves
         assertThat(merged.getReachableNodes(),
-                   anyOf(hasItem(sameInstance(node)),
-                         hasItem(sameInstance(node2))));
+                   (Matcher) anyOf(hasItem(sameInstance(node)),
+                                   hasItem(sameInstance(node2))));
         // two edges have same target
         List<DAGEdge<String,String>> nbrs =
                 Lists.newArrayList(merged.getOutgoingEdges());

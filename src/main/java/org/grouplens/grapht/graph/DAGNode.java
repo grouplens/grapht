@@ -202,7 +202,8 @@ public class DAGNode<V,E> implements Serializable {
      *         added.
      */
     public DAGEdge<V, E> getOutgoingEdgeWithLabel(Predicate<? super E> predicate) {
-        return Iterables.find(outgoingEdges, DAGEdge.labelMatches(predicate), null);
+        Predicate<DAGEdge<?, E>> edgePred = DAGEdge.labelMatches(predicate);
+        return Iterables.find(outgoingEdges, edgePred, null);
     }
 
     /**
