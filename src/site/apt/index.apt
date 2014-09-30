@@ -8,6 +8,3 @@ Grapht Dependency Injector
   Unlike other DI containers that resolve dependencies lazily when instances are requested, Grapht
   can compute dependency graphs in advance.  These graphs can be modified and analyzed prior to
   instantiation to achieve a variety of effects.
-
-  Grapht's primary documentation is on the {{{http://bitbucket.org/grouplens/grapht/wiki}BitBucket
-  wiki}}.
