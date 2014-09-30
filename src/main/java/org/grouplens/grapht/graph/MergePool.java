@@ -39,9 +39,9 @@ import java.util.Set;
  * @param <E> The edge type of graphs to merge.
  * @since 0.7
  * @author <a href="http://grouplens.org">GroupLens Research</a>
- * @todo Allow arbitrary equivalence relations over graph nodes so this class is less specialized.
  */
 public class MergePool<V,E> {
+    // TODO Allow arbitrary equivalence relations over graph nodes so this class is less specialized.
     private static final Logger logger = LoggerFactory.getLogger(MergePool.class);
 
     private final Set<DAGNode<V,E>> pool;
