@@ -13,7 +13,7 @@
     Grapht is a dependency injection container that uses pre-computed dependency graphs
     to track and analyze dependencies.
   </description>
-  <url>http://dev.grouplens.org/grapht</url>
+  <url>http://grapht.grouplens.org/</url>
 
   <organization>
     <name>GroupLens Research</name>
@@ -46,13 +46,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
-
-  <distributionManagement>
-    <site>
-      <id>grouplens.org</id>
-      <url>${grapht.web.path}</url>
-    </site>
-  </distributionManagement>
 
   <dependencies>
     <dependency>
