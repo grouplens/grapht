@@ -19,9 +19,9 @@
 package org.grouplens.grapht.reflect;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.grouplens.grapht.annotation.AliasFor;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
-import org.grouplens.grapht.reflect.Qualifiers;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -37,6 +37,18 @@ public class QualifiersTest {
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Qual {}
+
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @AliasFor(Qual.class)
+    public static @interface AQual {}
+
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @AliasFor(AQual.class)
+    public static @interface AAQual {}
+
+
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface VQual {
@@ -63,6 +75,24 @@ public class QualifiersTest {
                    equalTo(false));
         assertThat(Qualifiers.isQualifier(Qual.class),
                    equalTo(true));
+    }
+
+    @Test
+    public void testResolveAliasUnaliased() {
+        assertThat(Qualifiers.resolveAliases(Qual.class),
+                   equalTo((Class) Qual.class));
+    }
+
+    @Test
+    public void testResolveAlias() {
+        assertThat(Qualifiers.resolveAliases(AQual.class),
+                   equalTo((Class) Qual.class));
+    }
+
+    @Test
+    public void testResolveDoubleAlias() {
+        assertThat(Qualifiers.resolveAliases(AAQual.class),
+                   equalTo((Class) Qual.class));
     }
 
     @Test

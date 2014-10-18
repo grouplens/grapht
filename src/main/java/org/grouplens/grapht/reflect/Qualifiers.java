@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.reflect;
 
+import com.google.common.collect.Sets;
+import org.grouplens.grapht.annotation.AliasFor;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.util.ClassProxy;
@@ -30,6 +32,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  * Utilities related to Qualifier implementations.
@@ -49,6 +52,33 @@ public final class Qualifiers {
      */
     public static boolean isQualifier(Class<? extends Annotation> type) {
         return type.getAnnotation(javax.inject.Qualifier.class) != null;
+    }
+
+    /**
+     * Resolve qualifier aliases, returning the target qualifier.  Aliases are resolved
+     * recursively.
+     *
+     * @param type The annotation type.
+     * @return The annotation type for which this type is an alias, or {@code type} if it is not an
+     * alias.
+     * @throws java.lang.IllegalArgumentException if there is a problem with the type, such as a
+     *                                            circular alias reference.
+     */
+    public static Class<? extends Annotation> resolveAliases(Class<? extends Annotation> type) {
+        Set<Class<? extends Annotation>> seen = Sets.newHashSet();
+        seen.add(type);
+        Class<? extends Annotation> result = type;
+        AliasFor alias;
+        while ((alias = result.getAnnotation(AliasFor.class)) != null) {
+            result = alias.value();
+            if (!seen.add(result)) {
+                throw new IllegalArgumentException("Circular alias reference starting with " + type);
+            }
+        }
+        if (!result.isAnnotationPresent(Qualifier.class)) {
+            throw new IllegalArgumentException("alias target " + type + " is not a qualifier");
+        }
+        return result;
     }
 
     /**
@@ -98,7 +128,7 @@ public final class Qualifiers {
             return new AnnotationMatcher(annot);
         }
     }
-    
+
     private abstract static class AbstractMatcher implements QualifierMatcher {
         private static final long serialVersionUID = 1L;
 
