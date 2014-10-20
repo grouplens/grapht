@@ -23,6 +23,8 @@ import org.grouplens.grapht.annotation.AliasFor;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Qualifier;
@@ -39,6 +41,7 @@ import java.util.Set;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class Qualifiers {
+    private static final Logger logger = LoggerFactory.getLogger(Qualifiers.class);
     private Qualifiers() { }
 
     /**
@@ -120,7 +123,7 @@ public final class Qualifiers {
             return new AnnotationClassMatcher(annotType);
         }
     }
-    
+
     /**
      * @param annot Annotation instance to match, or {@code null} to match only the lack of a qualifier.
      * @return A QualifierMatcher that matches annotations equaling annot
@@ -128,13 +131,37 @@ public final class Qualifiers {
     public static QualifierMatcher match(@Nonnull Annotation annot) {
         if (annot == null) {
             return matchNone();
+        } else if (annot.annotationType().getDeclaredMethods().length == 0) {
+            logger.debug("using type matcher for nullary annotation {}", annot);
+            // Instances of the same nullary annotation are all equal to each other, so just do
+            // type checking.  This makes aliasing work with annotation value matchers, b/c we
+            // do not allow aliases to have parameters.  The matcher still has value priority.
+            return new AnnotationClassMatcher(annot.annotationType(),
+                                              DefaultMatcherPriority.MATCH_VALUE);
         } else {
             return new AnnotationMatcher(annot);
         }
     }
 
+    private static enum DefaultMatcherPriority {
+        MATCH_VALUE,
+        MATCH_TYPE,
+        MATCH_ANY,
+        MATCH_DEFAULT
+    }
+
     private abstract static class AbstractMatcher implements QualifierMatcher {
         private static final long serialVersionUID = 1L;
+        private final DefaultMatcherPriority priority;
+
+        AbstractMatcher(DefaultMatcherPriority prio) {
+            priority = prio;
+        }
+
+        @Override
+        public final int getPriority() {
+            return priority.ordinal();
+        }
 
         @Override
         @Deprecated
@@ -157,9 +184,8 @@ public final class Qualifiers {
     private static class DefaultMatcher extends AbstractMatcher {
         private static final long serialVersionUID = 1L;
 
-        @Override
-        public int getPriority() {
-            return 3;
+        DefaultMatcher() {
+            super(DefaultMatcherPriority.MATCH_DEFAULT);
         }
 
         @Override
@@ -191,9 +217,8 @@ public final class Qualifiers {
     private static class AnyMatcher extends AbstractMatcher {
         private static final long serialVersionUID = 1L;
 
-        @Override
-        public int getPriority() {
-            return 2;
+        AnyMatcher() {
+            super(DefaultMatcherPriority.MATCH_ANY);
         }
 
         @Override
@@ -220,11 +245,10 @@ public final class Qualifiers {
     private static class NullMatcher extends AbstractMatcher {
         private static final long serialVersionUID = 1L;
 
-        @Override
-        public int getPriority() {
-            return 0;
+        NullMatcher() {
+            super(DefaultMatcherPriority.MATCH_VALUE);
         }
-        
+
         @Override
         public boolean apply(Annotation q) {
             return q == null;
@@ -250,8 +274,14 @@ public final class Qualifiers {
         private static final long serialVersionUID = -1L;
         private final Class<? extends Annotation> type;
         private final Class<? extends Annotation> actual;
-        
+
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
+            this(type, DefaultMatcherPriority.MATCH_TYPE);
+        }
+        
+        public AnnotationClassMatcher(Class<? extends Annotation> type,
+                                      DefaultMatcherPriority prio) {
+            super(prio);
             Preconditions.notNull("type", type);
             Preconditions.isQualifier(type);
             this.type = type;
@@ -259,11 +289,6 @@ public final class Qualifiers {
             actual = resolveAliases(type);
         }
         
-        @Override
-        public int getPriority() {
-            return 1;
-        }
-
         @Override
         public boolean apply(Annotation q) {
             // We test if the alias-resolved types match.
@@ -337,16 +362,12 @@ public final class Qualifiers {
         private final Annotation annotation;
         
         public AnnotationMatcher(Annotation annot) {
+            super(DefaultMatcherPriority.MATCH_VALUE);
             Preconditions.notNull("annotation", annot);
             Preconditions.isQualifier(annot.annotationType());
             annotation = annot;
         }
         
-        @Override
-        public int getPriority() {
-            return 0;
-        }
-
         @Override
         public boolean apply(Annotation q) {
             return annotation.equals(q);
