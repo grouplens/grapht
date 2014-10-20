@@ -23,7 +23,9 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.inject.Qualifier;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.lang.annotation.Documented;
@@ -36,6 +38,8 @@ import java.util.Set;
  * Annotation processor that checks and validates DI annotations.
  */
 public class AnnotationValidator extends AbstractProcessor {
+    private static final String DEFAULT_ANNOT_PREFIX = "org.grouplens.grapht.annotation.Default";
+
     @Override
     public SourceVersion getSupportedSourceVersion() {
         // support version 6 or 7
@@ -108,6 +112,16 @@ public class AnnotationValidator extends AbstractProcessor {
         for (Element elt : elts) {
             if (elt.getAnnotation(Qualifier.class) == null) {
                 error(elt, "alias annotation must also be a qualifier");
+            }
+            for (AnnotationMirror mirror: elt.getAnnotationMirrors()) {
+                Element element = mirror.getAnnotationType().asElement();
+                if (element instanceof TypeElement) {
+                    TypeElement type = (TypeElement) element;
+                    Name name = type.getQualifiedName();
+                    if (name.subSequence(0, DEFAULT_ANNOT_PREFIX.length()).equals(DEFAULT_ANNOT_PREFIX)) {
+                        warning(elt, "alias annotation has %s, defaults should be on target", type.getSimpleName());
+                    }
+                }
             }
         }
     }
