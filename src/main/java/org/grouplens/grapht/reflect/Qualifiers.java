@@ -21,7 +21,6 @@ package org.grouplens.grapht.reflect;
 import com.google.common.collect.Sets;
 import org.grouplens.grapht.annotation.AliasFor;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
-import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
@@ -250,11 +249,14 @@ public final class Qualifiers {
     private static class AnnotationClassMatcher extends AbstractMatcher {
         private static final long serialVersionUID = -1L;
         private final Class<? extends Annotation> type;
+        private final Class<? extends Annotation> actual;
         
         public AnnotationClassMatcher(Class<? extends Annotation> type) {
             Preconditions.notNull("type", type);
             Preconditions.isQualifier(type);
             this.type = type;
+            // find the actual type to match (resolving aliases)
+            actual = resolveAliases(type);
         }
         
         @Override
@@ -264,27 +266,38 @@ public final class Qualifiers {
 
         @Override
         public boolean apply(Annotation q) {
+            // We test if the alias-resolved types match.
             Class<? extends Annotation> qtype = (q == null ? null : q.annotationType());
-            return type.equals(qtype);
+            if (qtype == null) {
+                return false;
+            } else {
+                Class<? extends Annotation> qact = resolveAliases(qtype);
+                return actual.equals(qact);
+            }
         }
         
         @Override
         public boolean equals(Object o) {
             return o instanceof AnnotationClassMatcher
-                   && ((AnnotationClassMatcher) o).type.equals(type);
+                   && ((AnnotationClassMatcher) o).actual.equals(actual);
         }
         
         @Override
         public int hashCode() {
-            return type.hashCode();
+            return actual.hashCode();
         }
         
         @Override
         public String toString() {
-            return type.toString();
+            if (type.equals(actual)) {
+                return type.toString();
+            } else {
+                return type.toString() + "( alias of " + actual.toString() + ")";
+            }
         }
 
         private Object writeReplace() {
+            // We just serialize the type. If its alias status changes, that is fine.
             return new SerialProxy(type);
         }
 
