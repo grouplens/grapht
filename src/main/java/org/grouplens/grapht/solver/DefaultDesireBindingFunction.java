@@ -22,6 +22,7 @@ import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.annotation.*;
 import org.grouplens.grapht.reflect.Desire;
+import org.grouplens.grapht.reflect.Qualifiers;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.util.Preconditions;
@@ -85,6 +86,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
         // REVIEW If it is not the first desire, can a qualifier exist?
         if (dchain.getPreviousDesires().isEmpty() && qualifier != null) {
             Class<? extends Annotation> annotType = qualifier.annotationType();
+            annotType = Qualifiers.resolveAliases(annotType);
 
             result = getDefaultValue(desire, annotType);
             if (result == null) {
@@ -92,7 +94,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             }
 
             // if the qualifier does not allow fall-through, we're done
-            if (!qualifier.annotationType().isAnnotationPresent(AllowUnqualifiedMatch.class)) {
+            if (!annotType.isAnnotationPresent(AllowUnqualifiedMatch.class)) {
                 return result;
             }
         }
