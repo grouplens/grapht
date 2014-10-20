@@ -33,6 +33,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Annotation processor that checks and validates DI annotations.
@@ -108,6 +109,7 @@ public class AnnotationValidator extends AbstractProcessor {
     }
 
     private void analyzeAliases(RoundEnvironment re) {
+        Pattern defaultPat = Pattern.compile("^" + Pattern.quote(DEFAULT_ANNOT_PREFIX));
         Set<? extends Element> elts = re.getElementsAnnotatedWith(AliasFor.class);
         for (Element elt : elts) {
             if (elt.getAnnotation(Qualifier.class) == null) {
@@ -121,7 +123,7 @@ public class AnnotationValidator extends AbstractProcessor {
                 if (element instanceof TypeElement) {
                     TypeElement type = (TypeElement) element;
                     Name name = type.getQualifiedName();
-                    if (name.subSequence(0, DEFAULT_ANNOT_PREFIX.length()).equals(DEFAULT_ANNOT_PREFIX)) {
+                    if (defaultPat.matcher(name).matches()) {
                         warning(elt, "alias annotation has %s, defaults should be on target", type.getSimpleName());
                     }
                 }
