@@ -19,6 +19,7 @@
 package org.grouplens.grapht;
 
 import org.grouplens.grapht.annotation.AliasFor;
+import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.DefaultNull;
 import org.grouplens.grapht.solver.MultipleBindingsException;
 import org.junit.Test;
@@ -58,6 +59,19 @@ public class QualifierAliasTest {
     public void testBindAlias() throws InjectionException {
         InjectorBuilder bld = InjectorBuilder.create();
         bld.bind(Alias.class, String.class).to("hello");
+        Injector inj = bld.build();
+        RequireQual rq = inj.getInstance(RequireQual.class);
+        assertThat(rq.dependency, equalTo("hello"));
+    }
+
+    /**
+     * Test that binding to alias value w/ dep on unaliased qualifier works.
+     */
+    @Test
+    public void testBindAliasValue() throws InjectionException {
+        InjectorBuilder bld = InjectorBuilder.create();
+        Alias qual = AnnotationBuilder.of(Alias.class).build();
+        bld.bind(String.class).withQualifier(qual).to("hello");
         Injector inj = bld.build();
         RequireQual rq = inj.getInstance(RequireQual.class);
         assertThat(rq.dependency, equalTo("hello"));
