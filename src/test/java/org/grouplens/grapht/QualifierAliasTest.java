@@ -21,6 +21,7 @@ package org.grouplens.grapht;
 import org.grouplens.grapht.annotation.AliasFor;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.DefaultNull;
+import org.grouplens.grapht.annotation.DefaultString;
 import org.grouplens.grapht.solver.MultipleBindingsException;
 import org.junit.Test;
 
@@ -119,10 +120,24 @@ public class QualifierAliasTest {
     }
 
     /**
+     * Test that the default on the alias works.
+     */
+    @Test
+    public void testAliasDefault() throws InjectionException {
+        InjectorBuilder bld = InjectorBuilder.create();
+        Injector inj = bld.build();
+        RequireQual rq = inj.getInstance(RequireQual.class);
+        assertThat(rq.dependency, equalTo("wombat"));
+        RequireAlias ra = inj.getInstance(RequireAlias.class);
+        assertThat(ra.dependency, equalTo("wombat"));
+    }
+
+    /**
      * Basic qualifier
      */
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
+    @DefaultString("wombat")
     @Target(ElementType.PARAMETER)
     @Documented
     public static @interface Qual {}
