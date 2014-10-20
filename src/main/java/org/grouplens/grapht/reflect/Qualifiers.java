@@ -64,19 +64,24 @@ public final class Qualifiers {
      * @throws java.lang.IllegalArgumentException if there is a problem with the type, such as a
      *                                            circular alias reference.
      */
-    public static Class<? extends Annotation> resolveAliases(Class<? extends Annotation> type) {
+    @Nonnull
+    public static Class<? extends Annotation> resolveAliases(@Nonnull Class<? extends Annotation> type) {
+        Preconditions.notNull("qualifier type", type);
         Set<Class<? extends Annotation>> seen = Sets.newHashSet();
         seen.add(type);
         Class<? extends Annotation> result = type;
         AliasFor alias;
         while ((alias = result.getAnnotation(AliasFor.class)) != null) {
+            if (result.getDeclaredMethods().length > 0) {
+                throw new IllegalArgumentException("aliased qualifier cannot have parameters");
+            }
             result = alias.value();
+            if (!result.isAnnotationPresent(Qualifier.class)) {
+                throw new IllegalArgumentException("alias target " + type + " is not a qualifier");
+            }
             if (!seen.add(result)) {
                 throw new IllegalArgumentException("Circular alias reference starting with " + type);
             }
-        }
-        if (!result.isAnnotationPresent(Qualifier.class)) {
-            throw new IllegalArgumentException("alias target " + type + " is not a qualifier");
         }
         return result;
     }

@@ -32,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class QualifiersTest {
     @Qualifier
@@ -48,6 +49,23 @@ public class QualifiersTest {
     @AliasFor(AQual.class)
     public static @interface AAQual {}
 
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @AliasFor(Qual.class)
+    public static @interface BadAlias {
+        /* aliases cannot have values */
+        String value();
+    }
+
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @AliasFor(Circle2.class)
+    public static @interface Circle1 {}
+
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @AliasFor(Circle1.class)
+    public static @interface Circle2 {}
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
@@ -93,6 +111,26 @@ public class QualifiersTest {
     public void testResolveDoubleAlias() {
         assertThat(Qualifiers.resolveAliases(AAQual.class),
                    equalTo((Class) Qual.class));
+    }
+
+    @Test
+    public void testRejectBadAlias() {
+        try {
+            Qualifiers.resolveAliases(BadAlias.class);
+            fail("resolving a bad alias should throw an exception");
+        } catch (IllegalArgumentException ex) {
+            /* expected */
+        }
+    }
+
+    @Test
+    public void testRejectCircularAlias() {
+        try {
+            Qualifiers.resolveAliases(Circle2.class);
+            fail("resolving a circular alias should throw an exception");
+        } catch (IllegalArgumentException ex) {
+            /* expected */
+        }
     }
 
     @Test
