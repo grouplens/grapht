@@ -53,6 +53,7 @@ public class AnnotationValidator extends AbstractProcessor {
         Set<String> atypes = new HashSet<String>();
         atypes.add(Qualifier.class.getName());
         atypes.add(Attribute.class.getName());
+        atypes.add(AliasFor.class.getName());
         return atypes;
     }
 
@@ -72,6 +73,7 @@ public class AnnotationValidator extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         analyzeQualifiers(roundEnv);
         analyzeAttributes(roundEnv);
+        analyzeAliases(roundEnv);
         return false; // let other processors work too
     }
 
@@ -97,6 +99,15 @@ public class AnnotationValidator extends AbstractProcessor {
             Retention ret = elt.getAnnotation(Retention.class);
             if (ret == null || !ret.value().equals(RetentionPolicy.RUNTIME)) {
                 error(elt, "attribute annotation must have RUNTIME retention");
+            }
+        }
+    }
+
+    private void analyzeAliases(RoundEnvironment re) {
+        Set<? extends Element> elts = re.getElementsAnnotatedWith(AliasFor.class);
+        for (Element elt : elts) {
+            if (elt.getAnnotation(Qualifier.class) == null) {
+                error(elt, "alias annotation must also be a qualifier");
             }
         }
     }
