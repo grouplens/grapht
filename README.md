@@ -34,6 +34,10 @@ following to the dependencies section in your POM:
     
 ## Release Notes
 
+### 0.10.0
+
+- Add `@AliasFor` to allow qualifiers to alias each other.
+
 ### 0.8.1
 
 - Move `Types.getDefaultClassLoader()` to `ClassLoaders.inferDefault()`
