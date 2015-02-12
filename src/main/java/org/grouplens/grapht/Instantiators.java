@@ -20,10 +20,13 @@ package org.grouplens.grapht;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.TypedProvider;
 import org.grouplens.grapht.util.Types;
-
 import javax.inject.Provider;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.grouplens.grapht.util.LogContext;
 
 /**
  * Utilities and methods for building and working with {@link org.grouplens.grapht.Instantiator}s.
@@ -39,6 +42,12 @@ public final class Instantiators {
      * @param inst The instance to return (must be non-null).
      * @return An instantiator that returns {@code inst}.
      */
+
+
+    public static final Logger     Logger = LoggerFactory.getLogger(Instantiator.class);
+    private static final LogContext mdcContext = LogContext.create();
+
+
     public static Instantiator ofInstance(Object inst) {
         Preconditions.checkNotNull(inst, "instance");
         return new InstanceInstantiator(inst);
@@ -76,6 +85,7 @@ public final class Instantiators {
         Preconditions.checkNotNull(pinst, "provider instantiator");
         Preconditions.checkArgument(Provider.class.isAssignableFrom(pinst.getType()),
                                     "instantiator is not of type Provider");
+
         return new ProviderInstantiator(pinst);
     }
 
@@ -88,6 +98,8 @@ public final class Instantiators {
         // First try to unpack the instantiator
         if (instantiator instanceof ProviderInstantiator) {
             Instantiator itor = ((ProviderInstantiator) instantiator).providerInstantiator;
+            // ---  toProvider instance push to MDC ---------------------------------------
+            mdcContext.put(instantiator.getClass().toString(), itor.toString());
             if (itor instanceof InstanceInstantiator) {
                 return (Provider) ((InstanceInstantiator) itor).instance;
             }
@@ -103,9 +115,9 @@ public final class Instantiators {
      */
     public static Instantiator memoize(Instantiator instantiator) {
         Preconditions.checkNotNull(instantiator, "instantiator");
+
         return new MemoizingInstantiator(instantiator);
     }
-
     private static final class InstanceInstantiator implements Instantiator {
         private final Object instance;
         private final Class<?> type;
@@ -132,27 +144,32 @@ public final class Instantiators {
 
     private static class ProviderInstantiator implements Instantiator {
         private final Instantiator providerInstantiator;
-
         public ProviderInstantiator(Instantiator prov) {
             providerInstantiator = prov;
         }
 
         @Override
         public Object instantiate() throws ConstructionException {
+            Logger.trace(" provider invoked "+providerInstantiator);
             Provider<?> provider = (Provider) providerInstantiator.instantiate();
-            try {
+            try{
+                // --- push providerInstantiator to MDC ----------------------------------
+                mdcContext.put(provider.getClass().toString(), provider.toString());
+                mdcContext.finish();
                 return provider.get();
-            } catch (Throwable th) {
+            }
+            catch (Throwable th) {
                 throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
             }
-        }
 
+        }
         @SuppressWarnings("unchecked")
         @Override
         public Class<?> getType() {
             return Types.getProvidedType(providerInstantiator.getType());
         }
     }
+
 
     private static class MemoizingInstantiator implements Instantiator {
         private final Instantiator delegate;
@@ -209,10 +226,12 @@ public final class Instantiators {
         @Override
         public Object get() {
             try {
+                Logger.debug("Casting Instantiator ",instantiator.instantiate());
                 return getProvidedType().cast(instantiator.instantiate());
             } catch (ConstructionException ex) {
                 throw new RuntimeException(ex);
             }
         }
     }
+
 }
