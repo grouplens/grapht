@@ -35,6 +35,8 @@ import org.grouplens.grapht.util.LogContext;
  * @since 0.9
  */
 public final class Instantiators {
+    private static final Logger logger = LoggerFactory.getLogger(Instantiator.class);
+
     private Instantiators() {}
 
     /**
@@ -42,12 +44,6 @@ public final class Instantiators {
      * @param inst The instance to return (must be non-null).
      * @return An instantiator that returns {@code inst}.
      */
-
-
-    public static final Logger     Logger = LoggerFactory.getLogger(Instantiator.class);
-    private static final LogContext mdcContext = LogContext.create();
-
-
     public static Instantiator ofInstance(Object inst) {
         Preconditions.checkNotNull(inst, "instance");
         return new InstanceInstantiator(inst);
@@ -97,15 +93,15 @@ public final class Instantiators {
     public static Provider<?> toProvider(Instantiator instantiator) {
         // First try to unpack the instantiator
         if (instantiator instanceof ProviderInstantiator) {
-            Instantiator itor = ((ProviderInstantiator) instantiator).providerInstantiator;
-            // ---  toProvider instance push to MDC ---------------------------------------
-            mdcContext.put(instantiator.getClass().toString(), itor.toString());
-            if (itor instanceof InstanceInstantiator) {
-                return (Provider) ((InstanceInstantiator) itor).instance;
-            }
+                Instantiator itor = ((ProviderInstantiator) instantiator).providerInstantiator;
+                if (itor instanceof InstanceInstantiator) {
+                    return (Provider) ((InstanceInstantiator) itor).instance;
+                }
+
         }
-        // Otherwise, wrap it.
-        return new InstantiatorProvider(instantiator);
+
+            // Otherwise, wrap it.
+            return new InstantiatorProvider(instantiator);
     }
 
     /**
@@ -115,7 +111,6 @@ public final class Instantiators {
      */
     public static Instantiator memoize(Instantiator instantiator) {
         Preconditions.checkNotNull(instantiator, "instantiator");
-
         return new MemoizingInstantiator(instantiator);
     }
     private static final class InstanceInstantiator implements Instantiator {
@@ -150,18 +145,20 @@ public final class Instantiators {
 
         @Override
         public Object instantiate() throws ConstructionException {
-            Logger.trace(" provider invoked "+providerInstantiator);
             Provider<?> provider = (Provider) providerInstantiator.instantiate();
-            try{
-                // --- push providerInstantiator to MDC ----------------------------------
-                mdcContext.put(provider.getClass().toString(), provider.toString());
-                mdcContext.finish();
+            LogContext mdcContextProvider = LogContext.create();
+            logger.trace("invoked provider",provider);
+            try {
+                mdcContextProvider.put("org.grouplens.grapht.currentProvide", provider.toString());
                 return provider.get();
             }
             catch (Throwable th) {
                 throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
-            }
 
+            }
+            finally {
+                mdcContextProvider.finish();
+            }
         }
         @SuppressWarnings("unchecked")
         @Override
@@ -226,7 +223,7 @@ public final class Instantiators {
         @Override
         public Object get() {
             try {
-                Logger.debug("Casting Instantiator ",instantiator.instantiate());
+                logger.trace("invoking instantiator {}", instantiator);
                 return getProvidedType().cast(instantiator.instantiate());
             } catch (ConstructionException ex) {
                 throw new RuntimeException(ex);
