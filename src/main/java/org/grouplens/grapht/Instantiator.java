@@ -25,7 +25,7 @@ package org.grouplens.grapht;
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  * @since 0.9
  */
-public interface Instantiator {
+public interface Instantiator{
     Object instantiate() throws ConstructionException;
 
     /**
