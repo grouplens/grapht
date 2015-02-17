@@ -115,15 +115,15 @@ public class ClassInstantiator implements Instantiator {
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
         for (Desire d: desires) {
             Object value;
-            FieldInjectionPoint fd;
+            FieldInjectionPoint fd = null;
             Field field;
-            LogContext mdcContextInjectionPointFieldValue;
+            LogContext mdcContextInjectionPointFieldValue = null;
             if (d.getInjectionPoint() instanceof FieldInjectionPoint) {
-                mdcContextInjectionPointFieldValue = LogContext.create();
-                fd = (FieldInjectionPoint) d.getInjectionPoint();
-                value = checkNull(fd, providers.get(d).instantiate());
-                field = fd.getMember();
                 try {
+                    mdcContextInjectionPointFieldValue = LogContext.create();
+                    fd = (FieldInjectionPoint) d.getInjectionPoint();
+                    value = checkNull(fd, providers.get(d).instantiate());
+                    field = fd.getMember();
                     logger.trace("Setting field {} with arguments {}", field, value);
                     field.setAccessible(true);
                     field.set(instance, value);
@@ -150,12 +150,18 @@ public class ClassInstantiator implements Instantiator {
                 logger.trace("Injection point in progress with arguments {}", args);
                 logger.trace("Injection point in progress with method {}", setter);
                 Instantiator provider = providers.get(d);
-                mdcContextSetterInjectionPoint.put("org.grouplens.grapht.currentProvide", provider.toString());
-                mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint", sd.toString());
-                mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint,method", setter.toString());
-                mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint.args", args.toString());
-                args.set(sd.getParameterIndex(), checkNull(sd, provider.instantiate()));
-
+                try {
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.currentProvide", provider.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint", sd.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint,method", setter.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint.args", args.toString());
+                    args.set(sd.getParameterIndex(), checkNull(sd, provider.instantiate()));
+                } catch(Throwable th) {
+                    throw new RuntimeException("Unexpected instantiation exception",th);
+                }
+                finally {
+                   // Do nothing .
+                }
                 if (args.isCompleted()) {
                     // all parameters initialized, invoke the setter with all arguments
                     try {
