@@ -79,9 +79,10 @@ public class ClassInstantiator implements Instantiator {
     public Object instantiate() throws ConstructionException {
         // find constructor and build up necessary constructor arguments
 
-        LogContext mdcContext = LogContext.create();
+
         Constructor<?> ctor = getConstructor();
         // create the instance that we are injecting
+        LogContext mdcContext = LogContext.create();
         Object instance;
         try {
             mdcContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
@@ -92,7 +93,7 @@ public class ClassInstantiator implements Instantiator {
                     Instantiator provider = providers.get(d);
                     ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                     logger.trace("Injection point satisfactions in progress {}",cd);
-                    mdcContext.put("org.grouplens.grapht.class.injectionpoint", cd.toString());
+                    mdcContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
                     ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
                 }
             }
@@ -117,28 +118,25 @@ public class ClassInstantiator implements Instantiator {
             Object value;
             FieldInjectionPoint fd = null;
             Field field;
-            LogContext mdcContextInjectionPointFieldValue = null;
             if (d.getInjectionPoint() instanceof FieldInjectionPoint) {
+                LogContext mdcContextInjectionPtField =  LogContext.create();
                 try {
-                    mdcContextInjectionPointFieldValue = LogContext.create();
                     fd = (FieldInjectionPoint) d.getInjectionPoint();
                     value = checkNull(fd, providers.get(d).instantiate());
                     field = fd.getMember();
                     logger.trace("Setting field {} with arguments {}", field, value);
                     field.setAccessible(true);
                     field.set(instance, value);
-                    mdcContextInjectionPointFieldValue.put("org.grouplens.graph.injectionPoint.field", fd.toString());
-                    mdcContextInjectionPointFieldValue.put("org.grouplens.grapht.injectionPoint.field.member", field.toString());
-                    mdcContextInjectionPointFieldValue.put("org.grouplens.grapht.injectionPoint.field.value", value.toString());
+                    mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", fd.toString());
+                    mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", field.toString());
+                    mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", value.toString());
                 } catch (IllegalAccessException e) {
                     throw new ConstructionException(fd, e);
-                }
-                  finally {
-                    mdcContextInjectionPointFieldValue.finish();
+                } finally {
+                    mdcContextInjectionPtField.finish();
                 }
             } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
                 // collect parameters before invoking
-                LogContext mdcContextSetterInjectionPoint = LogContext.create();
                 SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
                 InjectionArgs args = settersAndArguments.get(sd.getMember());
                 Method setter = sd.getMember();
@@ -150,17 +148,17 @@ public class ClassInstantiator implements Instantiator {
                 logger.trace("Injection point in progress with arguments {}", args);
                 logger.trace("Injection point in progress with method {}", setter);
                 Instantiator provider = providers.get(d);
+                LogContext mdcContextSetterInjectionPoint = LogContext.create();
                 try {
-                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.currentProvide", provider.toString());
-                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint", sd.toString());
-                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint,method", setter.toString());
-                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint.setterinjectionpoint.args", args.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", provider.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", sd.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", setter.toString());
+                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", args.toString());
                     args.set(sd.getParameterIndex(), checkNull(sd, provider.instantiate()));
                 } catch(Throwable th) {
                     throw new RuntimeException("Unexpected instantiation exception",th);
-                }
-                finally {
-                   // Do nothing .
+                } finally {
+                    mdcContextSetterInjectionPoint.finish();
                 }
                 if (args.isCompleted()) {
                     // all parameters initialized, invoke the setter with all arguments
@@ -185,19 +183,16 @@ public class ClassInstantiator implements Instantiator {
                         }
                         throw new ConstructionException(sd, message, e);
                     }
-                    finally {
-                        mdcContextSetterInjectionPoint.finish();
-                    }
+
                 }
             } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
                 // just invoke the method
-                LogContext mdcContextInjectionNoArguments = LogContext.create();
                 Method method = ((NoArgumentInjectionPoint) d.getInjectionPoint()).getMember();
+                LogContext mdcContextInjectionPtNoArgs = LogContext.create();
                 try {
-                    mdcContextInjectionNoArguments = LogContext.create();
                     method = ((NoArgumentInjectionPoint) d.getInjectionPoint()).getMember();
                     logger.trace("Injection point method with no argument in progress {}", method);
-                    mdcContextInjectionNoArguments.put("org.grouplens.grapht.injectionPoint.noargumentinjectionpoint.method", method.toString());
+                    mdcContextInjectionPtNoArgs.put("org.grouplens.grapht.injectionPoint", method.toString());
                     logger.trace("Invoking no-argument injection point {}", d.getInjectionPoint());
                     method.setAccessible(true);
                     method.invoke(instance);
@@ -206,7 +201,7 @@ public class ClassInstantiator implements Instantiator {
                 } catch (IllegalAccessException e) {
                     throw new ConstructionException(d.getInjectionPoint(), "Access violation invoking " + method, e);
                 } finally {
-                    mdcContextInjectionNoArguments.finish();
+                    mdcContextInjectionPtNoArgs.finish();
                 }
             }
         }
