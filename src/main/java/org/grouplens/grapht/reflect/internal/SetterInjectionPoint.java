@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -83,6 +84,9 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
         return Types.hasNullableAnnotation(setter.getAnnotations()) || 
                Types.hasNullableAnnotation(setter.getParameterAnnotations()[parameter]);
     }
+
+    @Override
+    public void accept(InjectionPointVisitor visitor) { visitor.visitSetter();}
 
     @Override
     public Type getType() {

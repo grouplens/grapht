@@ -109,7 +109,12 @@ public class MockInjectionPoint implements InjectionPoint {
     public boolean isNullable() {
         return nullable;
     }
-    
+
+    @Override
+    public void accept(InjectionPointVisitor visitor) {
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof MockInjectionPoint)) {

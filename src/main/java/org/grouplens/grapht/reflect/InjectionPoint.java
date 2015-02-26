@@ -18,6 +18,8 @@
  */
 package org.grouplens.grapht.reflect;
 
+
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -25,6 +27,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import org.grouplens.grapht.reflect.internal.InjectionPointVisitorImpl;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 
 
 /**
@@ -39,6 +45,9 @@ public interface InjectionPoint extends Serializable {
      * 
      * @return The type of the injection point
      */
+
+
+
     Type getType();
     
     /**
@@ -56,7 +65,6 @@ public interface InjectionPoint extends Serializable {
      */
     @Nullable
     Annotation getQualifier();
-
     /**
      * Return the attribute of type A that is applied to the injection point. If
      * the injection point does not have an attribute of type {@code A}, then null is
@@ -87,4 +95,13 @@ public interface InjectionPoint extends Serializable {
      * @return True if this injection point accepts null values
      */
     boolean isNullable();
+
+    /**
+     * This method introduce divide get() method of ClassInstantiator
+     * into sub helper methods via Java Visitor methodology.
+     *
+     * @param visitor
+     */
+    void accept(InjectionPointVisitor visitor);
+
 }

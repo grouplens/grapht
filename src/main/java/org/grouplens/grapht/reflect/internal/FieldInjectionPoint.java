@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -41,6 +42,7 @@ import java.util.Collection;
 public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
     // transient because we use a serialization proxy
+
     private final transient Field field;
     private final transient AnnotationHelper annotations;
     
@@ -95,13 +97,17 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
+    public void accept(InjectionPointVisitor visitor) { visitor.visitField(); }
+
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof FieldInjectionPoint)) {
             return false;
         }
         return ((FieldInjectionPoint) o).field.equals(field);
     }
-    
+
+
     @Override
     public int hashCode() {
         return field.hashCode();
@@ -154,4 +160,6 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
             }
         }
     }
+
+
 }

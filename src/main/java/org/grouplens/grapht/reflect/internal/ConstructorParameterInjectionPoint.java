@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.ConstructorProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -40,6 +41,9 @@ import java.util.Collection;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
+    @Override
+    public void accept(InjectionPointVisitor visitor) {    }
+
     private static final long serialVersionUID = -1L;
 
     // transient because of serialization proxy

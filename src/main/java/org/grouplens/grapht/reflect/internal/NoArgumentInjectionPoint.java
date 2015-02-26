@@ -19,6 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 
@@ -36,6 +37,10 @@ import java.util.Collections;
 
 public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
+
+    @Override
+    public void accept(InjectionPointVisitor visitor) { visitor.visitNoArgument(); }
+
     private final transient Method method;
 
     /**

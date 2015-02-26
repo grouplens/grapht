@@ -22,6 +22,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
+import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
@@ -72,7 +73,12 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     public boolean isNullable() {
         return nullable;
     }
-    
+
+    @Override
+    public void accept(InjectionPointVisitor visitor) {
+
+    }
+
     @Override
     public Class<?> getType() {
         return type;
