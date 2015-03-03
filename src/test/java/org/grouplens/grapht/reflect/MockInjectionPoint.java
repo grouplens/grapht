@@ -111,9 +111,7 @@ public class MockInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) {
-
-    }
+    public void accept(InjectionPointVisitor visitor)throws UnsupportedOperationException{ }
 
     @Override
     public boolean equals(Object o) {

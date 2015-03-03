@@ -64,12 +64,9 @@ public class ClassInstantiator implements Instantiator {
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
 
-
         this.type = type;
         this.desires = desires;
         this.providers = providers;
-
-
     }
 
     @Override
@@ -117,109 +114,12 @@ public class ClassInstantiator implements Instantiator {
         // prepared to comply with JSR 330
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
         for (Desire d: desires) {
-            //Object value = null;
-            if (d.getInjectionPoint() instanceof FieldInjectionPoint) {
-                InjectionPointVisitor visitor = new InjectionPointVisitorImpl(d.getInjectionPoint(),providers.get(d).instantiate(),instance);
+                InjectionPointVisitor visitor = new InjectionPointVisitorImpl(d,d.getInjectionPoint(),providers,instance,settersAndArguments);
                 d.getInjectionPoint().accept(visitor);
-                /*LogContext mdcContextInjectionPtField =  LogContext.create();
-                FieldInjectionPoint fd = null;
-                Field field;
-                try {
-                    mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
-                    fd = (FieldInjectionPoint) d.getInjectionPoint();
-                    value = checkNull(fd, providers.get(d).instantiate());
-                    field = fd.getMember();
-                    logger.trace("Setting field {} with arguments {}", field, value);
-                    field.setAccessible(true);
-                    field.set(instance, value);
-
-                } catch (IllegalAccessException e) {
-                    throw new ConstructionException(fd, e);
-                } finally {
-                    mdcContextInjectionPtField.finish();
-                }*/
-
-
-            } else if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
-                // collect parameters before invoking
-                InjectionPointVisitor visitor = new InjectionPointVisitorImpl(d,providers,instance,settersAndArguments);
-                d.getInjectionPoint().accept(visitor);
-                /* SetterInjectionPoint sd = (SetterInjectionPoint) d.getInjectionPoint();
-                InjectionArgs args = settersAndArguments.get(sd.getMember());
-                Method setter = sd.getMember();
-                if (args == null) {
-                    // first encounter of this method
-                    args = new InjectionArgs(setter.getParameterTypes().length);
-                    settersAndArguments.put(setter, args);
-                }
-                Instantiator provider = providers.get(d);
-                LogContext mdcContextSetterInjectionPoint = LogContext.create();
-                try {
-                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", provider.toString());
-                    mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", sd.toString());
-                    args.set(sd.getParameterIndex(), checkNull(sd, provider.instantiate()));
-                } catch(Throwable th) {
-                    throw new RuntimeException("Unexpected instantiation exception",th);
-
-                } finally {
-                    mdcContextSetterInjectionPoint.finish();
-                }
-                if (args.isCompleted()) {
-                    // all parameters initialized, invoke the setter with all arguments
-                    try {
-                        logger.trace("Invoking setter {} with arguments {}", setter, args.arguments);
-                        setter.setAccessible(true);
-                        setter.invoke(instance, args.arguments);
-                    } catch (InvocationTargetException e) {
-                        String message = "Exception thrown by ";
-                        if (args.arguments.length == 1) {
-                            message += sd;
-                        } else {
-                            message += setter;
-                        }
-                        throw new ConstructionException(sd, message, e);
-                    } catch (IllegalAccessException e) {
-                        String message = "Access violation calling ";
-                        if (args.arguments.length == 1) {
-                            message += sd;
-                        } else {
-                            message += setter;
-                        }
-                        throw new ConstructionException(sd, message, e);
-
-                    }
-
-                }*/
-            } else if (d.getInjectionPoint() instanceof NoArgumentInjectionPoint) {
-                // just invoke the method
-                InjectionPointVisitor visitor = new InjectionPointVisitorImpl(d.getInjectionPoint(), instance);
-                d.getInjectionPoint().accept(visitor);
-                /*Method method = ((NoArgumentInjectionPoint) d.getInjectionPoint()).getMember();
-                LogContext mdcContextInjectionPtNoArgs = LogContext.create();
-                try {
-                    method = ((NoArgumentInjectionPoint) d.getInjectionPoint()).getMember();
-                    logger.trace("Injection point method with no argument in progress {}", d.getInjectionPoint());
-                    mdcContextInjectionPtNoArgs.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
-                    logger.trace("Invoking no-argument injection point {}", d.getInjectionPoint());
-                    method.setAccessible(true);
-                    method.invoke(instance);
-                } catch (InvocationTargetException e) {
-                    throw new ConstructionException(d.getInjectionPoint(), "Exception throw by " + method, e);
-                } catch (IllegalAccessException e) {
-                    throw new ConstructionException(d.getInjectionPoint(), "Access violation invoking " + method, e);
-                } finally {
-                    mdcContextInjectionPtNoArgs.finish();
-                }*/
-            }
         }
-        
         // the instance has been fully configured
         return instance;
     }
-
-
-
-
     @SuppressWarnings("unchecked")
     private Constructor<?> getConstructor() {
         for (Desire d: desires) {
@@ -252,7 +152,7 @@ public class ClassInstantiator implements Instantiator {
         }
     }
     
-    public  static class InjectionArgs {
+    protected static class InjectionArgs {
         public final Object[] arguments;
         private final boolean[] injected;
         

@@ -34,8 +34,7 @@ import org.grouplens.grapht.util.LogContext;
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  * @since 0.9
  */
-public final class
-        Instantiators {
+public final class Instantiators {
     private static final Logger logger = LoggerFactory.getLogger(Instantiators.class);
 
     private Instantiators() {}
@@ -100,7 +99,6 @@ public final class
             }
         }
         // Otherwise, wrap it.
-
 
         return new InstantiatorProvider(instantiator);
     }

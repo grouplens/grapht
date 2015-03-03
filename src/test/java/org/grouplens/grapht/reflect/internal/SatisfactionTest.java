@@ -62,7 +62,7 @@ public class SatisfactionTest {
     private Set<InjectionPoint> getInjectionPoints(Satisfaction s) {
         Set<InjectionPoint> detected = new HashSet<InjectionPoint>();
         for (Desire d: s.getDependencies()) {
-            detected.add(((ReflectionDesire) d).getInjectionPoint());
+            detected.add(d.getInjectionPoint());
         }
         return detected;
     }

@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.FieldProxy;
@@ -97,7 +98,10 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) { visitor.visitField(); }
+    public void accept(InjectionPointVisitor visitor) throws ConstructionException {
+        visitor.visitField(this);
+    }
+
 
     @Override
     public boolean equals(Object o) {

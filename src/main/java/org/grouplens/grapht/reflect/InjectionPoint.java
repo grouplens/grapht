@@ -27,6 +27,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
+
+import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.reflect.internal.FieldInjectionPoint;
 import org.grouplens.grapht.reflect.internal.InjectionPointVisitorImpl;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -97,11 +100,11 @@ public interface InjectionPoint extends Serializable {
     boolean isNullable();
 
     /**
-     * This method introduce divide get() method of ClassInstantiator
-     * into sub helper methods via Java Visitor methodology.
      *
+     * Accept a visitor to inspect the injection points.
      * @param visitor
      */
-    void accept(InjectionPointVisitor visitor);
+    void accept(InjectionPointVisitor visitor) throws ConstructionException;
+
 
 }
