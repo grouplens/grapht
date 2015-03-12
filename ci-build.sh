@@ -5,4 +5,4 @@ set -x
 
 export CI=true
 mvn -U deploy
-mvn -U sonar:sonar
+mvn sonar:sonar
