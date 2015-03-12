@@ -11,6 +11,7 @@ after_success:
 branches:
   except:
   - stable
+  - feature/sonar
 env:
   global:
   # CI_DEPLOY_USER

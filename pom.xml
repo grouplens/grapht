@@ -352,42 +352,5 @@
         </plugins>
       </reporting>
     </profile>
-
-    <profile>
-      <id>test-coverage</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.version}</version>
-            <executions>
-              <execution>
-                <id>prepare-agent</id>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
-            <version>2.2.0</version>
-            <configuration>
-              <repoToken>${env.COVERALLS_TOKEN}</repoToken>
-            </configuration>
-            <executions>
-              <execution>
-                <id>post-coveralls</id>
-                <goals><goal>jacoco</goal></goals>
-                <phase>verify</phase>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 </project>
