@@ -3,5 +3,6 @@
 set -e
 set -x
 
-mvn -U -Ppublish-ci deploy
-mvn -U -Ppublish-ci sonar:sonar
+export CI=true
+mvn -U deploy
+mvn -U sonar:sonar
