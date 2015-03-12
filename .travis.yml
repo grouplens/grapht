@@ -5,9 +5,6 @@ jdk:
 - openjdk6
 install: mvn --batch-mode dependency:go-offline
 script: mvn --batch-mode install
-after_success:
-- ./etc/maybe-coverage.sh
-- ./etc/maybe-deploy.sh
 branches:
   except:
   - stable
