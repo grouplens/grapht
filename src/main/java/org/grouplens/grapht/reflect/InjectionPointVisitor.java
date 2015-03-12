@@ -25,20 +25,26 @@ package org.grouplens.grapht.reflect;
 
 
 import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.reflect.internal.FieldInjectionPoint;
-import org.grouplens.grapht.reflect.internal.InjectionPointVisitorImpl;
-import org.grouplens.grapht.reflect.internal.NoArgumentInjectionPoint;
-import org.grouplens.grapht.reflect.internal.SetterInjectionPoint;
+import org.grouplens.grapht.reflect.internal.*;
+
 import java.util.Map;
 
+/**
+ * Interface for injection point visitors.
+ * Instances of this interface are used to inspect or act on different types of injection points.
+ * @see InjectionPoint#accept(InjectionPointVisitor)
+ */
 public interface InjectionPointVisitor {
 
-    void visitField(FieldInjectionPoint ip) throws ConstructionException;
+    void visitField(FieldInjectionPoint ip) throws InjectionException;
 
-    void visitSetter(SetterInjectionPoint ip) throws ConstructionException;
+    void visitSetter(SetterInjectionPoint ip) throws InjectionException;
 
-    void visitNoArgument(NoArgumentInjectionPoint ip) throws ConstructionException;
+    void visitNoArgument(NoArgumentInjectionPoint ip) throws InjectionException;
 
-    void visitConstructor() throws ConstructionException;
+    void visitConstructor(ConstructorParameterInjectionPoint ip) throws ConstructionException;
+
+    void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException;
 }

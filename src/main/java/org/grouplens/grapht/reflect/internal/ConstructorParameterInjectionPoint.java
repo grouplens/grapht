@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.ConstructorProxy;
@@ -41,8 +42,6 @@ import java.util.Collection;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
-    @Override
-    public void accept(InjectionPointVisitor visitor) {    }
 
     private static final long serialVersionUID = -1L;
 
@@ -90,7 +89,12 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     public boolean isNullable() {
         return Types.hasNullableAnnotation(constructor.getParameterAnnotations()[paramIndex]);
     }
-    
+
+    @Override
+    public void accept(InjectionPointVisitor visitor) throws ConstructionException {
+        visitor.visitConstructor(this);
+    }
+
     @Override
     public Type getType() {
         return Types.box(constructor.getGenericParameterTypes()[paramIndex]);

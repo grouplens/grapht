@@ -20,6 +20,7 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
@@ -75,8 +76,8 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) {
-
+    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+        visitor.visitSynthetic(this);
     }
 
     @Override

@@ -19,12 +19,12 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InvalidObjectException;
@@ -98,10 +98,9 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws ConstructionException {
+    public void accept(InjectionPointVisitor visitor) throws InjectionException {
         visitor.visitField(this);
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -110,7 +109,6 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
         }
         return ((FieldInjectionPoint) o).field.equals(field);
     }
-
 
     @Override
     public int hashCode() {
@@ -164,6 +162,4 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
             }
         }
     }
-
-
 }

@@ -16,10 +16,10 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.NullDependencyException;
 import org.grouplens.grapht.reflect.Desire;
@@ -40,7 +40,6 @@ import java.util.Map;
  *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-
 public class InjectionPointVisitorImpl implements InjectionPointVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(InjectionPointVisitorImpl.class);
@@ -49,7 +48,6 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     private Map<Desire, Instantiator> providers;
     Desire d;
     Map<Method, ClassInstantiator.InjectionArgs> settersAndArguments = null;
-
 
     InjectionPointVisitorImpl(Desire d, InjectionPoint injectionPoint, Map<Desire, Instantiator> providers, Object instance,
                               Map<Method, ClassInstantiator.InjectionArgs> settersAndArguments) {
@@ -61,15 +59,13 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitField(FieldInjectionPoint ip) throws ConstructionException {
+    public void visitField(FieldInjectionPoint fd) throws ConstructionException {
         LogContext mdcContextInjectionPtField =  LogContext.create();
-        FieldInjectionPoint fd = null;
         Field field;
         Object value;
         try {
             mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", injectionPoint.toString());
-            fd = ip;
-            value = checkNull(fd, providers.get(d).instantiate());
+            value = ClassInstantiator.checkNull(fd, providers.get(d).instantiate());
             field = fd.getMember();
             logger.trace("Setting field {} with arguments {}", field, value);
             field.setAccessible(true);
@@ -86,20 +82,20 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitSetter(SetterInjectionPoint ip) throws ConstructionException {
-
-        ClassInstantiator.InjectionArgs args = settersAndArguments.get(ip.getMember());
-        Method setter = ip.getMember();
+    public void visitSetter(SetterInjectionPoint st) throws ConstructionException {
+        ClassInstantiator.InjectionArgs args = settersAndArguments.get(st.getMember());
+        Method setter = st.getMember();
         if (args == null) {
         //  first encounter of this method
+
             args = new ClassInstantiator.InjectionArgs(setter.getParameterTypes().length);
             settersAndArguments.put(setter, args);
         }
         Instantiator provider = providers.get(d);
         LogContext mdcContextSetterInjectionPoint = LogContext.create();
         try {
-            mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", ip.toString());
-            args.set(ip.getParameterIndex(), checkNull(ip, provider.instantiate()));
+            mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", st.toString());
+            args.set(st.getParameterIndex(), ClassInstantiator.checkNull(st, provider.instantiate()));
         } catch (Throwable th) {
             throw new RuntimeException("Unexpected instantiation exception", th);
 
@@ -115,23 +111,19 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
             } catch (InvocationTargetException e) {
                 String message = "Exception thrown by ";
                 if (args.arguments.length == 1) {
-                    message += ip;
+                    message += st;
                 } else {
                     message += setter;
                 }
-                throw new ConstructionException(ip, message, e);
+                throw new ConstructionException(st, message, e);
             } catch (IllegalAccessException e) {
                 String message = "Access violation calling ";
                 if (args.arguments.length == 1) {
-                    message += ip;
+                    message += st;
                 } else {
                     message += setter;
                 }
-                try {
-                    throw new ConstructionException(ip, message, e);
-                } catch (ConstructionException e1) {
-                    e1.printStackTrace();
-                }
+                throw new ConstructionException(st, message, e);
             }
         }
     }
@@ -147,58 +139,22 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
             logger.trace("Invoking no-argument injection point {}", injectionPoint);
             method.setAccessible(true);
             method.invoke(instance);
-
         } catch (InvocationTargetException e) {
-
-                throw new ConstructionException(injectionPoint, "Exception throw by " + method, e);
-
+            throw new ConstructionException(injectionPoint, "Exception throw by " + method, e);
         } catch (IllegalAccessException e) {
-
-                throw new ConstructionException(injectionPoint, "Access violation invoking " + method, e);
-
-        }
-          finally {
-                    mdcContextInjectionPtNoArgs.finish();
+            throw new ConstructionException(injectionPoint, "Access violation invoking " + method, e);
+        } finally {
+            mdcContextInjectionPtNoArgs.finish();
         }
     }
 
     @Override
-    public void visitConstructor() {
+    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws ConstructionException {
 
     }
 
-
-    private static class InjectionArgs {
-        public final Object[] arguments;
-        private final boolean[] injected;
-
-        public InjectionArgs(int num) {
-            arguments = new Object[num];
-            injected = new boolean[num];
-        }
-
-        public void set(int i, Object o) {
-            arguments[i] =o;
-            injected[i] = true;
-        }
-
-        public boolean isCompleted() {
-            for (int i = 0; i < injected.length; i++) {
-                if (!injected[i]) {
-                    return false;
-                }
-            }
-            return true;
-        }
+    @Override
+    public void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException {
 
     }
-
-    private static Object checkNull(InjectionPoint injectPoint, Object value) throws NullDependencyException {
-        if (value == null && !injectPoint.isNullable()) {
-            throw new NullDependencyException(injectPoint);
-        } else {
-            return value;
-        }
-    }
-
 }

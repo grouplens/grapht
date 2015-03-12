@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht.reflect;
 
-
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -27,14 +25,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
-
 import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.reflect.internal.FieldInjectionPoint;
-import org.grouplens.grapht.reflect.internal.InjectionPointVisitorImpl;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
-
+import org.grouplens.grapht.InjectionException;
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -100,11 +92,8 @@ public interface InjectionPoint extends Serializable {
     boolean isNullable();
 
     /**
-     *
-     * Accept a visitor to inspect the injection points.
+     *Accept a visitor to inspect the injection points.
      * @param visitor
      */
-    void accept(InjectionPointVisitor visitor) throws ConstructionException;
-
-
+    void accept(InjectionPointVisitor visitor) throws ConstructionException, InjectionException;
 }
