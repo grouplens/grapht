@@ -43,18 +43,14 @@ import java.util.Map;
 public class InjectionPointVisitorImpl implements InjectionPointVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(InjectionPointVisitorImpl.class);
-    private InjectionPoint injectionPoint;
     private Object instance;
-    private Map<Desire, Instantiator> providers;
-    Desire d;
+    private Instantiator provider = null;
     Map<Method, ClassInstantiator.InjectionArgs> settersAndArguments = null;
 
-    InjectionPointVisitorImpl(Desire d, InjectionPoint injectionPoint, Map<Desire, Instantiator> providers, Object instance,
+    InjectionPointVisitorImpl(Instantiator provider,Object instance,
                               Map<Method, ClassInstantiator.InjectionArgs> settersAndArguments) {
-        this.d                   =  d;
-        this.injectionPoint      =  d.getInjectionPoint();
-        this.providers           =  providers;
-        this.instance            =  instance;
+        this.provider =  provider;
+        this.instance =  instance;
         this.settersAndArguments = settersAndArguments;
     }
 
@@ -64,21 +60,19 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
         Field field;
         Object value;
         try {
-            mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", injectionPoint.toString());
-            value = ClassInstantiator.checkNull(fd, providers.get(d).instantiate());
+            mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", fd.toString());
+            value = ClassInstantiator.checkNull(fd, provider.instantiate());
             field = fd.getMember();
             logger.trace("Setting field {} with arguments {}", field, value);
             field.setAccessible(true);
             field.set(instance, value);
         } catch (IllegalAccessException e) {
             throw new ConstructionException(fd, e);
-
         } catch (NullDependencyException e) {
             throw new ConstructionException(fd, e);
         } finally {
             mdcContextInjectionPtField.finish();
         }
-
     }
 
     @Override
@@ -91,14 +85,13 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
             args = new ClassInstantiator.InjectionArgs(setter.getParameterTypes().length);
             settersAndArguments.put(setter, args);
         }
-        Instantiator provider = providers.get(d);
+        Instantiator providerLoc = provider;
         LogContext mdcContextSetterInjectionPoint = LogContext.create();
         try {
             mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", st.toString());
-            args.set(st.getParameterIndex(), ClassInstantiator.checkNull(st, provider.instantiate()));
+            args.set(st.getParameterIndex(), ClassInstantiator.checkNull(st, providerLoc.instantiate()));
         } catch (Throwable th) {
             throw new RuntimeException("Unexpected instantiation exception", th);
-
         } finally {
             mdcContextSetterInjectionPoint.finish();
         }
@@ -134,15 +127,15 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
         LogContext mdcContextInjectionPtNoArgs = LogContext.create();
         try {
             method = ip.getMember();
-            logger.trace("Injection point method with no argument in progress {}", injectionPoint);
-            mdcContextInjectionPtNoArgs.put("org.grouplens.grapht.injectionPoint", injectionPoint.toString());
-            logger.trace("Invoking no-argument injection point {}", injectionPoint);
+            logger.trace("Injection point method with no argument in progress {}", ip);
+            mdcContextInjectionPtNoArgs.put("org.grouplens.grapht.injectionPoint", ip.toString());
+            logger.trace("Invoking no-argument injection point {}", ip);
             method.setAccessible(true);
             method.invoke(instance);
         } catch (InvocationTargetException e) {
-            throw new ConstructionException(injectionPoint, "Exception throw by " + method, e);
+            throw new ConstructionException(ip, "Exception throw by " + method, e);
         } catch (IllegalAccessException e) {
-            throw new ConstructionException(injectionPoint, "Access violation invoking " + method, e);
+            throw new ConstructionException(ip, "Access violation invoking " + method, e);
         } finally {
             mdcContextInjectionPtNoArgs.finish();
         }

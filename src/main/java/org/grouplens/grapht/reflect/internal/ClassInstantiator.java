@@ -18,6 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.sun.org.omg.CORBA.ExceptionDescriptionHelper;
 import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Instantiator;
@@ -91,7 +92,13 @@ public class
                     Instantiator provider = providers.get(d);
                     ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                     logger.trace("Injection point satisfactions in progress {}",cd);
-                    mdcContextInjectionPoint.put("org.grouplens.grapht.injectionPoint", cd.toString());
+                    try {
+                        mdcContextInjectionPoint.put("org.grouplens.grapht.injectionPoint", cd.toString());
+                    } catch(Exception e) {
+                         throw new RuntimeException("MDCLog exception", e);
+                    } finally {
+                        mdcContextInjectionPoint.finish();
+                    }
                     ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
                 }
             }
@@ -112,8 +119,7 @@ public class
         // prepared to comply with JSR 330
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
         for (Desire d: desires) {
-                InjectionPointVisitor visitor = new InjectionPointVisitorImpl(d, d.getInjectionPoint(),
-                                                                                providers, instance, settersAndArguments);
+            InjectionPointVisitor visitor = new InjectionPointVisitorImpl(providers.get(d),instance, settersAndArguments);
             try {
                 d.getInjectionPoint().accept(visitor);
             } catch (InjectionException e) {
