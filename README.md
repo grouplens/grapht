@@ -30,6 +30,12 @@ following to the dependencies section in your POM:
       <artifactId>grapht</artifactId>
       <version>0.10.0-BETA1</version>
     </dependency>
+
+## Legal
+
+Grapht is released under the terms of the GNU Lesser General Public License, version 2.1 or newer.
+
+**By submitting a pull request, you release your contribution to us under same license terms unless otherwise specified.**
     
 ## Release Notes
 
