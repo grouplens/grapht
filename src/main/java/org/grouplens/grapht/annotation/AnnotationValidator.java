@@ -28,6 +28,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,6 +42,7 @@ import java.util.regex.Pattern;
  */
 public class AnnotationValidator extends AbstractProcessor {
     private static final String DEFAULT_ANNOT_PREFIX = "org.grouplens.grapht.annotation.Default";
+    private static final Pattern DEFAULT_PATTERN = Pattern.compile("^" + Pattern.quote(DEFAULT_ANNOT_PREFIX));
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -83,33 +86,27 @@ public class AnnotationValidator extends AbstractProcessor {
     }
 
     private void analyzeQualifiers(RoundEnvironment re) {
-        Set<? extends Element> elts = re.getElementsAnnotatedWith(Qualifier.class);
-        for (Element elt: elts) {
-            if (elt.getAnnotation(Documented.class) == null) {
-                warning(elt, "qualifier annotation should be @Documented");
-            }
-            Retention ret = elt.getAnnotation(Retention.class);
-            if (ret == null || !ret.value().equals(RetentionPolicy.RUNTIME)) {
-                error(elt, "qualifer annotation must have RUNTIME retention");
-            }
-        }
+      analyzeAnnotations(re, Qualifier.class, "qualifier");
     }
 
     private void analyzeAttributes(RoundEnvironment re) {
-        Set<? extends Element> elts = re.getElementsAnnotatedWith(Qualifier.class);
-        for (Element elt: elts) {
-            if (elt.getAnnotation(Documented.class) == null) {
-                warning(elt, "attribute annotation should be @Documented");
-            }
-            Retention ret = elt.getAnnotation(Retention.class);
-            if (ret == null || !ret.value().equals(RetentionPolicy.RUNTIME)) {
-                error(elt, "attribute annotation must have RUNTIME retention");
-            }
-        }
+      analyzeAnnotations(re, Attribute.class, "attribute");
+    }
+
+    private void analyzeAnnotations(RoundEnvironment re, Class<? extends Annotation> annotation, String annotationName){
+      Set<? extends Element> elts = re.getElementsAnnotatedWith(annotation);
+      for (Element elt: elts) {
+          if (elt.getAnnotation(Documented.class) == null) {
+              warning(elt, String.format("%s annotation should be @Documented", annotationName));
+          }
+          Retention ret = elt.getAnnotation(Retention.class);
+          if (ret == null || !ret.value().equals(RetentionPolicy.RUNTIME)) {
+              error(elt, String.format("%s annotation must have RUNTIME retention", annotationName));
+          }
+      }
     }
 
     private void analyzeAliases(RoundEnvironment re) {
-        Pattern defaultPat = Pattern.compile("^" + Pattern.quote(DEFAULT_ANNOT_PREFIX));
         Set<? extends Element> elts = re.getElementsAnnotatedWith(AliasFor.class);
         for (Element elt : elts) {
             if (elt.getAnnotation(Qualifier.class) == null) {
@@ -123,8 +120,8 @@ public class AnnotationValidator extends AbstractProcessor {
                 if (element instanceof TypeElement) {
                     TypeElement type = (TypeElement) element;
                     Name name = type.getQualifiedName();
-                    if (defaultPat.matcher(name).matches()) {
-                        warning(elt, "alias annotation has %s, defaults should be on target", type.getSimpleName());
+                    if (DEFAULT_PATTERN.matcher(name).matches()) {
+                        warning(elt, "alias annotation has %s, defaults should be on alias target", type.getSimpleName());
                     }
                 }
             }
