@@ -25,6 +25,7 @@ import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InvalidObjectException;

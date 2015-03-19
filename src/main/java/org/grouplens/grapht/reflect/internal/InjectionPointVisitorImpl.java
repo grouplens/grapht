@@ -28,6 +28,7 @@ import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,8 +42,8 @@ import java.util.Map;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class InjectionPointVisitorImpl implements InjectionPointVisitor {
-
     private static final Logger logger = LoggerFactory.getLogger(InjectionPointVisitorImpl.class);
+
     private Object instance;
     private Instantiator provider = null;
     Map<Method, ClassInstantiator.InjectionArgs> settersAndArguments = null;
@@ -55,12 +56,12 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitField(FieldInjectionPoint fd) throws ConstructionException {
-        LogContext mdcContextInjectionPtField =  LogContext.create();
+    public void visitField(FieldInjectionPoint fd) throws InjectionException {
+        LogContext ipContext =  LogContext.create();
         Field field;
         Object value;
         try {
-            mdcContextInjectionPtField.put("org.grouplens.grapht.injectionPoint", fd.toString());
+            ipContext.put("org.grouplens.grapht.injectionPoint", fd.toString());
             value = ClassInstantiator.checkNull(fd, provider.instantiate());
             field = fd.getMember();
             logger.trace("Setting field {} with arguments {}", field, value);
@@ -71,29 +72,28 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
         } catch (NullDependencyException e) {
             throw new ConstructionException(fd, e);
         } finally {
-            mdcContextInjectionPtField.finish();
+            ipContext.finish();
         }
     }
 
     @Override
-    public void visitSetter(SetterInjectionPoint st) throws ConstructionException {
+    public void visitSetter(SetterInjectionPoint st) throws InjectionException {
         ClassInstantiator.InjectionArgs args = settersAndArguments.get(st.getMember());
         Method setter = st.getMember();
         if (args == null) {
-        //  first encounter of this method
-
+            //first encounter of this method
             args = new ClassInstantiator.InjectionArgs(setter.getParameterTypes().length);
             settersAndArguments.put(setter, args);
         }
         Instantiator providerLoc = provider;
-        LogContext mdcContextSetterInjectionPoint = LogContext.create();
+        LogContext ipContext = LogContext.create();
         try {
-            mdcContextSetterInjectionPoint.put("org.grouplens.grapht.injectionPoint", st.toString());
+            ipContext.put("org.grouplens.grapht.injectionPoint", st.toString());
             args.set(st.getParameterIndex(), ClassInstantiator.checkNull(st, providerLoc.instantiate()));
         } catch (Throwable th) {
-            throw new RuntimeException("Unexpected instantiation exception", th);
+            throw new RuntimeException("MDCLog exception", th);
         } finally {
-            mdcContextSetterInjectionPoint.finish();
+            ipContext.finish();
         }
         if (args.isCompleted()) {
         // all parameters initialized, invoke the setter with all arguments
@@ -122,13 +122,13 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitNoArgument(NoArgumentInjectionPoint ip) throws ConstructionException {
+    public void visitNoArgument(NoArgumentInjectionPoint ip) throws InjectionException {
         Method method = null;
-        LogContext mdcContextInjectionPtNoArgs = LogContext.create();
+        LogContext ipContext = LogContext.create();
         try {
             method = ip.getMember();
             logger.trace("Injection point method with no argument in progress {}", ip);
-            mdcContextInjectionPtNoArgs.put("org.grouplens.grapht.injectionPoint", ip.toString());
+            ipContext.put("org.grouplens.grapht.injectionPoint", ip.toString());
             logger.trace("Invoking no-argument injection point {}", ip);
             method.setAccessible(true);
             method.invoke(instance);
@@ -137,17 +137,13 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
         } catch (IllegalAccessException e) {
             throw new ConstructionException(ip, "Access violation invoking " + method, e);
         } finally {
-            mdcContextInjectionPtNoArgs.finish();
+            ipContext.finish();
         }
     }
 
     @Override
-    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws ConstructionException {
-
-    }
+    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws InjectionException { }
 
     @Override
-    public void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException {
-
-    }
+     public void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException { }
 }

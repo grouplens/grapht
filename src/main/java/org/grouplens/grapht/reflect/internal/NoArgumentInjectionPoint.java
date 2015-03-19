@@ -39,12 +39,13 @@ import java.util.Collections;
 
 public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
+    private final transient Method method;
 
     @Override
     public void accept(InjectionPointVisitor visitor) throws InjectionException {
         visitor.visitNoArgument(this);
     }
-    private final transient Method method;
+
 
     /**
      * Create a NoArgumentInjectionPoint that wraps the given no-argument

@@ -44,7 +44,7 @@ public interface InjectionPointVisitor {
 
     void visitNoArgument(NoArgumentInjectionPoint ip) throws InjectionException;
 
-    void visitConstructor(ConstructorParameterInjectionPoint ip) throws ConstructionException;
+    void visitConstructor(ConstructorParameterInjectionPoint ip) throws InjectionException;
 
     void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException;
 }

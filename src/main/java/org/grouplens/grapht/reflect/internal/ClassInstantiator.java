@@ -1,3 +1,4 @@
+
 /*
  * Grapht, an open source dependency injector.
  * Copyright 2010-2012 Regents of the University of Minnesota and contributors
@@ -27,8 +28,10 @@ import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -37,17 +40,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.grouplens.grapht.util.LogContext;
+
 
 /**
  * Instantiates class instances.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class
-        ClassInstantiator implements Instantiator {
-
+public class ClassInstantiator implements Instantiator {
     private static final Logger  logger = LoggerFactory.getLogger(ClassInstantiator.class);
+
     private final Class<?> type;
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
@@ -65,6 +67,7 @@ public class
         Preconditions.notNull("type", type);
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
+
         this.type = type;
         this.desires = desires;
         this.providers = providers;
@@ -80,24 +83,24 @@ public class
         // find constructor and build up necessary constructor arguments
         Constructor<?> ctor = getConstructor();
         // create the instance that we are injecting
-        LogContext mdcContext = LogContext.create();
+        LogContext globalLogContext = LogContext.create();
         Object instance = null;
         try {
-            mdcContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
+            globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
             Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
             for (Desire d : desires) {
-                LogContext mdcContextInjectionPoint = LogContext.create();
+                LogContext ipContext = LogContext.create();
                 if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                     // this desire is a constructor argument so create it now
                     Instantiator provider = providers.get(d);
                     ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                     logger.trace("Injection point satisfactions in progress {}",cd);
                     try {
-                        mdcContextInjectionPoint.put("org.grouplens.grapht.injectionPoint", cd.toString());
+                        ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
                     } catch(Exception e) {
                          throw new RuntimeException("MDCLog exception", e);
                     } finally {
-                        mdcContextInjectionPoint.finish();
+                        ipContext.finish();
                     }
                     ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
                 }
@@ -112,23 +115,25 @@ public class
         } catch (IllegalAccessException e) {
             throw new ConstructionException(ctor, "Access violation on " + ctor, e);
         }
-        finally {
-            mdcContext.finish();
-        }
+
         // satisfy dependencies in the order of the list, which was
         // prepared to comply with JSR 330
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
         for (Desire d: desires) {
             InjectionPointVisitor visitor = new InjectionPointVisitorImpl(providers.get(d),instance, settersAndArguments);
             try {
+                globalLogContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
                 d.getInjectionPoint().accept(visitor);
             } catch (InjectionException e) {
-                throw new RuntimeException("Unexpected exception", e);
+                throw new RuntimeException("InjectionPoint Exception ", e);
+            } finally {
+                globalLogContext.finish();
             }
         }
         // the instance has been fully configured
         return instance;
     }
+
     @SuppressWarnings("unchecked")
     private Constructor<?> getConstructor() {
         for (Desire d: desires) {
@@ -138,9 +143,9 @@ public class
                 Constructor<?> ctor = ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getMember();
                 logger.debug("Using constructor annotated with @Inject: {}", ctor);
                 return ctor;
-
             }
         }
+
         try {
             logger.debug("Using default constructor for {}", type);
             return type.getDeclaredConstructor();
@@ -182,6 +187,5 @@ public class
             }
             return true;
         }
-
     }
 }
