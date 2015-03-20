@@ -69,5 +69,5 @@ public interface Injector {
      * @return An instance of type T
      * @throws ConstructionException if type cannot be instantiated
      */
-    <T> T getInstance(Annotation qualifier, Class<T> type) throws ConstructionException, InjectionException;
+    <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException;
 }

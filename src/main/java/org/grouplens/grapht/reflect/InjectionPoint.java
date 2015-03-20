@@ -25,7 +25,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
-
+import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.InjectionException;
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -39,6 +40,9 @@ public interface InjectionPoint extends Serializable {
      * 
      * @return The type of the injection point
      */
+
+
+
     Type getType();
     
     /**
@@ -56,7 +60,6 @@ public interface InjectionPoint extends Serializable {
      */
     @Nullable
     Annotation getQualifier();
-
     /**
      * Return the attribute of type A that is applied to the injection point. If
      * the injection point does not have an attribute of type {@code A}, then null is
@@ -87,4 +90,10 @@ public interface InjectionPoint extends Serializable {
      * @return True if this injection point accepts null values
      */
     boolean isNullable();
+
+    /**
+     *Accept a visitor to inspect the injection points.
+     * @param visitor
+     */
+    void accept(InjectionPointVisitor visitor) throws ConstructionException, InjectionException;
 }

@@ -35,7 +35,7 @@ import org.grouplens.grapht.util.LogContext;
  * @since 0.9
  */
 public final class Instantiators {
-    private static final Logger logger = LoggerFactory.getLogger(Instantiator.class);
+    private static final Logger logger = LoggerFactory.getLogger(Instantiators.class);
 
     private Instantiators() {}
 
@@ -93,15 +93,14 @@ public final class Instantiators {
     public static Provider<?> toProvider(Instantiator instantiator) {
         // First try to unpack the instantiator
         if (instantiator instanceof ProviderInstantiator) {
-                Instantiator itor = ((ProviderInstantiator) instantiator).providerInstantiator;
-                if (itor instanceof InstanceInstantiator) {
-                    return (Provider) ((InstanceInstantiator) itor).instance;
-                }
-
+            Instantiator itor = ((ProviderInstantiator) instantiator).providerInstantiator;
+            if (itor instanceof InstanceInstantiator) {
+                return (Provider) ((InstanceInstantiator) itor).instance;
+            }
         }
+        // Otherwise, wrap it.
 
-            // Otherwise, wrap it.
-            return new InstantiatorProvider(instantiator);
+        return new InstantiatorProvider(instantiator);
     }
 
     /**
@@ -147,16 +146,13 @@ public final class Instantiators {
         public Object instantiate() throws ConstructionException {
             Provider<?> provider = (Provider) providerInstantiator.instantiate();
             LogContext mdcContextProvider = LogContext.create();
-            logger.trace("invoked provider",provider);
+            logger.trace("invoking provider {}",provider);
             try {
-                mdcContextProvider.put("org.grouplens.grapht.currentProvide", provider.toString());
+                mdcContextProvider.put("org.grouplens.grapht.currentProvider", provider.toString());
                 return provider.get();
-            }
-            catch (Throwable th) {
+            } catch (Throwable th) {
                 throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
-
-            }
-            finally {
+            } finally {
                 mdcContextProvider.finish();
             }
         }
