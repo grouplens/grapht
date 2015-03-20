@@ -95,13 +95,8 @@ public class ClassInstantiator implements Instantiator {
                     Instantiator provider = providers.get(d);
                     ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                     logger.trace("Injection point satisfactions in progress {}",cd);
-                    try {
-                        ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
-                    } catch(Exception e) {
-                         throw new RuntimeException("MDCLog exception", e);
-                    } finally {
-                        ipContext.finish();
-                    }
+                    ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
+                    ipContext.finish();
                     ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
                 }
             }

@@ -69,9 +69,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
             field.set(instance, value);
         } catch (IllegalAccessException e) {
             throw new ConstructionException(fd, e);
-        } catch (NullDependencyException e) {
-            throw new ConstructionException(fd, e);
-        } finally {
+        }  finally {
             ipContext.finish();
         }
     }
@@ -90,8 +88,6 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
         try {
             ipContext.put("org.grouplens.grapht.injectionPoint", st.toString());
             args.set(st.getParameterIndex(), ClassInstantiator.checkNull(st, providerLoc.instantiate()));
-        } catch (Throwable th) {
-            throw new RuntimeException("MDCLog exception", th);
         } finally {
             ipContext.finish();
         }
