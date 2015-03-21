@@ -28,7 +28,7 @@ following to the dependencies section in your POM:
     <dependency>
       <groupId>org.grouplens.grapht</groupId>
       <artifactId>grapht</artifactId>
-      <version>0.10.0-BETA1</version>
+      <version>0.6.0</version>
     </dependency>
 
 ## Legal
