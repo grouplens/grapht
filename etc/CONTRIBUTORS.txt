@@ -1,0 +1,13 @@
+Grapht is copyrighted software, with the copyright held by its various authors
+and their institutions.
+
+University of Minnesota (Regents copyright)
+- Michael Ekstrand (all code until July 2014)
+- Michael Ludwig
+
+Texas State University (own copyright)
+- Michael Ekstrand
+- Mohammed-Imran Rukmoddin Kazi
+
+Others:
+- Gregor Trefs <https://github.com/gtrefs>
