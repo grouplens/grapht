@@ -99,7 +99,10 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+	public <FieldInjectionPointException extends Exception> void accept(
+															InjectionPointVisitor<FieldInjectionPointException>
+															visitor)
+															throws FieldInjectionPointException {
         visitor.visitField(this);
     }
 

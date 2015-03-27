@@ -91,7 +91,9 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+    public <ConstructorParameterException extends Exception> void accept(InjectionPointVisitor
+															      <ConstructorParameterException> visitor)
+													   			  throws ConstructorParameterException {
         visitor.visitConstructor(this);
     }
 

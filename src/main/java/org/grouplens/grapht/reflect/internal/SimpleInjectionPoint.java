@@ -59,7 +59,8 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         this.type = type;
         this.nullable = nullable;
     }
-    
+
+
     @Override
     public Class<?> getErasedType() {
         return type;
@@ -76,7 +77,9 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+    public <SimpleInjectionPointException extends Exception>  void accept(InjectionPointVisitor
+															  <SimpleInjectionPointException>
+															  visitor) throws SimpleInjectionPointException {
         visitor.visitSynthetic(this);
     }
 

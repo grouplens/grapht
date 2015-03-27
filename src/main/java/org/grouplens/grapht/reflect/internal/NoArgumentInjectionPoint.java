@@ -42,7 +42,11 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     private final transient Method method;
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+	public <NoArgumentInjectionPointException extends Exception>  void accept(
+																	   InjectionPointVisitor
+																	   <NoArgumentInjectionPointException>
+																	   visitor) throws
+																	   NoArgumentInjectionPointException {
         visitor.visitNoArgument(this);
     }
 

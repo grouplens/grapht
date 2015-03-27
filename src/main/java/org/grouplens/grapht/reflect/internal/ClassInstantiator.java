@@ -39,7 +39,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+
 
 
 /**
@@ -124,7 +124,9 @@ public class ClassInstantiator implements Instantiator {
                 d.getInjectionPoint().accept(visitor);
             } catch (InjectionException e) {
                 throw new RuntimeException("InjectionPoint Exception ", e);
-            } finally {
+            } catch (Exception e) {
+				throw new ConstructionException(d.getInjectionPoint(),e);
+			} finally {
                 globalLogContext.finish();
             }
         }

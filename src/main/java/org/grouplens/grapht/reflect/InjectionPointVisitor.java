@@ -36,15 +36,15 @@ import java.util.Map;
  * Instances of this interface are used to inspect or act on different types of injection points.
  * @see InjectionPoint#accept(InjectionPointVisitor)
  */
-public interface InjectionPointVisitor {
+public interface InjectionPointVisitor <X extends Exception> {
 
-    void visitField(FieldInjectionPoint ip) throws InjectionException;
+    void visitField(FieldInjectionPoint ip) throws X;
 
-    void visitSetter(SetterInjectionPoint ip) throws InjectionException;
+    void visitSetter(SetterInjectionPoint ip) throws X;
 
-    void visitNoArgument(NoArgumentInjectionPoint ip) throws InjectionException;
+    void visitNoArgument(NoArgumentInjectionPoint ip) throws X;
 
-    void visitConstructor(ConstructorParameterInjectionPoint ip) throws InjectionException;
+    void visitConstructor(ConstructorParameterInjectionPoint ip) throws X;
 
-    void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException;
+    void visitSynthetic(SimpleInjectionPoint ip) throws X;
 }

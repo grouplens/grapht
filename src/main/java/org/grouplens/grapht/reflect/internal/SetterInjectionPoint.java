@@ -88,7 +88,9 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+	public <SetterInjectionPointException extends Exception>  void accept(InjectionPointVisitor
+															       <SetterInjectionPointException> visitor)
+																   throws SetterInjectionPointException {
         visitor.visitSetter(this);
     }
 

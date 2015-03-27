@@ -41,7 +41,7 @@ import java.util.Map;
  *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class InjectionPointVisitorImpl implements InjectionPointVisitor {
+public class InjectionPointVisitorImpl implements InjectionPointVisitor<ConstructionException> {
     private static final Logger logger = LoggerFactory.getLogger(InjectionPointVisitorImpl.class);
 
     private Object instance;
@@ -56,7 +56,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitField(FieldInjectionPoint fd) throws InjectionException {
+    public void visitField(FieldInjectionPoint fd) throws ConstructionException {
         LogContext ipContext =  LogContext.create();
         Field field;
         Object value;
@@ -75,7 +75,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitSetter(SetterInjectionPoint st) throws InjectionException {
+    public void visitSetter(SetterInjectionPoint st) throws ConstructionException {
         ClassInstantiator.InjectionArgs args = settersAndArguments.get(st.getMember());
         Method setter = st.getMember();
         if (args == null) {
@@ -118,7 +118,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitNoArgument(NoArgumentInjectionPoint ip) throws InjectionException {
+    public void visitNoArgument(NoArgumentInjectionPoint ip) throws ConstructionException {
         Method method = null;
         LogContext ipContext = LogContext.create();
         try {
@@ -138,8 +138,8 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws InjectionException { }
+    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws ConstructionException { }
 
     @Override
-     public void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException { }
+     public void visitSynthetic(SimpleInjectionPoint ip) throws ConstructionException { }
 }
