@@ -1,0 +1,1230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>DependencySolverTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../testapidocs/org/grouplens/grapht/solver/DependencySolverTest.html">View Javadoc</a></div><pre>
+
+<a class="jxr_linenumber" name="1" href="#1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="2" href="#2">2</a>   <em class="jxr_comment"> * Grapht, an open source dependency injector.</em>
+<a class="jxr_linenumber" name="3" href="#3">3</a>   <em class="jxr_comment"> * Copyright 2010-2012 Regents of the University of Minnesota and contributors</em>
+<a class="jxr_linenumber" name="4" href="#4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="5" href="#5">5</a>   <em class="jxr_comment"> * This program is free software; you can redistribute it and/or modify</em>
+<a class="jxr_linenumber" name="6" href="#6">6</a>   <em class="jxr_comment"> * it under the terms of the GNU Lesser General Public License as</em>
+<a class="jxr_linenumber" name="7" href="#7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation; either version 2.1 of the</em>
+<a class="jxr_linenumber" name="8" href="#8">8</a>   <em class="jxr_comment"> * License, or (at your option) any later version.</em>
+<a class="jxr_linenumber" name="9" href="#9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="10" href="#10">10</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="11" href="#11">11</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</em>
+<a class="jxr_linenumber" name="12" href="#12">12</a>  <em class="jxr_comment"> * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</em>
+<a class="jxr_linenumber" name="13" href="#13">13</a>  <em class="jxr_comment"> * details.</em>
+<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License along with</em>
+<a class="jxr_linenumber" name="16" href="#16">16</a>  <em class="jxr_comment"> * this program; if not, write to the Free Software Foundation, Inc., 51</em>
+<a class="jxr_linenumber" name="17" href="#17">17</a>  <em class="jxr_comment"> * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</em>
+<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="19" href="#19">19</a>  <strong class="jxr_keyword">package</strong> org.grouplens.grapht.solver;
+<a class="jxr_linenumber" name="20" href="#20">20</a>  
+<a class="jxr_linenumber" name="21" href="#21">21</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Predicate;
+<a class="jxr_linenumber" name="22" href="#22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Predicates;
+<a class="jxr_linenumber" name="23" href="#23">23</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.*;
+<a class="jxr_linenumber" name="24" href="#24">24</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.CachePolicy;
+<a class="jxr_linenumber" name="25" href="#25">25</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.Component;
+<a class="jxr_linenumber" name="26" href="#26">26</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.Dependency;
+<a class="jxr_linenumber" name="27" href="#27">27</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.annotation.AnnotationBuilder;
+<a class="jxr_linenumber" name="28" href="#28">28</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.context.ContextElements;
+<a class="jxr_linenumber" name="29" href="#29">29</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.context.ContextMatcher;
+<a class="jxr_linenumber" name="30" href="#30">30</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.context.ContextPattern;
+<a class="jxr_linenumber" name="31" href="#31">31</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.graph.DAGEdge;
+<a class="jxr_linenumber" name="32" href="#32">32</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.graph.DAGNode;
+<a class="jxr_linenumber" name="33" href="#33">33</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.reflect.*;
+<a class="jxr_linenumber" name="34" href="#34">34</a>  <strong class="jxr_keyword">import</strong> org.junit.Assert;
+<a class="jxr_linenumber" name="35" href="#35">35</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="36" href="#36">36</a>  
+<a class="jxr_linenumber" name="37" href="#37">37</a>  <strong class="jxr_keyword">import</strong> javax.inject.Qualifier;
+<a class="jxr_linenumber" name="38" href="#38">38</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.Retention;
+<a class="jxr_linenumber" name="39" href="#39">39</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.RetentionPolicy;
+<a class="jxr_linenumber" name="40" href="#40">40</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="41" href="#41">41</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
+<a class="jxr_linenumber" name="42" href="#42">42</a>  <strong class="jxr_keyword">import</strong> java.util.HashSet;
+<a class="jxr_linenumber" name="43" href="#43">43</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
+<a class="jxr_linenumber" name="44" href="#44">44</a>  
+<a class="jxr_linenumber" name="45" href="#45">45</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.equalTo;
+<a class="jxr_linenumber" name="46" href="#46">46</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.hasSize;
+<a class="jxr_linenumber" name="47" href="#47">47</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertThat;
+<a class="jxr_linenumber" name="48" href="#48">48</a>  
+<a class="jxr_linenumber" name="49" href="#49">49</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/solver/DependencySolverTest.html">DependencySolverTest</a> {
+<a class="jxr_linenumber" name="50" href="#50">50</a>      <strong class="jxr_keyword">private</strong> DependencySolver createSolver(ListMultimap&lt;ContextMatcher, BindRule&gt; rules) {
+<a class="jxr_linenumber" name="51" href="#51">51</a>          <strong class="jxr_keyword">return</strong> DependencySolver.newBuilder()
+<a class="jxr_linenumber" name="52" href="#52">52</a>                  .addBindingFunction(<strong class="jxr_keyword">new</strong> RuleBasedBindingFunction(rules))
+<a class="jxr_linenumber" name="53" href="#53">53</a>                  .setDefaultPolicy(CachePolicy.NO_PREFERENCE)
+<a class="jxr_linenumber" name="54" href="#54">54</a>                  .setMaxDepth(100)
+<a class="jxr_linenumber" name="55" href="#55">55</a>                  .build();
+<a class="jxr_linenumber" name="56" href="#56">56</a>      }
+<a class="jxr_linenumber" name="57" href="#57">57</a>      
+<a class="jxr_linenumber" name="58" href="#58">58</a>      <em class="jxr_comment">// bypass synthetic root and return node that resolves the desire </em>
+<a class="jxr_linenumber" name="59" href="#59">59</a>      <strong class="jxr_keyword">private</strong> DAGNode&lt;Component, Dependency&gt; getRoot(DependencySolver r, Desire d) {
+<a class="jxr_linenumber" name="60" href="#60">60</a>          <strong class="jxr_keyword">return</strong> r.getGraph().getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d)).getTail();
+<a class="jxr_linenumber" name="61" href="#61">61</a>      }
+<a class="jxr_linenumber" name="62" href="#62">62</a>      
+<a class="jxr_linenumber" name="63" href="#63">63</a>      @Test
+<a class="jxr_linenumber" name="64" href="#64">64</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testCachePolicySuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="65" href="#65">65</a>          <em class="jxr_comment">// Test that satisfactions formed with different cache policies </em>
+<a class="jxr_linenumber" name="66" href="#66">66</a>          <em class="jxr_comment">// correctly restrict merging of nodes</em>
+<a class="jxr_linenumber" name="67" href="#67">67</a>          Satisfaction sa = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">new</strong> ArrayList&lt;Desire&gt;());
+<a class="jxr_linenumber" name="68" href="#68">68</a>          Desire da = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="69" href="#69">69</a>          Satisfaction sb = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(da));
+<a class="jxr_linenumber" name="70" href="#70">70</a>          
+<a class="jxr_linenumber" name="71" href="#71">71</a>          Desire ra = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sa);
+<a class="jxr_linenumber" name="72" href="#72">72</a>          Desire rb = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sb);
+<a class="jxr_linenumber" name="73" href="#73">73</a>          
+<a class="jxr_linenumber" name="74" href="#74">74</a>          ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="75" href="#75">75</a>          <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="76" href="#76">76</a>          <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="77" href="#77">77</a>          bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="78" href="#78">78</a>                       <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(da, ra).setCachePolicy(CachePolicy.MEMOIZE));
+<a class="jxr_linenumber" name="79" href="#79">79</a>          bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="80" href="#80">80</a>                       <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(da, ra).setCachePolicy(CachePolicy.NEW_INSTANCE));
+<a class="jxr_linenumber" name="81" href="#81">81</a>          
+<a class="jxr_linenumber" name="82" href="#82">82</a>          DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="83" href="#83">83</a>          r.resolve(rb);
+<a class="jxr_linenumber" name="84" href="#84">84</a>          r.resolve(da); <em class="jxr_comment">// should create a single extra sa node with different cache policy</em>
+<a class="jxr_linenumber" name="85" href="#85">85</a>  
+<a class="jxr_linenumber" name="86" href="#86">86</a>          assertThat(r.getGraph().getReachableNodes(),
+<a class="jxr_linenumber" name="87" href="#87">87</a>                     hasSize(3 + 1));
+<a class="jxr_linenumber" name="88" href="#88">88</a>  
+<a class="jxr_linenumber" name="89" href="#89">89</a>          DAGNode&lt;Component, Dependency&gt; bnode = getRoot(r, rb);
+<a class="jxr_linenumber" name="90" href="#90">90</a>          Assert.assertEquals(CachePolicy.NO_PREFERENCE, bnode.getLabel().getCachePolicy());
+<a class="jxr_linenumber" name="91" href="#91">91</a>          
+<a class="jxr_linenumber" name="92" href="#92">92</a>          DAGNode&lt;Component, Dependency&gt; adepnode = getNode(bnode, sa, da);
+<a class="jxr_linenumber" name="93" href="#93">93</a>          Assert.assertNotNull(adepnode);
+<a class="jxr_linenumber" name="94" href="#94">94</a>          Assert.assertEquals(CachePolicy.MEMOIZE, adepnode.getLabel().getCachePolicy());
+<a class="jxr_linenumber" name="95" href="#95">95</a>          
+<a class="jxr_linenumber" name="96" href="#96">96</a>          DAGNode&lt;Component, Dependency&gt; anode = getRoot(r, da);
+<a class="jxr_linenumber" name="97" href="#97">97</a>          Assert.assertNotSame(adepnode, anode);
+<a class="jxr_linenumber" name="98" href="#98">98</a>          Assert.assertEquals(CachePolicy.NEW_INSTANCE, anode.getLabel().getCachePolicy());
+<a class="jxr_linenumber" name="99" href="#99">99</a>      }
+<a class="jxr_linenumber" name="100" href="#100">100</a>     
+<a class="jxr_linenumber" name="101" href="#101">101</a>     @Test
+<a class="jxr_linenumber" name="102" href="#102">102</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testNoDependenciesSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="103" href="#103">103</a>         <em class="jxr_comment">// Test resolving a satisfaction that has no dependencies and is already satisfiable</em>
+<a class="jxr_linenumber" name="104" href="#104">104</a>         Satisfaction sat = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">new</strong> ArrayList&lt;Desire&gt;());
+<a class="jxr_linenumber" name="105" href="#105">105</a>         Desire desire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sat);
+<a class="jxr_linenumber" name="106" href="#106">106</a> 
+<a class="jxr_linenumber" name="107" href="#107">107</a>         DependencySolver r = createSolver(ArrayListMultimap.&lt;ContextMatcher, BindRule&gt;create());
+<a class="jxr_linenumber" name="108" href="#108">108</a>         r.resolve(desire);
+<a class="jxr_linenumber" name="109" href="#109">109</a>         assertThat(r.getGraph().getReachableNodes(), hasSize(2));
+<a class="jxr_linenumber" name="110" href="#110">110</a> 
+<a class="jxr_linenumber" name="111" href="#111">111</a>         DAGNode&lt;Component, Dependency&gt; node = getRoot(r, desire);
+<a class="jxr_linenumber" name="112" href="#112">112</a>         Assert.assertEquals(sat, node.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="113" href="#113">113</a>         Assert.assertTrue(node.getOutgoingEdges().isEmpty());
+<a class="jxr_linenumber" name="114" href="#114">114</a>         Assert.assertTrue(r.getGraph().getReachableNodes().contains(node));
+<a class="jxr_linenumber" name="115" href="#115">115</a>     }
+<a class="jxr_linenumber" name="116" href="#116">116</a> 
+<a class="jxr_linenumber" name="117" href="#117">117</a>     @Test
+<a class="jxr_linenumber" name="118" href="#118">118</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testSingleDependencySuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="119" href="#119">119</a>         <em class="jxr_comment">// Test resolving a satisfaction with a single dependency that is already satisfiable</em>
+<a class="jxr_linenumber" name="120" href="#120">120</a>         Satisfaction dep = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="121" href="#121">121</a>         Desire depDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(dep);
+<a class="jxr_linenumber" name="122" href="#122">122</a>         Satisfaction rootSat = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(depDesire));
+<a class="jxr_linenumber" name="123" href="#123">123</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(rootSat);
+<a class="jxr_linenumber" name="124" href="#124">124</a>         
+<a class="jxr_linenumber" name="125" href="#125">125</a>         DependencySolver r = createSolver(ArrayListMultimap.&lt;ContextMatcher, BindRule&gt;create());
+<a class="jxr_linenumber" name="126" href="#126">126</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="127" href="#127">127</a>         
+<a class="jxr_linenumber" name="128" href="#128">128</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="129" href="#129">129</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="130" href="#130">130</a>         Assert.assertEquals(rootSat, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="131" href="#131">131</a>         Assert.assertEquals(1, rootNode.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="132" href="#132">132</a>         Assert.assertEquals(dep, rootNode.getOutgoingEdges().iterator().next().getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="133" href="#133">133</a>     }
+<a class="jxr_linenumber" name="134" href="#134">134</a> 
+<a class="jxr_linenumber" name="135" href="#135">135</a>     @Test
+<a class="jxr_linenumber" name="136" href="#136">136</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testSingleDependencyChainedDesiresSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="137" href="#137">137</a>         <em class="jxr_comment">// Test resolving a satisfaction with a single dependency through multiple desires/bind rules</em>
+<a class="jxr_linenumber" name="138" href="#138">138</a>         Satisfaction dep = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="139" href="#139">139</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="140" href="#140">140</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="141" href="#141">141</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(dep);
+<a class="jxr_linenumber" name="142" href="#142">142</a>         Satisfaction root = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="143" href="#143">143</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(root);
+<a class="jxr_linenumber" name="144" href="#144">144</a>         
+<a class="jxr_linenumber" name="145" href="#145">145</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="146" href="#146">146</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="147" href="#147">147</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, d2),
+<a class="jxr_linenumber" name="148" href="#148">148</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, d3));
+<a class="jxr_linenumber" name="149" href="#149">149</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="150" href="#150">150</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="151" href="#151">151</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="152" href="#152">152</a>         
+<a class="jxr_linenumber" name="153" href="#153">153</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="154" href="#154">154</a>         Assert.assertEquals(root, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="155" href="#155">155</a>         Assert.assertEquals(1, rootNode.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="156" href="#156">156</a>         Assert.assertEquals(dep, rootNode.getOutgoingEdges().iterator().next().getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="157" href="#157">157</a>     }
+<a class="jxr_linenumber" name="158" href="#158">158</a> 
+<a class="jxr_linenumber" name="159" href="#159">159</a>     @Test
+<a class="jxr_linenumber" name="160" href="#160">160</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testMultipleSatisfiableDesiresSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="161" href="#161">161</a>         <em class="jxr_comment">// Test resolving a single satisfaction, where the chain of bind rules</em>
+<a class="jxr_linenumber" name="162" href="#162">162</a>         <em class="jxr_comment">// contains multiple satisfiable desires, and the deepest is selected</em>
+<a class="jxr_linenumber" name="163" href="#163">163</a>         Satisfaction dep = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="164" href="#164">164</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="165" href="#165">165</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Ap.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="166" href="#166">166</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="167" href="#167">167</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="168" href="#168">168</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(dep);
+<a class="jxr_linenumber" name="169" href="#169">169</a>         Satisfaction root = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="170" href="#170">170</a>         
+<a class="jxr_linenumber" name="171" href="#171">171</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="172" href="#172">172</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="173" href="#173">173</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, d2),
+<a class="jxr_linenumber" name="174" href="#174">174</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, d3));
+<a class="jxr_linenumber" name="175" href="#175">175</a> 
+<a class="jxr_linenumber" name="176" href="#176">176</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(root);
+<a class="jxr_linenumber" name="177" href="#177">177</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="178" href="#178">178</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="179" href="#179">179</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="180" href="#180">180</a> 
+<a class="jxr_linenumber" name="181" href="#181">181</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="182" href="#182">182</a>         Assert.assertEquals(root, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="183" href="#183">183</a>         Assert.assertEquals(1, rootNode.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="184" href="#184">184</a>         Assert.assertEquals(dep, rootNode.getOutgoingEdges().iterator().next().getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="185" href="#185">185</a>     }
+<a class="jxr_linenumber" name="186" href="#186">186</a>     
+<a class="jxr_linenumber" name="187" href="#187">187</a>     @Test
+<a class="jxr_linenumber" name="188" href="#188">188</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testParentReferencesGrandChildSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="189" href="#189">189</a>         <em class="jxr_comment">// Test that when a desire references a child that child's desire (2 desires total),</em>
+<a class="jxr_linenumber" name="190" href="#190">190</a>         <em class="jxr_comment">// the parent desire is resolved properly (note that a solution by walking</em>
+<a class="jxr_linenumber" name="191" href="#191">191</a>         <em class="jxr_comment">// up leaf nodes doesn't work in this case since it will encounter the parent</em>
+<a class="jxr_linenumber" name="192" href="#192">192</a>         <em class="jxr_comment">// and child at the same time).</em>
+<a class="jxr_linenumber" name="193" href="#193">193</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="194" href="#194">194</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="195" href="#195">195</a>         
+<a class="jxr_linenumber" name="196" href="#196">196</a>         Satisfaction s3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>); <em class="jxr_comment">// leaf/grandchild</em>
+<a class="jxr_linenumber" name="197" href="#197">197</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d2)); <em class="jxr_comment">// child</em>
+<a class="jxr_linenumber" name="198" href="#198">198</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2));
+<a class="jxr_linenumber" name="199" href="#199">199</a>         
+<a class="jxr_linenumber" name="200" href="#200">200</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="201" href="#201">201</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s3);
+<a class="jxr_linenumber" name="202" href="#202">202</a>         
+<a class="jxr_linenumber" name="203" href="#203">203</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="204" href="#204">204</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="205" href="#205">205</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="206" href="#206">206</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="207" href="#207">207</a>         
+<a class="jxr_linenumber" name="208" href="#208">208</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="209" href="#209">209</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="210" href="#210">210</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="211" href="#211">211</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="212" href="#212">212</a>         
+<a class="jxr_linenumber" name="213" href="#213">213</a>         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="214" href="#214">214</a>         Assert.assertEquals(s1, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="215" href="#215">215</a>         
+<a class="jxr_linenumber" name="216" href="#216">216</a>         DAGNode&lt;Component, Dependency&gt; n1 =
+<a class="jxr_linenumber" name="217" href="#217">217</a>                 getNode(r.getGraph(), Component.create(s1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="218" href="#218">218</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(s2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="219" href="#219">219</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(r.getGraph(), Component.create(s3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="220" href="#220">220</a> 
+<a class="jxr_linenumber" name="221" href="#221">221</a>         assertThat(Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))),
+<a class="jxr_linenumber" name="222" href="#222">222</a>                    hasSize(1));
+<a class="jxr_linenumber" name="223" href="#223">223</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="224" href="#224">224</a>         
+<a class="jxr_linenumber" name="225" href="#225">225</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="226" href="#226">226</a>         Assert.assertEquals(d2, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="227" href="#227">227</a>         
+<a class="jxr_linenumber" name="228" href="#228">228</a>         Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="229" href="#229">229</a>         Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="230" href="#230">230</a>     }
+<a class="jxr_linenumber" name="231" href="#231">231</a>     
+<a class="jxr_linenumber" name="232" href="#232">232</a>     @Test
+<a class="jxr_linenumber" name="233" href="#233">233</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testContextRoleMatchSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="234" href="#234">234</a>         <em class="jxr_comment">// Test that qualifiers are properly remembered in the context</em>
+<a class="jxr_linenumber" name="235" href="#235">235</a>         <em class="jxr_comment">// - note that this is different than having a qualifier-binding, that is</em>
+<a class="jxr_linenumber" name="236" href="#236">236</a>         <em class="jxr_comment">//   part of the bind rule's match implementation</em>
+<a class="jxr_linenumber" name="237" href="#237">237</a>         <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> qualifier1 = AnnotationBuilder.of(Qual.<strong class="jxr_keyword">class</strong>).setValue(0).build();
+<a class="jxr_linenumber" name="238" href="#238">238</a>         <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> qualifier2 = AnnotationBuilder.of(Qual.<strong class="jxr_keyword">class</strong>).setValue(1).build();
+<a class="jxr_linenumber" name="239" href="#239">239</a>         
+<a class="jxr_linenumber" name="240" href="#240">240</a>         Desire dr1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(<strong class="jxr_keyword">null</strong>, qualifier1);
+<a class="jxr_linenumber" name="241" href="#241">241</a>         Desire dr2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(<strong class="jxr_keyword">null</strong>, qualifier2);
+<a class="jxr_linenumber" name="242" href="#242">242</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="243" href="#243">243</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(dr1, dr2));
+<a class="jxr_linenumber" name="244" href="#244">244</a>         Satisfaction r2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d3));
+<a class="jxr_linenumber" name="245" href="#245">245</a>         Satisfaction r3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>, Arrays.asList(d3));
+<a class="jxr_linenumber" name="246" href="#246">246</a>         
+<a class="jxr_linenumber" name="247" href="#247">247</a>         Satisfaction r4 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Cp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="248" href="#248">248</a>         Satisfaction or4 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="249" href="#249">249</a>         
+<a class="jxr_linenumber" name="250" href="#250">250</a>         Desire br1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r2);
+<a class="jxr_linenumber" name="251" href="#251">251</a>         Desire br2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r3);
+<a class="jxr_linenumber" name="252" href="#252">252</a>         Desire b3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r4);
+<a class="jxr_linenumber" name="253" href="#253">253</a>         Desire ob3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(or4);
+<a class="jxr_linenumber" name="254" href="#254">254</a>         
+<a class="jxr_linenumber" name="255" href="#255">255</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="256" href="#256">256</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="257" href="#257">257</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(dr1, br1),
+<a class="jxr_linenumber" name="258" href="#258">258</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(dr2, br2));
+<a class="jxr_linenumber" name="259" href="#259">259</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = Object.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="260" href="#260">260</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.match(qualifier1);
+<a class="jxr_linenumber" name="261" href="#261">261</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="262" href="#262">262</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d3, b3));
+<a class="jxr_linenumber" name="263" href="#263">263</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type1 = Object.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="264" href="#264">264</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier3 = MockQualifierMatcher.match(qualifier2);
+<a class="jxr_linenumber" name="265" href="#265">265</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier3)),
+<a class="jxr_linenumber" name="266" href="#266">266</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d3, ob3));
+<a class="jxr_linenumber" name="267" href="#267">267</a>         
+<a class="jxr_linenumber" name="268" href="#268">268</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="269" href="#269">269</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="270" href="#270">270</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="271" href="#271">271</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="272" href="#272">272</a>         
+<a class="jxr_linenumber" name="273" href="#273">273</a>         Assert.assertEquals(5 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="274" href="#274">274</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(r1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="275" href="#275">275</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(r2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="276" href="#276">276</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(r.getGraph(), Component.create(r3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="277" href="#277">277</a>         DAGNode&lt;Component, Dependency&gt; n4 = getNode(r.getGraph(), Component.create(r4, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="278" href="#278">278</a>         DAGNode&lt;Component, Dependency&gt; on4 = getNode(r.getGraph(), Component.create(or4, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="279" href="#279">279</a> 
+<a class="jxr_linenumber" name="280" href="#280">280</a>         Assert.assertEquals(n1, rootNode);
+<a class="jxr_linenumber" name="281" href="#281">281</a>         Assert.assertEquals(2, n1.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="282" href="#282">282</a>         
+<a class="jxr_linenumber" name="283" href="#283">283</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="284" href="#284">284</a>         Assert.assertEquals(dr1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="285" href="#285">285</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="286" href="#286">286</a>         Assert.assertEquals(dr2, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="287" href="#287">287</a> 
+<a class="jxr_linenumber" name="288" href="#288">288</a>         Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n4))).size());
+<a class="jxr_linenumber" name="289" href="#289">289</a>         Assert.assertEquals(d3, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n4))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="290" href="#290">290</a>         Assert.assertEquals(1, Sets.filter(n3.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(on4))).size());
+<a class="jxr_linenumber" name="291" href="#291">291</a>         Assert.assertEquals(d3, Sets.filter(n3.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(on4))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="292" href="#292">292</a>     }
+<a class="jxr_linenumber" name="293" href="#293">293</a>     
+<a class="jxr_linenumber" name="294" href="#294">294</a>     @Test
+<a class="jxr_linenumber" name="295" href="#295">295</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testSimpleContextMatchSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="296" href="#296">296</a>         <em class="jxr_comment">// Test that a context-specific bind rule is included and selected</em>
+<a class="jxr_linenumber" name="297" href="#297">297</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="298" href="#298">298</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="299" href="#299">299</a>         Satisfaction r2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="300" href="#300">300</a>         Satisfaction or2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="301" href="#301">301</a>         
+<a class="jxr_linenumber" name="302" href="#302">302</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r2);
+<a class="jxr_linenumber" name="303" href="#303">303</a>         Desire ob1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(or2);
+<a class="jxr_linenumber" name="304" href="#304">304</a> 
+<a class="jxr_linenumber" name="305" href="#305">305</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="306" href="#306">306</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="307" href="#307">307</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1));
+<a class="jxr_linenumber" name="308" href="#308">308</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="309" href="#309">309</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="310" href="#310">310</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="311" href="#311">311</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, ob1));
+<a class="jxr_linenumber" name="312" href="#312">312</a> 
+<a class="jxr_linenumber" name="313" href="#313">313</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="314" href="#314">314</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="315" href="#315">315</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="316" href="#316">316</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="317" href="#317">317</a> 
+<a class="jxr_linenumber" name="318" href="#318">318</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="319" href="#319">319</a>         Assert.assertEquals(r1, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="320" href="#320">320</a>         Assert.assertEquals(1, rootNode.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="321" href="#321">321</a>         Assert.assertEquals(or2, rootNode.getOutgoingEdges().iterator().next().getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="322" href="#322">322</a>     }
+<a class="jxr_linenumber" name="323" href="#323">323</a>     
+<a class="jxr_linenumber" name="324" href="#324">324</a>     @Test
+<a class="jxr_linenumber" name="325" href="#325">325</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testContextClosenessMatchSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="326" href="#326">326</a>         <em class="jxr_comment">// Test that between two context bind rules, the closest is chosen</em>
+<a class="jxr_linenumber" name="327" href="#327">327</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="328" href="#328">328</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="329" href="#329">329</a>         
+<a class="jxr_linenumber" name="330" href="#330">330</a>         Satisfaction or3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Cp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="331" href="#331">331</a>         Satisfaction r3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="332" href="#332">332</a>         Satisfaction r2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d2));
+<a class="jxr_linenumber" name="333" href="#333">333</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="334" href="#334">334</a>         
+<a class="jxr_linenumber" name="335" href="#335">335</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r2);
+<a class="jxr_linenumber" name="336" href="#336">336</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r3);
+<a class="jxr_linenumber" name="337" href="#337">337</a>         Desire ob2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(or3);
+<a class="jxr_linenumber" name="338" href="#338">338</a>         
+<a class="jxr_linenumber" name="339" href="#339">339</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="340" href="#340">340</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="341" href="#341">341</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1));
+<a class="jxr_linenumber" name="342" href="#342">342</a>         <em class="jxr_comment">// for this test, CycleA is farther than B so b2 should be selected over ob2</em>
+<a class="jxr_linenumber" name="343" href="#343">343</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="344" href="#344">344</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="345" href="#345">345</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="346" href="#346">346</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, ob2));
+<a class="jxr_linenumber" name="347" href="#347">347</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type1 = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="348" href="#348">348</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier1 = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="349" href="#349">349</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier1)),
+<a class="jxr_linenumber" name="350" href="#350">350</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="351" href="#351">351</a>         
+<a class="jxr_linenumber" name="352" href="#352">352</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="353" href="#353">353</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="354" href="#354">354</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="355" href="#355">355</a>         
+<a class="jxr_linenumber" name="356" href="#356">356</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(r1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="357" href="#357">357</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(r2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="358" href="#358">358</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(r.getGraph(), Component.create(r3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="359" href="#359">359</a>         DAGNode&lt;Component, Dependency&gt; on3 = getNode(r.getGraph(), Component.create(or3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="360" href="#360">360</a> 
+<a class="jxr_linenumber" name="361" href="#361">361</a>         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="362" href="#362">362</a>         Assert.assertNotNull(n1);
+<a class="jxr_linenumber" name="363" href="#363">363</a>         Assert.assertNotNull(n2);
+<a class="jxr_linenumber" name="364" href="#364">364</a>         Assert.assertNotNull(n3);
+<a class="jxr_linenumber" name="365" href="#365">365</a>         Assert.assertNull(on3);
+<a class="jxr_linenumber" name="366" href="#366">366</a>         
+<a class="jxr_linenumber" name="367" href="#367">367</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="368" href="#368">368</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="369" href="#369">369</a> 
+<a class="jxr_linenumber" name="370" href="#370">370</a>         Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="371" href="#371">371</a>         Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="372" href="#372">372</a>     }
+<a class="jxr_linenumber" name="373" href="#373">373</a> 
+<a class="jxr_linenumber" name="374" href="#374">374</a>     @Test
+<a class="jxr_linenumber" name="375" href="#375">375</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testContextLengthMatchSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="376" href="#376">376</a>         <em class="jxr_comment">// Test that between two context bind rules, the longest is chosen</em>
+<a class="jxr_linenumber" name="377" href="#377">377</a>         <em class="jxr_comment">// if their closeness is equal</em>
+<a class="jxr_linenumber" name="378" href="#378">378</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="379" href="#379">379</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="380" href="#380">380</a>         
+<a class="jxr_linenumber" name="381" href="#381">381</a>         Satisfaction or3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Cp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="382" href="#382">382</a>         Satisfaction r3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="383" href="#383">383</a>         Satisfaction r2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d2));
+<a class="jxr_linenumber" name="384" href="#384">384</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="385" href="#385">385</a>         
+<a class="jxr_linenumber" name="386" href="#386">386</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r2);
+<a class="jxr_linenumber" name="387" href="#387">387</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r3);
+<a class="jxr_linenumber" name="388" href="#388">388</a>         Desire ob2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(or3);
+<a class="jxr_linenumber" name="389" href="#389">389</a>         
+<a class="jxr_linenumber" name="390" href="#390">390</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="391" href="#391">391</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="392" href="#392">392</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1));
+<a class="jxr_linenumber" name="393" href="#393">393</a>         <em class="jxr_comment">// for this test, AB is longer than CycleA so b2 is selected over ob2</em>
+<a class="jxr_linenumber" name="394" href="#394">394</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="395" href="#395">395</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="396" href="#396">396</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="397" href="#397">397</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, ob2));
+<a class="jxr_linenumber" name="398" href="#398">398</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type1 = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="399" href="#399">399</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier1 = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="400" href="#400">400</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type2 = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="401" href="#401">401</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier2 = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="402" href="#402">402</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier1), ContextElements.matchType(type2, qualifier2)
+<a class="jxr_linenumber" name="403" href="#403">403</a>         ),
+<a class="jxr_linenumber" name="404" href="#404">404</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="405" href="#405">405</a>         
+<a class="jxr_linenumber" name="406" href="#406">406</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="407" href="#407">407</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="408" href="#408">408</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="409" href="#409">409</a>         
+<a class="jxr_linenumber" name="410" href="#410">410</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(r1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="411" href="#411">411</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(r2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="412" href="#412">412</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(r.getGraph(), Component.create(r3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="413" href="#413">413</a>         DAGNode&lt;Component, Dependency&gt; on3 = getNode(r.getGraph(), Component.create(or3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="414" href="#414">414</a> 
+<a class="jxr_linenumber" name="415" href="#415">415</a>         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="416" href="#416">416</a>         Assert.assertNotNull(n1);
+<a class="jxr_linenumber" name="417" href="#417">417</a>         Assert.assertNotNull(n2);
+<a class="jxr_linenumber" name="418" href="#418">418</a>         Assert.assertNotNull(n3);
+<a class="jxr_linenumber" name="419" href="#419">419</a>         Assert.assertNull(on3);
+<a class="jxr_linenumber" name="420" href="#420">420</a>         
+<a class="jxr_linenumber" name="421" href="#421">421</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="422" href="#422">422</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="423" href="#423">423</a> 
+<a class="jxr_linenumber" name="424" href="#424">424</a>         Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="425" href="#425">425</a>         Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="426" href="#426">426</a>     }
+<a class="jxr_linenumber" name="427" href="#427">427</a>     
+<a class="jxr_linenumber" name="428" href="#428">428</a>     @Test
+<a class="jxr_linenumber" name="429" href="#429">429</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testIgnoreDefaultContextBindingSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="430" href="#430">430</a>         <em class="jxr_comment">// Test that a specific context binding is preferred over a valid default</em>
+<a class="jxr_linenumber" name="431" href="#431">431</a>         <em class="jxr_comment">// context binding for the same type. This can be inferred from the above</em>
+<a class="jxr_linenumber" name="432" href="#432">432</a>         <em class="jxr_comment">// tests but it is nice to ensure it works as expected</em>
+<a class="jxr_linenumber" name="433" href="#433">433</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="434" href="#434">434</a>         
+<a class="jxr_linenumber" name="435" href="#435">435</a>         Satisfaction or2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="436" href="#436">436</a>         Satisfaction r2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="437" href="#437">437</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="438" href="#438">438</a>         
+<a class="jxr_linenumber" name="439" href="#439">439</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r2);
+<a class="jxr_linenumber" name="440" href="#440">440</a>         Desire ob1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(or2);
+<a class="jxr_linenumber" name="441" href="#441">441</a>         
+<a class="jxr_linenumber" name="442" href="#442">442</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="443" href="#443">443</a>         <em class="jxr_comment">// for this test, CycleA is more specific than default, so b2 is selected</em>
+<a class="jxr_linenumber" name="444" href="#444">444</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="445" href="#445">445</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, ob1));
+<a class="jxr_linenumber" name="446" href="#446">446</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="447" href="#447">447</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="448" href="#448">448</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="449" href="#449">449</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1));
+<a class="jxr_linenumber" name="450" href="#450">450</a>         
+<a class="jxr_linenumber" name="451" href="#451">451</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="452" href="#452">452</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="453" href="#453">453</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="454" href="#454">454</a>         
+<a class="jxr_linenumber" name="455" href="#455">455</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(r1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="456" href="#456">456</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(r2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="457" href="#457">457</a>         DAGNode&lt;Component, Dependency&gt; on2 = getNode(r.getGraph(), Component.create(or2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="458" href="#458">458</a> 
+<a class="jxr_linenumber" name="459" href="#459">459</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="460" href="#460">460</a>         Assert.assertNotNull(n1);
+<a class="jxr_linenumber" name="461" href="#461">461</a>         Assert.assertNotNull(n2);
+<a class="jxr_linenumber" name="462" href="#462">462</a>         Assert.assertNull(on2);
+<a class="jxr_linenumber" name="463" href="#463">463</a>         
+<a class="jxr_linenumber" name="464" href="#464">464</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="465" href="#465">465</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="466" href="#466">466</a>     }
+<a class="jxr_linenumber" name="467" href="#467">467</a> 
+<a class="jxr_linenumber" name="468" href="#468">468</a>     @Test
+<a class="jxr_linenumber" name="469" href="#469">469</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testMultipleDependenciesSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="470" href="#470">470</a>         <em class="jxr_comment">// Test that a satisfaction with multiple dependencies is correctly resolved</em>
+<a class="jxr_linenumber" name="471" href="#471">471</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="472" href="#472">472</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="473" href="#473">473</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="474" href="#474">474</a>         
+<a class="jxr_linenumber" name="475" href="#475">475</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2, d3));
+<a class="jxr_linenumber" name="476" href="#476">476</a>         Satisfaction sd1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="477" href="#477">477</a>         Satisfaction sd2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="478" href="#478">478</a>         Satisfaction sd3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Cp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="479" href="#479">479</a>         
+<a class="jxr_linenumber" name="480" href="#480">480</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd1);
+<a class="jxr_linenumber" name="481" href="#481">481</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd2);
+<a class="jxr_linenumber" name="482" href="#482">482</a>         Desire b3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd3);
+<a class="jxr_linenumber" name="483" href="#483">483</a>         
+<a class="jxr_linenumber" name="484" href="#484">484</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="485" href="#485">485</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="486" href="#486">486</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="487" href="#487">487</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2),
+<a class="jxr_linenumber" name="488" href="#488">488</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d3, b3));
+<a class="jxr_linenumber" name="489" href="#489">489</a>         
+<a class="jxr_linenumber" name="490" href="#490">490</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="491" href="#491">491</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="492" href="#492">492</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="493" href="#493">493</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="494" href="#494">494</a>         
+<a class="jxr_linenumber" name="495" href="#495">495</a>         Assert.assertEquals(4 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="496" href="#496">496</a>         Assert.assertEquals(r1, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="497" href="#497">497</a>         Assert.assertEquals(3, rootNode.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="498" href="#498">498</a>         
+<a class="jxr_linenumber" name="499" href="#499">499</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(sd1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="500" href="#500">500</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(sd2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="501" href="#501">501</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(r.getGraph(), Component.create(sd3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="502" href="#502">502</a>         
+<a class="jxr_linenumber" name="503" href="#503">503</a>         Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n1))).size());
+<a class="jxr_linenumber" name="504" href="#504">504</a>         Assert.assertEquals(d1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n1))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="505" href="#505">505</a>         
+<a class="jxr_linenumber" name="506" href="#506">506</a>         Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="507" href="#507">507</a>         Assert.assertEquals(d2, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="508" href="#508">508</a>         
+<a class="jxr_linenumber" name="509" href="#509">509</a>         Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="510" href="#510">510</a>         Assert.assertEquals(d3, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="511" href="#511">511</a>     }
+<a class="jxr_linenumber" name="512" href="#512">512</a> 
+<a class="jxr_linenumber" name="513" href="#513">513</a>     @Test
+<a class="jxr_linenumber" name="514" href="#514">514</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testMultipleRootsSharedDependencySuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="515" href="#515">515</a>         <em class="jxr_comment">// Test multiple root desires that resolve to nodes that share</em>
+<a class="jxr_linenumber" name="516" href="#516">516</a>         <em class="jxr_comment">// a dependency, and verify that the resolved dependency is the same DAGNode&lt;Component, DesireChain&gt;</em>
+<a class="jxr_linenumber" name="517" href="#517">517</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="518" href="#518">518</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="519" href="#519">519</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="520" href="#520">520</a>         
+<a class="jxr_linenumber" name="521" href="#521">521</a>         Satisfaction r1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2, d3));
+<a class="jxr_linenumber" name="522" href="#522">522</a>         Satisfaction sd1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="523" href="#523">523</a>         
+<a class="jxr_linenumber" name="524" href="#524">524</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd1);
+<a class="jxr_linenumber" name="525" href="#525">525</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd1);
+<a class="jxr_linenumber" name="526" href="#526">526</a>         Desire b3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd1);
+<a class="jxr_linenumber" name="527" href="#527">527</a> 
+<a class="jxr_linenumber" name="528" href="#528">528</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="529" href="#529">529</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="530" href="#530">530</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="531" href="#531">531</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2),
+<a class="jxr_linenumber" name="532" href="#532">532</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d3, b3));
+<a class="jxr_linenumber" name="533" href="#533">533</a>         
+<a class="jxr_linenumber" name="534" href="#534">534</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(r1);
+<a class="jxr_linenumber" name="535" href="#535">535</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="536" href="#536">536</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="537" href="#537">537</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="538" href="#538">538</a>         
+<a class="jxr_linenumber" name="539" href="#539">539</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="540" href="#540">540</a>         Assert.assertEquals(r1, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="541" href="#541">541</a>         Assert.assertEquals(3, rootNode.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="542" href="#542">542</a>         
+<a class="jxr_linenumber" name="543" href="#543">543</a>         Set&lt;Desire&gt; edges = <strong class="jxr_keyword">new</strong> HashSet&lt;Desire&gt;();
+<a class="jxr_linenumber" name="544" href="#544">544</a>         <strong class="jxr_keyword">for</strong> (DAGEdge&lt;Component, Dependency&gt; e: rootNode.getOutgoingEdges()) {
+<a class="jxr_linenumber" name="545" href="#545">545</a>             Assert.assertEquals(sd1, e.getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="546" href="#546">546</a>             edges.add(e.getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="547" href="#547">547</a>         }
+<a class="jxr_linenumber" name="548" href="#548">548</a>         
+<a class="jxr_linenumber" name="549" href="#549">549</a>         Assert.assertTrue(edges.contains(d1));
+<a class="jxr_linenumber" name="550" href="#550">550</a>         Assert.assertTrue(edges.contains(d2));
+<a class="jxr_linenumber" name="551" href="#551">551</a>         Assert.assertTrue(edges.contains(d3));
+<a class="jxr_linenumber" name="552" href="#552">552</a>     }
+<a class="jxr_linenumber" name="553" href="#553">553</a> 
+<a class="jxr_linenumber" name="554" href="#554">554</a>     @Test
+<a class="jxr_linenumber" name="555" href="#555">555</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testChainedDependenciesSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="556" href="#556">556</a>         <em class="jxr_comment">// Test multiple levels of dependencies</em>
+<a class="jxr_linenumber" name="557" href="#557">557</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="558" href="#558">558</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="559" href="#559">559</a>         
+<a class="jxr_linenumber" name="560" href="#560">560</a>         Satisfaction s3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="561" href="#561">561</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d2));
+<a class="jxr_linenumber" name="562" href="#562">562</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="563" href="#563">563</a>         
+<a class="jxr_linenumber" name="564" href="#564">564</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="565" href="#565">565</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s3);
+<a class="jxr_linenumber" name="566" href="#566">566</a>         
+<a class="jxr_linenumber" name="567" href="#567">567</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="568" href="#568">568</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="569" href="#569">569</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="570" href="#570">570</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="571" href="#571">571</a>         
+<a class="jxr_linenumber" name="572" href="#572">572</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="573" href="#573">573</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="574" href="#574">574</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="575" href="#575">575</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="576" href="#576">576</a>         
+<a class="jxr_linenumber" name="577" href="#577">577</a>         Assert.assertEquals(3 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="578" href="#578">578</a>         Assert.assertEquals(s1, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="579" href="#579">579</a>         
+<a class="jxr_linenumber" name="580" href="#580">580</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(s1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="581" href="#581">581</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(s2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="582" href="#582">582</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(r.getGraph(), Component.create(s3, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="583" href="#583">583</a>         
+<a class="jxr_linenumber" name="584" href="#584">584</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="585" href="#585">585</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="586" href="#586">586</a>         
+<a class="jxr_linenumber" name="587" href="#587">587</a>         Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
+<a class="jxr_linenumber" name="588" href="#588">588</a>         Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="589" href="#589">589</a>     }
+<a class="jxr_linenumber" name="590" href="#590">590</a> 
+<a class="jxr_linenumber" name="591" href="#591">591</a>     @Test
+<a class="jxr_linenumber" name="592" href="#592">592</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testComplexDependenciesSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="593" href="#593">593</a>         <em class="jxr_comment">// Test a contrived example of a reasonably complex dependency scenario</em>
+<a class="jxr_linenumber" name="594" href="#594">594</a>         <em class="jxr_comment">// that tests contexts, qualifiers, shared, and split nodes</em>
+<a class="jxr_linenumber" name="595" href="#595">595</a>         <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> r1 = AnnotationBuilder.of(Qual.<strong class="jxr_keyword">class</strong>).setValue(0).build();
+<a class="jxr_linenumber" name="596" href="#596">596</a>         <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> r2 = AnnotationBuilder.of(Qual.<strong class="jxr_keyword">class</strong>).setValue(1).build();
+<a class="jxr_linenumber" name="597" href="#597">597</a>         <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> r3 = AnnotationBuilder.of(Qual.<strong class="jxr_keyword">class</strong>).setValue(2).build();
+<a class="jxr_linenumber" name="598" href="#598">598</a>         <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> r4 = AnnotationBuilder.of(Qual.<strong class="jxr_keyword">class</strong>).setValue(3).build();
+<a class="jxr_linenumber" name="599" href="#599">599</a>         
+<a class="jxr_linenumber" name="600" href="#600">600</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(<strong class="jxr_keyword">null</strong>, r1);
+<a class="jxr_linenumber" name="601" href="#601">601</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(<strong class="jxr_keyword">null</strong>, r2);
+<a class="jxr_linenumber" name="602" href="#602">602</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(<strong class="jxr_keyword">null</strong>, r3);
+<a class="jxr_linenumber" name="603" href="#603">603</a>         Desire d4 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(<strong class="jxr_keyword">null</strong>, r4);
+<a class="jxr_linenumber" name="604" href="#604">604</a>         Desire d5 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="605" href="#605">605</a>         Desire d6 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="606" href="#606">606</a>         Desire d7 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="607" href="#607">607</a>         
+<a class="jxr_linenumber" name="608" href="#608">608</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2));
+<a class="jxr_linenumber" name="609" href="#609">609</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d3, d4));
+<a class="jxr_linenumber" name="610" href="#610">610</a>         Satisfaction s3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>, Arrays.asList(d5));
+<a class="jxr_linenumber" name="611" href="#611">611</a>         Satisfaction s4 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(D.<strong class="jxr_keyword">class</strong>, Arrays.asList(d6));
+<a class="jxr_linenumber" name="612" href="#612">612</a>         Satisfaction s5 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(E.<strong class="jxr_keyword">class</strong>, Arrays.asList(d7));
+<a class="jxr_linenumber" name="613" href="#613">613</a>         Satisfaction s6 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(F.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="614" href="#614">614</a>         Satisfaction s7 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(G.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="615" href="#615">615</a>         
+<a class="jxr_linenumber" name="616" href="#616">616</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="617" href="#617">617</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s3);
+<a class="jxr_linenumber" name="618" href="#618">618</a>         Desire b3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s4);
+<a class="jxr_linenumber" name="619" href="#619">619</a>         Desire b4 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s5);
+<a class="jxr_linenumber" name="620" href="#620">620</a>         Desire b5 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s6);
+<a class="jxr_linenumber" name="621" href="#621">621</a>         Desire b6 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s7);
+<a class="jxr_linenumber" name="622" href="#622">622</a>         
+<a class="jxr_linenumber" name="623" href="#623">623</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="624" href="#624">624</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="625" href="#625">625</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1), <em class="jxr_comment">// d1 -&gt; s2</em>
+<a class="jxr_linenumber" name="626" href="#626">626</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b1), <em class="jxr_comment">// d2 -&gt; s2</em>
+<a class="jxr_linenumber" name="627" href="#627">627</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d3, b3), <em class="jxr_comment">// d3 -&gt; s4</em>
+<a class="jxr_linenumber" name="628" href="#628">628</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d4, b3), <em class="jxr_comment">// d4 -&gt; s4</em>
+<a class="jxr_linenumber" name="629" href="#629">629</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d5, b4), <em class="jxr_comment">// d5 -&gt; s5</em>
+<a class="jxr_linenumber" name="630" href="#630">630</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d6, b4), <em class="jxr_comment">// d6 -&gt; s5</em>
+<a class="jxr_linenumber" name="631" href="#631">631</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d7, b5)); <em class="jxr_comment">// d7 -&gt; s6</em>
+<a class="jxr_linenumber" name="632" href="#632">632</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="633" href="#633">633</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.match(r1);
+<a class="jxr_linenumber" name="634" href="#634">634</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="635" href="#635">635</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d3, b2)); <em class="jxr_comment">// r1s1:d3 -&gt; s3</em>
+<a class="jxr_linenumber" name="636" href="#636">636</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type1 = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="637" href="#637">637</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier1 = MockQualifierMatcher.match(r2);
+<a class="jxr_linenumber" name="638" href="#638">638</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type2 = D.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="639" href="#639">639</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier2 = MockQualifierMatcher.match(r4);
+<a class="jxr_linenumber" name="640" href="#640">640</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type1, qualifier1),
+<a class="jxr_linenumber" name="641" href="#641">641</a>                                                 ContextElements.matchType(type2, qualifier2)
+<a class="jxr_linenumber" name="642" href="#642">642</a>         ),
+<a class="jxr_linenumber" name="643" href="#643">643</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d7, b6)); <em class="jxr_comment">// r2s1,r4s2:d7 -&gt; s7</em>
+<a class="jxr_linenumber" name="644" href="#644">644</a>         
+<a class="jxr_linenumber" name="645" href="#645">645</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="646" href="#646">646</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="647" href="#647">647</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="648" href="#648">648</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="649" href="#649">649</a>         
+<a class="jxr_linenumber" name="650" href="#650">650</a>         <em class="jxr_comment">// there are 10 nodes, s2, s4 and s5 are duplicated</em>
+<a class="jxr_linenumber" name="651" href="#651">651</a>         Assert.assertEquals(10 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="652" href="#652">652</a>         
+<a class="jxr_linenumber" name="653" href="#653">653</a>         <em class="jxr_comment">// grab all of the nodes in the graph</em>
+<a class="jxr_linenumber" name="654" href="#654">654</a>         DAGNode&lt;Component, Dependency&gt; n1 = rootNode;
+<a class="jxr_linenumber" name="655" href="#655">655</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(n1, s2, d1);
+<a class="jxr_linenumber" name="656" href="#656">656</a>         DAGNode&lt;Component, Dependency&gt; on2 = getNode(n1, s2, d2);
+<a class="jxr_linenumber" name="657" href="#657">657</a>         DAGNode&lt;Component, Dependency&gt; n3 = getNode(n2, s3, d3);
+<a class="jxr_linenumber" name="658" href="#658">658</a>         DAGNode&lt;Component, Dependency&gt; n4 = getNode(n2, s4, d4);
+<a class="jxr_linenumber" name="659" href="#659">659</a>         DAGNode&lt;Component, Dependency&gt; on4 = getNode(on2, s4, d3); <em class="jxr_comment">// should equal n4</em>
+<a class="jxr_linenumber" name="660" href="#660">660</a>         DAGNode&lt;Component, Dependency&gt; oon4 = getNode(on2, s4, d4); <em class="jxr_comment">// should not equal n4 and on4</em>
+<a class="jxr_linenumber" name="661" href="#661">661</a>         DAGNode&lt;Component, Dependency&gt; n5 = getNode(n3, s5, d5);
+<a class="jxr_linenumber" name="662" href="#662">662</a>         DAGNode&lt;Component, Dependency&gt; on5 = getNode(on4, s5, d6); <em class="jxr_comment">// should equal n5</em>
+<a class="jxr_linenumber" name="663" href="#663">663</a>         DAGNode&lt;Component, Dependency&gt; oon5 = getNode(oon4, s5, d6); <em class="jxr_comment">// should not equal n5 and on5</em>
+<a class="jxr_linenumber" name="664" href="#664">664</a>         DAGNode&lt;Component, Dependency&gt; n6 = getNode(n5, s6, d7);
+<a class="jxr_linenumber" name="665" href="#665">665</a>         DAGNode&lt;Component, Dependency&gt; n7 = getNode(oon5, s7, d7);
+<a class="jxr_linenumber" name="666" href="#666">666</a>         
+<a class="jxr_linenumber" name="667" href="#667">667</a>         <em class="jxr_comment">// make sure that node states are as expected, if they're not null then</em>
+<a class="jxr_linenumber" name="668" href="#668">668</a>         <em class="jxr_comment">// they match the satisfaction and desire in the query</em>
+<a class="jxr_linenumber" name="669" href="#669">669</a>         Assert.assertTrue(n1 != <strong class="jxr_keyword">null</strong> &amp;&amp; n2 != <strong class="jxr_keyword">null</strong> &amp;&amp; n3 != <strong class="jxr_keyword">null</strong> &amp;&amp; n4 != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="670" href="#670">670</a>                           &amp;&amp; n5 != <strong class="jxr_keyword">null</strong> &amp;&amp; n6 != <strong class="jxr_keyword">null</strong> &amp;&amp; n7 != <strong class="jxr_keyword">null</strong> &amp;&amp; on2 != <strong class="jxr_keyword">null</strong> 
+<a class="jxr_linenumber" name="671" href="#671">671</a>                           &amp;&amp; on4 != <strong class="jxr_keyword">null</strong> &amp;&amp; on5 != <strong class="jxr_keyword">null</strong> &amp;&amp; oon4 != <strong class="jxr_keyword">null</strong> &amp;&amp; oon5 != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="672" href="#672">672</a>         Assert.assertNotSame(n2, on2);
+<a class="jxr_linenumber" name="673" href="#673">673</a>         Assert.assertSame(n4, on4);
+<a class="jxr_linenumber" name="674" href="#674">674</a>         Assert.assertSame(n5, on5);
+<a class="jxr_linenumber" name="675" href="#675">675</a>         Assert.assertNotSame(n4, oon4);
+<a class="jxr_linenumber" name="676" href="#676">676</a>         Assert.assertNotSame(n5, oon5);
+<a class="jxr_linenumber" name="677" href="#677">677</a>         
+<a class="jxr_linenumber" name="678" href="#678">678</a>         <em class="jxr_comment">// make sure there aren't any extra edges</em>
+<a class="jxr_linenumber" name="679" href="#679">679</a>         Assert.assertEquals(2, n1.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="680" href="#680">680</a>         Assert.assertEquals(2, n2.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="681" href="#681">681</a>         Assert.assertEquals(2, on2.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="682" href="#682">682</a>         Assert.assertEquals(1, n3.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="683" href="#683">683</a>         Assert.assertEquals(1, n4.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="684" href="#684">684</a>         Assert.assertEquals(1, oon4.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="685" href="#685">685</a>         Assert.assertEquals(1, n5.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="686" href="#686">686</a>         Assert.assertEquals(1, oon5.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="687" href="#687">687</a>         Assert.assertEquals(0, n6.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="688" href="#688">688</a>         Assert.assertEquals(0, n7.getOutgoingEdges().size());
+<a class="jxr_linenumber" name="689" href="#689">689</a>         
+<a class="jxr_linenumber" name="690" href="#690">690</a>         <em class="jxr_comment">// special case for root (since the graph adds a synthetic root)</em>
+<a class="jxr_linenumber" name="691" href="#691">691</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n1).size());
+<a class="jxr_linenumber" name="692" href="#692">692</a>         assertThat(r.getGraph().getIncomingEdges(n1).iterator().next().getHead().getLabel(),
+<a class="jxr_linenumber" name="693" href="#693">693</a>                    equalTo(DependencySolver.ROOT_SATISFACTION));
+<a class="jxr_linenumber" name="694" href="#694">694</a> 
+<a class="jxr_linenumber" name="695" href="#695">695</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n2).size());
+<a class="jxr_linenumber" name="696" href="#696">696</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(on2).size());
+<a class="jxr_linenumber" name="697" href="#697">697</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n3).size());
+<a class="jxr_linenumber" name="698" href="#698">698</a>         Assert.assertEquals(2, r.getGraph().getIncomingEdges(n4).size());
+<a class="jxr_linenumber" name="699" href="#699">699</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(oon4).size());
+<a class="jxr_linenumber" name="700" href="#700">700</a>         Assert.assertEquals(2, r.getGraph().getIncomingEdges(n5).size());
+<a class="jxr_linenumber" name="701" href="#701">701</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(oon5).size());
+<a class="jxr_linenumber" name="702" href="#702">702</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n6).size());
+<a class="jxr_linenumber" name="703" href="#703">703</a>         Assert.assertEquals(1, r.getGraph().getIncomingEdges(n7).size());
+<a class="jxr_linenumber" name="704" href="#704">704</a>     }
+<a class="jxr_linenumber" name="705" href="#705">705</a>     
+<a class="jxr_linenumber" name="706" href="#706">706</a>     @Test
+<a class="jxr_linenumber" name="707" href="#707">707</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testContextBreakingCycleSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="708" href="#708">708</a>         <em class="jxr_comment">// Test that a context that is activated after a certain number of</em>
+<a class="jxr_linenumber" name="709" href="#709">709</a>         <em class="jxr_comment">// cycles within a dependency can break out of the cycle and finish resolving</em>
+<a class="jxr_linenumber" name="710" href="#710">710</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="711" href="#711">711</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="712" href="#712">712</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="713" href="#713">713</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d2));
+<a class="jxr_linenumber" name="714" href="#714">714</a>         Satisfaction os2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="715" href="#715">715</a>         
+<a class="jxr_linenumber" name="716" href="#716">716</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="717" href="#717">717</a>         Desire ob1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(os2);
+<a class="jxr_linenumber" name="718" href="#718">718</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="719" href="#719">719</a>         
+<a class="jxr_linenumber" name="720" href="#720">720</a>         <em class="jxr_comment">// configure bindings so that s1 and s2 cycle for a couple of iterations</em>
+<a class="jxr_linenumber" name="721" href="#721">721</a>         <em class="jxr_comment">// until the context s2/s2 is reached, then switches to os2</em>
+<a class="jxr_linenumber" name="722" href="#722">722</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="723" href="#723">723</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="724" href="#724">724</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="725" href="#725">725</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="726" href="#726">726</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="727" href="#727">727</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="728" href="#728">728</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type1 = B.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="729" href="#729">729</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier1 = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="730" href="#730">730</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier),
+<a class="jxr_linenumber" name="731" href="#731">731</a>                                                 ContextElements.matchType(type1, qualifier1)
+<a class="jxr_linenumber" name="732" href="#732">732</a>         ),
+<a class="jxr_linenumber" name="733" href="#733">733</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, ob1));
+<a class="jxr_linenumber" name="734" href="#734">734</a>         
+<a class="jxr_linenumber" name="735" href="#735">735</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="736" href="#736">736</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="737" href="#737">737</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="738" href="#738">738</a>         DAGNode&lt;Component, Dependency&gt; rootNode = getRoot(r, rootDesire);
+<a class="jxr_linenumber" name="739" href="#739">739</a>         
+<a class="jxr_linenumber" name="740" href="#740">740</a>         <em class="jxr_comment">// the resulting graph should be s1-&gt;s2-&gt;s1-&gt;s2-&gt;s1-&gt;os2 = 6 nodes</em>
+<a class="jxr_linenumber" name="741" href="#741">741</a>         Assert.assertEquals(6 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="742" href="#742">742</a>         Assert.assertEquals(s1, rootNode.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="743" href="#743">743</a>         
+<a class="jxr_linenumber" name="744" href="#744">744</a>         <em class="jxr_comment">// edge s1-&gt;s2 by d1</em>
+<a class="jxr_linenumber" name="745" href="#745">745</a>         Set&lt;DAGEdge&lt;Component, Dependency&gt;&gt; edges = rootNode.getOutgoingEdges();
+<a class="jxr_linenumber" name="746" href="#746">746</a>         Assert.assertEquals(1, edges.size());
+<a class="jxr_linenumber" name="747" href="#747">747</a>         DAGEdge&lt;Component, Dependency&gt; e1 = edges.iterator().next();
+<a class="jxr_linenumber" name="748" href="#748">748</a>         Assert.assertEquals(s2, e1.getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="749" href="#749">749</a>         Assert.assertEquals(d1, e1.getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="750" href="#750">750</a>         
+<a class="jxr_linenumber" name="751" href="#751">751</a>         <em class="jxr_comment">// edge s2-&gt;s1 by d2</em>
+<a class="jxr_linenumber" name="752" href="#752">752</a>         edges = e1.getTail().getOutgoingEdges();
+<a class="jxr_linenumber" name="753" href="#753">753</a>         Assert.assertEquals(1, edges.size());
+<a class="jxr_linenumber" name="754" href="#754">754</a>         DAGEdge&lt;Component, Dependency&gt; e2 = edges.iterator().next();
+<a class="jxr_linenumber" name="755" href="#755">755</a>         Assert.assertEquals(s1, e2.getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="756" href="#756">756</a>         Assert.assertEquals(d2, e2.getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="757" href="#757">757</a>         
+<a class="jxr_linenumber" name="758" href="#758">758</a>         <em class="jxr_comment">// edge s1-&gt;s2 by d1</em>
+<a class="jxr_linenumber" name="759" href="#759">759</a>         edges = e2.getTail().getOutgoingEdges();
+<a class="jxr_linenumber" name="760" href="#760">760</a>         Assert.assertEquals(1, edges.size());
+<a class="jxr_linenumber" name="761" href="#761">761</a>         DAGEdge&lt;Component, Dependency&gt; e3 = edges.iterator().next();
+<a class="jxr_linenumber" name="762" href="#762">762</a>         Assert.assertEquals(s2, e3.getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="763" href="#763">763</a>         Assert.assertEquals(d1, e3.getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="764" href="#764">764</a>         
+<a class="jxr_linenumber" name="765" href="#765">765</a>         <em class="jxr_comment">// edge s2-&gt;s1 by d2</em>
+<a class="jxr_linenumber" name="766" href="#766">766</a>         edges = e3.getTail().getOutgoingEdges();
+<a class="jxr_linenumber" name="767" href="#767">767</a>         Assert.assertEquals(1, edges.size());
+<a class="jxr_linenumber" name="768" href="#768">768</a>         DAGEdge&lt;Component, Dependency&gt; e4 = edges.iterator().next();
+<a class="jxr_linenumber" name="769" href="#769">769</a>         Assert.assertEquals(s1, e4.getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="770" href="#770">770</a>         Assert.assertEquals(d2, e4.getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="771" href="#771">771</a>         
+<a class="jxr_linenumber" name="772" href="#772">772</a>         <em class="jxr_comment">// edge s1-&gt;os2 by d1</em>
+<a class="jxr_linenumber" name="773" href="#773">773</a>         edges = e4.getTail().getOutgoingEdges();
+<a class="jxr_linenumber" name="774" href="#774">774</a>         Assert.assertEquals(1, edges.size());
+<a class="jxr_linenumber" name="775" href="#775">775</a>         DAGEdge&lt;Component, Dependency&gt; e5 = edges.iterator().next();
+<a class="jxr_linenumber" name="776" href="#776">776</a>         Assert.assertEquals(os2, e5.getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="777" href="#777">777</a>         Assert.assertEquals(d1, e5.getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="778" href="#778">778</a>         
+<a class="jxr_linenumber" name="779" href="#779">779</a>         Assert.assertTrue(e5.getTail().getOutgoingEdges().isEmpty());
+<a class="jxr_linenumber" name="780" href="#780">780</a>     }
+<a class="jxr_linenumber" name="781" href="#781">781</a>     
+<a class="jxr_linenumber" name="782" href="#782">782</a>     @Test
+<a class="jxr_linenumber" name="783" href="#783">783</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testTooManyChoicesFilteredByContextSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="784" href="#784">784</a>         <em class="jxr_comment">// Test when too many choices exist, but are limited in scope by contexts</em>
+<a class="jxr_linenumber" name="785" href="#785">785</a>         <em class="jxr_comment">// that do not apply, the resolving will succeed</em>
+<a class="jxr_linenumber" name="786" href="#786">786</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="787" href="#787">787</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="788" href="#788">788</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="789" href="#789">789</a>         Satisfaction os2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="790" href="#790">790</a>         
+<a class="jxr_linenumber" name="791" href="#791">791</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="792" href="#792">792</a>         Desire ob1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(os2);
+<a class="jxr_linenumber" name="793" href="#793">793</a>         
+<a class="jxr_linenumber" name="794" href="#794">794</a>         <em class="jxr_comment">// configure bindings so that d1 has two solutions, but 1 is only active</em>
+<a class="jxr_linenumber" name="795" href="#795">795</a>         <em class="jxr_comment">// within a Bp context (which is not possible in this case)</em>
+<a class="jxr_linenumber" name="796" href="#796">796</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="797" href="#797">797</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="798" href="#798">798</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1));
+<a class="jxr_linenumber" name="799" href="#799">799</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = Bp.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="800" href="#800">800</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="801" href="#801">801</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="802" href="#802">802</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, ob1));
+<a class="jxr_linenumber" name="803" href="#803">803</a>         
+<a class="jxr_linenumber" name="804" href="#804">804</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="805" href="#805">805</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="806" href="#806">806</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="807" href="#807">807</a>         
+<a class="jxr_linenumber" name="808" href="#808">808</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="809" href="#809">809</a>         
+<a class="jxr_linenumber" name="810" href="#810">810</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(s1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="811" href="#811">811</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(s2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="812" href="#812">812</a>         
+<a class="jxr_linenumber" name="813" href="#813">813</a>         Assert.assertNotNull(n1);
+<a class="jxr_linenumber" name="814" href="#814">814</a>         Assert.assertNotNull(n2);
+<a class="jxr_linenumber" name="815" href="#815">815</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="816" href="#816">816</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="817" href="#817">817</a>     }
+<a class="jxr_linenumber" name="818" href="#818">818</a> 
+<a class="jxr_linenumber" name="819" href="#819">819</a>     @Test
+<a class="jxr_linenumber" name="820" href="#820">820</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testLimitedBindRuleApplicationsSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="821" href="#821">821</a>         <em class="jxr_comment">// Test that a bind-rule is properly excluded from subsequent desires</em>
+<a class="jxr_linenumber" name="822" href="#822">822</a>         <em class="jxr_comment">// when resolving a desire chain, but a final desire can still be found</em>
+<a class="jxr_linenumber" name="823" href="#823">823</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="824" href="#824">824</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="825" href="#825">825</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="826" href="#826">826</a>         
+<a class="jxr_linenumber" name="827" href="#827">827</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="828" href="#828">828</a>         
+<a class="jxr_linenumber" name="829" href="#829">829</a>         <em class="jxr_comment">// configure bindings so that s1:d1-&gt;d1, d1-&gt;b1</em>
+<a class="jxr_linenumber" name="830" href="#830">830</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="831" href="#831">831</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="832" href="#832">832</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1));
+<a class="jxr_linenumber" name="833" href="#833">833</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="834" href="#834">834</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="835" href="#835">835</a>         bindings.put(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="836" href="#836">836</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, d1));
+<a class="jxr_linenumber" name="837" href="#837">837</a>         
+<a class="jxr_linenumber" name="838" href="#838">838</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="839" href="#839">839</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="840" href="#840">840</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="841" href="#841">841</a>         
+<a class="jxr_linenumber" name="842" href="#842">842</a>         Assert.assertEquals(2 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="843" href="#843">843</a>         
+<a class="jxr_linenumber" name="844" href="#844">844</a>         DAGNode&lt;Component, Dependency&gt; n1 = getNode(r.getGraph(), Component.create(s1, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="845" href="#845">845</a>         DAGNode&lt;Component, Dependency&gt; n2 = getNode(r.getGraph(), Component.create(s2, CachePolicy.NO_PREFERENCE));
+<a class="jxr_linenumber" name="846" href="#846">846</a>         
+<a class="jxr_linenumber" name="847" href="#847">847</a>         Assert.assertNotNull(n1);
+<a class="jxr_linenumber" name="848" href="#848">848</a>         Assert.assertNotNull(n2);
+<a class="jxr_linenumber" name="849" href="#849">849</a>         Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
+<a class="jxr_linenumber" name="850" href="#850">850</a>         Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+<a class="jxr_linenumber" name="851" href="#851">851</a>     }
+<a class="jxr_linenumber" name="852" href="#852">852</a>     
+<a class="jxr_linenumber" name="853" href="#853">853</a>     @Test
+<a class="jxr_linenumber" name="854" href="#854">854</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testMultipleRequestsMergeSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="855" href="#855">855</a>         <em class="jxr_comment">// Test that multiple requests to resolve() will update the graph</em>
+<a class="jxr_linenumber" name="856" href="#856">856</a>         <em class="jxr_comment">// and share dependency nodes as expected</em>
+<a class="jxr_linenumber" name="857" href="#857">857</a>         Desire a1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// a's dependency</em>
+<a class="jxr_linenumber" name="858" href="#858">858</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's first dependency</em>
+<a class="jxr_linenumber" name="859" href="#859">859</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's second dependency</em>
+<a class="jxr_linenumber" name="860" href="#860">860</a>         Satisfaction sa = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(a1));
+<a class="jxr_linenumber" name="861" href="#861">861</a>         Satisfaction sap = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Ap.<strong class="jxr_keyword">class</strong>, Arrays.asList(a1)); <em class="jxr_comment">// variant of CycleA</em>
+<a class="jxr_linenumber" name="862" href="#862">862</a>         Satisfaction sd = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(D.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2));
+<a class="jxr_linenumber" name="863" href="#863">863</a>         Satisfaction sb = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="864" href="#864">864</a>         Satisfaction sc = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="865" href="#865">865</a>         
+<a class="jxr_linenumber" name="866" href="#866">866</a>         Desire da = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sa);
+<a class="jxr_linenumber" name="867" href="#867">867</a>         Desire dap = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sap);
+<a class="jxr_linenumber" name="868" href="#868">868</a>         
+<a class="jxr_linenumber" name="869" href="#869">869</a>         <em class="jxr_comment">// configure bindings so that a1 -&gt; sd, b1 -&gt; sb, b2 -&gt; sc</em>
+<a class="jxr_linenumber" name="870" href="#870">870</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="871" href="#871">871</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="872" href="#872">872</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(a1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd)),
+<a class="jxr_linenumber" name="873" href="#873">873</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sb)),
+<a class="jxr_linenumber" name="874" href="#874">874</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sc)));
+<a class="jxr_linenumber" name="875" href="#875">875</a>         
+<a class="jxr_linenumber" name="876" href="#876">876</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="877" href="#877">877</a>         r.resolve(da);
+<a class="jxr_linenumber" name="878" href="#878">878</a>         r.resolve(dap);
+<a class="jxr_linenumber" name="879" href="#879">879</a>         
+<a class="jxr_linenumber" name="880" href="#880">880</a>         DAGNode&lt;Component, Dependency&gt; root = r.getGraph();
+<a class="jxr_linenumber" name="881" href="#881">881</a>         Assert.assertEquals(5 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="882" href="#882">882</a>         Assert.assertEquals(2, root.getOutgoingEdges().size()); <em class="jxr_comment">// da and dap</em>
+<a class="jxr_linenumber" name="883" href="#883">883</a>         
+<a class="jxr_linenumber" name="884" href="#884">884</a>         DAGNode&lt;Component, Dependency&gt; na =
+<a class="jxr_linenumber" name="885" href="#885">885</a>                 root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
+<a class="jxr_linenumber" name="886" href="#886">886</a>         DAGNode&lt;Component, Dependency&gt; nap = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dap)).getTail();
+<a class="jxr_linenumber" name="887" href="#887">887</a>         
+<a class="jxr_linenumber" name="888" href="#888">888</a>         <em class="jxr_comment">// sa and sap were different satisfactions, so they should be separate nodes</em>
+<a class="jxr_linenumber" name="889" href="#889">889</a>         Assert.assertNotSame(na, nap);
+<a class="jxr_linenumber" name="890" href="#890">890</a>         
+<a class="jxr_linenumber" name="891" href="#891">891</a>         <em class="jxr_comment">// the resolved desire for a1, from da</em>
+<a class="jxr_linenumber" name="892" href="#892">892</a>         DAGNode&lt;Component, Dependency&gt; ra1 = na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+<a class="jxr_linenumber" name="893" href="#893">893</a>         DAGNode&lt;Component, Dependency&gt; ra1p = nap.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+<a class="jxr_linenumber" name="894" href="#894">894</a>         
+<a class="jxr_linenumber" name="895" href="#895">895</a>         <em class="jxr_comment">// verify that both a and ap point to the sb satisfaction, and verify</em>
+<a class="jxr_linenumber" name="896" href="#896">896</a>         <em class="jxr_comment">// that sb (and also its children) are properly shared</em>
+<a class="jxr_linenumber" name="897" href="#897">897</a>         Assert.assertSame(sd, ra1.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="898" href="#898">898</a>         Assert.assertSame(sd, ra1p.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="899" href="#899">899</a>         Assert.assertSame(ra1, ra1p);
+<a class="jxr_linenumber" name="900" href="#900">900</a> 
+<a class="jxr_linenumber" name="901" href="#901">901</a>         Predicate&lt;DAGNode&lt;Component, ?&gt;&gt; tgt = DAGNode.labelMatches(Predicates.equalTo(Component.create(sd, CachePolicy.NO_PREFERENCE)));
+<a class="jxr_linenumber" name="902" href="#902">902</a>         DAGNode&lt;Component, Dependency&gt; node =
+<a class="jxr_linenumber" name="903" href="#903">903</a>                 Iterables.find(r.getGraph().getReachableNodes(),
+<a class="jxr_linenumber" name="904" href="#904">904</a>                                tgt);
+<a class="jxr_linenumber" name="905" href="#905">905</a>         assertThat(r.getGraph().getIncomingEdges(node),
+<a class="jxr_linenumber" name="906" href="#906">906</a>                    hasSize(2));
+<a class="jxr_linenumber" name="907" href="#907">907</a>     }
+<a class="jxr_linenumber" name="908" href="#908">908</a>     
+<a class="jxr_linenumber" name="909" href="#909">909</a>     @Test
+<a class="jxr_linenumber" name="910" href="#910">910</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testMultipleRequestsNoMergeSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="911" href="#911">911</a>         <em class="jxr_comment">// Test that multiple requests will keep nodes separate as required</em>
+<a class="jxr_linenumber" name="912" href="#912">912</a>         <em class="jxr_comment">// by dependency configuration</em>
+<a class="jxr_linenumber" name="913" href="#913">913</a>         Desire a1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// a's dependency</em>
+<a class="jxr_linenumber" name="914" href="#914">914</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's first dependency</em>
+<a class="jxr_linenumber" name="915" href="#915">915</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's second dependency</em>
+<a class="jxr_linenumber" name="916" href="#916">916</a>         Satisfaction sa = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(a1));
+<a class="jxr_linenumber" name="917" href="#917">917</a>         Satisfaction sap = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Ap.<strong class="jxr_keyword">class</strong>, Arrays.asList(a1)); <em class="jxr_comment">// variant of CycleA</em>
+<a class="jxr_linenumber" name="918" href="#918">918</a>         Satisfaction sd = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(D.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2));
+<a class="jxr_linenumber" name="919" href="#919">919</a>         Satisfaction sb = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="920" href="#920">920</a>         Satisfaction sbp = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>); <em class="jxr_comment">// variant of B</em>
+<a class="jxr_linenumber" name="921" href="#921">921</a>         Satisfaction sc = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="922" href="#922">922</a>         Satisfaction scp = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Cp.<strong class="jxr_keyword">class</strong>); <em class="jxr_comment">// variant of C</em>
+<a class="jxr_linenumber" name="923" href="#923">923</a>         
+<a class="jxr_linenumber" name="924" href="#924">924</a>         Desire da = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sa);
+<a class="jxr_linenumber" name="925" href="#925">925</a>         Desire dap = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sap);
+<a class="jxr_linenumber" name="926" href="#926">926</a>         
+<a class="jxr_linenumber" name="927" href="#927">927</a>         <em class="jxr_comment">// configure bindings so that a1 -&gt; sd, b1 -&gt; sb, b2 -&gt; sc</em>
+<a class="jxr_linenumber" name="928" href="#928">928</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="929" href="#929">929</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="930" href="#930">930</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(a1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd)),
+<a class="jxr_linenumber" name="931" href="#931">931</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sb)),
+<a class="jxr_linenumber" name="932" href="#932">932</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sc)));
+<a class="jxr_linenumber" name="933" href="#933">933</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = Ap.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="934" href="#934">934</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="935" href="#935">935</a>         bindings.putAll(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="936" href="#936">936</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sbp)),
+<a class="jxr_linenumber" name="937" href="#937">937</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(scp)));
+<a class="jxr_linenumber" name="938" href="#938">938</a>         
+<a class="jxr_linenumber" name="939" href="#939">939</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="940" href="#940">940</a>         r.resolve(da);
+<a class="jxr_linenumber" name="941" href="#941">941</a>         r.resolve(dap);
+<a class="jxr_linenumber" name="942" href="#942">942</a>         
+<a class="jxr_linenumber" name="943" href="#943">943</a>         DAGNode&lt;Component, Dependency&gt; root = r.getGraph();
+<a class="jxr_linenumber" name="944" href="#944">944</a>         Assert.assertEquals(8 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="945" href="#945">945</a>         Assert.assertEquals(2, root.getOutgoingEdges().size()); <em class="jxr_comment">// da and dap</em>
+<a class="jxr_linenumber" name="946" href="#946">946</a>         
+<a class="jxr_linenumber" name="947" href="#947">947</a>         DAGNode&lt;Component, Dependency&gt; na = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
+<a class="jxr_linenumber" name="948" href="#948">948</a>         DAGNode&lt;Component, Dependency&gt; nap = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dap)).getTail();
+<a class="jxr_linenumber" name="949" href="#949">949</a>         
+<a class="jxr_linenumber" name="950" href="#950">950</a>         <em class="jxr_comment">// sa and sap were different satisfactions, so they should be separate nodes</em>
+<a class="jxr_linenumber" name="951" href="#951">951</a>         Assert.assertNotSame(na, nap);
+<a class="jxr_linenumber" name="952" href="#952">952</a>         
+<a class="jxr_linenumber" name="953" href="#953">953</a>         <em class="jxr_comment">// the resolved desire for a1, from da</em>
+<a class="jxr_linenumber" name="954" href="#954">954</a>         DAGNode&lt;Component, Dependency&gt; ra1 = na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+<a class="jxr_linenumber" name="955" href="#955">955</a>         DAGNode&lt;Component, Dependency&gt; ra1p = nap.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+<a class="jxr_linenumber" name="956" href="#956">956</a>         
+<a class="jxr_linenumber" name="957" href="#957">957</a>         <em class="jxr_comment">// verify that both ra1 and ra1p are different nodes that both use the</em>
+<a class="jxr_linenumber" name="958" href="#958">958</a>         <em class="jxr_comment">// sd satisfaction because sd's dependencies are configured differently</em>
+<a class="jxr_linenumber" name="959" href="#959">959</a>         Assert.assertNotSame(ra1, ra1p);
+<a class="jxr_linenumber" name="960" href="#960">960</a>         Assert.assertSame(sd, ra1.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="961" href="#961">961</a>         Assert.assertSame(sd, ra1p.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="962" href="#962">962</a>         
+<a class="jxr_linenumber" name="963" href="#963">963</a>         Assert.assertSame(sb, ra1.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="964" href="#964">964</a>         Assert.assertSame(sc, ra1.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="965" href="#965">965</a>         Assert.assertSame(sbp, ra1p.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="966" href="#966">966</a>         Assert.assertSame(scp, ra1p.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="967" href="#967">967</a>     }
+<a class="jxr_linenumber" name="968" href="#968">968</a>     
+<a class="jxr_linenumber" name="969" href="#969">969</a>     @Test
+<a class="jxr_linenumber" name="970" href="#970">970</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testRequestDependencyMergeSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="971" href="#971">971</a>         <em class="jxr_comment">// Test that a request for a desire already in the graph as a dependency</em>
+<a class="jxr_linenumber" name="972" href="#972">972</a>         <em class="jxr_comment">// will have a new edge from the root to that dependency added.</em>
+<a class="jxr_linenumber" name="973" href="#973">973</a>         Desire a1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// a's dependency</em>
+<a class="jxr_linenumber" name="974" href="#974">974</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's first dependency</em>
+<a class="jxr_linenumber" name="975" href="#975">975</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's second dependency</em>
+<a class="jxr_linenumber" name="976" href="#976">976</a>         Satisfaction sa = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(a1));
+<a class="jxr_linenumber" name="977" href="#977">977</a>         Satisfaction sd = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(D.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2));
+<a class="jxr_linenumber" name="978" href="#978">978</a>         Satisfaction sb = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="979" href="#979">979</a>         Satisfaction sc = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="980" href="#980">980</a>         
+<a class="jxr_linenumber" name="981" href="#981">981</a>         Desire da = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sa);
+<a class="jxr_linenumber" name="982" href="#982">982</a>         Desire dd = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd);
+<a class="jxr_linenumber" name="983" href="#983">983</a>         <em class="jxr_comment">// configure bindings so that a1 -&gt; sd, b1 -&gt; sb, b2 -&gt; sc</em>
+<a class="jxr_linenumber" name="984" href="#984">984</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="985" href="#985">985</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="986" href="#986">986</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(a1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd)),
+<a class="jxr_linenumber" name="987" href="#987">987</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sb)),
+<a class="jxr_linenumber" name="988" href="#988">988</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sc)));
+<a class="jxr_linenumber" name="989" href="#989">989</a>         
+<a class="jxr_linenumber" name="990" href="#990">990</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="991" href="#991">991</a>         r.resolve(da);
+<a class="jxr_linenumber" name="992" href="#992">992</a>         r.resolve(dd);
+<a class="jxr_linenumber" name="993" href="#993">993</a>         
+<a class="jxr_linenumber" name="994" href="#994">994</a>         DAGNode&lt;Component, Dependency&gt; root = r.getGraph();
+<a class="jxr_linenumber" name="995" href="#995">995</a>         Assert.assertEquals(4 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="996" href="#996">996</a>         Assert.assertEquals(2, root.getOutgoingEdges().size()); <em class="jxr_comment">// da and dd</em>
+<a class="jxr_linenumber" name="997" href="#997">997</a>         
+<a class="jxr_linenumber" name="998" href="#998">998</a>         DAGNode&lt;Component, Dependency&gt; na = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
+<a class="jxr_linenumber" name="999" href="#999">999</a>         DAGNode&lt;Component, Dependency&gt; nd = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dd)).getTail();
+<a class="jxr_linenumber" name="1000" href="#1000">1000</a>         
+<a class="jxr_linenumber" name="1001" href="#1001">1001</a>         <em class="jxr_comment">// additionally verify that there is an edge going from na to nd</em>
+<a class="jxr_linenumber" name="1002" href="#1002">1002</a>         Assert.assertEquals(1, Sets.filter(na.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(nd))).size());
+<a class="jxr_linenumber" name="1003" href="#1003">1003</a>         Assert.assertSame(nd, na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail());
+<a class="jxr_linenumber" name="1004" href="#1004">1004</a>     }
+<a class="jxr_linenumber" name="1005" href="#1005">1005</a>     
+<a class="jxr_linenumber" name="1006" href="#1006">1006</a>     @Test
+<a class="jxr_linenumber" name="1007" href="#1007">1007</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testRequestDependencyNoMergeSuccess() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1008" href="#1008">1008</a>         <em class="jxr_comment">// Test that a request for a desire already in the graph as a dependency,</em>
+<a class="jxr_linenumber" name="1009" href="#1009">1009</a>         <em class="jxr_comment">// will create a new node if the dependency has a different configuration</em>
+<a class="jxr_linenumber" name="1010" href="#1010">1010</a>         <em class="jxr_comment">// because of context-specific bind rules</em>
+<a class="jxr_linenumber" name="1011" href="#1011">1011</a>         Desire a1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// a's dependency</em>
+<a class="jxr_linenumber" name="1012" href="#1012">1012</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's first dependency</em>
+<a class="jxr_linenumber" name="1013" href="#1013">1013</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(); <em class="jxr_comment">// d's second dependency</em>
+<a class="jxr_linenumber" name="1014" href="#1014">1014</a>         Satisfaction sa = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(a1));
+<a class="jxr_linenumber" name="1015" href="#1015">1015</a>         Satisfaction sd = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(D.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1, d2));
+<a class="jxr_linenumber" name="1016" href="#1016">1016</a>         Satisfaction sb = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="1017" href="#1017">1017</a>         Satisfaction sbp = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Bp.<strong class="jxr_keyword">class</strong>); <em class="jxr_comment">// variant of B</em>
+<a class="jxr_linenumber" name="1018" href="#1018">1018</a>         Satisfaction sc = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="1019" href="#1019">1019</a>         Satisfaction scp = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(Cp.<strong class="jxr_keyword">class</strong>); <em class="jxr_comment">// variant of C</em>
+<a class="jxr_linenumber" name="1020" href="#1020">1020</a>         
+<a class="jxr_linenumber" name="1021" href="#1021">1021</a>         Desire da = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sa);
+<a class="jxr_linenumber" name="1022" href="#1022">1022</a>         Desire dd = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd);
+<a class="jxr_linenumber" name="1023" href="#1023">1023</a>         
+<a class="jxr_linenumber" name="1024" href="#1024">1024</a>         <em class="jxr_comment">// configure bindings so that a1 -&gt; sd, b1 -&gt; sb, b2 -&gt; sc</em>
+<a class="jxr_linenumber" name="1025" href="#1025">1025</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1026" href="#1026">1026</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="1027" href="#1027">1027</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(a1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sd)),
+<a class="jxr_linenumber" name="1028" href="#1028">1028</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sbp)),
+<a class="jxr_linenumber" name="1029" href="#1029">1029</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(scp)));
+<a class="jxr_linenumber" name="1030" href="#1030">1030</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type = A.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="1031" href="#1031">1031</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/grouplens/grapht/reflect/MockQualifierMatcher.html">MockQualifierMatcher</a> qualifier = MockQualifierMatcher.any();
+<a class="jxr_linenumber" name="1032" href="#1032">1032</a>         bindings.putAll(ContextPattern.subsequence(ContextElements.matchType(type, qualifier)),
+<a class="jxr_linenumber" name="1033" href="#1033">1033</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sb)),
+<a class="jxr_linenumber" name="1034" href="#1034">1034</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(sc)));
+<a class="jxr_linenumber" name="1035" href="#1035">1035</a>         
+<a class="jxr_linenumber" name="1036" href="#1036">1036</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1037" href="#1037">1037</a>         r.resolve(da);
+<a class="jxr_linenumber" name="1038" href="#1038">1038</a>         r.resolve(dd);
+<a class="jxr_linenumber" name="1039" href="#1039">1039</a>         
+<a class="jxr_linenumber" name="1040" href="#1040">1040</a>         DAGNode&lt;Component, Dependency&gt; root = r.getGraph();
+<a class="jxr_linenumber" name="1041" href="#1041">1041</a>         Assert.assertEquals(7 + 1, r.getGraph().getReachableNodes().size()); <em class="jxr_comment">// add one for synthetic root</em>
+<a class="jxr_linenumber" name="1042" href="#1042">1042</a>         Assert.assertEquals(2, root.getOutgoingEdges().size()); <em class="jxr_comment">// da and dd</em>
+<a class="jxr_linenumber" name="1043" href="#1043">1043</a>         
+<a class="jxr_linenumber" name="1044" href="#1044">1044</a>         <em class="jxr_comment">// resolved root desire nodes</em>
+<a class="jxr_linenumber" name="1045" href="#1045">1045</a>         DAGNode&lt;Component, Dependency&gt; na = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
+<a class="jxr_linenumber" name="1046" href="#1046">1046</a>         DAGNode&lt;Component, Dependency&gt; nd = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dd)).getTail();
+<a class="jxr_linenumber" name="1047" href="#1047">1047</a>         
+<a class="jxr_linenumber" name="1048" href="#1048">1048</a>         <em class="jxr_comment">// make sure that there is no edge between na and nd</em>
+<a class="jxr_linenumber" name="1049" href="#1049">1049</a>         Assert.assertTrue(Sets.filter(na.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(nd))).isEmpty());
+<a class="jxr_linenumber" name="1050" href="#1050">1050</a>         
+<a class="jxr_linenumber" name="1051" href="#1051">1051</a>         <em class="jxr_comment">// look up dependency for na (which is also the sd satisfaction)</em>
+<a class="jxr_linenumber" name="1052" href="#1052">1052</a>         DAGNode&lt;Component, Dependency&gt; nad = na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+<a class="jxr_linenumber" name="1053" href="#1053">1053</a>         
+<a class="jxr_linenumber" name="1054" href="#1054">1054</a>         <em class="jxr_comment">// verify that the two sd nodes are different and have different edge</em>
+<a class="jxr_linenumber" name="1055" href="#1055">1055</a>         <em class="jxr_comment">// configurations</em>
+<a class="jxr_linenumber" name="1056" href="#1056">1056</a>         Assert.assertNotSame(nd, nad); 
+<a class="jxr_linenumber" name="1057" href="#1057">1057</a>         Assert.assertSame(sd, nd.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="1058" href="#1058">1058</a>         Assert.assertSame(sd, nad.getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="1059" href="#1059">1059</a>         
+<a class="jxr_linenumber" name="1060" href="#1060">1060</a>         Assert.assertSame(sb, nad.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="1061" href="#1061">1061</a>         Assert.assertSame(sc, nad.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="1062" href="#1062">1062</a>         Assert.assertSame(sbp, nd.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="1063" href="#1063">1063</a>         Assert.assertSame(scp, nd.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+<a class="jxr_linenumber" name="1064" href="#1064">1064</a>     }
+<a class="jxr_linenumber" name="1065" href="#1065">1065</a> 
+<a class="jxr_linenumber" name="1066" href="#1066">1066</a>     @Test(expected=UnresolvableDependencyException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="1067" href="#1067">1067</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testLimitedBindRuleApplicationsFail() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1068" href="#1068">1068</a>         <em class="jxr_comment">// Test that a bind-rule is properly excluded form subsequent desires</em>
+<a class="jxr_linenumber" name="1069" href="#1069">1069</a>         <em class="jxr_comment">// but that leaves no applicable bindings so resolving fails</em>
+<a class="jxr_linenumber" name="1070" href="#1070">1070</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1071" href="#1071">1071</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="1072" href="#1072">1072</a>         
+<a class="jxr_linenumber" name="1073" href="#1073">1073</a>         <em class="jxr_comment">// configure bindings so that d1-&gt;d1 so binding fails</em>
+<a class="jxr_linenumber" name="1074" href="#1074">1074</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1075" href="#1075">1075</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="1076" href="#1076">1076</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, d1));
+<a class="jxr_linenumber" name="1077" href="#1077">1077</a>         
+<a class="jxr_linenumber" name="1078" href="#1078">1078</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1079" href="#1079">1079</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1080" href="#1080">1080</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="1081" href="#1081">1081</a>     }
+<a class="jxr_linenumber" name="1082" href="#1082">1082</a>     
+<a class="jxr_linenumber" name="1083" href="#1083">1083</a>     @Test(expected=CyclicDependencyException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="1084" href="#1084">1084</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testCyclicDependenciesFail() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1085" href="#1085">1085</a>         <em class="jxr_comment">// Test that a cyclic dependency is properly caught and resolving</em>
+<a class="jxr_linenumber" name="1086" href="#1086">1086</a>         <em class="jxr_comment">// fails before a stack overflow</em>
+<a class="jxr_linenumber" name="1087" href="#1087">1087</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1088" href="#1088">1088</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1089" href="#1089">1089</a>         
+<a class="jxr_linenumber" name="1090" href="#1090">1090</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="1091" href="#1091">1091</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>, Arrays.asList(d2));
+<a class="jxr_linenumber" name="1092" href="#1092">1092</a>         
+<a class="jxr_linenumber" name="1093" href="#1093">1093</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="1094" href="#1094">1094</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1095" href="#1095">1095</a>         
+<a class="jxr_linenumber" name="1096" href="#1096">1096</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1097" href="#1097">1097</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="1098" href="#1098">1098</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="1099" href="#1099">1099</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="1100" href="#1100">1100</a>         
+<a class="jxr_linenumber" name="1101" href="#1101">1101</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1102" href="#1102">1102</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1103" href="#1103">1103</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="1104" href="#1104">1104</a>     }
+<a class="jxr_linenumber" name="1105" href="#1105">1105</a>     
+<a class="jxr_linenumber" name="1106" href="#1106">1106</a>     @Test(expected=MultipleBindingsException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="1107" href="#1107">1107</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testTooManyBindRulesFail() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1108" href="#1108">1108</a>         <em class="jxr_comment">// Test that providing too many choices for bind rules throws an exception</em>
+<a class="jxr_linenumber" name="1109" href="#1109">1109</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1110" href="#1110">1110</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="1111" href="#1111">1111</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="1112" href="#1112">1112</a>         Satisfaction s3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(C.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="1113" href="#1113">1113</a>         
+<a class="jxr_linenumber" name="1114" href="#1114">1114</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="1115" href="#1115">1115</a>         Desire ob1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s3);
+<a class="jxr_linenumber" name="1116" href="#1116">1116</a>         
+<a class="jxr_linenumber" name="1117" href="#1117">1117</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1118" href="#1118">1118</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="1119" href="#1119">1119</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="1120" href="#1120">1120</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, ob1));
+<a class="jxr_linenumber" name="1121" href="#1121">1121</a>         
+<a class="jxr_linenumber" name="1122" href="#1122">1122</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1123" href="#1123">1123</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1124" href="#1124">1124</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="1125" href="#1125">1125</a>     }
+<a class="jxr_linenumber" name="1126" href="#1126">1126</a> 
+<a class="jxr_linenumber" name="1127" href="#1127">1127</a>     @Test(expected=UnresolvableDependencyException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="1128" href="#1128">1128</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testUnsatisfiableDesireFail() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1129" href="#1129">1129</a>         <em class="jxr_comment">// Test that a chain of desires that cannot be satisfied throws an exception</em>
+<a class="jxr_linenumber" name="1130" href="#1130">1130</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1131" href="#1131">1131</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1132" href="#1132">1132</a>         Desire d3 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1133" href="#1133">1133</a>         
+<a class="jxr_linenumber" name="1134" href="#1134">1134</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="1135" href="#1135">1135</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1136" href="#1136">1136</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="1137" href="#1137">1137</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, d2),
+<a class="jxr_linenumber" name="1138" href="#1138">1138</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, d3));
+<a class="jxr_linenumber" name="1139" href="#1139">1139</a>         
+<a class="jxr_linenumber" name="1140" href="#1140">1140</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1141" href="#1141">1141</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1142" href="#1142">1142</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="1143" href="#1143">1143</a>     }
+<a class="jxr_linenumber" name="1144" href="#1144">1144</a>     
+<a class="jxr_linenumber" name="1145" href="#1145">1145</a>     @Test(expected=UnresolvableDependencyException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="1146" href="#1146">1146</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testNoBindRulesFail() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1147" href="#1147">1147</a>         <em class="jxr_comment">// Test that not providing applicable bind rules will throw an exception,</em>
+<a class="jxr_linenumber" name="1148" href="#1148">1148</a>         <em class="jxr_comment">// even if other bind rules are given</em>
+<a class="jxr_linenumber" name="1149" href="#1149">1149</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1150" href="#1150">1150</a>         Desire d2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1151" href="#1151">1151</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="1152" href="#1152">1152</a>         
+<a class="jxr_linenumber" name="1153" href="#1153">1153</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1154" href="#1154">1154</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1155" href="#1155">1155</a>         bindings.put(ContextPattern.any(),
+<a class="jxr_linenumber" name="1156" href="#1156">1156</a>                      <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d2, b2));
+<a class="jxr_linenumber" name="1157" href="#1157">1157</a> 
+<a class="jxr_linenumber" name="1158" href="#1158">1158</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1159" href="#1159">1159</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1160" href="#1160">1160</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="1161" href="#1161">1161</a>     }
+<a class="jxr_linenumber" name="1162" href="#1162">1162</a> 
+<a class="jxr_linenumber" name="1163" href="#1163">1163</a>     @Test(expected=UnresolvableDependencyException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="1164" href="#1164">1164</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testNonLeafSatisfiableDesireFail() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="1165" href="#1165">1165</a>         <em class="jxr_comment">// Test that a chain of desires, where an intermediate desire is</em>
+<a class="jxr_linenumber" name="1166" href="#1166">1166</a>         <em class="jxr_comment">// satisfiable but the leaf node is not, still throws an exception</em>
+<a class="jxr_linenumber" name="1167" href="#1167">1167</a>         Desire d1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1168" href="#1168">1168</a>         Satisfaction s1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(A.<strong class="jxr_keyword">class</strong>, Arrays.asList(d1));
+<a class="jxr_linenumber" name="1169" href="#1169">1169</a>         Satisfaction s2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockSatisfaction.html">MockSatisfaction</a>(B.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="1170" href="#1170">1170</a>         
+<a class="jxr_linenumber" name="1171" href="#1171">1171</a>         Desire b1 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s2);
+<a class="jxr_linenumber" name="1172" href="#1172">1172</a>         Desire b2 = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>();
+<a class="jxr_linenumber" name="1173" href="#1173">1173</a>         
+<a class="jxr_linenumber" name="1174" href="#1174">1174</a>         ImmutableListMultimap.Builder&lt;ContextMatcher, BindRule&gt; bindings = ImmutableListMultimap.builder();
+<a class="jxr_linenumber" name="1175" href="#1175">1175</a>         bindings.putAll(ContextPattern.any(),
+<a class="jxr_linenumber" name="1176" href="#1176">1176</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(d1, b1),
+<a class="jxr_linenumber" name="1177" href="#1177">1177</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/solver/MockBindRule.html">MockBindRule</a>(b1, b2));
+<a class="jxr_linenumber" name="1178" href="#1178">1178</a> 
+<a class="jxr_linenumber" name="1179" href="#1179">1179</a>         Desire rootDesire = <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/reflect/MockDesire.html">MockDesire</a>(s1);
+<a class="jxr_linenumber" name="1180" href="#1180">1180</a>         DependencySolver r = createSolver(bindings.build());
+<a class="jxr_linenumber" name="1181" href="#1181">1181</a>         r.resolve(rootDesire);
+<a class="jxr_linenumber" name="1182" href="#1182">1182</a>     }
+<a class="jxr_linenumber" name="1183" href="#1183">1183</a>     
+<a class="jxr_linenumber" name="1184" href="#1184">1184</a>     <em class="jxr_comment">// Find the node for s connected to p by the given desire, d</em>
+<a class="jxr_linenumber" name="1185" href="#1185">1185</a>     <strong class="jxr_keyword">private</strong> DAGNode&lt;Component, Dependency&gt; getNode(DAGNode&lt;Component, Dependency&gt; graph, Satisfaction s, Desire d) {
+<a class="jxr_linenumber" name="1186" href="#1186">1186</a>         <strong class="jxr_keyword">for</strong> (DAGEdge&lt;Component, Dependency&gt; e: graph.getOutgoingEdges()) {
+<a class="jxr_linenumber" name="1187" href="#1187">1187</a>             <strong class="jxr_keyword">if</strong> (e.getLabel().getInitialDesire().equals(d) &amp;&amp; e.getTail().getLabel().getSatisfaction().equals(s)) {
+<a class="jxr_linenumber" name="1188" href="#1188">1188</a>                 <strong class="jxr_keyword">return</strong> e.getTail();
+<a class="jxr_linenumber" name="1189" href="#1189">1189</a>             }
+<a class="jxr_linenumber" name="1190" href="#1190">1190</a>         }
+<a class="jxr_linenumber" name="1191" href="#1191">1191</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="1192" href="#1192">1192</a>     }
+<a class="jxr_linenumber" name="1193" href="#1193">1193</a>     
+<a class="jxr_linenumber" name="1194" href="#1194">1194</a>     <strong class="jxr_keyword">private</strong> DAGNode&lt;Component, Dependency&gt; getNode(DAGNode&lt;Component, Dependency&gt; g, Component s) {
+<a class="jxr_linenumber" name="1195" href="#1195">1195</a>         Predicate&lt;DAGNode&lt;Component, ?&gt;&gt; pred = DAGNode.labelMatches(Predicates.equalTo(s));
+<a class="jxr_linenumber" name="1196" href="#1196">1196</a>         <strong class="jxr_keyword">return</strong> Iterables.find(g.getReachableNodes(), pred, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="1197" href="#1197">1197</a>     }
+<a class="jxr_linenumber" name="1198" href="#1198">1198</a>     
+<a class="jxr_linenumber" name="1199" href="#1199">1199</a>     @Qualifier
+<a class="jxr_linenumber" name="1200" href="#1200">1200</a>     @Retention(RetentionPolicy.RUNTIME)
+<a class="jxr_linenumber" name="1201" href="#1201">1201</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> @<strong class="jxr_keyword">interface</strong> <a href="../../../../org/grouplens/grapht/reflect/QualifiersTest.html">Qual</a> {
+<a class="jxr_linenumber" name="1202" href="#1202">1202</a>         <strong class="jxr_keyword">int</strong> value();
+<a class="jxr_linenumber" name="1203" href="#1203">1203</a>     }
+<a class="jxr_linenumber" name="1204" href="#1204">1204</a> 
+<a class="jxr_linenumber" name="1205" href="#1205">1205</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/GraphRewritingTest.html">A</a> {}
+<a class="jxr_linenumber" name="1206" href="#1206">1206</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/GraphRewritingTest.html">B</a> {}
+<a class="jxr_linenumber" name="1207" href="#1207">1207</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/GraphRewritingTest.html">C</a> {}
+<a class="jxr_linenumber" name="1208" href="#1208">1208</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/solver/DependencySolverTest.html">D</a> {}
+<a class="jxr_linenumber" name="1209" href="#1209">1209</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/solver/DependencySolverTest.html">E</a> {}
+<a class="jxr_linenumber" name="1210" href="#1210">1210</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/solver/DependencySolverTest.html">F</a> {}
+<a class="jxr_linenumber" name="1211" href="#1211">1211</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/solver/DependencySolverTest.html">G</a> {}
+<a class="jxr_linenumber" name="1212" href="#1212">1212</a> 
+<a class="jxr_linenumber" name="1213" href="#1213">1213</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/context/ContextPatternTest.html">Ap</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../org/grouplens/grapht/GraphRewritingTest.html">A</a> {}
+<a class="jxr_linenumber" name="1214" href="#1214">1214</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/context/ContextPatternTest.html">Bp</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../org/grouplens/grapht/GraphRewritingTest.html">B</a> {}
+<a class="jxr_linenumber" name="1215" href="#1215">1215</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/context/ContextPatternTest.html">Cp</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../org/grouplens/grapht/GraphRewritingTest.html">C</a> {}
+<a class="jxr_linenumber" name="1216" href="#1216">1216</a> }
+</pre>
+<hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
+</html>
+
