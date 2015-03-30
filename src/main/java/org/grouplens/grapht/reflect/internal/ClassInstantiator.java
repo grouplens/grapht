@@ -59,10 +59,10 @@ public class ClassInstantiator implements Instantiator {
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
 
-		this.type = type;
+        this.type = type;
         this.desires = desires;
         this.providers = providers;
-	}
+    }
 
     @Override
     public Class getType() {
@@ -129,7 +129,7 @@ public class ClassInstantiator implements Instantiator {
             }
         }
 
-		try {
+        try {
             logger.debug("Using default constructor for {}", type);
             return type.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
@@ -160,7 +160,6 @@ public class ClassInstantiator implements Instantiator {
         public void set(int i, Object o) {
             arguments[i] =o;
             injected[i] = true;
-
         }
         
         public boolean isCompleted() {

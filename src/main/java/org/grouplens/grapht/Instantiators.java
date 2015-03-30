@@ -23,9 +23,12 @@ import com.google.common.base.Throwables;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.TypedProvider;
 import org.grouplens.grapht.util.Types;
-import javax.inject.Provider;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+
+import javax.inject.Provider;
+
+
 
 /**
  * Utilities and methods for building and working with {@link org.grouplens.grapht.Instantiator}s.
@@ -80,7 +83,6 @@ public final class Instantiators {
         Preconditions.checkNotNull(pinst, "provider instantiator");
         Preconditions.checkArgument(Provider.class.isAssignableFrom(pinst.getType()),
                                     "instantiator is not of type Provider");
-
         return new ProviderInstantiator(pinst);
     }
 
@@ -98,7 +100,6 @@ public final class Instantiators {
             }
         }
         // Otherwise, wrap it.
-
         return new InstantiatorProvider(instantiator);
     }
 
@@ -111,6 +112,7 @@ public final class Instantiators {
         Preconditions.checkNotNull(instantiator, "instantiator");
         return new MemoizingInstantiator(instantiator);
     }
+
     private static final class InstanceInstantiator implements Instantiator {
         private final Object instance;
         private final Class<?> type;
@@ -137,6 +139,7 @@ public final class Instantiators {
 
     private static class ProviderInstantiator implements Instantiator {
         private final Instantiator providerInstantiator;
+
         public ProviderInstantiator(Instantiator prov) {
             providerInstantiator = prov;
         }
@@ -155,13 +158,13 @@ public final class Instantiators {
                 mdcContextProvider.finish();
             }
         }
+
         @SuppressWarnings("unchecked")
         @Override
         public Class<?> getType() {
             return Types.getProvidedType(providerInstantiator.getType());
         }
     }
-
 
     private static class MemoizingInstantiator implements Instantiator {
         private final Instantiator delegate;
@@ -225,5 +228,4 @@ public final class Instantiators {
             }
         }
     }
-
 }

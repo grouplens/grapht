@@ -45,7 +45,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     }
 
     /**
-	 * Create a NoArgumentInjectionPoint that wraps the given no-argument
+     * Create a NoArgumentInjectionPoint that wraps the given no-argument
      * method.
      * 
      * @param method The method to invoke without arguments

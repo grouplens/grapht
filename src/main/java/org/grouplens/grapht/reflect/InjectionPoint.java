@@ -26,22 +26,19 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
+
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
  * Examples include a constructor parameter, a setter method, or a field.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface
-		InjectionPoint extends Serializable {
+public interface InjectionPoint extends Serializable {
     /**
      * Return the type required to satisfy the injection point.
      * 
      * @return The type of the injection point
      */
-
-
-
     Type getType();
     
     /**
@@ -59,6 +56,7 @@ public interface
      */
     @Nullable
     Annotation getQualifier();
+
     /**
      * Return the attribute of type A that is applied to the injection point. If
      * the injection point does not have an attribute of type {@code A}, then null is
