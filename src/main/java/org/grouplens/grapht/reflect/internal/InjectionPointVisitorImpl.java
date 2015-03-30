@@ -19,11 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.NullDependencyException;
-import org.grouplens.grapht.reflect.Desire;
-import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.LogContext;
 import org.slf4j.Logger;
@@ -32,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +48,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor<Construc
         this.provider =  provider;
         this.instance =  instance;
         this.settersAndArguments = settersAndArguments;
-    }
+	}
 
     @Override
     public void visitField(FieldInjectionPoint fd) throws ConstructionException {

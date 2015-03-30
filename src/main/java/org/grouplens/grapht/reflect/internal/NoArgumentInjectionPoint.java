@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.MethodProxy;
@@ -42,16 +40,12 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     private final transient Method method;
 
     @Override
-	public <NoArgumentInjectionPointException extends Exception>  void accept(
-																	   InjectionPointVisitor
-																	   <NoArgumentInjectionPointException>
-																	   visitor) throws
-																	   NoArgumentInjectionPointException {
+	public <X extends Exception>  void accept(InjectionPointVisitor<X> visitor) throws X {
         visitor.visitNoArgument(this);
     }
 
-
     /**
+	 *
      * Create a NoArgumentInjectionPoint that wraps the given no-argument
      * method.
      * 

@@ -23,13 +23,7 @@
  */
 package org.grouplens.grapht.reflect;
 
-
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
-import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.reflect.internal.*;
-
-import java.util.Map;
 
 /**
  * Interface for injection point visitors.

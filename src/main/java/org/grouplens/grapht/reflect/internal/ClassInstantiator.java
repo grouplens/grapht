@@ -1,4 +1,3 @@
-
 /*
  * Grapht, an open source dependency injector.
  * Copyright 2010-2012 Regents of the University of Minnesota and contributors
@@ -19,9 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import com.sun.org.omg.CORBA.ExceptionDescriptionHelper;
 import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.NullDependencyException;
 import org.grouplens.grapht.reflect.Desire;
@@ -32,15 +29,10 @@ import org.grouplens.grapht.util.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 
 /**
  * Instantiates class instances.
@@ -48,7 +40,7 @@ import java.util.Map;
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ClassInstantiator implements Instantiator {
-    private static final Logger  logger = LoggerFactory.getLogger(ClassInstantiator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClassInstantiator.class);
 
     private final Class<?> type;
     private final List<Desire> desires;
@@ -118,18 +110,10 @@ public class ClassInstantiator implements Instantiator {
         // prepared to comply with JSR 330
         Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
         for (Desire d: desires) {
-            InjectionPointVisitor visitor = new InjectionPointVisitorImpl(providers.get(d),instance, settersAndArguments);
-            try {
-                globalLogContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
-                d.getInjectionPoint().accept(visitor);
-            } catch (InjectionException e) {
-                throw new RuntimeException("InjectionPoint Exception ", e);
-            } catch (Exception e) {
-				throw new ConstructionException(d.getInjectionPoint(),e);
-			} finally {
-                globalLogContext.finish();
-            }
-        }
+            InjectionPointVisitorImpl visitor = new InjectionPointVisitorImpl(providers.get(d),instance, settersAndArguments);
+			globalLogContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
+			d.getInjectionPoint().accept(visitor);
+		}
         // the instance has been fully configured
         return instance;
     }
