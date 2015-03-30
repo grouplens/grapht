@@ -19,11 +19,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.NullDependencyException;
-import org.grouplens.grapht.reflect.Desire;
-import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.LogContext;
 import org.slf4j.Logger;
@@ -41,7 +37,7 @@ import java.util.Map;
  *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class InjectionPointVisitorImpl implements InjectionPointVisitor {
+public class InjectionPointVisitorImpl implements InjectionPointVisitor<ConstructionException> {
     private static final Logger logger = LoggerFactory.getLogger(InjectionPointVisitorImpl.class);
 
     private Object instance;
@@ -50,13 +46,13 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
 
     InjectionPointVisitorImpl(Instantiator provider,Object instance,
                               Map<Method, ClassInstantiator.InjectionArgs> settersAndArguments) {
-        this.provider =  provider;
-        this.instance =  instance;
-        this.settersAndArguments = settersAndArguments;
-    }
+		this.provider = provider;
+		this.instance = instance;
+		this.settersAndArguments = settersAndArguments;
+	}
 
     @Override
-    public void visitField(FieldInjectionPoint fd) throws InjectionException {
+    public void visitField(FieldInjectionPoint fd) throws ConstructionException {
         LogContext ipContext =  LogContext.create();
         Field field;
         Object value;
@@ -75,7 +71,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitSetter(SetterInjectionPoint st) throws InjectionException {
+    public void visitSetter(SetterInjectionPoint st) throws ConstructionException {
         ClassInstantiator.InjectionArgs args = settersAndArguments.get(st.getMember());
         Method setter = st.getMember();
         if (args == null) {
@@ -118,7 +114,7 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitNoArgument(NoArgumentInjectionPoint ip) throws InjectionException {
+    public void visitNoArgument(NoArgumentInjectionPoint ip) throws ConstructionException {
         Method method = null;
         LogContext ipContext = LogContext.create();
         try {
@@ -138,8 +134,8 @@ public class InjectionPointVisitorImpl implements InjectionPointVisitor {
     }
 
     @Override
-    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws InjectionException { }
+    public void visitConstructor(ConstructorParameterInjectionPoint ip) throws ConstructionException { }
 
     @Override
-     public void visitSynthetic(SimpleInjectionPoint ip) throws InjectionException { }
+     public void visitSynthetic(SimpleInjectionPoint ip) throws ConstructionException { }
 }

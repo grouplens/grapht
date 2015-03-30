@@ -26,7 +26,6 @@ import org.grouplens.grapht.util.Types;
 import javax.inject.Provider;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-import org.grouplens.grapht.util.LogContext;
 
 /**
  * Utilities and methods for building and working with {@link org.grouplens.grapht.Instantiator}s.

@@ -20,7 +20,6 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
@@ -59,7 +58,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         this.type = type;
         this.nullable = nullable;
     }
-    
+
     @Override
     public Class<?> getErasedType() {
         return type;
@@ -76,8 +75,8 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
-        visitor.visitSynthetic(this);
+    public <X extends Exception>  void accept(InjectionPointVisitor <X> visitor) throws X {
+		visitor.visitSynthetic(this);
     }
 
     @Override

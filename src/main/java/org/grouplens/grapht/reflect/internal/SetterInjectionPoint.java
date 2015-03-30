@@ -18,8 +18,6 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.MethodProxy;
@@ -88,9 +86,9 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
+	public <X extends Exception>  void accept(InjectionPointVisitor <X> visitor) throws X {
         visitor.visitSetter(this);
-    }
+	}
 
     @Override
     public Type getType() {

@@ -25,8 +25,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 
 /**
  * InjectionPoint represents a point of injection for an instantiable type.
@@ -34,7 +32,8 @@ import org.grouplens.grapht.InjectionException;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface InjectionPoint extends Serializable {
+public interface
+		InjectionPoint extends Serializable {
     /**
      * Return the type required to satisfy the injection point.
      * 
@@ -95,5 +94,5 @@ public interface InjectionPoint extends Serializable {
      *Accept a visitor to inspect the injection points.
      * @param visitor
      */
-    void accept(InjectionPointVisitor visitor) throws ConstructionException, InjectionException;
+	public <X extends Exception> void accept(InjectionPointVisitor<X> visitor) throws X;
 }

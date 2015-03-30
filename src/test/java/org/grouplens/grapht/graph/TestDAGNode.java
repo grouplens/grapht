@@ -252,7 +252,7 @@ public class TestDAGNode {
                                             .addEdge(foo, "foo")
                                             .build();
         DAGNode<String,String> needle =
-                bar.findNodeBFS(DAGNode.<String>labelMatches(Predicates.equalTo("foo")));
+                bar.findNodeBFS(DAGNode.labelMatches(Predicates.equalTo("foo")));
         assertThat(needle, sameInstance(foo));
     }
 
@@ -277,7 +277,7 @@ public class TestDAGNode {
                                             .addEdge(bar, "wombat")
                                             .addEdge(foo2, "goodbye")
                                             .build();
-        DAGNode<String,String> needle = bam.findNodeBFS(DAGNode.<String>labelMatches(Predicates.equalTo("foo")));
+        DAGNode<String,String> needle = bam.findNodeBFS(DAGNode.labelMatches(Predicates.equalTo("foo")));
         assertThat(needle, sameInstance(foo2));
     }
 
