@@ -92,5 +92,5 @@ public interface InjectionPoint extends Serializable {
      *Accept a visitor to inspect the injection points.
      * @param visitor
      */
-	public <X extends Exception> void accept(InjectionPointVisitor<X> visitor) throws X;
+    public <X extends Exception> void accept(InjectionPointVisitor<X> visitor) throws X;
 }
