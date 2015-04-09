@@ -1,7 +1,6 @@
 /*
  * Grapht, an open source dependency injector.
- * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)
- * Copyright 2010-2014 Regents of the University of Minnesota
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -21,10 +20,8 @@ package org.grouplens.grapht.reflect.internal;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.Desires;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
@@ -41,16 +38,17 @@ import java.util.Collections;
 
 /**
  * Synthetic injection point used for {@link Desires#create(java.lang.annotation.Annotation, Class, boolean)}.
- * 
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
+
 public final class SimpleInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
     // fields marked as transient since direct serialization is disabled
     private final transient Annotation qualifier;
     private final transient Class<?> type;
     private final transient boolean nullable;
-    
+
     public SimpleInjectionPoint(@Nullable Annotation qualifier, Class<?> type, boolean nullable) {
         Preconditions.notNull("type", type);
         if (qualifier != null) {
@@ -60,25 +58,20 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         this.type = type;
         this.nullable = nullable;
     }
-    
+
     @Override
     public Class<?> getErasedType() {
         return type;
     }
-    
+
     @Override
     public Member getMember() {
         return null;
     }
-    
+
     @Override
     public boolean isNullable() {
         return nullable;
-    }
-
-    @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
-        visitor.visitSynthetic(this);
     }
 
     @Override
@@ -121,7 +114,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
                   .append(nullable, p.nullable)
                   .isEquals();
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -1,7 +1,6 @@
 /*
  * Grapht, an open source dependency injector.
- * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)
- * Copyright 2010-2014 Regents of the University of Minnesota
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,10 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.ConstructorProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -40,7 +36,7 @@ import java.util.Collection;
 /**
  * ConstructorParameterInjectionPoint is an injection point wrapping a parameter
  * of a constructor.
- * 
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public class ConstructorParameterInjectionPoint implements InjectionPoint, Serializable {
@@ -77,7 +73,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     public Constructor<?> getMember() {
         return constructor;
     }
-    
+
     /**
      * @return The parameter index of this injection point within the
      *         constructor's parameters
@@ -85,15 +81,10 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     public int getParameterIndex() {
         return paramIndex;
     }
-    
+
     @Override
     public boolean isNullable() {
         return Types.hasNullableAnnotation(constructor.getParameterAnnotations()[paramIndex]);
-    }
-
-    @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
-        visitor.visitConstructor(this);
     }
 
     @Override
@@ -132,12 +123,12 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
         ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) o;
         return cp.constructor.equals(constructor) && cp.paramIndex == paramIndex;
     }
-    
+
     @Override
     public int hashCode() {
         return constructor.hashCode() ^ (37 * 17 * paramIndex);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

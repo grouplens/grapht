@@ -1,7 +1,6 @@
 /*
  * Grapht, an open source dependency injector.
- * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)
- * Copyright 2010-2014 Regents of the University of Minnesota
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,10 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.FieldProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -39,19 +35,18 @@ import java.util.Collection;
 
 /**
  * FieldInjectionPoint is an injection point wrapping a field.
- * 
+ *
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
     // transient because we use a serialization proxy
-
     private final transient Field field;
     private final transient AnnotationHelper annotations;
-    
+
     /**
      * Create an injection point wrapping the given field
-     * 
+     *
      * @param field The field to inject
      * @throws NullPointerException if field is null
      */
@@ -60,7 +55,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
         this.field = field;
         annotations = new AnnotationHelper(field.getAnnotations());
     }
-    
+
     @Override
     public Type getType() {
         return Types.box(field.getGenericType());
@@ -100,11 +95,6 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
-        visitor.visitField(this);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (!(o instanceof FieldInjectionPoint)) {
             return false;
@@ -116,7 +106,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     public int hashCode() {
         return field.hashCode();
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -1,7 +1,6 @@
 /*
  * Grapht, an open source dependency injector.
- * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)
- * Copyright 2010-2014 Regents of the University of Minnesota
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,10 +18,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.InjectionPointVisitor;
 import org.grouplens.grapht.util.MethodProxy;
 import org.grouplens.grapht.util.Preconditions;
 
@@ -42,16 +38,10 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     private static final long serialVersionUID = -1L;
     private final transient Method method;
 
-    @Override
-    public void accept(InjectionPointVisitor visitor) throws InjectionException {
-        visitor.visitNoArgument(this);
-    }
-
-
     /**
      * Create a NoArgumentInjectionPoint that wraps the given no-argument
      * method.
-     * 
+     *
      * @param method The method to invoke without arguments
      */
     public NoArgumentInjectionPoint(@Nonnull Method method) {
@@ -59,10 +49,10 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
         if (method.getParameterTypes().length != 0) {
             throw new IllegalArgumentException("Method takes arguments: " + method);
         }
-        
+
         this.method = method;
     }
-    
+
     /**
      * @return The setter method wrapped by this injection point
      */
@@ -70,7 +60,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     public Method getMember() {
         return method;
     }
-    
+
     @Override
     public boolean isNullable() {
         return true;
@@ -80,7 +70,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     public Type getType() {
         return Void.class;
     }
-    
+
     @Override
     public Class<?> getErasedType() {
         return Void.class;
@@ -111,12 +101,12 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
         NoArgumentInjectionPoint p = (NoArgumentInjectionPoint) o;
         return p.method.equals(method) && p.method == method;
     }
-    
+
     @Override
     public int hashCode() {
         return method.hashCode();
     }
-    
+
     @Override
     public String toString() {
         return method.toString();
