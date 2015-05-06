@@ -169,7 +169,9 @@ class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serial
             }
         } else if (o instanceof String
                    || o instanceof Annotation
-                   || ClassUtils.isPrimitiveOrWrapper(o.getClass())) {
+                   || ClassUtils.isPrimitiveOrWrapper(o.getClass())
+                   || o instanceof Class
+                   || o instanceof Enum ) {
             // the value is immutable and a copy is not necessary
             return o;
         } else {
