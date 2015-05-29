@@ -263,7 +263,6 @@ public class AnnotationBuilderTest {
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface A3 {
         double[] otherValue();
-        
         String value() default "hello";
     }
     
