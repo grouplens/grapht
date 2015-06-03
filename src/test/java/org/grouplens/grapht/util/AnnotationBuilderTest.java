@@ -98,8 +98,9 @@ public class AnnotationBuilderTest {
             .set("v17", new AnnotationBuilder<A2>(A2.class).set("value", 17).build())
             .set("v18", new A2[] { new AnnotationBuilder<A2>(A2.class).set("value", 18).build() })
             .set("v19", true)
-            .set("v20", new boolean[] { true, false })
+            .set("v20", new boolean[]{true, false})
             .set("v21", new AnnotationBuilder<A5>(A5.class).set("value", 0).build())
+            .set("v22", new AnnotationBuilder<A6>(A6.class).set("value", Class.class).build())
             .build();
 
         Assert.assertEquals((byte) 1, t.v1());
@@ -147,6 +148,9 @@ public class AnnotationBuilderTest {
         Assert.assertFalse(t.v20()[1]);
 
         Assert.assertEquals(RestrictionType.NONE, t.v21().type());
+
+        Assert.assertEquals(Class.class, t.v22().value());
+
     }
     
     @Test
@@ -283,7 +287,7 @@ public class AnnotationBuilderTest {
 
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface A6 {
-       Class<? extends String> clazz = null;
+        Class value() default  Class.class;
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -309,5 +313,6 @@ public class AnnotationBuilderTest {
         boolean v19();
         boolean[] v20();
         A5 v21();
+        A6 v22();
     }
 }

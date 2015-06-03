@@ -328,8 +328,8 @@ public final class AnnotationBuilder<T extends Annotation> {
     }
 
     /**
-     * As {@link #set(String, Enum)} but assigns an Annotation instance to
-     * the value. A NullPointerException is thrown if value is null.
+     * As {@link #set(String, boolean)} but 'assigns an enum value'
+     * .A NullPointerException is thrown if value is null.
      *
      * @param name
      * @param value
@@ -340,8 +340,8 @@ public final class AnnotationBuilder<T extends Annotation> {
     }
 
     /**
-     * As {@link #set(String, Class)} but assigns an Annotation instance to
-     * the value. A NullPointerException is thrown if value is null.
+     * As {@link #set(String, Class)} but 'assigns an class value'
+     * .A NullPointerException is thrown if value is null.
      *
      * @param name
      * @param value
