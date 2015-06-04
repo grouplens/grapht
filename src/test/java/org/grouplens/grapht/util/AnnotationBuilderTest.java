@@ -19,12 +19,15 @@
  */
 package org.grouplens.grapht.util;
 
+import com.sun.tools.javac.code.Attribute;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
+import org.grouplens.grapht.reflect.internal.types.InterfaceA;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 
 public class AnnotationBuilderTest {
     @Test
@@ -95,9 +98,11 @@ public class AnnotationBuilderTest {
             .set("v17", new AnnotationBuilder<A2>(A2.class).set("value", 17).build())
             .set("v18", new A2[] { new AnnotationBuilder<A2>(A2.class).set("value", 18).build() })
             .set("v19", true)
-            .set("v20", new boolean[] { true, false })
+            .set("v20", new boolean[]{true, false})
+            .set("v21", new AnnotationBuilder<A5>(A5.class).set("value", 0).build())
+            .set("v22", new AnnotationBuilder<A6>(A6.class).set("value", Class.class).build())
             .build();
-        
+
         Assert.assertEquals((byte) 1, t.v1());
         Assert.assertEquals((short) 2, t.v2());
         Assert.assertEquals(3, t.v3());
@@ -141,6 +146,11 @@ public class AnnotationBuilderTest {
         Assert.assertEquals(2, t.v20().length);
         Assert.assertTrue(t.v20()[0]);
         Assert.assertFalse(t.v20()[1]);
+
+        Assert.assertEquals(RestrictionType.NONE, t.v21().type());
+
+        Assert.assertEquals(Class.class, t.v22().value());
+
     }
     
     @Test
@@ -253,11 +263,10 @@ public class AnnotationBuilderTest {
     public static @interface A2 {
         int value();
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface A3 {
         double[] otherValue();
-        
         String value() default "hello";
     }
     
@@ -265,7 +274,22 @@ public class AnnotationBuilderTest {
     public static @interface A4 {
         A3[] arrays();
     }
-    
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface A5 {
+        int value() default 0;
+        RestrictionType type() default RestrictionType.NONE;
+    }
+
+    public enum RestrictionType {
+        NONE, LENGTH, FRACTION_DIGIT;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface A6 {
+        Class value() default  Class.class;
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Types {
         byte v1();
@@ -288,5 +312,7 @@ public class AnnotationBuilderTest {
         A2[] v18();
         boolean v19();
         boolean[] v20();
+        A5 v21();
+        A6 v22();
     }
 }

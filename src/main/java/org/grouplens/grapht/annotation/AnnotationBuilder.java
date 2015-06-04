@@ -326,7 +326,31 @@ public final class AnnotationBuilder<T extends Annotation> {
     public <A extends Annotation> AnnotationBuilder<T> set(String name, A[] value) {
         return set(name, value, value.getClass());
     }
-    
+
+    /**
+     * As {@link #set(String, boolean)} but 'assigns an enum value'
+     * .A NullPointerException is thrown if value is null.
+     *
+     * @param name
+     * @param value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> set(String name, Enum<? extends Enum> value) {
+        return set(name, value, value.getClass());
+    }
+
+    /**
+     * As {@link #set(String, Class)} but 'assigns an class value'
+     * .A NullPointerException is thrown if value is null.
+     *
+     * @param name
+     * @param value
+     * @return This builder
+     */
+    public AnnotationBuilder<T> set(String name, Class<? extends Class> value) {
+        return set(name, value, value.getClass());
+    }
+
     /**
      * Set the 'value' attribute to the given boolean value.
      * 
@@ -526,7 +550,25 @@ public final class AnnotationBuilder<T extends Annotation> {
     public <A extends Annotation> AnnotationBuilder<T> setValue(A[] value) {
         return set("value", value);
     }
-    
+
+    /**
+     * Set the 'value' attribute to the given enum.
+     *
+     * @param value The enum type annotation
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(Enum<? extends Enum> value) { return set("value", value);}
+
+    /**
+     * Set the 'value' attribute to the given class
+     *
+     * @param value The class type annotation
+     * @return This builder
+     */
+    public AnnotationBuilder<T> setValue(Class<? extends Class> value) { return set("value", value);}
+
+
+
     private AnnotationBuilder<T> set(String name, Object value, Class<?> type) {
         try {
             Method attr = this.type.getMethod(name);
