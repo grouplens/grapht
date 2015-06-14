@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.io.Closeable;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -43,7 +44,7 @@ import java.util.WeakHashMap;
  * @since 0.9
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class InjectionContainer {
+public class InjectionContainer implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(InjectionContainer.class);
 
     private final CachePolicy defaultCachePolicy;
@@ -81,7 +82,8 @@ public class InjectionContainer {
      * @see #makeInstantiator(DAGNode, SetMultimap)
      */
     public Instantiator makeInstantiator(DAGNode<Component, Dependency> node) {
-        return makeInstantiator(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
+        Instantiator inst  =  makeInstantiator(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
+        return inst;
     }
 
     /**
@@ -98,11 +100,11 @@ public class InjectionContainer {
         Instantiator cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
+            CachePolicy policy = node.getLabel().getCachePolicy();
+
             Map<Desire, Instantiator> depMap = makeDependencyMap(node, backEdges);
 
-            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap);
-
-            CachePolicy policy = node.getLabel().getCachePolicy();
+            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap, this);
             if (policy.equals(CachePolicy.NO_PREFERENCE)) {
                 policy = defaultCachePolicy;
             }
@@ -133,9 +135,11 @@ public class InjectionContainer {
         for (DAGEdge<Component,Dependency> edge: edges) {
             desires.add(edge.getLabel().getInitialDesire());
         }
-
         return Maps.asMap(desires.build(), new DepLookup(edges, backEdges));
     }
+
+    @Override
+    public void close() { }
 
     /**
      * Function to look up a desire in a set of dependency edges.

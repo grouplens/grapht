@@ -20,6 +20,7 @@
 package org.grouplens.grapht;
 
 import javax.inject.Qualifier;
+import java.io.Closeable;
 import java.lang.annotation.Annotation;
 
 /**
@@ -42,7 +43,7 @@ import java.lang.annotation.Annotation;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface Injector {
+public interface Injector  {
     /**
      * <p>
      * Get an instance of T based on the bindings that this Injector was
@@ -71,4 +72,5 @@ public interface Injector {
      * @throws ConstructionException if type cannot be instantiated
      */
     <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException;
+
 }

@@ -1,17 +1,11 @@
 /*
  * Grapht, an open source dependency injector.
- * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)
- * Copyright 2010-2014 Regents of the University of Minnesota
+ * Copyright 2010-2012 Regents of the University of Minnesota and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; either version 2.1 of the
  * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
  *
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, write to the Free Software Foundation, Inc., 51
@@ -20,6 +14,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.InjectionContainer;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.NullDependencyException;
 import org.grouplens.grapht.reflect.Desire;
@@ -49,6 +44,7 @@ public class ClassInstantiator implements Instantiator {
     private final Class<?> type;
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
+    private final InjectionContainer injectionContainer;
 
     /**
      * Create an ClassInstantiator that will provide instances of the given
@@ -59,14 +55,19 @@ public class ClassInstantiator implements Instantiator {
      * @param desires The dependency desires for the instance
      * @param providers The providers that satisfy the desires of the type
      */
-    public ClassInstantiator(Class<?> type, List<Desire> desires, Map<Desire,Instantiator> providers) {
+    public ClassInstantiator(Class<?> type, List<Desire> desires,
+                             Map<Desire,Instantiator> providers,
+                             InjectionContainer injectionContainer) {
         Preconditions.notNull("type", type);
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
+        Preconditions.notNull("injectionContainer", injectionContainer);
+
 
         this.type = type;
         this.desires = desires;
         this.providers = providers;
+        this.injectionContainer = injectionContainer;
     }
 
     @Override
@@ -88,6 +89,7 @@ public class ClassInstantiator implements Instantiator {
                 Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
                 for (Desire d : desires) {
                     LogContext ipContext = LogContext.create();
+                    d.getInjectionPoint().getType();
                     if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                         // this desire is a constructor argument so create it now
                         Instantiator provider = providers.get(d);
@@ -129,7 +131,7 @@ public class ClassInstantiator implements Instantiator {
             globalLogContext.finish();
         }
 
-         // the instance has been fully configured
+         // the instance has been fully configure
         return instance;
     }
 

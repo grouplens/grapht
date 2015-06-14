@@ -19,10 +19,7 @@
  */
 package org.grouplens.grapht.solver;
 
-import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.Instantiators;
-import org.grouplens.grapht.ResolutionException;
+import org.grouplens.grapht.*;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.InstanceProvider;
 import org.grouplens.grapht.util.Types;
@@ -136,7 +133,8 @@ public class ProviderBindingFunction implements BindingFunction {
         }
 
         @Override
-        public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+        public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
+                                             InjectionContainer injectionContainer) {
             Instantiator instantiator = dependencies.get(providedDesire);
             
             // Inject an instance of a provider wrapping this instantiator.

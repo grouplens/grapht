@@ -20,6 +20,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.InjectionContainer;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.Instantiators;
 import org.grouplens.grapht.reflect.Desire;
@@ -94,7 +95,8 @@ public class NullSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
+                                         InjectionContainer injectionContainer) {
         return Instantiators.ofNull(type);
     }
     

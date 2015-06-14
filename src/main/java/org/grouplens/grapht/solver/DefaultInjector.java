@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 
 /**
@@ -47,7 +49,6 @@ public class DefaultInjector implements Injector {
     
     private final DependencySolver solver;
     private final InjectionContainer instantiator;
-
     /**
      * <p>
      * Create a new DefaultInjector. The created resolver will use a max
@@ -151,5 +152,9 @@ public class DefaultInjector implements Injector {
             DAGNode<Component, Dependency> resolvedNode = resolved.getTail();
             return type.cast(instantiator.makeInstantiator(resolvedNode, solver.getBackEdges()).instantiate());
         }
+    }
+
+    void close() {
+        instantiator.close();
     }
 }

@@ -20,6 +20,7 @@
 package org.grouplens.grapht.reflect;
 
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.InjectionContainer;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.Instantiators;
 
@@ -33,7 +34,7 @@ import java.util.Map;
 /**
  * MockSatisfaction is a simple implementation of Satisfactions for certain
  * types of test cases. It can be configured by its constructors, although
- * {@link #makeInstantiator(Map)} always returns the same provider.
+ * {@link #makeInstantiator(Map, org.grouplens.grapht.InjectionContainer)} always returns the same provider.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
@@ -97,7 +98,8 @@ public class MockSatisfaction implements Satisfaction {
     }
 
     @Override
-    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies) {
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
+                                         InjectionContainer injectionContainer) {
         return Instantiators.ofProvider(provider);
     }
 

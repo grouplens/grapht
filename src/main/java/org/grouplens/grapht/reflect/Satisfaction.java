@@ -20,6 +20,7 @@
 package org.grouplens.grapht.reflect;
 
 import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.InjectionContainer;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.Instantiator;
 
@@ -114,5 +115,5 @@ public interface Satisfaction extends Serializable {
      *         satisfaction, instantiated using the specified dependency
      *         mapping.
      */
-    Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies);
+    Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer injectionContainer);
 }
