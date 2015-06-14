@@ -2,7 +2,6 @@ language: java
 jdk:
 - oraclejdk7
 - oraclejdk8
-- openjdk6
 install: mvn --batch-mode dependency:go-offline
 script: mvn --batch-mode install
 branches:
