@@ -96,7 +96,8 @@ public class InstanceSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer injectionContainer) {
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
+                                         InjectionContainer injectionContainer) {
         return Instantiators.ofInstance(instance);
     }
     
