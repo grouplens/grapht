@@ -92,7 +92,7 @@ public class SatisfactionTest {
         providers.put(new ReflectionDesire(TypeC.INTERFACE_B), Instantiators.ofInstance(b1));
         providers.put(new ReflectionDesire(TypeC.TYPE_B), Instantiators.ofInstance(b2));
         
-        Instantiator provider = new ClassSatisfaction(TypeC.class).makeInstantiator(providers, null);
+        Instantiator provider = new ClassSatisfaction(TypeC.class).makeInstantiator(providers,null);
         Object o = provider.instantiate();
         
         Assert.assertTrue(o instanceof TypeC);
