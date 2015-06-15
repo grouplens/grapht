@@ -43,7 +43,7 @@ import java.lang.annotation.Annotation;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public interface Injector  {
+public interface Injector extends AutoCloseable {
     /**
      * <p>
      * Get an instance of T based on the bindings that this Injector was
@@ -73,4 +73,8 @@ public interface Injector  {
      */
     <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException;
 
+    /**
+     * Close the injector, shutting down any instantiated components that require shutdown.
+     */
+    void close();
 }
