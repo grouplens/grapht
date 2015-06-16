@@ -154,7 +154,8 @@ public class DefaultInjector implements Injector {
         }
     }
 
-    void close() {
+    @Override
+    public void close() {
         instantiator.close();
     }
 }
