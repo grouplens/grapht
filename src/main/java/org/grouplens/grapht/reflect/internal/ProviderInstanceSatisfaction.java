@@ -97,7 +97,7 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
 
     @Override
     public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
-                                         InjectionContainer injectionContainer) {
+                                         InjectionContainer container) {
         return Instantiators.ofProvider(provider);
     }
     

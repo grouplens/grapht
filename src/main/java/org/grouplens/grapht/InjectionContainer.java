@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -82,8 +81,7 @@ public class InjectionContainer implements AutoCloseable {
      * @see #makeInstantiator(DAGNode, SetMultimap)
      */
     public Instantiator makeInstantiator(DAGNode<Component, Dependency> node) {
-        Instantiator inst  =  makeInstantiator(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
-        return inst;
+        return makeInstantiator(node, ImmutableSetMultimap.<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>>of());
     }
 
     /**
@@ -100,11 +98,12 @@ public class InjectionContainer implements AutoCloseable {
         Instantiator cached = providerCache.get(node);
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
-            CachePolicy policy = node.getLabel().getCachePolicy();
 
             Map<Desire, Instantiator> depMap = makeDependencyMap(node, backEdges);
 
             Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap, this);
+
+            CachePolicy policy = node.getLabel().getCachePolicy();
             if (policy.equals(CachePolicy.NO_PREFERENCE)) {
                 policy = defaultCachePolicy;
             }

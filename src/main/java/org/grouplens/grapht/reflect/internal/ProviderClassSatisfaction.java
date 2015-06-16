@@ -111,11 +111,11 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
-                                         InjectionContainer injectionContainer) {
+                                         InjectionContainer container) {
         // we have to use the raw type because we don't have enough information,
         // but we can assume correctly that it will build a provider
         ClassInstantiator providerBuilder = new ClassInstantiator(providerType, getDependencies(),
-                                                                  dependencies, injectionContainer);
+                                                                  dependencies, container);
         return Instantiators.ofProviderInstantiator(providerBuilder);
     }
     

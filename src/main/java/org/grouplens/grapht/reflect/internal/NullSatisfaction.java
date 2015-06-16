@@ -46,7 +46,8 @@ import java.util.Map;
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
-public class NullSatisfaction implements Satisfaction, Serializable {
+public class
+        NullSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = -1L;
     private final transient Class<?> type;
     
@@ -96,7 +97,7 @@ public class NullSatisfaction implements Satisfaction, Serializable {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
-                                         InjectionContainer injectionContainer) {
+                                         InjectionContainer container) {
         return Instantiators.ofNull(type);
     }
     

@@ -115,5 +115,5 @@ public interface Satisfaction extends Serializable {
      *         satisfaction, instantiated using the specified dependency
      *         mapping.
      */
-    Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer injectionContainer);
+    Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer container);
 }

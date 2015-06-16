@@ -102,8 +102,8 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer injectionContainer) {
-        return new ClassInstantiator(type, getDependencies(), dependencies, injectionContainer);
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer container) {
+        return new ClassInstantiator(type, getDependencies(), dependencies, container);
     }
     
     @Override

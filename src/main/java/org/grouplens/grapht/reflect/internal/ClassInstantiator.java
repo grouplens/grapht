@@ -50,7 +50,7 @@ public class ClassInstantiator implements Instantiator {
     private final Class<?> type;
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
-    private final InjectionContainer injectionContainer;
+    private final InjectionContainer container;
 
     /**
      * Create an ClassInstantiator that will provide instances of the given
@@ -63,16 +63,16 @@ public class ClassInstantiator implements Instantiator {
      */
     public ClassInstantiator(Class<?> type, List<Desire> desires,
                              Map<Desire,Instantiator> providers,
-                             InjectionContainer injectionContainer) {
+                             InjectionContainer container) {
         Preconditions.notNull("type", type);
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
-        Preconditions.notNull("injectionContainer", injectionContainer);
+        Preconditions.notNull("injectionContainer", container);
 
         this.type = type;
         this.desires = desires;
         this.providers = providers;
-        this.injectionContainer = injectionContainer;
+        this.container = container;
     }
 
     @Override
@@ -94,7 +94,6 @@ public class ClassInstantiator implements Instantiator {
                 Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
                 for (Desire d : desires) {
                     LogContext ipContext = LogContext.create();
-                    d.getInjectionPoint().getType();
                     if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                         // this desire is a constructor argument so create it now
                         Instantiator provider = providers.get(d);
@@ -136,7 +135,7 @@ public class ClassInstantiator implements Instantiator {
             globalLogContext.finish();
         }
 
-         // the instance has been fully configure
+         // the instance has been fully configured
         return instance;
     }
 
