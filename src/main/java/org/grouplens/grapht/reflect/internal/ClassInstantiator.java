@@ -1,3 +1,4 @@
+
 /*
  * Grapht, an open source dependency injector.
  * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)
@@ -19,22 +20,21 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.ConstructionException;
-import org.grouplens.grapht.InjectionContainer;
-import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.NullDependencyException;
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.grouplens.grapht.*;
+import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.Preconditions;
-import org.grouplens.grapht.reflect.internal.InjectionStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.Annotation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class ClassInstantiator implements Instantiator {
     private final Class<?> type;
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
-    private final InjectionContainer container;
+    private InjectionContainer container;
 
     /**
      * Create an ClassInstantiator that will provide instances of the given
@@ -134,8 +134,8 @@ public class ClassInstantiator implements Instantiator {
         } finally {
             globalLogContext.finish();
         }
-
-         // the instance has been fully configured
+        
+        // the instance has been fully configured
         return instance;
     }
 

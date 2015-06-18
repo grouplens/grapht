@@ -22,6 +22,7 @@ package org.grouplens.grapht.util;
 import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.PostConstruct;
@@ -51,7 +52,8 @@ import static org.junit.Assert.*;
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 public class ComponentLifecycleTest {
-    /**
+
+    @Ignore
     @Test
     public void testClosesAutoCloseable() throws InjectionException {
         InjectorBuilder bld = InjectorBuilder.create();
@@ -67,7 +69,7 @@ public class ComponentLifecycleTest {
         // Check that close was called.
         assertTrue("close was called", closed.isSet());
     }
-    */
+
     /**
      * If we inject an instance of an AutoCloseable, it should not be closed.
      */
@@ -90,7 +92,8 @@ public class ComponentLifecycleTest {
 
     /**
      * Test that the lifecycle management calls pre-destroy methods.
-
+     */
+    @Ignore
     @Test
     public void testCallsPreDestroy() throws InjectionException {
         InjectorBuilder bld = InjectorBuilder.create();
@@ -109,7 +112,8 @@ public class ComponentLifecycleTest {
 
     /**
      * Test that the lifecycle management does not call pre-destroy methods on an instance.
-
+     */
+    @Ignore
     @Test
     public void testDoesNotCallPreDestroyOnInstance() throws InjectionException {
         InjectorBuilder bld = InjectorBuilder.create();
@@ -128,7 +132,8 @@ public class ComponentLifecycleTest {
 
     /**
      * Test that the lifecycle management calls post-construct methods
-
+     */
+    @Ignore
     @Test
     public void testCallsPostConstruct() throws InjectionException {
         InjectorBuilder bld = InjectorBuilder.create();
@@ -145,7 +150,7 @@ public class ComponentLifecycleTest {
         // Check that close was called.
         assertTrue("close was called", setup.isSet());
     }
-    */
+
     /**
      * Flag component for detecting closure.
      */

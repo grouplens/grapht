@@ -239,7 +239,8 @@ public class AnnotationBuilderTest {
     static {
         
         try {
-            jvmA1a1 = AP.class.getMethod("a1").getAnnotation(A1.class);
+            jvmA1a1 = AP.class.
+                                      getMethod("a1").getAnnotation(A1.class);
             jvmA2a1 = AP.class.getMethod("a1").getAnnotation(A2.class);
             jvmA3a1 = AP.class.getMethod("a1").getAnnotation(A3.class);
             jvmA4a1 = AP.class.getMethod("a1").getAnnotation(A4.class);
@@ -282,7 +283,7 @@ public class AnnotationBuilderTest {
     }
 
     public enum RestrictionType {
-        NONE, LENGTH, FRACTION_DIGIT;
+        NONE, LENGTH, FRACTION_DIGIT
     }
 
     @Retention(RetentionPolicy.RUNTIME)
