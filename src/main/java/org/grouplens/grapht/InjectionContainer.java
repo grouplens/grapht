@@ -20,10 +20,12 @@
 package org.grouplens.grapht;
 
 import com.google.common.base.Function;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desire;
@@ -31,9 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import javax.annotation.PreDestroy;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Container for dependency-injected components.  A container is the scope of memoization, so
@@ -48,6 +51,7 @@ public class InjectionContainer implements AutoCloseable {
 
     private final CachePolicy defaultCachePolicy;
     private final Map<DAGNode<Component, Dependency>, Instantiator> providerCache;
+    private final Deque registry = new LinkedList();
 
     /**
      * Create a new instantiator with a default policy of {@code MEMOIZE}.
@@ -137,8 +141,44 @@ public class InjectionContainer implements AutoCloseable {
         return Maps.asMap(desires.build(), new DepLookup(edges, backEdges));
     }
 
+    public void registerComponent(Object instance){
+        registry.push(instance);
+    }
+
     @Override
-    public void close() { }
+    public void close() {
+        Throwable throwable =  null;
+        while (!registry.isEmpty()) {
+            Object component = registry.pop();
+                if(component instanceof AutoCloseable) {
+                    try {
+                        ((AutoCloseable)component).close();
+                    } catch (Throwable e) {
+                        if(throwable == null) {
+                            throwable = e;
+                        } else {
+                            throwable.addSuppressed(e);
+                        }
+                    }
+                }
+            Method[] methods = MethodUtils.getMethodsWithAnnotation(component.getClass(), PreDestroy.class);
+            for(Method method:methods) {
+                method.setAccessible(true);
+                try {
+                    method.invoke(component);
+                } catch (Throwable e) {
+                    if(throwable == null) {
+                        throwable = e;
+                    } else {
+                        throwable.addSuppressed(e);
+                    }
+                }
+            }
+        }
+        if(throwable!=null) {
+          throw Throwables.propagate(throwable);
+        }
+    }
 
     /**
      * Function to look up a desire in a set of dependency edges.

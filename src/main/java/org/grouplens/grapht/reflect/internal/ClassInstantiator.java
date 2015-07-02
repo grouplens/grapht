@@ -20,24 +20,22 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.grouplens.grapht.*;
-import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
-
+import javax.annotation.PostConstruct;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.Annotation;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Instantiates class instances.
@@ -50,7 +48,10 @@ public class ClassInstantiator implements Instantiator {
     private final Class<?> type;
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
-    private InjectionContainer container;
+    private final InjectionContainer container;
+    private Method[] methods;
+    Annotation[] annotations;
+
 
     /**
      * Create an ClassInstantiator that will provide instances of the given
@@ -134,7 +135,20 @@ public class ClassInstantiator implements Instantiator {
         } finally {
             globalLogContext.finish();
         }
-        
+        container.registerComponent(instance);
+
+        methods = MethodUtils.getMethodsWithAnnotation(type, PostConstruct.class);
+        for(Method method:methods){
+            method.setAccessible(true);
+            try {
+                method.invoke(instance);
+            } catch (InvocationTargetException e) {
+                throw new ConstructionException("Exception throw by " + method, e);
+            } catch (IllegalAccessException e) {
+                throw new ConstructionException("Access violation invoking " + method, e);
+            }
+        }
+
         // the instance has been fully configured
         return instance;
     }

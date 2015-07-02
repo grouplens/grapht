@@ -53,11 +53,11 @@ import static org.junit.Assert.*;
  */
 public class ComponentLifecycleTest {
 
-    @Ignore
     @Test
-    public void testClosesAutoCloseable() throws InjectionException {
+    public void testClosesAutoCloseable() throws Exception {
         InjectorBuilder bld = InjectorBuilder.create();
-        Flag closed = new Flag();
+        Flag closed
+                = new Flag();
         bld.bind(Flag.class).to(closed);
         Injector injector = bld.build();
         try {
@@ -74,7 +74,7 @@ public class ComponentLifecycleTest {
      * If we inject an instance of an AutoCloseable, it should not be closed.
      */
     @Test
-    public void testDoesNotCloseAutoCloseableInstance() throws InjectionException {
+    public void testDoesNotCloseAutoCloseableInstance() throws Exception {
         InjectorBuilder bld = InjectorBuilder.create();
         Flag closed = new Flag();
         bld.bind(Flag.class).to(closed);
@@ -93,9 +93,8 @@ public class ComponentLifecycleTest {
     /**
      * Test that the lifecycle management calls pre-destroy methods.
      */
-    @Ignore
     @Test
-    public void testCallsPreDestroy() throws InjectionException {
+    public void testCallsPreDestroy() throws Exception {
         InjectorBuilder bld = InjectorBuilder.create();
         Flag closed = new Flag();
         bld.bind(Flag.class).to(closed);
@@ -113,9 +112,8 @@ public class ComponentLifecycleTest {
     /**
      * Test that the lifecycle management does not call pre-destroy methods on an instance.
      */
-    @Ignore
     @Test
-    public void testDoesNotCallPreDestroyOnInstance() throws InjectionException {
+    public void testDoesNotCallPreDestroyOnInstance() throws Exception {
         InjectorBuilder bld = InjectorBuilder.create();
         Flag closed = new Flag();
         bld.bind(LifecycleShutdownComponent.class).to(new LifecycleShutdownComponent(closed));
@@ -133,9 +131,8 @@ public class ComponentLifecycleTest {
     /**
      * Test that the lifecycle management calls post-construct methods
      */
-    @Ignore
     @Test
-    public void testCallsPostConstruct() throws InjectionException {
+    public void testCallsPostConstruct() throws Exception {
         InjectorBuilder bld = InjectorBuilder.create();
         Flag setup = new Flag();
         bld.bind(Flag.class).to(setup);
