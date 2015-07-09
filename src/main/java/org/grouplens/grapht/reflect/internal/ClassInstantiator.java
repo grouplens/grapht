@@ -49,8 +49,7 @@ public class ClassInstantiator implements Instantiator {
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
     private final InjectionContainer container;
-    private Method[] methods;
-    Annotation[] annotations;
+
 
 
     /**
@@ -88,6 +87,8 @@ public class ClassInstantiator implements Instantiator {
         Constructor<?> ctor = getConstructor();
         LogContext globalLogContext = LogContext.create();
         Object instance = null;
+        Method[] methods;
+
         try {
             // create the instance that we are injecting
             try {
@@ -136,6 +137,7 @@ public class ClassInstantiator implements Instantiator {
             globalLogContext.finish();
         }
         container.registerComponent(instance);
+
 
         methods = MethodUtils.getMethodsWithAnnotation(type, PostConstruct.class);
         for(Method method:methods){

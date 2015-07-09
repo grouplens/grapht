@@ -237,7 +237,6 @@ public class AnnotationBuilderTest {
     private static final A4 jvmA4a1;
     
     static {
-        
         try {
             jvmA1a1 = AP.class.
                                       getMethod("a1").getAnnotation(A1.class);
