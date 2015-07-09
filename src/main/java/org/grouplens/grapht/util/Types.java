@@ -191,7 +191,9 @@ public final class Types {
         com.google.common.base.Preconditions.checkArgument(Provider.class.isAssignableFrom(providerClass),
                                                            "class is not Provider class");
         Map<TypeVariable<?>, Type> bindings = TypeUtils.getTypeArguments(providerClass, Provider.class);
-        if(!bindings.containsKey(PROVIDER_TYPE_VAR)){
+        Type boundType = bindings.get(PROVIDER_TYPE_VAR);
+
+        if(boundType == null || boundType instanceof TypeVariable){
             throw new IllegalArgumentException("Class provided by " + providerClass.getName() + " is generic");
         }
         final Class<?> inferredType = TypeUtils.getRawType(bindings.get(PROVIDER_TYPE_VAR), null);
