@@ -45,7 +45,7 @@ public class SkipIfUnusableTest {
         InjectorBuilder bld = InjectorBuilder.create();
         Injector inj = bld.build();
         try {
-            IfaceWithSkippableDefault obj = inj.getInstance(IfaceWithSkippableDefault.class);
+            IfaceWithSkippableDefault obj = inj.tryGetInstance(null, IfaceWithSkippableDefault.class);
             assertThat(obj, nullValue());
         } catch (InjectionException ex) {
             fail("injection of skipped object should succeed with null object");
@@ -60,7 +60,7 @@ public class SkipIfUnusableTest {
         InjectorBuilder bld = InjectorBuilder.create();
         Injector inj = bld.build();
         try {
-            IfaceWithSkippableDefaultProvider obj = inj.getInstance(IfaceWithSkippableDefaultProvider.class);
+            IfaceWithSkippableDefaultProvider obj = inj.tryGetInstance(null, IfaceWithSkippableDefaultProvider.class);
             assertThat(obj, nullValue());
         } catch (InjectionException e) {
             fail("injection of skipped provider should succeed with null object");

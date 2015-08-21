@@ -380,29 +380,53 @@ public class DependencySolver {
             // extend node onto deferred queue and skip its dependencies for now
             logger.debug("Deferring dependencies of {}", result.satisfaction);
             node = DAGNode.singleton(result.makeSatisfaction());
+            // FIXME Deferred and skippable bindings do not interact well
             deferQueue.add(new Deferral(node, newContext));
+            return Pair.of(node, result.makeDependency());
         } else {
-            // build up a node with its outgoing edges
-            DAGNodeBuilder<Component,Dependency> nodeBuilder = DAGNode.newBuilder();
-            nodeBuilder.setLabel(result.makeSatisfaction());
-            for (Desire d: result.satisfaction.getDependencies()) {
-                // complete the sub graph for the given desire
-                // - the call to resolveFully() is responsible for adding the dependency edges
-                //   so we don't need to process the returned node
-                logger.debug("Attempting to satisfy dependency {} of {}", d, result.satisfaction);
-                nodeBuilder.addEdge(resolveFully(d, newContext, deferQueue));
-            }
-            node = nodeBuilder.build();
+            return resolveDepsAndMakeNode(deferQueue, result, newContext);
         }
+    }
 
+    private Pair<DAGNode<Component, Dependency>,Dependency> resolveDepsAndMakeNode(Queue<Deferral> deferQueue,
+                                                                                   Resolution result,
+                                                                                   InjectionContext newContext) throws ResolutionException {
+        DAGNode<Component, Dependency> node;// build up a node with its outgoing edges
+        DAGNodeBuilder<Component,Dependency> nodeBuilder = DAGNode.newBuilder();
+        nodeBuilder.setLabel(result.makeSatisfaction());
+        for (Desire d: result.satisfaction.getDependencies()) {
+            // complete the sub graph for the given desire
+            // - the call to resolveFully() is responsible for adding the dependency edges
+            //   so we don't need to process the returned node
+            logger.debug("Attempting to satisfy dependency {} of {}", d, result.satisfaction);
+            Pair<DAGNode<Component, Dependency>, Dependency> dep;
+            try {
+                dep = resolveFully(d, newContext, deferQueue);
+            } catch (ResolutionException ex) {
+                // whoops, try to backtrack
+                Resolution back = result.skippable ? result.backtrack() : null;
+                if (back != null) {
+                    InjectionContext popped = newContext.getLeading();
+                    InjectionContext forked = InjectionContext.extend(popped, back.satisfaction,
+                                                                      back.desires.getInitialDesire().getInjectionPoint());
+                    return resolveDepsAndMakeNode(deferQueue, back, forked);
+                } else {
+                    throw ex;
+                }
+            }
+            nodeBuilder.addEdge(dep);
+        }
+        node = nodeBuilder.build();
         return Pair.of(node, result.makeDependency());
     }
-    
+
     private Resolution resolve(Desire desire, InjectionContext context) throws ResolutionException {
         DesireChain chain = DesireChain.singleton(desire);
 
         CachePolicy policy = CachePolicy.NO_PREFERENCE;
         boolean fixed = false;
+        boolean skippable = false;
+
         while(true) {
             logger.debug("Current desire: {}", chain.getCurrentDesire());
             
@@ -416,14 +440,15 @@ public class DependencySolver {
             }
             
             boolean defer = false;
-            boolean terminate = true;
+            boolean terminate = true; // so we stop if there is no binding
             if (binding != null) {
                 // update the desire chain
                 chain = chain.extend(binding.getDesire());
 
-                terminate = binding.terminates();
+                terminate = binding.terminates(); // binding decides if we stop
                 defer = binding.isDeferred();
                 fixed |= binding.isFixed();
+                skippable = binding.isSkippable();
                 
                 // upgrade policy if needed
                 if (binding.getCachePolicy().compareTo(policy) > 0) {
@@ -442,7 +467,7 @@ public class DependencySolver {
                     }
                 }
                 
-                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, fixed, defer);
+                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, fixed, defer, skippable);
             } else if (binding == null) {
                 // no more desires to process, it cannot be satisfied
                 throw new UnresolvableDependencyException(chain, context);
@@ -459,15 +484,18 @@ public class DependencySolver {
         private final DesireChain desires;
         private final boolean fixed;
         private final boolean deferDependencies;
-        
+        private final boolean skippable;
+
         public Resolution(Satisfaction satisfaction, CachePolicy policy, 
                           DesireChain desires, boolean fixed,
-                          boolean deferDependencies) {
+                          boolean deferDependencies,
+                          boolean skippable) {
             this.satisfaction = satisfaction;
             this.policy = policy;
             this.desires = desires;
             this.fixed = fixed;
             this.deferDependencies = deferDependencies;
+            this.skippable = skippable;
         }
 
         public Component makeSatisfaction() {
@@ -480,6 +508,34 @@ public class DependencySolver {
                 flags.add(Dependency.Flag.FIXED);
             }
             return Dependency.create(desires, flags);
+        }
+
+        /**
+         * Backtrack this resolution to skip a binding.
+         *
+         * @return The backtracked resolution, or {@code null} if the resolution cannot backtrack because doing so
+         * would result in a non-instantiable resolution.
+         * @throws IllegalArgumentException if attempting to backtrack would be invalid, because the resolution is
+         *                                  not skippable.
+         */
+        public Resolution backtrack() {
+            if (!skippable) {
+                throw new IllegalArgumentException("unskippable resolution can't backtrack");
+            }
+            if (desires.size() <= 1) {
+                throw new IllegalArgumentException("singleton desire chain can't backtrack");
+            }
+            DesireChain shrunk = desires.getPreviousDesireChain();
+            if (shrunk.getCurrentDesire().isInstantiable()) {
+                return new Resolution(shrunk.getCurrentDesire().getSatisfaction(),
+                                      policy, // FIXME Backtrack the policy
+                                      shrunk,
+                                      fixed,  // FIXME If we allow skippability on non-default bindings, this is wrong
+                                      deferDependencies, // FIXME same here
+                                      false);
+            } else {
+                return null;
+            }
         }
 
         @Override

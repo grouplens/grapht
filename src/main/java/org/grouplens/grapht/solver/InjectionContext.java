@@ -52,6 +52,21 @@ public class InjectionContext extends AbstractChain<Pair<Satisfaction,InjectionP
     }
 
     /**
+     * Extend or create an injection context.
+     * @param prefix The initial context.
+     * @param satisfaction The satisfaction.
+     * @param ip The injection point.
+     * @return The injection context.
+     */
+    public static InjectionContext extend(@Nullable InjectionContext prefix, Satisfaction satisfaction, InjectionPoint ip) {
+        if (prefix == null) {
+            return singleton(satisfaction, ip);
+        } else {
+            return prefix.extend(satisfaction, ip);
+        }
+    }
+
+    /**
      * Construct a singleton injection context with no attributes.
      * @param satisfaction The satisfaction.
      * @return The injection context.
