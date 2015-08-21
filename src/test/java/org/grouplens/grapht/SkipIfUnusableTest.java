@@ -76,7 +76,7 @@ public class SkipIfUnusableTest {
         bld.bind(Inner.class).to(InnerWithDep.class);
         Injector inj = bld.build();
         try {
-            IfaceWithSkippableDefault obj = inj.getInstance(IfaceWithSkippableDefault.class);
+            inj.tryGetInstance(null, IfaceWithSkippableDefault.class);
             fail("injecting a skippable default with a satisfied but instantiable dep should fail");
         } catch (InjectionException ex) {
             assertThat(ex, instanceOf(UnresolvableDependencyException.class));
@@ -91,7 +91,7 @@ public class SkipIfUnusableTest {
         InjectorBuilder bld = InjectorBuilder.create();
         Injector inj = bld.build();
         try {
-            inj.getInstance(DefaultRequirer.class);
+            inj.getInstance(null, DefaultRequirer.class);
             fail("injection of dep on skipped default should fail");
         } catch (InjectionException ex) {
             assertThat(ex, instanceOf(UnresolvableDependencyException.class));
@@ -110,6 +110,22 @@ public class SkipIfUnusableTest {
             assertThat(obj, notNullValue());
         } catch (InjectionException ex) {
             fail("injection of component with optional dep on skipped default should succeed");
+        }
+    }
+
+    /**
+     * Injection of component that optionally uses a non-skipped but transitively non-instantiable default should fail.
+     */
+    @Test
+    public void testFailOptionalDepHasUnmetDep() {
+        InjectorBuilder bld = InjectorBuilder.create();
+        bld.bind(Inner.class).to(InnerWithDep.class);
+        Injector inj = bld.build();
+        try {
+            OptionalDefaultRequirer obj = inj.getInstance(OptionalDefaultRequirer.class);
+            fail("injection of component with optional dep on non-skipped but uninstantiable default should fail");
+        } catch (InjectionException ex) {
+            assertThat(ex, instanceOf(UnresolvableDependencyException.class));
         }
     }
 
