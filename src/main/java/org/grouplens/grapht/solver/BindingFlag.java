@@ -36,7 +36,11 @@ public enum BindingFlag {
     /**
      * The binding is terminal (no further rules should be applied).
      */
-    TERMINAL;
+    TERMINAL,
+    /**
+     * The binding should be skipped if one of its results' dependencies cannot be satisfied.
+     */
+    SKIPPABLE;
 
     public static EnumSet<BindingFlag> emptySet() {
         return EnumSet.noneOf(BindingFlag.class);

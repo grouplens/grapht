@@ -160,39 +160,40 @@ public class DefaultDesireBindingFunction implements BindingFunction {
      */
     private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
         DefaultProvider provider = type.getAnnotation(DefaultProvider.class);
+        BindingResult.Builder brb = null;
         if (provider != null) {
-            return BindingResult.newBuilder()
-                                .setDesire(desire.restrict(Satisfactions.providerType(provider.value())))
-                                .setCachePolicy(provider.cachePolicy())
-                                .addFlag(BindingFlag.TERMINAL)
-                                .build();
+            brb = BindingResult.newBuilder()
+                               .setDesire(desire.restrict(Satisfactions.providerType(provider.value())))
+                               .setCachePolicy(provider.cachePolicy())
+                               .addFlag(BindingFlag.TERMINAL);
+            if (provider.skipIfUnusable()) {
+                brb.addFlag(BindingFlag.SKIPPABLE);
+            }
         }
 
         DefaultImplementation impl = type.getAnnotation(DefaultImplementation.class);
         if (impl != null) {
+            brb = BindingResult.newBuilder()
+                               .setCachePolicy(impl.cachePolicy());
             if (Types.isInstantiable(impl.value())) {
-                return BindingResult.newBuilder()
-                                    .setDesire(desire.restrict(Satisfactions.type(impl.value())))
-                                    .setCachePolicy(impl.cachePolicy())
-                                    .build();
+                brb.setDesire(desire.restrict(Satisfactions.type(impl.value())));
             } else {
-                return BindingResult.newBuilder()
-                                    .setDesire(desire.restrict(impl.value()))
-                                    .setCachePolicy(impl.cachePolicy())
-                                    .build();
+                brb.setDesire(desire.restrict(impl.value()));
+            }
+            if (impl.skipIfUnusable()) {
+                brb.addFlag(BindingFlag.SKIPPABLE);
             }
         }
 
         DefaultNull dnull = type.getAnnotation(DefaultNull.class);
         if (dnull != null) {
-            return BindingResult.newBuilder()
-                                .setDesire(desire.restrict(Satisfactions.nullOfType(desire.getDesiredType())))
-                                .setCachePolicy(CachePolicy.NO_PREFERENCE)
-                                .addFlag(BindingFlag.TERMINAL)
-                                .build();
+            brb = BindingResult.newBuilder()
+                               .setDesire(desire.restrict(Satisfactions.nullOfType(desire.getDesiredType())))
+                               .setCachePolicy(CachePolicy.NO_PREFERENCE)
+                               .addFlag(BindingFlag.TERMINAL);
         }
 
-        return null;
+        return brb != null ? brb.build() : null;
     }
 
     @SuppressWarnings("unchecked")
