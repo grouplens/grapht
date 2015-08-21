@@ -27,13 +27,22 @@ import java.lang.annotation.*;
 /**
  * DefaultProvider specifies a Provider implementation to act as a default binding
  * for types annotated with it.
- * 
- * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DefaultProvider {
     Class<? extends Provider<?>> value();
+
+    /**
+     * The default cache policy of this default.
+     * @return The default cache policy for this binding.
+     */
     CachePolicy cachePolicy() default CachePolicy.NO_PREFERENCE;
+
+    /**
+     * Whether the default binding should be skipped if its dependencies cannot be satisfied.
+     * @return {@code true} if this default should be skipped if its dependencies cannot be satisfied.
+     */
+    boolean skipIfUnusable() default false;
 }
