@@ -262,6 +262,11 @@ public class DefaultDesireBindingFunction implements BindingFunction {
                 }
             }
 
+            String skip = props.getProperty("skipIfUnusable");
+            if (skip != null && skip.trim().toLowerCase().equals("true")) {
+                builder.addFlag(BindingFlag.SKIPPABLE);
+            }
+
             if (found) {
                 String policy = props.getProperty("cachePolicy", "NO_PREFERENCE");
                 builder.setCachePolicy(CachePolicy.valueOf(policy));
