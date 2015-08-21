@@ -22,11 +22,11 @@ package org.grouplens.grapht.solver;
 import java.util.EnumSet;
 
 /**
- * @author <a href="http://www.grouplens.org">GroupLens Research</a>
+ * Flags controlling binding behavior.
  */
 public enum BindingFlag {
     /**
-     * The binding is fixed (no its result cannot be rewritten).
+     * The binding is fixed (its result cannot be rewritten in graph rewriting).
      */
     FIXED,
     /**
