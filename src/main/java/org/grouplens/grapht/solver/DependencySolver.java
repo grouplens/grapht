@@ -402,7 +402,11 @@ public class DependencySolver {
             Pair<DAGNode<Component, Dependency>, Dependency> dep;
             try {
                 dep = resolveFully(d, newContext, deferQueue);
-            } catch (ResolutionException ex) {
+            } catch (UnresolvableDependencyException ex) {
+                if (!d.equals(ex.getDesireChain().getInitialDesire())) {
+                    // this is for some other (deeper) desire, fail
+                    throw ex;
+                }
                 // whoops, try to backtrack
                 Resolution back = result.skippable ? result.backtrack() : null;
                 if (back != null) {
