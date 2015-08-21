@@ -28,6 +28,8 @@ import org.grouplens.grapht.reflect.Desires;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.lang.annotation.Annotation;
 
@@ -118,20 +120,33 @@ public class DefaultInjector implements Injector {
         return solver;
     }
     
+    @Nonnull
     @Override
     public <T> T getInstance(Class<T> type) throws InjectionException {
         return getInstance(null, type);
     }
     
+    @Nonnull
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException {
+        Object obj = getInstance(Desires.create(qualifier, type, false));
+        assert obj != null;
+        return type.cast(obj);
+    }
+
+    @Nullable
+    @Override
+    public <T> T tryGetInstance(Annotation qualifier, Class<T> type) throws InjectionException {
+        Object obj = getInstance(Desires.create(qualifier, type, true));
+        return type.cast(obj);
+    }
+
+    private Object getInstance(Desire desire) throws InjectionException {
         // All Provider cache access, graph resolution, etc. occur
         // within this exclusive lock so we know everything is thread safe
         // albeit in a non-optimal way.
         synchronized(this) {
-            Desire desire = Desires.create(qualifier, type, false);
-
             Predicate<Dependency> pred = Dependency.hasInitialDesire(desire);
 
             // check if the desire is already in the graph
@@ -149,7 +164,7 @@ public class DefaultInjector implements Injector {
 
             // Check if the provider for the resolved node is in our cache
             DAGNode<Component, Dependency> resolvedNode = resolved.getTail();
-            return type.cast(instantiator.makeInstantiator(resolvedNode, solver.getBackEdges()).instantiate());
+            return instantiator.makeInstantiator(resolvedNode, solver.getBackEdges()).instantiate();
         }
     }
 }
