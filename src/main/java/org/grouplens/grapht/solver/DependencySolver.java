@@ -414,6 +414,9 @@ public class DependencySolver {
                     InjectionContext forked = InjectionContext.extend(popped, back.satisfaction,
                                                                       back.desires.getInitialDesire().getInjectionPoint());
                     return resolveDepsAndMakeNode(deferQueue, back, forked);
+                } else if (result.backtracked || result.skippable) {
+                    // the result is the result of backtracking, or could be, so make an error at this dependency
+                    throw new UnresolvableDependencyException(result.desires, newContext.getLeading(), ex);
                 } else {
                     throw ex;
                 }
@@ -471,7 +474,7 @@ public class DependencySolver {
                     }
                 }
                 
-                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, fixed, defer, skippable);
+                return new Resolution(chain.getCurrentDesire().getSatisfaction(), policy, chain, fixed, defer, skippable, false);
             } else if (binding == null) {
                 // no more desires to process, it cannot be satisfied
                 throw new UnresolvableDependencyException(chain, context);
@@ -489,17 +492,20 @@ public class DependencySolver {
         private final boolean fixed;
         private final boolean deferDependencies;
         private final boolean skippable;
+        private final boolean backtracked;
 
         public Resolution(Satisfaction satisfaction, CachePolicy policy, 
                           DesireChain desires, boolean fixed,
                           boolean deferDependencies,
-                          boolean skippable) {
+                          boolean skippable,
+                          boolean backtracked) {
             this.satisfaction = satisfaction;
             this.policy = policy;
             this.desires = desires;
             this.fixed = fixed;
             this.deferDependencies = deferDependencies;
             this.skippable = skippable;
+            this.backtracked = backtracked;
         }
 
         public Component makeSatisfaction() {
@@ -536,7 +542,7 @@ public class DependencySolver {
                                       shrunk,
                                       fixed,  // FIXME If we allow skippability on non-default bindings, this is wrong
                                       deferDependencies, // FIXME same here
-                                      false);
+                                      false, true);
             } else {
                 return null;
             }

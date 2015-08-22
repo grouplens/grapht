@@ -149,6 +149,17 @@ public class SkipIfUnusableTest {
     }
 
     /**
+     * Skippable defaults dependend on by skippable defaults should cleanly be skipped.
+     */
+    @Test
+    public void testNestedSkipping() throws InjectionException {
+        InjectorBuilder bld = InjectorBuilder.create();
+        Injector inj = bld.build();
+        Outer obj = inj.tryGetInstance(null, Outer.class);
+        assertThat(obj, nullValue());
+    }
+
+    /**
      * Interface for dependencies.
      */
     interface Inner {
@@ -241,10 +252,13 @@ public class SkipIfUnusableTest {
         }
     }
 
+    @DefaultImplementation(value = DefaultRequirer.class, skipIfUnusable = true)
+    interface Outer {}
+
     /**
      * A component that requires an object with one of our skippable defaults.
      */
-    static class DefaultRequirer {
+    static class DefaultRequirer implements Outer {
         private final IfaceWithSkippableDefault dependency;
 
         @Inject
