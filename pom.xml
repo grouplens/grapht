@@ -350,9 +350,37 @@
     </profile>
 
     <profile>
-      <id>sonar-auth</id>
+      <id>auto-lint</id>
       <activation>
         <jdk>1.8</jdk>
+        <property>
+          <name>env.CI</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sonar-analyze</id>
+                <goals>
+                  <goal>sonar:sonar</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>sonar-auth</id>
+      <activation>
         <property>
           <name>env.SONAR_USER</name>
         </property>
