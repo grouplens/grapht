@@ -9,6 +9,13 @@ cache:
   - $HOME/.m2/repository/
 install: mvn --batch-mode dependency:go-offline
 script: mvn --batch-mode install
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: mvn --batch-mode --settings etc/ci-settings.xml deploy
+  on:
+    branch: master
+    jdk: oraclejdk7
 branches:
   except:
   - stable
@@ -21,3 +28,7 @@ env:
   - secure: fj6wBnUfRIfylO9q3NmBOSFzgjSk+4O2z7ucBWAIGYWcTsviJgHs5ksNaARwe9NFhtMK8ozPfHhCRoJC1NE7j0ewmt44KOX7WegUgEwPlZUdHEyR5PGETKlZltcPGX9MA9C/foWzFq5uS2TxME9N4Ct5RyVqsk0ytgTq5Bk7AUU=
   # COVERALLS_TOKEN
   - secure: IxE/hQMkpTshpL4nCCmtp9bV/YH85Svwjl6epVfQaKOwhMVtj9YUCgeuFJwh4ZUB6n+bIQr9sAq5jbBeomWbA04AdbXjuYPTnVgWBqitnY0dVTMpa/WS5mLcOkJCbAnYstNNwmeEifrhHP5hEWBTU9dx1aUClbcR0l3grjZE5D0=
+  # SONAR_USER
+  - secure: "Y0Hs0R/TncCka+m4aP2Dmn9J3PBm+gssKnttoYDGb8H5tDsMYRy+kxNhkGwqUdJnQRuth5583CYK8UzxYGeDzWDB+zCx7qiSzXblc2VG5sGSCBXBdmh8E100n+W9t02zjJpKGGqOrFvAbgkkaiGjsJB6FhUO19s4EaNeoAE5EnE="
+  # SONAR_PASSWORD
+  - secure: "N84js3IKpRatJp7XPRcIFbCJAIgn2ugnBnF62afi8L9f/SXnXlFfRYmeHyPMTSN2ivjFJ3dhePyOPvjEOlQcYZp3ZqL7nAWL56O9B5GFZaOsUEGZcknE14yRARYR5aLIP6kICuEcvHiYMGrfiTispE9ZQW4391gzvVVpPauX8J8="

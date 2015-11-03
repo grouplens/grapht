@@ -45,6 +45,7 @@
     <jacoco.version>0.7.1.201405082137</jacoco.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <sonar.host.url>https://sonar.cs.txstate.edu</sonar.host.url>
   </properties>
 
   <dependencies>
@@ -122,7 +123,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>2.5</version>
+          <version>2.7</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -346,6 +347,20 @@
           </plugin>
         </plugins>
       </reporting>
+    </profile>
+
+    <profile>
+      <id>sonar-auth</id>
+      <activation>
+        <jdk>1.8</jdk>
+        <property>
+          <name>env.SONAR_USER</name>
+        </property>
+      </activation>
+      <properties>
+        <sonar.login>${env.SONAR_USER}</sonar.login>
+        <sonar.password>${env.SONAR_PASSWORD}</sonar.password>
+      </properties>
     </profile>
   </profiles>
 </project>
