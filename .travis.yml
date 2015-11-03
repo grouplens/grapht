@@ -9,11 +9,13 @@ cache:
   - $HOME/.m2/repository/
 install: mvn --batch-mode dependency:go-offline
 script: mvn --batch-mode install
+after_success: ./etc/maybe-sonar.sh
 deploy:
   skip_cleanup: true
   provider: script
   script: mvn --batch-mode --settings etc/ci-settings.xml deploy
   on:
+    repo: grouplens/grapht
     branch: master
     jdk: oraclejdk7
 branches:
