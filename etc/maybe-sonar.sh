@@ -10,7 +10,7 @@ skip_unless()
 
 skip_unless "$TRAVIS_REPO_SLUG" = grouplens/grapht
 skip_unless "$TRAVIS_BRANCH" = master
-skip_unless -z "$TRAVIS_PULL_REQUEST"
+skip_unless "$TRAVIS_PULL_REQUEST" = false
 skip_unless "$TRAVIS_JDK_VERSION" = oraclejdk8
 
 exec mvn --batch-mode sonar:sonar
