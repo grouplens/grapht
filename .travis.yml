@@ -34,3 +34,10 @@ env:
   - secure: "Y0Hs0R/TncCka+m4aP2Dmn9J3PBm+gssKnttoYDGb8H5tDsMYRy+kxNhkGwqUdJnQRuth5583CYK8UzxYGeDzWDB+zCx7qiSzXblc2VG5sGSCBXBdmh8E100n+W9t02zjJpKGGqOrFvAbgkkaiGjsJB6FhUO19s4EaNeoAE5EnE="
   # SONAR_PASSWORD
   - secure: "N84js3IKpRatJp7XPRcIFbCJAIgn2ugnBnF62afi8L9f/SXnXlFfRYmeHyPMTSN2ivjFJ3dhePyOPvjEOlQcYZp3ZqL7nAWL56O9B5GFZaOsUEGZcknE14yRARYR5aLIP6kICuEcvHiYMGrfiTispE9ZQW4391gzvVVpPauX8J8="
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/12b880d9f4086ef2a62c
+    on_success: always
+    on_failure: always
+    on_start: never
