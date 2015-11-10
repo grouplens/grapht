@@ -22,11 +22,11 @@ package org.grouplens.grapht.solver;
 import java.util.EnumSet;
 
 /**
- * @author <a href="http://www.grouplens.org">GroupLens Research</a>
+ * Flags controlling binding behavior.
  */
 public enum BindingFlag {
     /**
-     * The binding is fixed (no its result cannot be rewritten).
+     * The binding is fixed (its result cannot be rewritten in graph rewriting).
      */
     FIXED,
     /**
@@ -36,7 +36,11 @@ public enum BindingFlag {
     /**
      * The binding is terminal (no further rules should be applied).
      */
-    TERMINAL;
+    TERMINAL,
+    /**
+     * The binding should be skipped if one of its results' dependencies cannot be satisfied.
+     */
+    SKIPPABLE;
 
     public static EnumSet<BindingFlag> emptySet() {
         return EnumSet.noneOf(BindingFlag.class);

@@ -19,6 +19,8 @@
  */
 package org.grouplens.grapht;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
@@ -45,7 +47,6 @@ import java.lang.annotation.Annotation;
  */
 public interface Injector extends AutoCloseable {
     /**
-     * <p>
      * Get an instance of T based on the bindings that this Injector was
      * configured with. An exception is thrown if the request type cannot be
      * instantiated with dependency injection.
@@ -59,10 +60,10 @@ public interface Injector extends AutoCloseable {
      * @return An instance of type T
      * @throws ConstructionException if type cannot be instantiated
      */
+    @Nonnull
     <T> T getInstance(Class<T> type) throws InjectionException;
 
     /**
-     * <p>
      * Get an instance of T with the given {@link Qualifier} annotation.
      * 
      * @param <T> The object type
@@ -71,7 +72,21 @@ public interface Injector extends AutoCloseable {
      * @return An instance of type T
      * @throws ConstructionException if type cannot be instantiated
      */
+    @Nonnull
     <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException;
+
+    /**
+     * Try to get an instance of a component, returning {@code null} if the component
+     * does not have a configured implementation.
+     *
+     * @param qualifier The qualifier, or {@code null} for an unqualified component.
+     * @param type The component type.
+     * @param <T> The component type.
+     * @return An instance of type {@code T}, or {@code null} if no implemenation of {@code T} is configured.
+     * @throws InjectionException if there is some other error injecting the instance.
+     */
+    @Nullable
+    <T> T tryGetInstance(Annotation qualifier, Class<T> type) throws InjectionException;
 
     /**
      * Close the injector, shutting down any instantiated components that require shutdown.

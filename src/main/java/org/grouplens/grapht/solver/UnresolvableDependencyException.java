@@ -42,15 +42,33 @@ public class UnresolvableDependencyException extends ResolutionException {
         this.desires = chain;
         this.context = context;
     }
+
+    public UnresolvableDependencyException(DesireChain chain, InjectionContext context, Throwable cause) {
+        super(cause);
+        this.desires = chain;
+        this.context = context;
+    }
     
     /**
+     * Get the context for this error.
+     *
      * @return The context that produced the unresolvable desire
      */
     public InjectionContext getContext() {
         return context;
     }
+
+    /**
+     * Get the entire desire chain in which resolution failed.
+     * @return The desire chain that failed to resolve.
+     */
+    public DesireChain getDesireChain() {
+        return desires;
+    }
     
     /**
+     * Get the desire that failed to resolve.
+     *
      * @return The unresolvable desire
      */
     public Desire getDesire() {

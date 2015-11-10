@@ -101,6 +101,14 @@ public class BindingResult {
         return flags.contains(BindingFlag.TERMINAL);
     }
 
+    /**
+     * Query whether this binding result should be skipped when one of its dependencies fails.
+     * @return {@code true} if this binding result should be skipped if one of its dependencies fails.
+     */
+    public boolean isSkippable() {
+        return flags.contains(BindingFlag.SKIPPABLE);
+    }
+
     public static class Builder {
         private Desire desire;
         private CachePolicy policy;

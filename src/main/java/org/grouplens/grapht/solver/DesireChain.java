@@ -94,6 +94,19 @@ public class DesireChain extends AbstractChain<Desire> {
     }
 
     /**
+     * Return the desire chain up to, but not including, the current desire.
+     * @return The previous desire chain.
+     */
+    @Nonnull
+    public DesireChain getPreviousDesireChain() {
+        if (previous == null) {
+            throw new IllegalArgumentException("cannot get previous chain from singleton");
+        } else {
+            return (DesireChain) previous;
+        }
+    }
+
+    /**
      * Get this chain's key. Each chain has a key, a unique object that is created when the chain
      * is created (via {@link #singleton(org.grouplens.grapht.reflect.Desire)}), and preserved through
      * {@link #extend(org.grouplens.grapht.reflect.Desire)} operations.  It can be used to remember

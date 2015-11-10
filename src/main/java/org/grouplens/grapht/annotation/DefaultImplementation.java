@@ -26,13 +26,26 @@ import java.lang.annotation.*;
 
 /**
  * A default implementation for a {@link Qualifier}.
- * 
- * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 @Documented
 public @interface DefaultImplementation {
+    /**
+     * The implementation class.
+     * @return The implementation class.
+     */
     Class<?> value();
+
+    /**
+     * The default cache policy of this default.
+     * @return The default cache policy for this binding.
+     */
     CachePolicy cachePolicy() default CachePolicy.NO_PREFERENCE;
+
+    /**
+     * Whether the default binding should be skipped if its dependencies cannot be satisfied.
+     * @return {@code true} if this default should be skipped if its dependencies cannot be satisfied.
+     */
+    boolean skipIfUnusable() default false;
 }

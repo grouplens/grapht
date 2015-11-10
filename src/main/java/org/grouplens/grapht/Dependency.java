@@ -73,7 +73,7 @@ public class Dependency implements Serializable {
 
     /**
      * Query whether this dependency is immune to rewriting.
-     * @return {@code true} if this dependency is immune to rewriting.
+     * @return {@code true} if this dependency cannot be rewritten during a graph rewrite.
      */
     public boolean isFixed() {
         return flags.contains(Flag.FIXED);
