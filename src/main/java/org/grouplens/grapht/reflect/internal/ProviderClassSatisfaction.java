@@ -115,7 +115,7 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
         // we have to use the raw type because we don't have enough information,
         // but we can assume correctly that it will build a provider
         ClassInstantiator providerBuilder = new ClassInstantiator(providerType, getDependencies(),
-                                                                  dependencies, container);
+                                                                  dependencies, container.getLifecycleManager());
         return Instantiators.ofProviderInstantiator(providerBuilder);
     }
     
