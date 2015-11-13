@@ -20,8 +20,8 @@
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.InjectionContainer;
 import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.LifecycleManager;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.SatisfactionVisitor;
@@ -102,8 +102,8 @@ public class ClassSatisfaction implements Satisfaction, Serializable {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer container) {
-        return new ClassInstantiator(type, getDependencies(), dependencies, container.getLifecycleManager());
+    public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, LifecycleManager lm) {
+        return new ClassInstantiator(type, getDependencies(), dependencies, lm);
     }
     
     @Override

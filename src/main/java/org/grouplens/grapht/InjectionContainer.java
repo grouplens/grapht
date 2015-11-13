@@ -116,7 +116,7 @@ public class InjectionContainer {
 
             Map<Desire, Instantiator> depMap = makeDependencyMap(node, backEdges);
 
-            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap, this);
+            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap, manager);
 
             CachePolicy policy = node.getLabel().getCachePolicy();
             if (policy.equals(CachePolicy.NO_PREFERENCE)) {

@@ -19,10 +19,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.InjectionContainer;
-import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.Instantiators;
+import org.grouplens.grapht.*;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -111,11 +108,11 @@ public class ProviderClassSatisfaction implements Satisfaction, Serializable {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
-                                         InjectionContainer container) {
+                                         LifecycleManager lm) {
         // we have to use the raw type because we don't have enough information,
         // but we can assume correctly that it will build a provider
         ClassInstantiator providerBuilder = new ClassInstantiator(providerType, getDependencies(),
-                                                                  dependencies, container.getLifecycleManager());
+                                                                  dependencies, lm);
         return Instantiators.ofProviderInstantiator(providerBuilder);
     }
     

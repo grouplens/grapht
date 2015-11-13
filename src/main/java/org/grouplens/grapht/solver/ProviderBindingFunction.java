@@ -134,7 +134,7 @@ public class ProviderBindingFunction implements BindingFunction {
 
         @Override
         public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
-                                             InjectionContainer container) {
+                                             LifecycleManager lm) {
             Instantiator instantiator = dependencies.get(providedDesire);
             
             // Inject an instance of a provider wrapping this instantiator.

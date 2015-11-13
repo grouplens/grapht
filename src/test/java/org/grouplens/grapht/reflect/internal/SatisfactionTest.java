@@ -20,8 +20,6 @@
 package org.grouplens.grapht.reflect.internal;
 
 import com.google.common.collect.Maps;
-import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.InjectionContainer;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.Instantiators;
 import org.grouplens.grapht.reflect.Desire;
@@ -92,8 +90,7 @@ public class SatisfactionTest {
         providers.put(new ReflectionDesire(TypeC.INTERFACE_B), Instantiators.ofInstance(b1));
         providers.put(new ReflectionDesire(TypeC.TYPE_B), Instantiators.ofInstance(b2));
         
-        Instantiator provider = new ClassSatisfaction(TypeC.class).makeInstantiator(providers,
-                                                                                    InjectionContainer.create());
+        Instantiator provider = new ClassSatisfaction(TypeC.class).makeInstantiator(providers, null);
         Object o = provider.instantiate();
         
         Assert.assertTrue(o instanceof TypeC);
@@ -120,7 +117,7 @@ public class SatisfactionTest {
         TypeC c = new TypeC(4);
 
         Instantiator p = new InstanceSatisfaction(c).makeInstantiator(Collections.EMPTY_MAP,
-                                                                      InjectionContainer.create());
+                                                                      null);
         Assert.assertSame(c, p.instantiate());
     }
     
@@ -136,9 +133,7 @@ public class SatisfactionTest {
     public void testProviderClassSatisfactionProvider() throws Exception {
         Map<Desire,Instantiator> providers = Maps.newHashMap();
         providers.put(new ReflectionDesire(ctorProviderCIP), Instantiators.ofInstance(10));
-        Instantiator provider = new ProviderClassSatisfaction(ProviderC.class).makeInstantiator(providers,
-                                                                                                InjectionContainer.
-                                                                                                create());
+        Instantiator provider = new ProviderClassSatisfaction(ProviderC.class).makeInstantiator(providers, null);
         // Assert.assertTrue(provider instanceof ProviderC);
         
         TypeC c = (TypeC) provider.instantiate();
