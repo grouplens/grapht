@@ -46,12 +46,12 @@ import java.util.*;
  * @since 0.9
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public class InjectionContainer implements AutoCloseable {
+public class InjectionContainer {
     private static final Logger logger = LoggerFactory.getLogger(InjectionContainer.class);
 
     private final CachePolicy defaultCachePolicy;
     private final Map<DAGNode<Component, Dependency>, Instantiator> providerCache;
-    private final Deque registry = new LinkedList();
+    private final LifecycleManager manager;
 
     /**
      * Create a new instantiator with a default policy of {@code MEMOIZE}.
@@ -62,17 +62,28 @@ public class InjectionContainer implements AutoCloseable {
     }
 
     /**
-     * Create a new instantiator.
+     * Create a new instantiator without a lifecycle manager.
      * @param dft The default cache policy.
      * @return The instantiator.
      */
     public static InjectionContainer create(CachePolicy dft) {
-        return new InjectionContainer(dft);
+        return new InjectionContainer(dft, null);
     }
 
-    private InjectionContainer(CachePolicy dft) {
+    /**
+     * Create a new instantiator.
+     * @param dft The default cache policy.
+     * @param mgr The lifecycle manager.
+     * @return The instantiator.
+     */
+    public static InjectionContainer create(CachePolicy dft, LifecycleManager mgr) {
+        return new InjectionContainer(dft, mgr);
+    }
+
+    private InjectionContainer(CachePolicy dft, LifecycleManager mgr) {
         defaultCachePolicy = dft;
         providerCache = new WeakHashMap<DAGNode<Component, Dependency>, Instantiator>();
+        manager = mgr;
     }
 
     /**
@@ -105,7 +116,7 @@ public class InjectionContainer implements AutoCloseable {
 
             Map<Desire, Instantiator> depMap = makeDependencyMap(node, backEdges);
 
-            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap, this);
+            Instantiator raw = node.getLabel().getSatisfaction().makeInstantiator(depMap, manager);
 
             CachePolicy policy = node.getLabel().getCachePolicy();
             if (policy.equals(CachePolicy.NO_PREFERENCE)) {
@@ -141,43 +152,13 @@ public class InjectionContainer implements AutoCloseable {
         return Maps.asMap(desires.build(), new DepLookup(edges, backEdges));
     }
 
-    public void registerComponent(Object instance){
-        registry.push(instance);
-    }
-
-    @Override
-    public void close() {
-        Throwable throwable =  null;
-        while (!registry.isEmpty()) {
-            Object component = registry.pop();
-                if(component instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable)component).close();
-                    } catch (Throwable e) {
-                        if(throwable == null) {
-                            throwable = e;
-                        } else {
-                            throwable.addSuppressed(e);
-                        }
-                    }
-                }
-            Method[] methods = MethodUtils.getMethodsWithAnnotation(component.getClass(), PreDestroy.class);
-            for(Method method:methods) {
-                method.setAccessible(true);
-                try {
-                    method.invoke(component);
-                } catch (Throwable e) {
-                    if(throwable == null) {
-                        throwable = e;
-                    } else {
-                        throwable.addSuppressed(e);
-                    }
-                }
-            }
-        }
-        if(throwable!=null) {
-          throw Throwables.propagate(throwable);
-        }
+    /**
+     * Get the lifecycle manager for this container.
+     * @return The lifecycle manager for the container.
+     */
+    @Nullable
+    public LifecycleManager getLifecycleManager() {
+        return manager;
     }
 
     /**

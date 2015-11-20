@@ -49,6 +49,8 @@ public class DefaultInjector implements Injector {
     
     private final DependencySolver solver;
     private final InjectionContainer instantiator;
+    private final LifecycleManager manager;
+
     /**
      * <p>
      * Create a new DefaultInjector. The created resolver will use a max
@@ -109,7 +111,8 @@ public class DefaultInjector implements Injector {
                                  .addBindingFunctions(functions)
                                  .setMaxDepth(maxDepth)
                                  .build();
-        instantiator = InjectionContainer.create(defaultPolicy);
+        manager = new LifecycleManager();
+        instantiator = InjectionContainer.create(defaultPolicy, manager);
     }
     
     /**
@@ -169,6 +172,8 @@ public class DefaultInjector implements Injector {
 
     @Override
     public void close() {
-        instantiator.close();
+        if (manager != null) {
+            manager.close();
+        }
     }
 }

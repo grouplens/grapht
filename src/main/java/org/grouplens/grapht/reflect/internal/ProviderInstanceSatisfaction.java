@@ -19,10 +19,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.InjectionContainer;
-import org.grouplens.grapht.Instantiator;
-import org.grouplens.grapht.Instantiators;
+import org.grouplens.grapht.*;
 import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
@@ -39,7 +36,7 @@ import java.util.Map;
 /**
  * Satisfaction implementation wrapping an existing Provider instance. It has no
  * dependencies and it always returns the same Provider when
- * {@link #makeInstantiator(Map,InjectionContainer)} is invoked.
+ * {@link Satisfaction#makeInstantiator(Map, LifecycleManager)} is invoked.
  * 
  * @author <a href="http://grouplens.org">GroupLens Research</a>
  */
@@ -64,7 +61,7 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
     }
     
     /**
-     * @return The provider instance returned by {@link #makeInstantiator(Map, InjectionContainer)}
+     * @return The provider instance returned by {@link Satisfaction#makeInstantiator(Map, LifecycleManager)}
      */
     public Provider<?> getProvider() {
         return provider;
@@ -97,7 +94,7 @@ public class ProviderInstanceSatisfaction implements Satisfaction, Serializable 
 
     @Override
     public Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies,
-                                         InjectionContainer container) {
+                                         LifecycleManager lm) {
         return Instantiators.ofProvider(provider);
     }
     

@@ -20,22 +20,25 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import org.grouplens.grapht.*;
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.grouplens.grapht.ConstructionException;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.LifecycleManager;
+import org.grouplens.grapht.NullDependencyException;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.lang3.reflect.MethodUtils;
 
 import javax.annotation.PostConstruct;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Instantiates class instances.
@@ -48,9 +51,7 @@ public class ClassInstantiator implements Instantiator {
     private final Class<?> type;
     private final List<Desire> desires;
     private final Map<Desire, Instantiator> providers;
-    private final InjectionContainer container;
-
-
+    private final LifecycleManager manager;
 
     /**
      * Create an ClassInstantiator that will provide instances of the given
@@ -63,16 +64,15 @@ public class ClassInstantiator implements Instantiator {
      */
     public ClassInstantiator(Class<?> type, List<Desire> desires,
                              Map<Desire,Instantiator> providers,
-                             InjectionContainer container) {
+                             LifecycleManager manager) {
         Preconditions.notNull("type", type);
         Preconditions.notNull("desires", desires);
         Preconditions.notNull("providers", providers);
-        Preconditions.notNull("injectionContainer", container);
 
         this.type = type;
         this.desires = desires;
         this.providers = providers;
-        this.container = container;
+        this.manager = manager;
     }
 
     @Override
@@ -136,8 +136,9 @@ public class ClassInstantiator implements Instantiator {
         } finally {
             globalLogContext.finish();
         }
-        container.registerComponent(instance);
-
+        if (manager != null) {
+            manager.registerComponent(instance);
+        }
 
         methods = MethodUtils.getMethodsWithAnnotation(type, PostConstruct.class);
         for(Method method:methods){

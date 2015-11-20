@@ -19,11 +19,10 @@
  */
 package org.grouplens.grapht.reflect;
 
-import org.grouplens.grapht.CachePolicy;
-import org.grouplens.grapht.InjectionContainer;
-import org.grouplens.grapht.Injector;
-import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -111,9 +110,11 @@ public interface Satisfaction extends Serializable {
      * 
      * @param dependencies A function mapping desires to providers of their
      *            instances.
+     * @param lm The lifecycle manager (if one should be used).
      * @return An instantiator of new instances of the type specified by this
      *         satisfaction, instantiated using the specified dependency
      *         mapping.
      */
-    Instantiator makeInstantiator(Map<Desire,Instantiator> dependencies, InjectionContainer container);
+    Instantiator makeInstantiator(@Nonnull Map<Desire,Instantiator> dependencies,
+                                  @Nullable LifecycleManager lm);
 }
