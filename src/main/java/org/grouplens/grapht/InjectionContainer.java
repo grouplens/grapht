@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -110,7 +109,10 @@ public class InjectionContainer {
      */
     public Instantiator makeInstantiator(DAGNode<Component, Dependency> node,
                                          SetMultimap<DAGNode<Component, Dependency>, DAGEdge<Component, Dependency>> backEdges) {
-        Instantiator cached = providerCache.get(node);
+        Instantiator cached;
+        synchronized (providerCache) {
+            cached = providerCache.get(node);
+        }
         if (cached == null) {
             logger.debug("Node has not been memoized, instantiating: {}", node.getLabel());
 
@@ -131,7 +133,14 @@ public class InjectionContainer {
                 assert policy.equals(CachePolicy.NEW_INSTANCE);
                 cached = raw;
             }
-            providerCache.put(node, cached);
+            synchronized (providerCache) {
+                if (!providerCache.containsKey(node)) {
+                    providerCache.put(node, cached);
+                } else {
+                    logger.debug("two threads built instantiator for {}, discarding 2nd build", node);
+                    cached = providerCache.get(node);
+                }
+            }
         }
         return cached;
     }
