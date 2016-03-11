@@ -32,7 +32,7 @@
   </issueManagement>
   <scm>
     <connection>scm:git:https://github.com/grouplens/grapht</connection>
-    <developerConnection>scm:git:git@github.com:grouplens/grapht.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/grouplens/grapht.git</developerConnection>
     <url>https://github.com/grouplens/grapht</url>
   </scm>
   <ciManagement>
@@ -208,6 +208,12 @@
             <version>2.5</version>
           </dependency>
         </dependencies>
+        <executions>
+          <execution>
+            <id>default-deploy</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
