@@ -32,7 +32,7 @@
   </issueManagement>
   <scm>
     <connection>scm:git:https://github.com/grouplens/grapht</connection>
-    <developerConnection>scm:git:https://github.com/grouplens/grapht</developerConnection>
+    <developerConnection>scm:git:git@github.com:grouplens/grapht.git</developerConnection>
     <url>https://github.com/grouplens/grapht</url>
   </scm>
   <ciManagement>
@@ -228,6 +228,32 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <version>1.6</version>
+      </plugin>
+
+      <plugin>
+        <!-- Deploy the web site -->
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <version>0.9</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <!-- select the Maven phase in which the plugin will be executed -->
+            <phase>site-deploy</phase>
+            <configuration>
+              <!-- Plugin configuration ges here -->
+              <server>github</server>
+              <!-- The commit message -->
+              <message>Building site for my project</message>
+              <!-- The location where the site is uploaded -->
+              <path>/</path>
+              <!-- Use merge or override the content -->
+              <merge>true</merge>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
