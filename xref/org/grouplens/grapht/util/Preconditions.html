@@ -10,68 +10,69 @@
 
 <a class="jxr_linenumber" name="1" href="#1">1</a>   <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="2" href="#2">2</a>   <em class="jxr_comment"> * Grapht, an open source dependency injector.</em>
-<a class="jxr_linenumber" name="3" href="#3">3</a>   <em class="jxr_comment"> * Copyright 2010-2012 Regents of the University of Minnesota and contributors</em>
-<a class="jxr_linenumber" name="4" href="#4">4</a>   <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="5" href="#5">5</a>   <em class="jxr_comment"> * This program is free software; you can redistribute it and/or modify</em>
-<a class="jxr_linenumber" name="6" href="#6">6</a>   <em class="jxr_comment"> * it under the terms of the GNU Lesser General Public License as</em>
-<a class="jxr_linenumber" name="7" href="#7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation; either version 2.1 of the</em>
-<a class="jxr_linenumber" name="8" href="#8">8</a>   <em class="jxr_comment"> * License, or (at your option) any later version.</em>
-<a class="jxr_linenumber" name="9" href="#9">9</a>   <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="10" href="#10">10</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful, but WITHOUT</em>
-<a class="jxr_linenumber" name="11" href="#11">11</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</em>
-<a class="jxr_linenumber" name="12" href="#12">12</a>  <em class="jxr_comment"> * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</em>
-<a class="jxr_linenumber" name="13" href="#13">13</a>  <em class="jxr_comment"> * details.</em>
-<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License along with</em>
-<a class="jxr_linenumber" name="16" href="#16">16</a>  <em class="jxr_comment"> * this program; if not, write to the Free Software Foundation, Inc., 51</em>
-<a class="jxr_linenumber" name="17" href="#17">17</a>  <em class="jxr_comment"> * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</em>
-<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_comment"> */</em>
-<a class="jxr_linenumber" name="19" href="#19">19</a>  <strong class="jxr_keyword">package</strong> org.grouplens.grapht.util;
-<a class="jxr_linenumber" name="20" href="#20">20</a>  
-<a class="jxr_linenumber" name="21" href="#21">21</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.InjectionException;
-<a class="jxr_linenumber" name="22" href="#22">22</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.InvalidBindingException;
-<a class="jxr_linenumber" name="23" href="#23">23</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.reflect.Qualifiers;
-<a class="jxr_linenumber" name="24" href="#24">24</a>  
-<a class="jxr_linenumber" name="25" href="#25">25</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.Annotation;
-<a class="jxr_linenumber" name="26" href="#26">26</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Modifier;
-<a class="jxr_linenumber" name="27" href="#27">27</a>  
-<a class="jxr_linenumber" name="28" href="#28">28</a>  <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="29" href="#29">29</a>  <em class="jxr_javadoccomment"> * Utility to organize checks for common assertions, and to throw</em>
-<a class="jxr_linenumber" name="30" href="#30">30</a>  <em class="jxr_javadoccomment"> * appropriately worded exceptions on failure.</em>
-<a class="jxr_linenumber" name="31" href="#31">31</a>  <em class="jxr_javadoccomment"> * </em>
-<a class="jxr_linenumber" name="32" href="#32">32</a>  <em class="jxr_javadoccomment"> * @author &lt;a href="<a href="http://grouplens.org" target="alexandria_uri">http://grouplens.org</a>"&gt;GroupLens Research&lt;/a&gt;</em>
-<a class="jxr_linenumber" name="33" href="#33">33</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="34" href="#34">34</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/util/Preconditions.html">Preconditions</a> {
-<a class="jxr_linenumber" name="35" href="#35">35</a>      <strong class="jxr_keyword">private</strong> <a href="../../../../org/grouplens/grapht/util/Preconditions.html">Preconditions</a>() { }
-<a class="jxr_linenumber" name="36" href="#36">36</a>  
-<a class="jxr_linenumber" name="37" href="#37">37</a>      @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="38" href="#38">38</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> isQualifier(Class&lt;?&gt; type) {
-<a class="jxr_linenumber" name="39" href="#39">39</a>          <strong class="jxr_keyword">if</strong> (!Annotation.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="40" href="#40">40</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/InvalidBindingException.html">InvalidBindingException</a>(type, <span class="jxr_string">"Type is not an Annotation"</span>);
-<a class="jxr_linenumber" name="41" href="#41">41</a>          }
-<a class="jxr_linenumber" name="42" href="#42">42</a>          <strong class="jxr_keyword">if</strong> (!Qualifiers.isQualifier((Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;) type)) {
-<a class="jxr_linenumber" name="43" href="#43">43</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/InvalidBindingException.html">InvalidBindingException</a>(type, <span class="jxr_string">"Annotation is not annotated with @Qualifier"</span>);
-<a class="jxr_linenumber" name="44" href="#44">44</a>          }
-<a class="jxr_linenumber" name="45" href="#45">45</a>      }
-<a class="jxr_linenumber" name="46" href="#46">46</a>      
-<a class="jxr_linenumber" name="47" href="#47">47</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> isAssignable(Class&lt;?&gt; source, Class&lt;?&gt; impl) {
-<a class="jxr_linenumber" name="48" href="#48">48</a>          <strong class="jxr_keyword">if</strong> (!source.isAssignableFrom(impl)) {
-<a class="jxr_linenumber" name="49" href="#49">49</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/InvalidBindingException.html">InvalidBindingException</a>(impl, <span class="jxr_string">"Type is not assignable to "</span> + source);
-<a class="jxr_linenumber" name="50" href="#50">50</a>          }
-<a class="jxr_linenumber" name="51" href="#51">51</a>      }
-<a class="jxr_linenumber" name="52" href="#52">52</a>  
-<a class="jxr_linenumber" name="53" href="#53">53</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> notNull(String name, Object value) {
-<a class="jxr_linenumber" name="54" href="#54">54</a>          <strong class="jxr_keyword">if</strong> (value == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="55" href="#55">55</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(name + <span class="jxr_string">" cannot be null"</span>);
-<a class="jxr_linenumber" name="56" href="#56">56</a>          }
-<a class="jxr_linenumber" name="57" href="#57">57</a>      }
-<a class="jxr_linenumber" name="58" href="#58">58</a>      
-<a class="jxr_linenumber" name="59" href="#59">59</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> inRange(<strong class="jxr_keyword">int</strong> value, <strong class="jxr_keyword">int</strong> min, <strong class="jxr_keyword">int</strong> max) {
-<a class="jxr_linenumber" name="60" href="#60">60</a>          <strong class="jxr_keyword">if</strong> (value &lt; min || value &gt;= max) {
-<a class="jxr_linenumber" name="61" href="#61">61</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IndexOutOfBoundsException(value + <span class="jxr_string">" must be in ["</span> + min + <span class="jxr_string">", "</span> + max + <span class="jxr_string">")"</span>);
-<a class="jxr_linenumber" name="62" href="#62">62</a>          }
-<a class="jxr_linenumber" name="63" href="#63">63</a>      }
-<a class="jxr_linenumber" name="64" href="#64">64</a>  }
+<a class="jxr_linenumber" name="3" href="#3">3</a>   <em class="jxr_comment"> * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)</em>
+<a class="jxr_linenumber" name="4" href="#4">4</a>   <em class="jxr_comment"> * Copyright 2010-2014 Regents of the University of Minnesota</em>
+<a class="jxr_linenumber" name="5" href="#5">5</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="6" href="#6">6</a>   <em class="jxr_comment"> * This program is free software; you can redistribute it and/or modify</em>
+<a class="jxr_linenumber" name="7" href="#7">7</a>   <em class="jxr_comment"> * it under the terms of the GNU Lesser General Public License as</em>
+<a class="jxr_linenumber" name="8" href="#8">8</a>   <em class="jxr_comment"> * published by the Free Software Foundation; either version 2.1 of the</em>
+<a class="jxr_linenumber" name="9" href="#9">9</a>   <em class="jxr_comment"> * License, or (at your option) any later version.</em>
+<a class="jxr_linenumber" name="10" href="#10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="11" href="#11">11</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="12" href="#12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</em>
+<a class="jxr_linenumber" name="13" href="#13">13</a>  <em class="jxr_comment"> * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</em>
+<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_comment"> * details.</em>
+<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="16" href="#16">16</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License along with</em>
+<a class="jxr_linenumber" name="17" href="#17">17</a>  <em class="jxr_comment"> * this program; if not, write to the Free Software Foundation, Inc., 51</em>
+<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_comment"> * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</em>
+<a class="jxr_linenumber" name="19" href="#19">19</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="20" href="#20">20</a>  <strong class="jxr_keyword">package</strong> org.grouplens.grapht.util;
+<a class="jxr_linenumber" name="21" href="#21">21</a>  
+<a class="jxr_linenumber" name="22" href="#22">22</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.InjectionException;
+<a class="jxr_linenumber" name="23" href="#23">23</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.InvalidBindingException;
+<a class="jxr_linenumber" name="24" href="#24">24</a>  <strong class="jxr_keyword">import</strong> org.grouplens.grapht.reflect.Qualifiers;
+<a class="jxr_linenumber" name="25" href="#25">25</a>  
+<a class="jxr_linenumber" name="26" href="#26">26</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.Annotation;
+<a class="jxr_linenumber" name="27" href="#27">27</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Modifier;
+<a class="jxr_linenumber" name="28" href="#28">28</a>  
+<a class="jxr_linenumber" name="29" href="#29">29</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="30" href="#30">30</a>  <em class="jxr_javadoccomment"> * Utility to organize checks for common assertions, and to throw</em>
+<a class="jxr_linenumber" name="31" href="#31">31</a>  <em class="jxr_javadoccomment"> * appropriately worded exceptions on failure.</em>
+<a class="jxr_linenumber" name="32" href="#32">32</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="33" href="#33">33</a>  <em class="jxr_javadoccomment"> * @author &lt;a href="<a href="http://grouplens.org" target="alexandria_uri">http://grouplens.org</a>"&gt;GroupLens Research&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="34" href="#34">34</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="35" href="#35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/util/Preconditions.html">Preconditions</a> {
+<a class="jxr_linenumber" name="36" href="#36">36</a>      <strong class="jxr_keyword">private</strong> <a href="../../../../org/grouplens/grapht/util/Preconditions.html">Preconditions</a>() { }
+<a class="jxr_linenumber" name="37" href="#37">37</a>  
+<a class="jxr_linenumber" name="38" href="#38">38</a>      @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="39" href="#39">39</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> isQualifier(Class&lt;?&gt; type) {
+<a class="jxr_linenumber" name="40" href="#40">40</a>          <strong class="jxr_keyword">if</strong> (!Annotation.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="41" href="#41">41</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/InvalidBindingException.html">InvalidBindingException</a>(type, <span class="jxr_string">"Type is not an Annotation"</span>);
+<a class="jxr_linenumber" name="42" href="#42">42</a>          }
+<a class="jxr_linenumber" name="43" href="#43">43</a>          <strong class="jxr_keyword">if</strong> (!Qualifiers.isQualifier((Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;) type)) {
+<a class="jxr_linenumber" name="44" href="#44">44</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/InvalidBindingException.html">InvalidBindingException</a>(type, <span class="jxr_string">"Annotation is not annotated with @Qualifier"</span>);
+<a class="jxr_linenumber" name="45" href="#45">45</a>          }
+<a class="jxr_linenumber" name="46" href="#46">46</a>      }
+<a class="jxr_linenumber" name="47" href="#47">47</a>      
+<a class="jxr_linenumber" name="48" href="#48">48</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> isAssignable(Class&lt;?&gt; source, Class&lt;?&gt; impl) {
+<a class="jxr_linenumber" name="49" href="#49">49</a>          <strong class="jxr_keyword">if</strong> (!source.isAssignableFrom(impl)) {
+<a class="jxr_linenumber" name="50" href="#50">50</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../org/grouplens/grapht/InvalidBindingException.html">InvalidBindingException</a>(impl, <span class="jxr_string">"Type is not assignable to "</span> + source);
+<a class="jxr_linenumber" name="51" href="#51">51</a>          }
+<a class="jxr_linenumber" name="52" href="#52">52</a>      }
+<a class="jxr_linenumber" name="53" href="#53">53</a>  
+<a class="jxr_linenumber" name="54" href="#54">54</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> notNull(String name, Object value) {
+<a class="jxr_linenumber" name="55" href="#55">55</a>          <strong class="jxr_keyword">if</strong> (value == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="56" href="#56">56</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(name + <span class="jxr_string">" cannot be null"</span>);
+<a class="jxr_linenumber" name="57" href="#57">57</a>          }
+<a class="jxr_linenumber" name="58" href="#58">58</a>      }
+<a class="jxr_linenumber" name="59" href="#59">59</a>      
+<a class="jxr_linenumber" name="60" href="#60">60</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> inRange(<strong class="jxr_keyword">int</strong> value, <strong class="jxr_keyword">int</strong> min, <strong class="jxr_keyword">int</strong> max) {
+<a class="jxr_linenumber" name="61" href="#61">61</a>          <strong class="jxr_keyword">if</strong> (value &lt; min || value &gt;= max) {
+<a class="jxr_linenumber" name="62" href="#62">62</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IndexOutOfBoundsException(value + <span class="jxr_string">" must be in ["</span> + min + <span class="jxr_string">", "</span> + max + <span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="63" href="#63">63</a>          }
+<a class="jxr_linenumber" name="64" href="#64">64</a>      }
+<a class="jxr_linenumber" name="65" href="#65">65</a>  }
 </pre>
 <hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
 </html>

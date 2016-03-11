@@ -1,4 +1,5 @@
 org.grouplens.grapht
+org.grouplens.grapht.annotation
 org.grouplens.grapht.context
 org.grouplens.grapht.graph
 org.grouplens.grapht.reflect

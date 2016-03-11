@@ -10,86 +10,87 @@
 
 <a class="jxr_linenumber" name="1" href="#1">1</a>   <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="2" href="#2">2</a>   <em class="jxr_comment"> * Grapht, an open source dependency injector.</em>
-<a class="jxr_linenumber" name="3" href="#3">3</a>   <em class="jxr_comment"> * Copyright 2010-2012 Regents of the University of Minnesota and contributors</em>
-<a class="jxr_linenumber" name="4" href="#4">4</a>   <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="5" href="#5">5</a>   <em class="jxr_comment"> * This program is free software; you can redistribute it and/or modify</em>
-<a class="jxr_linenumber" name="6" href="#6">6</a>   <em class="jxr_comment"> * it under the terms of the GNU Lesser General Public License as</em>
-<a class="jxr_linenumber" name="7" href="#7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation; either version 2.1 of the</em>
-<a class="jxr_linenumber" name="8" href="#8">8</a>   <em class="jxr_comment"> * License, or (at your option) any later version.</em>
-<a class="jxr_linenumber" name="9" href="#9">9</a>   <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="10" href="#10">10</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful, but WITHOUT</em>
-<a class="jxr_linenumber" name="11" href="#11">11</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</em>
-<a class="jxr_linenumber" name="12" href="#12">12</a>  <em class="jxr_comment"> * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</em>
-<a class="jxr_linenumber" name="13" href="#13">13</a>  <em class="jxr_comment"> * details.</em>
-<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License along with</em>
-<a class="jxr_linenumber" name="16" href="#16">16</a>  <em class="jxr_comment"> * this program; if not, write to the Free Software Foundation, Inc., 51</em>
-<a class="jxr_linenumber" name="17" href="#17">17</a>  <em class="jxr_comment"> * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</em>
-<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_comment"> */</em>
-<a class="jxr_linenumber" name="19" href="#19">19</a>  <strong class="jxr_keyword">package</strong> org.grouplens.grapht.util;
-<a class="jxr_linenumber" name="20" href="#20">20</a>  
-<a class="jxr_linenumber" name="21" href="#21">21</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
-<a class="jxr_linenumber" name="22" href="#22">22</a>  
-<a class="jxr_linenumber" name="23" href="#23">23</a>  <strong class="jxr_keyword">import</strong> java.net.URL;
-<a class="jxr_linenumber" name="24" href="#24">24</a>  <strong class="jxr_keyword">import</strong> java.net.URLClassLoader;
-<a class="jxr_linenumber" name="25" href="#25">25</a>  
-<a class="jxr_linenumber" name="26" href="#26">26</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.equalTo;
-<a class="jxr_linenumber" name="27" href="#27">27</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.notNullValue;
-<a class="jxr_linenumber" name="28" href="#28">28</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.sameInstance;
-<a class="jxr_linenumber" name="29" href="#29">29</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertThat;
-<a class="jxr_linenumber" name="30" href="#30">30</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.fail;
-<a class="jxr_linenumber" name="31" href="#31">31</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assume.assumeThat;
-<a class="jxr_linenumber" name="32" href="#32">32</a>  
-<a class="jxr_linenumber" name="33" href="#33">33</a>  <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="34" href="#34">34</a>  <em class="jxr_javadoccomment"> * Tests for the class loader utilities.</em>
-<a class="jxr_linenumber" name="35" href="#35">35</a>  <em class="jxr_javadoccomment"> * @author &lt;a href="<a href="http://www.grouplens.org" target="alexandria_uri">http://www.grouplens.org</a>"&gt;GroupLens Research&lt;/a&gt;</em>
-<a class="jxr_linenumber" name="36" href="#36">36</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="37" href="#37">37</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/util/ClassLoadersTest.html">ClassLoadersTest</a> {
-<a class="jxr_linenumber" name="38" href="#38">38</a>      @Test
-<a class="jxr_linenumber" name="39" href="#39">39</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testPushContextClassLoader() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="40" href="#40">40</a>          Thread th = Thread.currentThread();
-<a class="jxr_linenumber" name="41" href="#41">41</a>          ClassLoader orig = th.getContextClassLoader();
-<a class="jxr_linenumber" name="42" href="#42">42</a>          ClassLoader loader = <strong class="jxr_keyword">new</strong> URLClassLoader(<strong class="jxr_keyword">new</strong> URL[0], ClassLoaders.inferDefault(ClassLoadersTest.<strong class="jxr_keyword">class</strong>));
-<a class="jxr_linenumber" name="43" href="#43">43</a>          ClassLoaderContext ctx = ClassLoaders.pushContext(loader);
-<a class="jxr_linenumber" name="44" href="#44">44</a>          <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="45" href="#45">45</a>              assertThat(th.getContextClassLoader(), sameInstance(loader));
-<a class="jxr_linenumber" name="46" href="#46">46</a>          } <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="47" href="#47">47</a>              ctx.pop();
-<a class="jxr_linenumber" name="48" href="#48">48</a>          }
-<a class="jxr_linenumber" name="49" href="#49">49</a>          assertThat(th.getContextClassLoader(), sameInstance(orig));
-<a class="jxr_linenumber" name="50" href="#50">50</a>          <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="51" href="#51">51</a>              ctx.pop();
-<a class="jxr_linenumber" name="52" href="#52">52</a>              fail(<span class="jxr_string">"re-popping context should be illegal state"</span>);
-<a class="jxr_linenumber" name="53" href="#53">53</a>          } <strong class="jxr_keyword">catch</strong> (IllegalStateException e) {
-<a class="jxr_linenumber" name="54" href="#54">54</a>              <em class="jxr_comment">/*<em class="jxr_comment"> expected */</em></em>
-<a class="jxr_linenumber" name="55" href="#55">55</a>          }
-<a class="jxr_linenumber" name="56" href="#56">56</a>      }
-<a class="jxr_linenumber" name="57" href="#57">57</a>  
-<a class="jxr_linenumber" name="58" href="#58">58</a>      @Test
-<a class="jxr_linenumber" name="59" href="#59">59</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testInferLoaderFromRefClass() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="60" href="#60">60</a>          Thread th = Thread.currentThread();
-<a class="jxr_linenumber" name="61" href="#61">61</a>          ClassLoader orig = th.getContextClassLoader();
-<a class="jxr_linenumber" name="62" href="#62">62</a>          assumeThat(<span class="jxr_string">"have a context class loader"</span>,
-<a class="jxr_linenumber" name="63" href="#63">63</a>                     orig, notNullValue());
-<a class="jxr_linenumber" name="64" href="#64">64</a>          ClassLoaderContext ctx = ClassLoaders.pushContext(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="65" href="#65">65</a>          <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="66" href="#66">66</a>              assertThat(ClassLoaders.inferDefault(ClassLoadersTest.<strong class="jxr_keyword">class</strong>),
-<a class="jxr_linenumber" name="67" href="#67">67</a>                         equalTo(getClass().getClassLoader()));
-<a class="jxr_linenumber" name="68" href="#68">68</a>          } <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="69" href="#69">69</a>              ctx.pop();
-<a class="jxr_linenumber" name="70" href="#70">70</a>          }
-<a class="jxr_linenumber" name="71" href="#71">71</a>      }
-<a class="jxr_linenumber" name="72" href="#72">72</a>  
-<a class="jxr_linenumber" name="73" href="#73">73</a>      @Test
-<a class="jxr_linenumber" name="74" href="#74">74</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testInferLoaderFromThread() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="75" href="#75">75</a>          Thread th = Thread.currentThread();
-<a class="jxr_linenumber" name="76" href="#76">76</a>          ClassLoader orig = th.getContextClassLoader();
-<a class="jxr_linenumber" name="77" href="#77">77</a>          assumeThat(<span class="jxr_string">"have a context class loader"</span>,
-<a class="jxr_linenumber" name="78" href="#78">78</a>                     orig, notNullValue());
-<a class="jxr_linenumber" name="79" href="#79">79</a>          assertThat(ClassLoaders.inferDefault(ClassLoadersTest.<strong class="jxr_keyword">class</strong>),
-<a class="jxr_linenumber" name="80" href="#80">80</a>                     equalTo(orig));
-<a class="jxr_linenumber" name="81" href="#81">81</a>      }
-<a class="jxr_linenumber" name="82" href="#82">82</a>  }
+<a class="jxr_linenumber" name="3" href="#3">3</a>   <em class="jxr_comment"> * Copyright 2014-2015 various contributors (see CONTRIBUTORS.txt)</em>
+<a class="jxr_linenumber" name="4" href="#4">4</a>   <em class="jxr_comment"> * Copyright 2010-2014 Regents of the University of Minnesota</em>
+<a class="jxr_linenumber" name="5" href="#5">5</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="6" href="#6">6</a>   <em class="jxr_comment"> * This program is free software; you can redistribute it and/or modify</em>
+<a class="jxr_linenumber" name="7" href="#7">7</a>   <em class="jxr_comment"> * it under the terms of the GNU Lesser General Public License as</em>
+<a class="jxr_linenumber" name="8" href="#8">8</a>   <em class="jxr_comment"> * published by the Free Software Foundation; either version 2.1 of the</em>
+<a class="jxr_linenumber" name="9" href="#9">9</a>   <em class="jxr_comment"> * License, or (at your option) any later version.</em>
+<a class="jxr_linenumber" name="10" href="#10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="11" href="#11">11</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="12" href="#12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</em>
+<a class="jxr_linenumber" name="13" href="#13">13</a>  <em class="jxr_comment"> * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more</em>
+<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_comment"> * details.</em>
+<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="16" href="#16">16</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License along with</em>
+<a class="jxr_linenumber" name="17" href="#17">17</a>  <em class="jxr_comment"> * this program; if not, write to the Free Software Foundation, Inc., 51</em>
+<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_comment"> * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</em>
+<a class="jxr_linenumber" name="19" href="#19">19</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="20" href="#20">20</a>  <strong class="jxr_keyword">package</strong> org.grouplens.grapht.util;
+<a class="jxr_linenumber" name="21" href="#21">21</a>  
+<a class="jxr_linenumber" name="22" href="#22">22</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="23" href="#23">23</a>  
+<a class="jxr_linenumber" name="24" href="#24">24</a>  <strong class="jxr_keyword">import</strong> java.net.URL;
+<a class="jxr_linenumber" name="25" href="#25">25</a>  <strong class="jxr_keyword">import</strong> java.net.URLClassLoader;
+<a class="jxr_linenumber" name="26" href="#26">26</a>  
+<a class="jxr_linenumber" name="27" href="#27">27</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.equalTo;
+<a class="jxr_linenumber" name="28" href="#28">28</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.notNullValue;
+<a class="jxr_linenumber" name="29" href="#29">29</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.sameInstance;
+<a class="jxr_linenumber" name="30" href="#30">30</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertThat;
+<a class="jxr_linenumber" name="31" href="#31">31</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.fail;
+<a class="jxr_linenumber" name="32" href="#32">32</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assume.assumeThat;
+<a class="jxr_linenumber" name="33" href="#33">33</a>  
+<a class="jxr_linenumber" name="34" href="#34">34</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="35" href="#35">35</a>  <em class="jxr_javadoccomment"> * Tests for the class loader utilities.</em>
+<a class="jxr_linenumber" name="36" href="#36">36</a>  <em class="jxr_javadoccomment"> * @author &lt;a href="<a href="http://www.grouplens.org" target="alexandria_uri">http://www.grouplens.org</a>"&gt;GroupLens Research&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="37" href="#37">37</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="38" href="#38">38</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/grouplens/grapht/util/ClassLoadersTest.html">ClassLoadersTest</a> {
+<a class="jxr_linenumber" name="39" href="#39">39</a>      @Test
+<a class="jxr_linenumber" name="40" href="#40">40</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testPushContextClassLoader() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="41" href="#41">41</a>          Thread th = Thread.currentThread();
+<a class="jxr_linenumber" name="42" href="#42">42</a>          ClassLoader orig = th.getContextClassLoader();
+<a class="jxr_linenumber" name="43" href="#43">43</a>          ClassLoader loader = <strong class="jxr_keyword">new</strong> URLClassLoader(<strong class="jxr_keyword">new</strong> URL[0], ClassLoaders.inferDefault(ClassLoadersTest.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="44" href="#44">44</a>          ClassLoaderContext ctx = ClassLoaders.pushContext(loader);
+<a class="jxr_linenumber" name="45" href="#45">45</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="46" href="#46">46</a>              assertThat(th.getContextClassLoader(), sameInstance(loader));
+<a class="jxr_linenumber" name="47" href="#47">47</a>          } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="48" href="#48">48</a>              ctx.pop();
+<a class="jxr_linenumber" name="49" href="#49">49</a>          }
+<a class="jxr_linenumber" name="50" href="#50">50</a>          assertThat(th.getContextClassLoader(), sameInstance(orig));
+<a class="jxr_linenumber" name="51" href="#51">51</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="52" href="#52">52</a>              ctx.pop();
+<a class="jxr_linenumber" name="53" href="#53">53</a>              fail(<span class="jxr_string">"re-popping context should be illegal state"</span>);
+<a class="jxr_linenumber" name="54" href="#54">54</a>          } <strong class="jxr_keyword">catch</strong> (IllegalStateException e) {
+<a class="jxr_linenumber" name="55" href="#55">55</a>              <em class="jxr_comment">/*<em class="jxr_comment"> expected */</em></em>
+<a class="jxr_linenumber" name="56" href="#56">56</a>          }
+<a class="jxr_linenumber" name="57" href="#57">57</a>      }
+<a class="jxr_linenumber" name="58" href="#58">58</a>  
+<a class="jxr_linenumber" name="59" href="#59">59</a>      @Test
+<a class="jxr_linenumber" name="60" href="#60">60</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testInferLoaderFromRefClass() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="61" href="#61">61</a>          Thread th = Thread.currentThread();
+<a class="jxr_linenumber" name="62" href="#62">62</a>          ClassLoader orig = th.getContextClassLoader();
+<a class="jxr_linenumber" name="63" href="#63">63</a>          assumeThat(<span class="jxr_string">"have a context class loader"</span>,
+<a class="jxr_linenumber" name="64" href="#64">64</a>                     orig, notNullValue());
+<a class="jxr_linenumber" name="65" href="#65">65</a>          ClassLoaderContext ctx = ClassLoaders.pushContext(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="66" href="#66">66</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="67" href="#67">67</a>              assertThat(ClassLoaders.inferDefault(ClassLoadersTest.<strong class="jxr_keyword">class</strong>),
+<a class="jxr_linenumber" name="68" href="#68">68</a>                         equalTo(getClass().getClassLoader()));
+<a class="jxr_linenumber" name="69" href="#69">69</a>          } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="70" href="#70">70</a>              ctx.pop();
+<a class="jxr_linenumber" name="71" href="#71">71</a>          }
+<a class="jxr_linenumber" name="72" href="#72">72</a>      }
+<a class="jxr_linenumber" name="73" href="#73">73</a>  
+<a class="jxr_linenumber" name="74" href="#74">74</a>      @Test
+<a class="jxr_linenumber" name="75" href="#75">75</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testInferLoaderFromThread() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="76" href="#76">76</a>          Thread th = Thread.currentThread();
+<a class="jxr_linenumber" name="77" href="#77">77</a>          ClassLoader orig = th.getContextClassLoader();
+<a class="jxr_linenumber" name="78" href="#78">78</a>          assumeThat(<span class="jxr_string">"have a context class loader"</span>,
+<a class="jxr_linenumber" name="79" href="#79">79</a>                     orig, notNullValue());
+<a class="jxr_linenumber" name="80" href="#80">80</a>          assertThat(ClassLoaders.inferDefault(ClassLoadersTest.<strong class="jxr_keyword">class</strong>),
+<a class="jxr_linenumber" name="81" href="#81">81</a>                     equalTo(orig));
+<a class="jxr_linenumber" name="82" href="#82">82</a>      }
+<a class="jxr_linenumber" name="83" href="#83">83</a>  }
 </pre>
 <hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
 </html>
