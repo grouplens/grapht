@@ -195,7 +195,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.5</version>
         <dependencies>
           <dependency>
             <groupId>org.apache.maven.wagon</groupId>
@@ -221,7 +221,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>2.10.3</version>
       </plugin>
 
       <plugin>
@@ -266,43 +266,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
         <version>2.3</version>
-      </plugin>
-
-      <plugin>
-        <inherited>false</inherited>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-changes-plugin</artifactId>
-        <version>2.9</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>github-report</report>
-            </reports>
-            <configuration>
-              <includeOpenIssues>false</includeOpenIssues>
-              <onlyCurrentVersion>true</onlyCurrentVersion>
-              <columnNames>Id,Summary,Status,Created,Updated,Fix Version</columnNames>
-            </configuration>
-          </reportSet>
-        </reportSets>
-      </plugin>
-
-      <plugin>
-        <inherited>false</inherited>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-changelog-plugin</artifactId>
-        <version>2.2</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>changelog</report>
-            </reports>
-            <configuration>
-              <issueIDRegexPattern>(?&lt;=#)\d+\b</issueIDRegexPattern>
-              <issueLinkUrl>https://github.com/grouplens/lenskit/issues/</issueLinkUrl>
-            </configuration>
-          </reportSet>
-        </reportSets>
       </plugin>
     </plugins>
   </reporting>
