@@ -29,7 +29,7 @@
     </breadcrumbs>
     <menu name="Grapht">
       <item name="About" href="index.html"/>
-      <item name="BitBucket" href="http://bitbucket.org/grouplens/grapht/"/>
+      <item name="GitHub" href="https://github.com/grouplens/grapht/"/>
     </menu>
     <!--<menu ref="modules"/>-->
     <menu ref="reports" inherit="bottom"/>
