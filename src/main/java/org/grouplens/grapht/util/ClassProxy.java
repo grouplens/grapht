@@ -171,7 +171,7 @@ public final class ClassProxy implements Serializable {
         try {
             digest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("JVM does not support MD5");
+            throw new RuntimeException("JVM does not support MD5", e);
         }
         checksumClass(type, digest);
 
