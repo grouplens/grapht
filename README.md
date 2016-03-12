@@ -1,6 +1,8 @@
 # Grapht
 
 [![Build Status](https://travis-ci.org/grouplens/grapht.png?branch=master)](https://travis-ci.org/grouplens/grapht)
+[![SonarQube test coverage](https://img.shields.io/sonar/https/sonar.cs.txstate.edu/org.grouplens.grapht:grapht/coverage.svg)](https://sonar.cs.txstate.edu/dashboard/index/2713)
+[![SonarQube tech debt](https://img.shields.io/sonar/https/sonar.cs.txstate.edu/org.grouplens.grapht:grapht/tech_debt.svg)](https://sonar.cs.txstate.edu/dashboard/index/2713)
 
 Grapht is a light-weight dependency injector. It converts the dependency
 injection problem into a graph-based problem that can be solved and analyzed
