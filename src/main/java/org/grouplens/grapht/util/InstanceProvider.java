@@ -34,7 +34,7 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
     private static final long serialVersionUID = -1L;
 
     private final Class<?> providedType;
-    private final T instance;
+    private final transient T instance; // transient because serialization proxy takes care of it
 
     /**
      * Construct a new instance provider.
@@ -84,6 +84,7 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
     private static class SerialProxy implements Serializable {
         private static final long serialVersionUID = 1L;
         private ClassProxy type;
+        @SuppressWarnings("squid:S1948") // serializable warning; node is serializable iff its label type is
         private Object instance;
 
         public SerialProxy(Class<?> t, Object i) {

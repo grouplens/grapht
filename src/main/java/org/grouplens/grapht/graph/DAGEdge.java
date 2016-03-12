@@ -46,6 +46,7 @@ public class DAGEdge<V,E> implements Serializable {
     @Nonnull
     private final DAGNode<V,E> tail;
     @Nonnull
+    @SuppressWarnings("squid:S1948") // serializable warning; edge is serializable iff its label type is
     private final E label;
     private transient volatile int hashCode;
 

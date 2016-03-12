@@ -54,6 +54,7 @@ public class DAGNode<V,E> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Nonnull
+    @SuppressWarnings("squid:S1948") // serializable warning; node is serializable iff its label type is
     private final V label;
     @Nonnull
     private final ImmutableSet<DAGEdge<V,E>> outgoingEdges;

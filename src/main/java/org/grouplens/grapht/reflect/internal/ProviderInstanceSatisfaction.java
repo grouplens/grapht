@@ -42,6 +42,7 @@ import java.util.Map;
  */
 public class ProviderInstanceSatisfaction implements Satisfaction, Serializable {
     private static final long serialVersionUID = 1L;
+    @SuppressWarnings("squid:S1948") // serializable warning; satisfaction is serializable iff provider is
     private final Provider<?> provider;
 
     /**

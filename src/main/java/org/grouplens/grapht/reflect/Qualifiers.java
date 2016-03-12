@@ -360,6 +360,7 @@ public final class Qualifiers {
     private static class AnnotationMatcher extends AbstractMatcher implements Serializable {
         private static final long serialVersionUID = 1L;
 
+        @SuppressWarnings("squid:S1948") // serializable warning; annotations are serializable
         private final Annotation annotation;
         
         public AnnotationMatcher(Annotation annot) {

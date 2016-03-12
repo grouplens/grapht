@@ -41,7 +41,7 @@ import java.util.Map;
 class AnnotationProxy<T extends Annotation> implements InvocationHandler, Serializable {
     private static final long serialVersionUID = 1L;
     private final ClassProxy annotationType;
-    private final Map<String, Object> attributes;
+    private final ImmutableMap<String, Object> attributes;
     private transient Class<T> cachedType;
 
     public AnnotationProxy(Class<T> type, Map<String, Object> attrs) {
