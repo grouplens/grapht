@@ -153,14 +153,6 @@ public class SatisfactionTest {
         Assert.assertSame(c, s.getProvider());
     }
     
-    @Test @Ignore("Not relevant for instantiators.")
-    public void testProviderInstanceSatisfactionProvider() throws Exception {
-        ProviderC instance = new ProviderC(10);
-        Instantiator provider = new ProviderInstanceSatisfaction(instance)
-                                    .makeInstantiator(Collections.EMPTY_MAP,null);
-        Assert.assertSame(instance, provider);
-    }
-    
     @Test
     public void testClassSatisfactionEquals() throws Exception {
         // two variations of the arguments
