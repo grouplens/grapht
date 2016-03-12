@@ -180,7 +180,17 @@ class BindingImpl<T> implements Binding<T> {
     public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
         Satisfaction s = Satisfactions.providerType(provider);
         BindRuleBuilder brb = startRule().setSatisfaction(s);
-        generateBindings(brb, Types.getProvidedType(provider));
+        Class<?> provided;
+        try {
+            provided = Types.getProvidedType(provider);
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().endsWith("is generic")) {
+                throw new InvalidBindingException(sourceType, "cannot bind to generic provider");
+            } else {
+                throw e;
+            }
+        }
+        generateBindings(brb, provided);
     }
 
     @Override
