@@ -176,7 +176,9 @@ public final class ClassProxy implements Serializable {
         checksumClass(type, digest);
 
         ByteBuffer buf = ByteBuffer.wrap(digest.digest());
-        return buf.getLong() ^ buf.getLong();
+        long l1 = buf.getLong();
+        long l2 = buf.getLong();
+        return l1 ^ l2;
     }
 
     private static void checksumClass(Class<?> type, MessageDigest digest) {
