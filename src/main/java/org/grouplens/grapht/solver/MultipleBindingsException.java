@@ -19,12 +19,11 @@
  */
 package org.grouplens.grapht.solver;
 
+import com.google.common.collect.ImmutableList;
 import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.reflect.Desire;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Thrown when a BindingFunction would be required to return multiple binding
@@ -39,12 +38,12 @@ public class MultipleBindingsException extends ResolutionException {
 
     private final InjectionContext context;
     private final DesireChain desires;
-    private final Collection<?> bindings;
+    private final ImmutableList<?> bindings;
     
     public MultipleBindingsException(DesireChain desires, InjectionContext context, Collection<?> bindings) {
         this.desires = desires;
         this.context = context;
-        this.bindings = Collections.unmodifiableCollection(new ArrayList<Object>(bindings));
+        this.bindings = ImmutableList.copyOf(bindings);
     }
     
     /**
