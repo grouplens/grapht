@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
  * @since 0.7.0
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
-public abstract class AbstractChain<E> extends AbstractList<E> implements Serializable {
+public abstract class AbstractChain<E extends Serializable> extends AbstractList<E> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     protected final AbstractChain<E> previous;
