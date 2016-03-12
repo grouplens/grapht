@@ -41,6 +41,7 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
      * @param instance The instance.
      * @deprecated Use {@link Providers#of(Object)} instead.
      */
+    @SuppressWarnings("unused")
     @Deprecated
     public InstanceProvider(T instance) {
         this(instance, instance == null ? Object.class : instance.getClass());
@@ -77,6 +78,7 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
         return new SerialProxy(providedType,  instance);
     }
 
+    @SuppressWarnings("unused")
     private Object readObject() throws ObjectStreamException {
         throw new InvalidObjectException("must use serialization proxy");
     }
@@ -94,7 +96,7 @@ public class InstanceProvider<T> implements TypedProvider<T>, Serializable {
 
         @SuppressWarnings("unchecked")
         private Object readResolve() throws ObjectStreamException {
-            Class<?> cls = null;
+            Class<?> cls;
             try {
                 cls = type.resolve();
             } catch (ClassNotFoundException e) {
