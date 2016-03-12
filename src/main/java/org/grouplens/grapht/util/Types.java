@@ -205,7 +205,7 @@ public final class Types {
                 return inferredType;
             }
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class does not implement get()");
+            throw new IllegalArgumentException("Class does not implement get()", e);
         }
     }
 

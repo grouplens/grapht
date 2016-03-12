@@ -582,7 +582,7 @@ public final class AnnotationBuilder<T extends Annotation> {
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Annotation type " + this.type + " does not have an attribute named: " + name);
+            throw new IllegalArgumentException("Annotation type " + this.type + " does not have an attribute named: " + name, e);
         }
     }
     
