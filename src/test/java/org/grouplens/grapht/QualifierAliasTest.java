@@ -104,7 +104,10 @@ public class QualifierAliasTest {
     }
 
     /**
-     * Test that binding both alias and qualifier fails.
+     * Test that binding both alias and qualifier fails.  Aliases are treated as equivalent to their qualifiers,
+     * so we have a multiple-binding situation.
+     *
+     * We will also take this opportunity to test the {@link MultipleBindingsException}.
      */
     @Test
     public void testBindQualAndAlias() throws InjectionException {
@@ -117,6 +120,10 @@ public class QualifierAliasTest {
             fail("should fail w/ multiple bindings");
         } catch (MultipleBindingsException ex) {
             /* expected */
+            assertThat(ex.getBindRules(), hasSize(2));
+            assertThat(ex.getDesire().getDesiredType(),
+                       equalTo((Class) String.class));
+            assertThat(ex.getContext(), hasSize(2));
         }
     }
 
