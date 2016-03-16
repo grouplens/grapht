@@ -142,7 +142,8 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         private static final long serialVersionUID = 1L;
         private ClassProxy type;
         private boolean nullable;
-        @Nullable @SuppressWarnings("SE_BAD_FIELD")
+        @Nullable
+        @SuppressWarnings("squid:S1948") // serializable - annotations are serializable
         private Annotation qualifier;
 
         private SerialProxy(Class<?> t, boolean isNullable, @Nullable Annotation qual) {

@@ -170,7 +170,6 @@ public class BindingFunctionBuilderTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Ignore("currently throws IllegalArgument for generic provider")
     @Test
     public void testBindToBadProvider() throws Exception {
         // Test that we get an exception when binding to a provider of an overly generic type
@@ -178,7 +177,7 @@ public class BindingFunctionBuilderTest {
         try {
             builder.getRootContext()
                    .bind((Class) InputStream.class)
-                    .toProvider(new InstanceProvider("foo"));
+                   .toProvider(new InstanceProvider("foo"));
             fail("binding to bad provider should throw exception");
         } catch (InvalidBindingException e) {
             /* expected */
