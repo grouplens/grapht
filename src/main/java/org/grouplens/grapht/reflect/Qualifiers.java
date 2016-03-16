@@ -129,7 +129,7 @@ public final class Qualifiers {
      * @param annot Annotation instance to match, or {@code null} to match only the lack of a qualifier.
      * @return A QualifierMatcher that matches annotations equaling annot
      */
-    public static QualifierMatcher match(@Nonnull Annotation annot) {
+    public static QualifierMatcher match(Annotation annot) {
         if (annot == null) {
             return matchNone();
         } else if (annot.annotationType().getDeclaredMethods().length == 0) {

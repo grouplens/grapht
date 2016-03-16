@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -162,6 +163,14 @@ public class QualifiersTest {
         assertThat(Qualifiers.matchNone(), equalTo(Qualifiers.matchNone()));
         assertThat(Qualifiers.matchNone(), not(equalTo(Qualifiers.matchAny())));
         assertThat(SerializationUtils.clone(Qualifiers.matchNone()),
+                   equalTo(Qualifiers.matchNone()));
+    }
+
+    @Test
+    public void testMatchNoneByNull() {
+        assertThat(Qualifiers.match((Class) null),
+                   equalTo(Qualifiers.matchNone()));
+        assertThat(Qualifiers.match((Annotation) null),
                    equalTo(Qualifiers.matchNone()));
     }
 
