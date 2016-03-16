@@ -19,6 +19,7 @@
  */
 package org.grouplens.grapht.reflect;
 
+import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.grouplens.grapht.annotation.AliasFor;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
@@ -27,11 +28,13 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Qualifier;
+import java.io.InvalidObjectException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -164,6 +167,8 @@ public class QualifiersTest {
         assertThat(Qualifiers.matchNone(), not(equalTo(Qualifiers.matchAny())));
         assertThat(SerializationUtils.clone(Qualifiers.matchNone()),
                    equalTo(Qualifiers.matchNone()));
+        assertThat(Qualifiers.matchNone().toString(),
+                   equalTo("-"));
     }
 
     @Test
@@ -207,6 +212,20 @@ public class QualifiersTest {
                    equalTo(Qualifiers.match(Qual.class)));
         assertThat(SerializationUtils.clone(Qualifiers.match(VQual.class)),
                    equalTo(Qualifiers.match(VQual.class)));
+    }
+
+    @Test
+    public void testClassMatcherBadClassError() {
+        Qualifiers.AnnotationClassMatcher.SerialProxy proxy =
+                new Qualifiers.AnnotationClassMatcher.SerialProxy(String.class);
+        byte[] data = SerializationUtils.serialize(proxy);
+        try {
+            SerializationUtils.deserialize(data);
+            fail("deserialization should fail with error");
+        } catch (SerializationException e) {
+            assertThat(e.getCause(), instanceOf(InvalidObjectException.class));
+            assertThat(e.getCause().getCause(), instanceOf(ClassCastException.class));
+        }
     }
 
     @Test

@@ -144,7 +144,7 @@ public final class Qualifiers {
         }
     }
 
-    private static enum DefaultMatcherPriority {
+    private enum DefaultMatcherPriority {
         MATCH_VALUE,
         MATCH_TYPE,
         MATCH_ANY,
@@ -271,7 +271,7 @@ public final class Qualifiers {
         }
     }
     
-    private static class AnnotationClassMatcher extends AbstractMatcher {
+    static class AnnotationClassMatcher extends AbstractMatcher {
         private static final long serialVersionUID = -1L;
         private final Class<? extends Annotation> type;
         private final Class<? extends Annotation> actual;
@@ -331,7 +331,7 @@ public final class Qualifiers {
             throw new InvalidObjectException("must use serialization proxy");
         }
 
-        private static class SerialProxy implements Serializable {
+        static class SerialProxy implements Serializable {
             private static final long serialVersionUID = 1L;
 
             private final ClassProxy type;
