@@ -44,7 +44,7 @@
     <jacoco.version>0.7.5.201505241946</jacoco.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <sonar.host.url>https://sonar.cs.txstate.edu</sonar.host.url>
+    <sonar.host.url>https://sonarqube.com</sonar.host.url>
   </properties>
 
   <dependencies>
@@ -341,19 +341,6 @@
           </plugin>
         </plugins>
       </reporting>
-    </profile>
-
-    <profile>
-      <id>sonar-auth</id>
-      <activation>
-        <property>
-          <name>env.SONAR_USER</name>
-        </property>
-      </activation>
-      <properties>
-        <sonar.login>${env.SONAR_USER}</sonar.login>
-        <sonar.password>${env.SONAR_PASSWORD}</sonar.password>
-      </properties>
     </profile>
   </profiles>
 </project>

@@ -33,6 +33,8 @@ env:
   - secure: "Y0Hs0R/TncCka+m4aP2Dmn9J3PBm+gssKnttoYDGb8H5tDsMYRy+kxNhkGwqUdJnQRuth5583CYK8UzxYGeDzWDB+zCx7qiSzXblc2VG5sGSCBXBdmh8E100n+W9t02zjJpKGGqOrFvAbgkkaiGjsJB6FhUO19s4EaNeoAE5EnE="
   # SONAR_PASSWORD
   - secure: "N84js3IKpRatJp7XPRcIFbCJAIgn2ugnBnF62afi8L9f/SXnXlFfRYmeHyPMTSN2ivjFJ3dhePyOPvjEOlQcYZp3ZqL7nAWL56O9B5GFZaOsUEGZcknE14yRARYR5aLIP6kICuEcvHiYMGrfiTispE9ZQW4391gzvVVpPauX8J8="
+  # SONAR_TOKEN
+  - secure: Mc3lDFojFojszb8qiVMSv9gRLx8WWbnQ1UlYcIOfd/YxpKIeb4vuZFnRD4gLnkpp+s7ezVrqnddBJ1frfjEusgzvUEocHY9xsRiuGD8F6t2R0abxWbbLJg2yAsCTNXRnqsTPW0wKANKZZJnb1qVAwu2k4URaahlNT9Pr4K7UXZc=
 notifications:
   webhooks:
     urls:
