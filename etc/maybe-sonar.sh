@@ -13,4 +13,4 @@ skip_unless "$TRAVIS_BRANCH" = master
 skip_unless "$TRAVIS_PULL_REQUEST" = false
 skip_unless "$TRAVIS_JDK_VERSION" = oraclejdk8
 
-exec mvn --batch-mode sonar:sonar -Dsonar.login="$SONAR_TOKEN"
+exec mvn --batch-mode package sonar:sonar -Dsonar.login="$SONAR_TOKEN"
