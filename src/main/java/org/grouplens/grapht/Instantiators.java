@@ -193,7 +193,7 @@ public final class Instantiators {
             if (error != null) {
                 Throwables.propagateIfPossible(error, ConstructionException.class);
                 // shouldn't happen, but hey.
-                throw new RuntimeException("Unexpected instantiation exception", error);
+                throw Throwables.propagate(error);
             } else {
                 return instance;
             }
