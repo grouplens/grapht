@@ -152,27 +152,28 @@
 <a class="jxr_linenumber" name="142" href="#142">142</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 1L;
 <a class="jxr_linenumber" name="143" href="#143">143</a>         <strong class="jxr_keyword">private</strong> <a href="../../../../../org/grouplens/grapht/util/ClassProxy.html">ClassProxy</a> type;
 <a class="jxr_linenumber" name="144" href="#144">144</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> nullable;
-<a class="jxr_linenumber" name="145" href="#145">145</a>         @Nullable @SuppressWarnings(<span class="jxr_string">"SE_BAD_FIELD"</span>)
-<a class="jxr_linenumber" name="146" href="#146">146</a>         <strong class="jxr_keyword">private</strong> Annotation qualifier;
-<a class="jxr_linenumber" name="147" href="#147">147</a> 
-<a class="jxr_linenumber" name="148" href="#148">148</a>         <strong class="jxr_keyword">private</strong> <a href="../../../../../org/grouplens/grapht/reflect/Qualifiers.html">SerialProxy</a>(Class&lt;?&gt; t, <strong class="jxr_keyword">boolean</strong> isNullable, @Nullable Annotation qual) {
-<a class="jxr_linenumber" name="149" href="#149">149</a>             type = ClassProxy.of(t);
-<a class="jxr_linenumber" name="150" href="#150">150</a>             nullable = isNullable;
-<a class="jxr_linenumber" name="151" href="#151">151</a>             qualifier = qual;
-<a class="jxr_linenumber" name="152" href="#152">152</a>         }
-<a class="jxr_linenumber" name="153" href="#153">153</a> 
-<a class="jxr_linenumber" name="154" href="#154">154</a>         <strong class="jxr_keyword">public</strong> Object readResolve() <strong class="jxr_keyword">throws</strong> ObjectStreamException {
-<a class="jxr_linenumber" name="155" href="#155">155</a>             <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="156" href="#156">156</a>                 <strong class="jxr_keyword">return</strong> Desires.createInjectionPoint(qualifier, type.resolve(), nullable);
-<a class="jxr_linenumber" name="157" href="#157">157</a>             } <strong class="jxr_keyword">catch</strong> (ClassNotFoundException e) {
-<a class="jxr_linenumber" name="158" href="#158">158</a>                 InvalidObjectException ex =
-<a class="jxr_linenumber" name="159" href="#159">159</a>                         <strong class="jxr_keyword">new</strong> InvalidObjectException(<span class="jxr_string">"cannot resolve class "</span> + type.getClassName());
-<a class="jxr_linenumber" name="160" href="#160">160</a>                 ex.initCause(e);
-<a class="jxr_linenumber" name="161" href="#161">161</a>                 <strong class="jxr_keyword">throw</strong> ex;
-<a class="jxr_linenumber" name="162" href="#162">162</a>             }
-<a class="jxr_linenumber" name="163" href="#163">163</a>         }
-<a class="jxr_linenumber" name="164" href="#164">164</a>     }
-<a class="jxr_linenumber" name="165" href="#165">165</a> }
+<a class="jxr_linenumber" name="145" href="#145">145</a>         @Nullable
+<a class="jxr_linenumber" name="146" href="#146">146</a>         @SuppressWarnings(<span class="jxr_string">"squid:S1948"</span>) <em class="jxr_comment">// serializable - annotations are serializable</em>
+<a class="jxr_linenumber" name="147" href="#147">147</a>         <strong class="jxr_keyword">private</strong> Annotation qualifier;
+<a class="jxr_linenumber" name="148" href="#148">148</a> 
+<a class="jxr_linenumber" name="149" href="#149">149</a>         <strong class="jxr_keyword">private</strong> <a href="../../../../../org/grouplens/grapht/reflect/Qualifiers.html">SerialProxy</a>(Class&lt;?&gt; t, <strong class="jxr_keyword">boolean</strong> isNullable, @Nullable Annotation qual) {
+<a class="jxr_linenumber" name="150" href="#150">150</a>             type = ClassProxy.of(t);
+<a class="jxr_linenumber" name="151" href="#151">151</a>             nullable = isNullable;
+<a class="jxr_linenumber" name="152" href="#152">152</a>             qualifier = qual;
+<a class="jxr_linenumber" name="153" href="#153">153</a>         }
+<a class="jxr_linenumber" name="154" href="#154">154</a> 
+<a class="jxr_linenumber" name="155" href="#155">155</a>         <strong class="jxr_keyword">public</strong> Object readResolve() <strong class="jxr_keyword">throws</strong> ObjectStreamException {
+<a class="jxr_linenumber" name="156" href="#156">156</a>             <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="157" href="#157">157</a>                 <strong class="jxr_keyword">return</strong> Desires.createInjectionPoint(qualifier, type.resolve(), nullable);
+<a class="jxr_linenumber" name="158" href="#158">158</a>             } <strong class="jxr_keyword">catch</strong> (ClassNotFoundException e) {
+<a class="jxr_linenumber" name="159" href="#159">159</a>                 InvalidObjectException ex =
+<a class="jxr_linenumber" name="160" href="#160">160</a>                         <strong class="jxr_keyword">new</strong> InvalidObjectException(<span class="jxr_string">"cannot resolve class "</span> + type.getClassName());
+<a class="jxr_linenumber" name="161" href="#161">161</a>                 ex.initCause(e);
+<a class="jxr_linenumber" name="162" href="#162">162</a>                 <strong class="jxr_keyword">throw</strong> ex;
+<a class="jxr_linenumber" name="163" href="#163">163</a>             }
+<a class="jxr_linenumber" name="164" href="#164">164</a>         }
+<a class="jxr_linenumber" name="165" href="#165">165</a>     }
+<a class="jxr_linenumber" name="166" href="#166">166</a> }
 </pre>
 <hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
 </html>

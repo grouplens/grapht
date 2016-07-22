@@ -592,7 +592,7 @@
 <a class="jxr_linenumber" name="582" href="#582">582</a>         } <strong class="jxr_keyword">catch</strong> (SecurityException e) {
 <a class="jxr_linenumber" name="583" href="#583">583</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(e);
 <a class="jxr_linenumber" name="584" href="#584">584</a>         } <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e) {
-<a class="jxr_linenumber" name="585" href="#585">585</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Annotation type "</span> + <strong class="jxr_keyword">this</strong>.type + <span class="jxr_string">" does not have an attribute named: "</span> + name);
+<a class="jxr_linenumber" name="585" href="#585">585</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Annotation type "</span> + <strong class="jxr_keyword">this</strong>.type + <span class="jxr_string">" does not have an attribute named: "</span> + name, e);
 <a class="jxr_linenumber" name="586" href="#586">586</a>         }
 <a class="jxr_linenumber" name="587" href="#587">587</a>     }
 <a class="jxr_linenumber" name="588" href="#588">588</a>     
