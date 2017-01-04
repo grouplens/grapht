@@ -95,7 +95,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
             }
 
             // if the qualifier does not allow fall-through, we're done
-            if (!annotType.isAnnotationPresent(AllowUnqualifiedMatch.class)) {
+            if (!annotType.isAnnotationPresent(AllowDefaultMatch.class) && !annotType.isAnnotationPresent(AllowUnqualifiedMatch.class)) {
                 return result;
             }
         }

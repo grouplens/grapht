@@ -17,16 +17,19 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-package org.grouplens.grapht.reflect.internal.types;
+package org.grouplens.grapht.annotation;
 
-import org.grouplens.grapht.annotation.AllowDefaultMatch;
-import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
+import java.lang.annotation.*;
 
-import javax.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-@Qualifier
+/**
+ * Mark a qualifier as allowing default matches.  If a qualifier bears this annotation, then
+ * the default qualifier matcher (what you get if you call {@link org.grouplens.grapht.Context#bind(Class)}
+ * without calling any subsequent qualifier method) will match it.  This allows certain qualifiers
+ * to fall-through to their unqualified implementations.  It also allows default implementations
+ * to be used.
+ */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
-@AllowDefaultMatch
-public @interface RoleA { }
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface AllowDefaultMatch {
+}

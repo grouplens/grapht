@@ -22,6 +22,7 @@ package org.grouplens.grapht.reflect;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.grouplens.grapht.annotation.AliasFor;
+import org.grouplens.grapht.annotation.AllowDefaultMatch;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.junit.Test;
@@ -79,7 +80,7 @@ public class QualifiersTest {
     }
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
-    @AllowUnqualifiedMatch
+    @AllowDefaultMatch
     public static @interface DftQual {}
 
     private Qual makeQual() {

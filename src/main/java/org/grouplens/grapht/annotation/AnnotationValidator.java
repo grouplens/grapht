@@ -116,6 +116,9 @@ public class AnnotationValidator extends AbstractProcessor {
             if (elt.getAnnotation(AllowUnqualifiedMatch.class) != null) {
                 error(elt, "alias annotation has @AllowUnqualifiedMatch (should be on alias target)");
             }
+            if (elt.getAnnotation(AllowDefaultMatch.class) != null) {
+                error(elt, "alias annotation has @AllowDefaultMatch (should be on alias target)");
+            }
             for (AnnotationMirror mirror: elt.getAnnotationMirrors()) {
                 Element element = mirror.getAnnotationType().asElement();
                 if (element instanceof TypeElement) {

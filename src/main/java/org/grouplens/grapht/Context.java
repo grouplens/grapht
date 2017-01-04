@@ -47,7 +47,7 @@ public interface Context {
      * invoking one of its various to() methods.  Unless further configuration is
      * done, this binding will match unqualified dependencies and dependencies
      * with a qualifier annotated with
-     * {@link org.grouplens.grapht.annotation.AllowUnqualifiedMatch}.
+     * {@link org.grouplens.grapht.annotation.AllowDefaultMatch}.
      * 
      * @param <T> The matched source type
      * @param type The raw class that is matched

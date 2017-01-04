@@ -21,6 +21,7 @@ package org.grouplens.grapht.reflect;
 
 import com.google.common.collect.Sets;
 import org.grouplens.grapht.annotation.AliasFor;
+import org.grouplens.grapht.annotation.AllowDefaultMatch;
 import org.grouplens.grapht.annotation.AllowUnqualifiedMatch;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
@@ -90,7 +91,7 @@ public final class Qualifiers {
     }
 
     /**
-     * The default qualifier matcher. This is currently the {@linkplain #matchAny() any matcher}.
+     * The default qualifier matcher. This matches the null qualifier and any qualifier
      * @return A QualifierMatcher that matches using the default policy.
      */
     public static QualifierMatcher matchDefault() {
@@ -190,12 +191,13 @@ public final class Qualifiers {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public boolean apply(Annotation q) {
             if (q == null) {
                 return true;
             } else {
                 Class<? extends Annotation> atype = q.annotationType();
-                return atype.isAnnotationPresent(AllowUnqualifiedMatch.class);
+                return atype.isAnnotationPresent(AllowDefaultMatch.class) || atype.isAnnotationPresent(AllowUnqualifiedMatch.class);
             }
         }
 
