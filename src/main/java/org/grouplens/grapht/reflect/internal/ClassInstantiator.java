@@ -89,32 +89,8 @@ public class ClassInstantiator implements Instantiator {
         Method[] methods;
 
         try (LogContext globalLogContext = LogContext.create()) {
-            // create the instance that we are injecting
-            try {
-                globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
-                Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
-                for (Desire d : desires) {
-                    if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
-                        // this desire is a constructor argument so create it now
-                        Instantiator provider = providers.get(d);
-                        ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
-                        logger.trace("Injection point satisfactions in progress {}", cd);
-                        try (LogContext ipContext = LogContext.create()) {
-                            ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
-                            ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
-                        }
-                    }
-                }
-                logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
-                ctor.setAccessible(true);
-                instance = ctor.newInstance(ctorArgs);
-            } catch (InvocationTargetException e) {
-                throw new ConstructionException(ctor, "Constructor " + ctor + " failed", e);
-            } catch (InstantiationException e) {
-                throw new ConstructionException(ctor, "Could not instantiate " + type, e);
-            } catch (IllegalAccessException e) {
-                throw new ConstructionException(ctor, "Access violation on " + ctor, e);
-            }
+            globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
+            instance = createInstance(ctor);
 
             // satisfy dependencies in the order of the list, which was
             // prepared to comply with JSR 330
@@ -127,6 +103,7 @@ public class ClassInstantiator implements Instantiator {
                 }
             }
         }
+
         if (manager != null) {
             manager.registerComponent(instance);
         }
@@ -144,6 +121,36 @@ public class ClassInstantiator implements Instantiator {
         }
 
         // the instance has been fully configured
+        return instance;
+    }
+
+    private Object createInstance(Constructor<?> ctor) throws ConstructionException {
+        Object instance;
+        try {
+            Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
+            for (Desire d : desires) {
+                if (!(d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint)) {
+                    continue;
+                }
+                // this desire is a constructor argument so create it now
+                Instantiator provider = providers.get(d);
+                ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
+                logger.trace("Injection point satisfactions in progress {}", cd);
+                try (LogContext ipContext = LogContext.create()) {
+                    ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
+                    ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
+                }
+            }
+            logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
+            ctor.setAccessible(true);
+            instance = ctor.newInstance(ctorArgs);
+        } catch (InvocationTargetException e) {
+            throw new ConstructionException(ctor, "Constructor " + ctor + " failed", e);
+        } catch (InstantiationException e) {
+            throw new ConstructionException(ctor, "Could not instantiate " + type, e);
+        } catch (IllegalAccessException e) {
+            throw new ConstructionException(ctor, "Access violation on " + ctor, e);
+        }
         return instance;
     }
 
