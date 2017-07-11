@@ -28,7 +28,7 @@ import org.slf4j.MDC;
  * to be set, and popped back off when the context is finished.
  */
 
-public class LogContext {
+public class LogContext implements AutoCloseable {
     @SuppressWarnings("rawtypes")
 
     private final Map memory = MDC.getCopyOfContextMap();
@@ -60,6 +60,11 @@ public class LogContext {
      */
     public void finish() {
         MDC.setContextMap(memory == null ? Collections.EMPTY_MAP : memory);
+    }
+
+    @Override
+    public void close() {
+        finish();
     }
 }
 

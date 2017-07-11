@@ -85,28 +85,24 @@ public class ClassInstantiator implements Instantiator {
         // find constructor and build up necessary constructor arguments
 
         Constructor<?> ctor = getConstructor();
-        LogContext globalLogContext = LogContext.create();
         Object instance = null;
         Method[] methods;
 
-        try {
+        try (LogContext globalLogContext = LogContext.create()) {
             // create the instance that we are injecting
             try {
                 globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
                 Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
                 for (Desire d : desires) {
-                    LogContext ipContext = LogContext.create();
                     if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
                         // this desire is a constructor argument so create it now
                         Instantiator provider = providers.get(d);
                         ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
                         logger.trace("Injection point satisfactions in progress {}", cd);
-                        try {
+                        try (LogContext ipContext = LogContext.create()) {
                             ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
-                        } finally {
-                            ipContext.finish();
+                            ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
                         }
-                        ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
                     }
                 }
                 logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
@@ -124,17 +120,12 @@ public class ClassInstantiator implements Instantiator {
             // prepared to comply with JSR 330
             Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
             for (Desire d : desires) {
-                LogContext ipContext = LogContext.create();
-                try {
+                try (LogContext ipContext = LogContext.create()) {
                     final InjectionStrategy injectionStrategy = InjectionStrategy.forInjectionPoint(d.getInjectionPoint());
                     ipContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
                     injectionStrategy.inject(d.getInjectionPoint(), instance, providers.get(d), settersAndArguments);
-                } finally {
-                    ipContext.finish();
                 }
             }
-        } finally {
-            globalLogContext.finish();
         }
         if (manager != null) {
             manager.registerComponent(instance);

@@ -24,10 +24,10 @@ import com.google.common.base.Throwables;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.TypedProvider;
 import org.grouplens.grapht.util.Types;
-import javax.inject.Provider;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-import org.grouplens.grapht.util.LogContext;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Provider;
 
 /**
  * Utilities and methods for building and working with {@link org.grouplens.grapht.Instantiator}s.
@@ -146,17 +146,15 @@ public final class Instantiators {
         @Override
         public Object instantiate() throws ConstructionException {
             Provider<?> provider = (Provider) providerInstantiator.instantiate();
-            LogContext mdcContextProvider = LogContext.create();
-            logger.trace("invoking provider {}",provider);
-            try {
+            logger.trace("invoking provider {}", provider);
+            try (LogContext mdcContextProvider = LogContext.create()) {
                 mdcContextProvider.put("org.grouplens.grapht.currentProvider", provider.toString());
                 return provider.get();
             } catch (Throwable th) {
                 throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
-            } finally {
-                mdcContextProvider.finish();
             }
         }
+
         @SuppressWarnings("unchecked")
         @Override
         public Class<?> getType() {
