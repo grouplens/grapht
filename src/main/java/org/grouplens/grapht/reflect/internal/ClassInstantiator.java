@@ -20,6 +20,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.Instantiator;
@@ -29,16 +30,16 @@ import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.Preconditions;
+import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Instantiates class instances.
@@ -86,7 +87,6 @@ public class ClassInstantiator implements Instantiator {
 
         Constructor<?> ctor = getConstructor();
         Object instance = null;
-        Method[] methods;
 
         try (LogContext globalLogContext = LogContext.create()) {
             globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
@@ -108,8 +108,7 @@ public class ClassInstantiator implements Instantiator {
             manager.registerComponent(instance);
         }
 
-        methods = MethodUtils.getMethodsWithAnnotation(type, PostConstruct.class);
-        for(Method method:methods){
+        for(Method method: getPostConstructMethods()){
             method.setAccessible(true);
             try {
                 method.invoke(instance);
@@ -122,6 +121,21 @@ public class ClassInstantiator implements Instantiator {
 
         // the instance has been fully configured
         return instance;
+    }
+
+    private List<Method> getPostConstructMethods() {
+        ImmutableList.Builder<Method> methods = ImmutableList.builder();
+
+        Types.getUniqueMethods(type)
+             .stream()
+             .filter(m -> m.getAnnotation(Inject.class) != null)
+             .filter(m -> m.getParameterCount() == 0)
+             .sorted(Comparator.comparing(Method::getDeclaringClass,
+                                          Types.supertypesFirst()))
+             .forEach(methods::add);
+
+        methods.add(MethodUtils.getMethodsWithAnnotation(type, PostConstruct.class));
+        return methods.build();
     }
 
     private Object createInstance(Constructor<?> ctor) throws ConstructionException {

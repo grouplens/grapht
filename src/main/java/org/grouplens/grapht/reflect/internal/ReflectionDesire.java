@@ -33,8 +33,14 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary
@@ -71,48 +77,31 @@ public class ReflectionDesire implements Desire, Serializable {
                 }
             }
         }
-        
-        // JSR 330 mandates that super class methods are injected first, so we
-        // collect method injection points into a separate list and then reverse
-        // it to get the ordering correct.
-        List<Desire> groupDesires = Lists.newArrayList();
-        
-        // Must also keep track of methods overridden in the subtypes.
-        Set<Signature> visitedMethods = new HashSet<Signature>();
-        while(type != null) {
-            for (Method m: type.getDeclaredMethods()) {
-                Signature s = new Signature(m);
-                if (!visitedMethods.contains(s) && m.getAnnotation(Inject.class) != null
-                    && !Modifier.isStatic(m.getModifiers())) {
-                    // have not seen this signature, and its an injection point
-                    if (m.getParameterTypes().length > 0) {
-                        for (int i = 0; i < m.getParameterTypes().length; i++) {
-                            groupDesires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
-                        }
-                    } else {
-                        // hack to invoke no-argument injectable methods required by JSR 330
-                        groupDesires.add(new ReflectionDesire(new NoArgumentInjectionPoint(m)));
+
+        List<Desire> nonCtorDesires = new ArrayList<>();
+
+        for (Field f: Types.getAllFields(type)) {
+            if (f.getAnnotation(Inject.class) != null && !Modifier.isStatic(f.getModifiers())) {
+                nonCtorDesires.add(new ReflectionDesire(new FieldInjectionPoint(f)));
+            }
+        }
+
+        for (Method m: Types.getUniqueMethods(type)) {
+            if (m.getAnnotation(Inject.class) != null && !Modifier.isStatic(m.getModifiers())) {
+                int nparams = m.getParameterCount();
+                if (nparams > 0) {
+                    for (int i = 0; i < nparams; i++) {
+                        nonCtorDesires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
                     }
                 }
-                // always add signature, because a subclass without @Inject
-                // overrides any @Inject on the superclass's method declaration
-                visitedMethods.add(s);
             }
-            for (Field f: type.getDeclaredFields()) {
-                if (f.getAnnotation(Inject.class) != null && !Modifier.isStatic(f.getModifiers())) {
-                    // have not seen this field
-                    groupDesires.add(new ReflectionDesire(new FieldInjectionPoint(f)));
-                }
-            }
-            
-            type = type.getSuperclass();
         }
-        
-        // after reversing this list, fields will be injected 
-        // before methods as required
-        Collections.reverse(groupDesires);
-        desires.addAll(groupDesires);
-        
+
+        // JSR 330 mandates that super class methods and fields are injected first
+        nonCtorDesires.sort(Comparator.comparing(d -> d.getInjectionPoint().getMember().getDeclaringClass(),
+                                                 Types.supertypesFirst()));
+        desires.addAll(nonCtorDesires);
+
         return Collections.unmodifiableList(desires);
     }
     
@@ -265,53 +254,6 @@ public class ReflectionDesire implements Desire, Serializable {
                 ex.initCause(e);
                 throw ex;
             }
-        }
-    }
-    
-    /*
-     * Internal class to track a methods signature. Java's default reflection
-     * doesn't give us a convenient way to record just this information.
-     *
-     * FIXME Document why we need this class more clearly
-     */
-    public static class Signature {
-        private final String name;
-        private final Type[] args;
-        
-        public Signature(Method m) {
-            // FIXME Make it clearer what this code is supposed to do
-            int mods = m.getModifiers();
-            if (Modifier.isPublic(mods) || Modifier.isProtected(mods)) {
-                // method overrides depends solely on method name
-                name = m.getName();
-            } else if (Modifier.isPrivate(mods)) {
-                // method overrides depend on method name and class name
-                name = m.getName() + m.getDeclaringClass().getCanonicalName();
-            } else {
-                // method overrides depend on method name and package,
-                // since it is package-private
-                Package pkg = m.getDeclaringClass().getPackage();
-                if (pkg != null) {
-                    name = m.getName() + pkg.getName();
-                } else {
-                    name = m.getName();
-                }
-            }
-            args = m.getGenericParameterTypes();
-        }
-        
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof Signature)) {
-                return false;
-            }
-            Signature s = (Signature) o;
-            return s.name.equals(name) && Arrays.equals(args, s.args);
-        }
-        
-        @Override
-        public int hashCode() {
-            return (name.hashCode() ^ Arrays.hashCode(args));
         }
     }
 }

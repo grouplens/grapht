@@ -26,7 +26,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Static helper methods for working with types.
@@ -45,7 +45,66 @@ public final class Types {
         byte.class, short.class, int.class, long.class,
         double.class, float.class
     };
-    
+
+    /**
+     * Get a list of unique methods of the class and its superclasses.  This resolves overrides,
+     * preferring the subclass implementation.
+     *
+     * @param type The type to search.
+     * @return The list of unique methods.
+     */
+    public static List<Method> getUniqueMethods(Class<?> type) {
+        List<Method> methods = new ArrayList<>();
+        // Must keep track of methods overridden in the subtypes.
+        Set<Signature> visitedMethods = new HashSet<>();
+        while(type != null) {
+            for (Method m : type.getDeclaredMethods()) {
+                Signature s = new Signature(m);
+                if (!visitedMethods.contains(s)) {
+                    methods.add(m);
+                    visitedMethods.add(s);
+                }
+            }
+
+            type = type.getSuperclass();
+        }
+
+        return methods;
+    }
+
+    /**
+     * Get all fields from a class and its superclasses.
+     * @param type The class.
+     * @return The list of fields from the class and its superclasses.
+     */
+    public static List<Field> getAllFields(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
+        while (type != null) {
+            fields.addAll(Arrays.asList(type.getDeclaredFields()));
+            type = type.getSuperclass();
+        }
+        return fields;
+    }
+
+    /**
+     * Comparator that sorts classes by inheritance order, superclasses first.
+     * @return A comparator that orders classes by inheritance order.
+     */
+    public static Comparator<Class<?>> supertypesFirst() {
+        return (c1, c2) -> {
+            if (c1.equals(c2)) {
+                return 0;
+            } else if (c1.isAssignableFrom(c2)) {
+                // c1 is superclass of c2, sort it first
+                return -1;
+            } else if (c2.isAssignableFrom(c1)) {
+                return 1;
+            } else {
+                throw new IllegalArgumentException("cannot compare " + c1 + " and " + c2);
+            }
+        };
+    }
+
     /**
      * Create a parameterized type wrapping the given class and type arguments.
      * 
@@ -298,5 +357,52 @@ public final class Types {
     @Deprecated
     public static ClassLoader getDefaultClassLoader() {
         return ClassLoaders.inferDefault();
+    }
+
+    /*
+     * Internal class to track a methods signature. Java's default reflection
+     * doesn't give us a convenient way to record just this information.
+     *
+     * FIXME Document why we need this class more clearly
+     */
+    private static class Signature {
+        private final String name;
+        private final Type[] args;
+
+        public Signature(Method m) {
+            // FIXME Make it clearer what this code is supposed to do
+            int mods = m.getModifiers();
+            if (Modifier.isPublic(mods) || Modifier.isProtected(mods)) {
+                // method overrides depends solely on method name
+                name = m.getName();
+            } else if (Modifier.isPrivate(mods)) {
+                // method overrides depend on method name and class name
+                name = m.getName() + m.getDeclaringClass().getCanonicalName();
+            } else {
+                // method overrides depend on method name and package,
+                // since it is package-private
+                Package pkg = m.getDeclaringClass().getPackage();
+                if (pkg != null) {
+                    name = m.getName() + pkg.getName();
+                } else {
+                    name = m.getName();
+                }
+            }
+            args = m.getGenericParameterTypes();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Signature)) {
+                return false;
+            }
+            Signature s = (Signature) o;
+            return s.name.equals(name) && Arrays.equals(args, s.args);
+        }
+
+        @Override
+        public int hashCode() {
+            return (name.hashCode() ^ Arrays.hashCode(args));
+        }
     }
 }
