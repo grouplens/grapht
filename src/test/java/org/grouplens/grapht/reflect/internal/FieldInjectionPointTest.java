@@ -37,13 +37,13 @@ public class FieldInjectionPointTest {
     @Test
     public void testNotNullable() throws NoSuchFieldException {
         FieldInjectionPoint nonnull = new FieldInjectionPoint(getClass().getDeclaredField("foo"));
-        assertThat(nonnull.isNullable(), equalTo(false));
+        assertThat(nonnull.isOptional(), equalTo(false));
     }
 
     @Test
     public void testNullable() throws NoSuchFieldException {
         FieldInjectionPoint field = new FieldInjectionPoint(getClass().getDeclaredField("nullable"));
-        assertThat(field.isNullable(), equalTo(true));
+        assertThat(field.isOptional(), equalTo(true));
     }
 
     @Test

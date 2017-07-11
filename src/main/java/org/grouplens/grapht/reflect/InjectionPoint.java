@@ -85,7 +85,10 @@ public interface InjectionPoint extends Serializable {
     @Nullable Member getMember();
 
     /**
-     * @return True if this injection point accepts null values
+     * Query whether this injection point is optional.  Optional injection points do not need to be satisfied in order
+     * for the class to be instantiated.
+     *
+     * @return True if this injection point is optional.
      */
-    boolean isNullable();
+    boolean isOptional();
 }

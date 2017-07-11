@@ -91,7 +91,7 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public boolean isNullable() {
+    public boolean isOptional() {
         return Types.hasNullableAnnotation(field.getAnnotations());
     }
 

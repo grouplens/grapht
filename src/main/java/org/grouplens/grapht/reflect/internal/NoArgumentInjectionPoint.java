@@ -63,7 +63,7 @@ public class NoArgumentInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public boolean isNullable() {
+    public boolean isOptional() {
         return true;
     }
 

@@ -79,7 +79,7 @@ public class SetterInjectionPoint implements InjectionPoint, Serializable {
     }
 
     @Override
-    public boolean isNullable() {
+    public boolean isOptional() {
         // we'll check both setter and parameter annotations
         return Types.hasNullableAnnotation(setter.getAnnotations()) ||
                Types.hasNullableAnnotation(setter.getParameterAnnotations()[parameter]);

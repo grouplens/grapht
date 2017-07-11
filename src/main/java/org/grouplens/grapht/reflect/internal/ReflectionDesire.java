@@ -165,7 +165,7 @@ public class ReflectionDesire implements Desire, Serializable {
                 if (Types.isInstantiable(desiredType)) {
                     satisfaction = new ClassSatisfaction(desiredType);
                 } // else don't satisfy this, even if the injection point is null
-            } else if (injectPoint.isNullable()) {
+            } else if (injectPoint.isOptional()) {
                 // we only default to null if the injection point depended on
                 // an interface. if they ask for a concrete type, it's a bug
                 // for that type not to be injectable

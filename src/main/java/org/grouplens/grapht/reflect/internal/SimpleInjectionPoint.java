@@ -71,7 +71,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
     }
 
     @Override
-    public boolean isNullable() {
+    public boolean isOptional() {
         return nullable;
     }
 

@@ -67,7 +67,7 @@ public class ProviderBindingFunction implements BindingFunction {
                     // Create a desire for the provided type, cloning the attributes
                     // and nullability from the original desire
                     Desire providedDesire = Desires.create(desire.getInjectionPoint().getQualifier(),
-                                                           providedType, desire.getInjectionPoint().isNullable());
+                                                           providedType, desire.getInjectionPoint().isOptional());
                     // Satisfied JIT desire for this injection point
                     Desire jitDesire = desire.restrict(new ProviderInjectionSatisfaction(providedDesire));
                     // Make sure to defer this binding since the single dependency

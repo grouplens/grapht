@@ -107,7 +107,7 @@ public class MockInjectionPoint implements InjectionPoint {
     }
 
     @Override
-    public boolean isNullable() {
+    public boolean isOptional() {
         return nullable;
     }
 

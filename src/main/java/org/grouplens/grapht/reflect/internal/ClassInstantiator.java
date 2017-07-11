@@ -180,7 +180,7 @@ public class ClassInstantiator implements Instantiator {
     }
 
     static Object checkNull(InjectionPoint injectPoint, Object value) throws NullDependencyException {
-        if (value == null && !injectPoint.isNullable()) {
+        if (value == null && !injectPoint.isOptional()) {
             throw new NullDependencyException(injectPoint);
         } else {
             return value;

@@ -72,7 +72,7 @@ public class InjectionPointTest {
         Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
         expected.add(p1);
         expected.add(p2);
-        
+
         // verify that the qualifiers and types are identified properly
         Assert.assertThat(p1.getQualifier(), instanceOf(RoleA.class));
         Assert.assertThat(p2.getQualifier(), instanceOf(RoleB.class));
@@ -85,8 +85,8 @@ public class InjectionPointTest {
         Assert.assertEquals(String.class, p2.getType());
         
         // verify nullability and transience
-        Assert.assertFalse(p1.isNullable());
-        Assert.assertTrue(p2.isNullable());
+        Assert.assertFalse(p1.isOptional());
+        Assert.assertTrue(p2.isOptional());
         
         Assert.assertEquals(expected, getInjectionPoints(CtorType.class));
     }
@@ -130,10 +130,10 @@ public class InjectionPointTest {
         Assert.assertEquals(String.class, p4.getType());
         
         // verify nullability and transience
-        Assert.assertFalse(p1.isNullable());
-        Assert.assertFalse(p2.isNullable());
-        Assert.assertFalse(p3.isNullable());
-        Assert.assertTrue(p4.isNullable());
+        Assert.assertFalse(p1.isOptional());
+        Assert.assertFalse(p2.isOptional());
+        Assert.assertFalse(p3.isOptional());
+        Assert.assertTrue(p4.isOptional());
         
         Assert.assertEquals(expected, getInjectionPoints(SetterType.class));
     }

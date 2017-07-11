@@ -84,7 +84,7 @@ public class ConstructorParameterInjectionPoint implements InjectionPoint, Seria
     }
 
     @Override
-    public boolean isNullable() {
+    public boolean isOptional() {
         return Types.hasNullableAnnotation(constructor.getParameterAnnotations()[paramIndex]);
     }
 
