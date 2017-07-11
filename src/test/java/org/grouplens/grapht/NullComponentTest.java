@@ -19,6 +19,7 @@
  */
 package org.grouplens.grapht;
 
+import com.google.common.base.Optional;
 import org.grouplens.grapht.reflect.internal.types.TypeDftN;
 import org.junit.Test;
 
@@ -37,6 +38,15 @@ public class NullComponentTest {
     public void testDefaultNull() throws InjectionException {
         InjectorBuilder b = InjectorBuilder.create();
         Injector inj = b.build();
+        NullableDep obj = inj.getInstance(NullableDep.class);
+        assertThat(obj, not(nullValue()));
+        assertThat(obj.getDep(), nullValue());
+    }
+
+    @Test
+    public void testDefaultAbsent() throws InjectionException {
+        InjectorBuilder b = InjectorBuilder.create();
+        Injector inj = b.build();
         OptionalDep obj = inj.getInstance(OptionalDep.class);
         assertThat(obj, not(nullValue()));
         assertThat(obj.getDep(), nullValue());
@@ -49,11 +59,22 @@ public class NullComponentTest {
         inj.getInstance(RequireDep.class);
     }
 
+    private static class NullableDep {
+        private TypeDftN depend;
+        @Inject
+        public NullableDep(@Nullable TypeDftN dep) {
+            depend = dep;
+        }
+        public TypeDftN getDep() {
+            return depend;
+        }
+    }
+
     private static class OptionalDep {
         private TypeDftN depend;
         @Inject
-        public OptionalDep(@Nullable TypeDftN dep) {
-            depend = dep;
+        public OptionalDep(Optional<TypeDftN> dep) {
+            depend = dep.orNull();
         }
         public TypeDftN getDep() {
             return depend;

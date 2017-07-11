@@ -19,6 +19,8 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
 import org.grouplens.grapht.reflect.Desire;
@@ -51,7 +53,7 @@ public class InjectionPointTest {
     
     @Test
     public void testAttributesLookup() throws Exception {
-        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class);
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
         ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
         ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
         
@@ -65,14 +67,12 @@ public class InjectionPointTest {
     @Test
     public void testConstructorParameterInjectionPoint() throws Exception {
         // created expected injection points
-        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class);
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
         ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
         ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
-        
-        Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
-        expected.add(p1);
-        expected.add(p2);
+        ConstructorParameterInjectionPoint p3 = new ConstructorParameterInjectionPoint(ctor, 2);
 
+        Set<InjectionPoint> expected = Sets.newHashSet(p1, p2, p3);
         // verify that the qualifiers and types are identified properly
         Assert.assertThat(p1.getQualifier(), instanceOf(RoleA.class));
         Assert.assertThat(p2.getQualifier(), instanceOf(RoleB.class));
@@ -90,7 +90,18 @@ public class InjectionPointTest {
         
         Assert.assertEquals(expected, getInjectionPoints(CtorType.class));
     }
-    
+
+    @Test
+    public void testConstructorParameterOptionalDep() throws NoSuchMethodException {
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
+        ConstructorParameterInjectionPoint point = new ConstructorParameterInjectionPoint(ctor, 2);
+        Assert.assertThat(point.getQualifier(), instanceOf(RoleB.class));
+        Assert.assertThat(point.getAttributes(), hasSize(0));
+        Assert.assertThat(point.getAttribute(Transient.class), nullValue());
+        Assert.assertEquals(String.class, point.getType());
+        Assert.assertTrue(point.isOptional());
+    }
+
     @Test
     public void testSetterMethodInjectionPoint() throws Exception {
         // create expected injection points
@@ -231,7 +242,8 @@ public class InjectionPointTest {
     
     public static class CtorType {
         @Inject
-        public CtorType(@Transient @RoleA Object a, @Nullable @RoleB String b) { }
+        public CtorType(@Transient @RoleA Object a, @Nullable @RoleB String b,
+                        @RoleB Optional<String> c) { }
         
         // other constructor to be ignored
         public CtorType() { }
