@@ -17,19 +17,11 @@
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-/**
- * Helper methods for instantiate() method
- * ClassInstantiator
- *
- * @author <a href="http://grouplens.org">GroupLens Research</a>
- */
-
 package org.grouplens.grapht.reflect.internal;
 
 import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.util.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +30,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+/**
+ * Helper methods for instantiate() method
+ * ClassInstantiator
+ *
+ * @author <a href="http://grouplens.org">GroupLens Research</a>
+ */
 enum InjectionStrategy {
 
     // method invoked for Field-Injection type 
