@@ -36,10 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Instantiates class instances.
@@ -92,14 +91,32 @@ public class ClassInstantiator implements Instantiator {
             globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
             instance = createInstance(ctor);
 
-            // satisfy dependencies in the order of the list, which was
-            // prepared to comply with JSR 330
+            Map<Member, List<Desire>> depGroups =
+                    desires.stream()
+                           .filter(d -> !(d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint))
+                           .collect(Collectors.groupingBy(d -> d.getInjectionPoint().getMember()));
+            // JSR 330 requires supertype injection points to be set first, and fields first
+            List<Member> members = new ArrayList<>(depGroups.keySet());
+            members.sort(Comparator.comparing(Member::getDeclaringClass,
+                                              Types.supertypesFirst())
+                                   .thenComparing((m1, m2) -> {
+                                       if (m1 instanceof Field && m2 instanceof Method) {
+                                           return -1;
+                                       } else if (m1 instanceof Method && m2 instanceof Field) {
+                                           return 1;
+                                       } else {
+                                           return 0;
+                                       }
+                                   }));
+
             Map<Method, InjectionArgs> settersAndArguments = new HashMap<Method, InjectionArgs>();
-            for (Desire d : desires) {
-                try (LogContext ipContext = LogContext.create()) {
-                    final InjectionStrategy injectionStrategy = InjectionStrategy.forInjectionPoint(d.getInjectionPoint());
-                    ipContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
-                    injectionStrategy.inject(d.getInjectionPoint(), instance, providers.get(d), settersAndArguments);
+            for (Member m: members) {
+                if (m instanceof Method) {
+                    invokeMethod(instance, (Method) m, depGroups.get(m));
+                } else if (m instanceof Field) {
+                    invokeField(instance, (Field) m, depGroups.get(m));
+                } else {
+                    throw new IllegalStateException("unexpected member " + m);
                 }
             }
         }
@@ -166,6 +183,55 @@ public class ClassInstantiator implements Instantiator {
             throw new ConstructionException(ctor, "Access violation on " + ctor, e);
         }
         return instance;
+    }
+
+    private void invokeMethod(Object instance, Method setter, List<Desire> desires) throws ConstructionException {
+        Object[] args = new Object[desires.size()];
+        for (int i = 0; i < args.length; i++) {
+            Desire d = desires.get(i);
+            try (LogContext ipContext = LogContext.create()) {
+                ipContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
+                args[i] = providers.get(d).instantiate();
+            }
+        }
+
+        try {
+            logger.trace("Invoking setter {} with arguments {}", setter, args);
+            setter.setAccessible(true);
+            setter.invoke(instance, args);
+        } catch (InvocationTargetException e) {
+            String message = "Exception thrown by ";
+            if (args.length == 1) {
+                message += desires.get(0).getInjectionPoint();
+            } else {
+                message += setter;
+            }
+            throw new ConstructionException(desires.get(0).getInjectionPoint(), message, e);
+        } catch (IllegalAccessException e) {
+            String message = "Access violation calling ";
+            if (args.length == 1) {
+                message += desires.get(0).getInjectionPoint();
+            } else {
+                message += setter;
+            }
+            throw new ConstructionException(desires.get(0).getInjectionPoint(), message, e);
+        }
+    }
+
+    private void invokeField(Object instance, Field field, List<Desire> desires) throws ConstructionException {
+        assert desires.size() == 1;
+        Object value;
+        Desire d = desires.get(0);
+        Instantiator provider = providers.get(d);
+        try (LogContext ipContext = LogContext.create()) {
+            ipContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
+            value = ClassInstantiator.checkNull(d.getInjectionPoint(), provider.instantiate());
+            logger.trace("Setting field {} with arguments {}", field, value);
+            field.setAccessible(true);
+            field.set(instance, value);
+        } catch (IllegalAccessException e) {
+            throw new ConstructionException(d.getInjectionPoint(), e);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -78,11 +78,9 @@ public class ReflectionDesire implements Desire, Serializable {
             }
         }
 
-        List<Desire> nonCtorDesires = new ArrayList<>();
-
         for (Field f: Types.getAllFields(type)) {
             if (f.getAnnotation(Inject.class) != null && !Modifier.isStatic(f.getModifiers())) {
-                nonCtorDesires.add(new ReflectionDesire(new FieldInjectionPoint(f)));
+                desires.add(new ReflectionDesire(new FieldInjectionPoint(f)));
             }
         }
 
@@ -91,16 +89,11 @@ public class ReflectionDesire implements Desire, Serializable {
                 int nparams = m.getParameterCount();
                 if (nparams > 0) {
                     for (int i = 0; i < nparams; i++) {
-                        nonCtorDesires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
+                        desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
                     }
                 }
             }
         }
-
-        // JSR 330 mandates that super class methods and fields are injected first
-        nonCtorDesires.sort(Comparator.comparing(d -> d.getInjectionPoint().getMember().getDeclaringClass(),
-                                                 Types.supertypesFirst()));
-        desires.addAll(nonCtorDesires);
 
         return Collections.unmodifiableList(desires);
     }
