@@ -9,7 +9,9 @@ cache:
   - $HOME/.sonar/cache/
 install: mvn --batch-mode dependency:go-offline
 script: mvn --batch-mode verify
-after_success: ./etc/maybe-sonar.sh
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+- ./etc/maybe-sonar.sh
 deploy:
   skip_cleanup: true
   provider: script
