@@ -254,7 +254,7 @@ public class ClassInstantiator implements Instantiator {
             // this constructor is being invoked for a ClassSatisfaction or a 
             // ProviderClassSatisfaction, both of which assert that the type is
             // instantiable, so this should never happen
-            throw new RuntimeException("Unexpected exception", e);
+            throw new IllegalStateException("Unexpected exception", e);
         }
     }
 
