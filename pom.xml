@@ -41,7 +41,7 @@
   </ciManagement>
 
   <properties>
-    <jacoco.version>0.7.5.201505241946</jacoco.version>
+    <jacoco.version>0.7.9</jacoco.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <sonar.host.url>https://sonarqube.com</sonar.host.url>
@@ -323,6 +323,13 @@
                 <id>prepare-agent</id>
                 <goals>
                   <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>report</goal>
                 </goals>
               </execution>
             </executions>
