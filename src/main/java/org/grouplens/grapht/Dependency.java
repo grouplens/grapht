@@ -80,17 +80,12 @@ public class Dependency implements Serializable {
     }
 
     /**
-     * Create a predicate matching dependencies with the specified initial desire.
+     * Query whether this dependency has a particular initial desire.
      * @param d The desire.
-     * @return A predicate that accepts dependencies whose initial desire is {@code d}.
+     * @return {@code true} if the dependency's initial desire is {@code d}.
      */
-    public static Predicate<Dependency> hasInitialDesire(final Desire d) {
-        return new Predicate<Dependency>() {
-            @Override
-            public boolean apply(@Nullable Dependency input) {
-                return input != null && input.getInitialDesire().equals(d);
-            }
-        };
+    public boolean hasInitialDesire(Desire d) {
+        return getInitialDesire().equals(d);
     }
 
     @Override

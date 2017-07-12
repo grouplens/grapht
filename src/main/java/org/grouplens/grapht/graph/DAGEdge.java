@@ -19,13 +19,12 @@
  */
 package org.grouplens.grapht.graph;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Edges in DAGs.  These arise from building nodes with a {@link DAGNodeBuilder}.
@@ -125,52 +124,16 @@ public class DAGEdge<V,E> implements Serializable {
     }
 
     public static <E> Predicate<DAGEdge<?,E>> labelMatches(final Predicate<? super E> pred) {
-        return new Predicate<DAGEdge<?, E>>() {
-            @Override
-            public boolean apply(@Nullable DAGEdge<?, E> input) {
-                E label = input == null ? null : input.getLabel();
-                return pred.apply(label);
-            }
+        return input -> {
+            E label = input == null ? null : input.getLabel();
+            return pred.test(label);
         };
     }
 
     public static <V,E> Predicate<DAGEdge<V,E>> tailMatches(final Predicate<? super DAGNode<V,E>> pred) {
-        return new Predicate<DAGEdge<V, E>>() {
-            @Override
-            public boolean apply(@Nullable DAGEdge<V, E> input) {
-                DAGNode<V,E> tail = input == null ? null : input.getTail();
-                return pred.apply(tail);
-            }
-        };
-    }
-
-    public static <V,E> Function<DAGEdge<V,E>,DAGNode<V,E>> extractTail() {
-        return new Function<DAGEdge<V, E>, DAGNode<V, E>>() {
-            @Nullable
-            @Override
-            public DAGNode<V, E> apply(@Nullable DAGEdge<V, E> input) {
-                return input == null ? null : input.getTail();
-            }
-        };
-    }
-
-    public static <V,E> Predicate<DAGEdge<V,E>> headMatches(final Predicate<? super DAGNode<V,E>> pred) {
-        return new Predicate<DAGEdge<V, E>>() {
-            @Override
-            public boolean apply(@Nullable DAGEdge<V, E> input) {
-                DAGNode<V,E> head = input == null ? null : input.getHead();
-                return pred.apply(head);
-            }
-        };
-    }
-
-    public static <V,E> Function<DAGEdge<V,E>,DAGNode<V,E>> extractHead() {
-        return new Function<DAGEdge<V, E>, DAGNode<V, E>>() {
-            @Nullable
-            @Override
-            public DAGNode<V, E> apply(@Nullable DAGEdge<V, E> input) {
-                return input == null ? null : input.getHead();
-            }
+        return input -> {
+            DAGNode<V,E> tail = input == null ? null : input.getTail();
+            return pred.test(tail);
         };
     }
 
@@ -186,27 +149,23 @@ public class DAGEdge<V,E> implements Serializable {
      * @return A function over edges.
      */
     public static <V,E> Function<DAGEdge<V,E>,DAGEdge<V,E>> transformNodes(final Function<? super DAGNode<V,E>,? extends DAGNode<V,E>> func) {
-        return new Function<DAGEdge<V, E>, DAGEdge<V, E>>() {
-            @Nullable
-            @Override
-            public DAGEdge<V, E> apply(@Nullable DAGEdge<V, E> input) {
-                if (input == null) {
-                    return null;
-                }
-                DAGNode<V,E> nt, nh;
-                nt = func.apply(input.getTail());
-                nh = func.apply(input.getHead());
-                if (nt == null) {
-                    nt = input.getTail();
-                }
-                if (nh == null) {
-                    nh = input.getHead();
-                }
-                if (!nt.equals(input.getTail()) || !nh.equals(input.getHead())) {
-                    return create(nh, nt, input.getLabel());
-                } else {
-                    return input;
-                }
+        return input -> {
+            if (input == null) {
+                return null;
+            }
+            DAGNode<V,E> nt, nh;
+            nt = func.apply(input.getTail());
+            nh = func.apply(input.getHead());
+            if (nt == null) {
+                nt = input.getTail();
+            }
+            if (nh == null) {
+                nh = input.getHead();
+            }
+            if (!nt.equals(input.getTail()) || !nh.equals(input.getHead())) {
+                return create(nh, nt, input.getLabel());
+            } else {
+                return input;
             }
         };
     }

@@ -19,7 +19,10 @@
  */
 package org.grouplens.grapht.graph;
 
-import com.google.common.base.*;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.*;
 import net.jcip.annotations.Immutable;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,6 +33,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A node in a (rooted) DAG.  Since DAGs are rooted, a full graph is just represented by its root
@@ -191,6 +197,7 @@ public class DAGNode<V,E> implements Serializable {
      * @return An outgoing edge with the specified label, or {@code null} if no such edge exists.
      * If multiple edges have this label, an arbitrary one is returned.
      */
+    @Nullable
     public DAGEdge<V,E> getOutgoingEdgeWithLabel(E label) {
         return getOutgoingEdgeWithLabel(Predicates.equalTo(label));
     }
@@ -203,9 +210,13 @@ public class DAGNode<V,E> implements Serializable {
      *         multiple edges have labels matching the predicate, it is undefined which one will be
      *         added.
      */
+    @Nullable
     public DAGEdge<V, E> getOutgoingEdgeWithLabel(Predicate<? super E> predicate) {
         Predicate<DAGEdge<?, E>> edgePred = DAGEdge.labelMatches(predicate);
-        return Iterables.find(outgoingEdges, edgePred, null);
+        return outgoingEdges.stream()
+                            .filter(edgePred)
+                            .findFirst()
+                            .orElse(null);
     }
 
     /**
@@ -213,9 +224,9 @@ public class DAGNode<V,E> implements Serializable {
      * @return The set of adjacent nodes.
      */
     public Set<DAGNode<V,E>> getAdjacentNodes() {
-        return FluentIterable.from(outgoingEdges)
-                             .transform(DAGEdge.<V, E>extractTail())
-                             .toSet();
+        return outgoingEdges.stream()
+                            .map(DAGEdge::getTail)
+                            .collect(Collectors.toSet());
     }
 
     /**
@@ -318,7 +329,7 @@ public class DAGNode<V,E> implements Serializable {
      *         such node is found.
      */
     public DAGNode<V, E> findNodeBFS(@NotNull Predicate<? super DAGNode<V, E>> pred) {
-        if (pred.apply(this)) {
+        if (pred.test(this)) {
             return this;
         }
 
@@ -332,7 +343,7 @@ public class DAGNode<V,E> implements Serializable {
                 // is this the node we are looking for?
                 DAGNode<V, E> nbr = e.getTail();
                 if (!seen.contains(nbr)) {
-                    if (pred.apply(nbr)) {
+                    if (pred.test(nbr)) {
                         return nbr;
                     } else {
                         seen.add(nbr);
@@ -362,7 +373,7 @@ public class DAGNode<V,E> implements Serializable {
             DAGNode<V, E> node = work.remove();
             for (DAGEdge<V, E> e : node.getOutgoingEdges()) {
                 // is this the edge we are looking for?
-                if (pred.apply(e)) {
+                if (pred.test(e)) {
                     return e;
                 } else if (!seen.contains(e.getTail())) {
                     seen.add(e.getTail());
@@ -443,12 +454,9 @@ public class DAGNode<V,E> implements Serializable {
     }
 
     public static <V> Predicate<DAGNode<V,?>> labelMatches(final Predicate<? super V> pred) {
-        return new Predicate<DAGNode<V, ?>>() {
-            @Override
-            public boolean apply(@Nullable DAGNode<V, ?> input) {
-                V lbl = input == null ? null : input.getLabel();
-                return pred.apply(lbl);
-            }
+        return input -> {
+            V lbl = input == null ? null : input.getLabel();
+            return pred.test(lbl);
         };
     }
 
