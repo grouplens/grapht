@@ -21,6 +21,7 @@ package org.grouplens.grapht;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.grouplens.grapht.util.LogContext;
 import org.grouplens.grapht.util.TypedProvider;
 import org.grouplens.grapht.util.Types;
@@ -221,7 +222,7 @@ public final class Instantiators {
                 logger.trace("invoking instantiator {}", instantiator);
                 return getProvidedType().cast(instantiator.instantiate());
             } catch (ConstructionException ex) {
-                throw new RuntimeException(ex);
+                throw new UncheckedExecutionException(ex);
             }
         }
     }
