@@ -24,7 +24,10 @@ import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.reflect.MockInjectionPoint;
 import org.grouplens.grapht.reflect.internal.types.*;
-import org.grouplens.grapht.solver.*;
+import org.grouplens.grapht.solver.BindingResult;
+import org.grouplens.grapht.solver.DefaultDesireBindingFunction;
+import org.grouplens.grapht.solver.DependencySolver;
+import org.grouplens.grapht.solver.DesireChain;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -132,8 +135,8 @@ public class ReflectionDesireTest {
         BindingResult result = null;
         for (Desire d: desires) {
             if (methodOrCtorParam instanceof Method) {
-                if (d.getInjectionPoint() instanceof SetterInjectionPoint) {
-                    SetterInjectionPoint sp = (SetterInjectionPoint) (d.getInjectionPoint());
+                if (d.getInjectionPoint() instanceof ParameterInjectionPoint) {
+                    ParameterInjectionPoint sp = (ParameterInjectionPoint) (d.getInjectionPoint());
                     if (sp.getMember().equals(methodOrCtorParam)) {
                         result = DefaultDesireBindingFunction.create()
                                                              .bind(DependencySolver.initialContext(),
@@ -141,13 +144,13 @@ public class ReflectionDesireTest {
                         break;
                     }
                 }
-            } else { // assume its an Integer
-                if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
-                    ConstructorParameterInjectionPoint cp = (ConstructorParameterInjectionPoint) (d.getInjectionPoint());
+            } else { // assume it's an Integer
+                if (d.getInjectionPoint() instanceof ParameterInjectionPoint) {
+                    ParameterInjectionPoint cp = (ParameterInjectionPoint) (d.getInjectionPoint());
                     if (((Integer) methodOrCtorParam).intValue() == cp.getParameterIndex()) {
                         result = DefaultDesireBindingFunction.create()
-                                .bind(DependencySolver.initialContext(),
-                                      DesireChain.singleton(d));
+                                                             .bind(DependencySolver.initialContext(),
+                                                                   DesireChain.singleton(d));
                         break;
                     }
                 }

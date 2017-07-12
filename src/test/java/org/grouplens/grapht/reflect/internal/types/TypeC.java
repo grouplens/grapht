@@ -20,8 +20,7 @@
 package org.grouplens.grapht.reflect.internal.types;
 
 import org.grouplens.grapht.reflect.InjectionPoint;
-import org.grouplens.grapht.reflect.internal.ConstructorParameterInjectionPoint;
-import org.grouplens.grapht.reflect.internal.SetterInjectionPoint;
+import org.grouplens.grapht.reflect.internal.ParameterInjectionPoint;
 
 import javax.inject.Inject;
 
@@ -34,11 +33,11 @@ public class TypeC {
     
     static {
         try {
-            CONSTRUCTOR = new ConstructorParameterInjectionPoint(TypeC.class.getConstructor(int.class), 0);
-            INTERFACE_A = new SetterInjectionPoint(TypeC.class.getMethod("setRoleA", InterfaceA.class), 0);
-            TYPE_A = new SetterInjectionPoint(TypeC.class.getMethod("setTypeA", TypeA.class), 0);
-            INTERFACE_B = new SetterInjectionPoint(TypeC.class.getMethod("setRoleD", InterfaceB.class), 0);
-            TYPE_B = new SetterInjectionPoint(TypeC.class.getMethod("setTypeB", TypeB.class), 0);
+            CONSTRUCTOR = new ParameterInjectionPoint(TypeC.class.getConstructor(int.class), 0);
+            INTERFACE_A = new ParameterInjectionPoint(TypeC.class.getMethod("setRoleA", InterfaceA.class), 0);
+            TYPE_A = new ParameterInjectionPoint(TypeC.class.getMethod("setTypeA", TypeA.class), 0);
+            INTERFACE_B = new ParameterInjectionPoint(TypeC.class.getMethod("setRoleD", InterfaceB.class), 0);
+            TYPE_B = new ParameterInjectionPoint(TypeC.class.getMethod("setTypeB", TypeB.class), 0);
         } catch(Exception e) {
             throw new RuntimeException(e);
         }

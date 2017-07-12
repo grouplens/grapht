@@ -84,19 +84,21 @@ public class ClassInstantiator implements Instantiator {
     public Object instantiate() throws ConstructionException {
         // find constructor and build up necessary constructor arguments
 
+        Map<Member, List<Desire>> depGroups =
+                desires.stream()
+                       .collect(Collectors.groupingBy(d -> d.getInjectionPoint().getMember()));
+
         Constructor<?> ctor = getConstructor();
         Object instance = null;
 
         try (LogContext globalLogContext = LogContext.create()) {
             globalLogContext.put("org.grouplens.grapht.class", ctor.getClass().toString());
-            instance = createInstance(ctor);
+            instance = createInstance(ctor, depGroups.getOrDefault(ctor, Collections.emptyList()));
 
-            Map<Member, List<Desire>> depGroups =
-                    desires.stream()
-                           .filter(d -> !(d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint))
-                           .collect(Collectors.groupingBy(d -> d.getInjectionPoint().getMember()));
             // JSR 330 requires supertype injection points to be set first, and fields first
             List<Member> members = new ArrayList<>(depGroups.keySet());
+            members.remove(ctor);
+            assert members.stream().noneMatch(m -> m instanceof Constructor);
             members.sort(Comparator.comparing(Member::getDeclaringClass,
                                               Types.supertypesFirst())
                                    .thenComparing((m1, m2) -> {
@@ -155,17 +157,14 @@ public class ClassInstantiator implements Instantiator {
         return methods.build();
     }
 
-    private Object createInstance(Constructor<?> ctor) throws ConstructionException {
+    private Object createInstance(Constructor<?> ctor, List<Desire> ctorDeps) throws ConstructionException {
         Object instance;
         try {
             Object[] ctorArgs = new Object[ctor.getParameterTypes().length];
-            for (Desire d : desires) {
-                if (!(d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint)) {
-                    continue;
-                }
+            for (Desire d : ctorDeps) {
                 // this desire is a constructor argument so create it now
                 Instantiator provider = providers.get(d);
-                ConstructorParameterInjectionPoint cd = (ConstructorParameterInjectionPoint) d.getInjectionPoint();
+                ParameterInjectionPoint cd = (ParameterInjectionPoint) d.getInjectionPoint();
                 logger.trace("Injection point satisfactions in progress {}", cd);
                 try (LogContext ipContext = LogContext.create()) {
                     ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
@@ -237,10 +236,10 @@ public class ClassInstantiator implements Instantiator {
     @SuppressWarnings("unchecked")
     private Constructor<?> getConstructor() {
         for (Desire d: desires) {
-            if (d.getInjectionPoint() instanceof ConstructorParameterInjectionPoint) {
-                // since we only allow one injectable constructor, any ConstructorParameterInjectionPoint
+            if (d.getInjectionPoint().getMember() instanceof Constructor) {
+                // since we only allow one injectable constructor, any constructor injection point
                 // will have the same constructor as all other constructor parameter injection points
-                Constructor<?> ctor = ((ConstructorParameterInjectionPoint) d.getInjectionPoint()).getMember();
+                Constructor<?> ctor = (Constructor<?>) d.getInjectionPoint().getMember();
                 logger.debug("Using constructor annotated with @Inject: {}", ctor);
                 return ctor;
             }

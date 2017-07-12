@@ -37,9 +37,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -69,7 +67,7 @@ public class ReflectionDesire implements Desire, Serializable {
                 if (!ctorFound) {
                     ctorFound = true;
                     for (int i = 0; i < ctor.getParameterTypes().length; i++) {
-                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i)));
+                        desires.add(new ReflectionDesire(new ParameterInjectionPoint(ctor, i)));
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
@@ -89,7 +87,7 @@ public class ReflectionDesire implements Desire, Serializable {
                 int nparams = m.getParameterCount();
                 if (nparams > 0) {
                     for (int i = 0; i < nparams; i++) {
-                        desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
+                        desires.add(new ReflectionDesire(new ParameterInjectionPoint(m, i)));
                     }
                 }
             }
