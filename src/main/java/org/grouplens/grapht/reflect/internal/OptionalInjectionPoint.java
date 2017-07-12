@@ -20,6 +20,7 @@
 package org.grouplens.grapht.reflect.internal;
 
 import com.google.common.base.Preconditions;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.grouplens.grapht.reflect.InjectionPoint;
@@ -37,22 +38,32 @@ import java.util.Optional;
 /**
  * An optional injection point that wraps values in {@link Optional}.
  */
+@ThreadSafe
 public class OptionalInjectionPoint implements InjectionPoint {
     private final InjectionPoint delegate;
-    private final Type type;
+    private transient Type type;
 
     public OptionalInjectionPoint(InjectionPoint base) {
         Preconditions.checkArgument(base.getErasedType().equals(Optional.class),
                                     "delegate must have type Optional");
         delegate = base;
-        Map<TypeVariable<?>, Type> args = TypeUtils.getTypeArguments(base.getType(), Optional.class);
-        TypeVariable<?> t = Optional.class.getTypeParameters()[0];
-        type = args.get(t);
-        Preconditions.checkArgument(type != null, "delegate type must have resolved T");
+        type = unwrapOptionalType(base.getType());
+    }
+
+    private Type unwrapOptionalType(Type base) {
+        Map<TypeVariable<?>, Type> args = TypeUtils.getTypeArguments(base, Optional.class);
+        TypeVariable<?> tv = Optional.class.getTypeParameters()[0];
+        Type t = args.get(tv);
+        Preconditions.checkArgument(t != null, "delegate type must have resolved T");
+        return t;
     }
 
     @Override
     public Type getType() {
+        Type tp = type;
+        if (tp == null) {
+            type = tp = unwrapOptionalType(delegate.getType());
+        }
         return type;
     }
 
