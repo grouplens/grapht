@@ -19,18 +19,17 @@
  */
 package org.grouplens.grapht.solver;
 
-import com.google.common.base.Predicate;
 import net.jcip.annotations.ThreadSafe;
 import org.grouplens.grapht.*;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.reflect.Desires;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 
 /**
@@ -149,11 +148,10 @@ public class DefaultInjector implements Injector {
         // within this exclusive lock so we know everything is thread safe
         // albeit in a non-optimal way.
         synchronized(this) {
-            Predicate<Dependency> pred = Dependency.hasInitialDesire(desire);
-
             // check if the desire is already in the graph
             DAGEdge<Component, Dependency> resolved =
-                    solver.getGraph().getOutgoingEdgeWithLabel(pred);
+                    solver.getGraph()
+                          .getOutgoingEdgeWithLabel(d -> d.hasInitialDesire(desire));
 
             // The edge is only non-null if instantiate() has been called before,
             // it may be present in the graph at a deeper node. If that's the case
@@ -161,7 +159,8 @@ public class DefaultInjector implements Injector {
             if (resolved == null) {
                 logger.info("Must resolve desire: {}", desire);
                 solver.resolve(desire);
-                resolved = solver.getGraph().getOutgoingEdgeWithLabel(pred);
+                resolved = solver.getGraph()
+                                 .getOutgoingEdgeWithLabel(d -> d.hasInitialDesire(desire));
             }
 
             // Check if the provider for the resolved node is in our cache

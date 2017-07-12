@@ -20,7 +20,6 @@
 package org.grouplens.grapht.graph;
 
 import com.google.common.base.Functions;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Merges graphs to remove redundant nodes.  This takes graphs and merges them, pruning redundant
@@ -91,10 +91,11 @@ public class MergePool<V,E> {
             // Resolve the merged neighbors of this node.  They have already been
             // merged, since we are going in topological order.
             Set<DAGNode<V, E>> neighbors =
-                    FluentIterable.from(toMerge.getOutgoingEdges())
-                                  .transform(DAGEdge.<V,E>extractTail())
-                                  .transform(Functions.forMap(mergedMap))
-                                  .toSet();
+                    toMerge.getOutgoingEdges()
+                           .stream()
+                           .map(DAGEdge::getTail)
+                           .map(Functions.forMap(mergedMap))
+                           .collect(Collectors.toSet());
 
             // See if we have already created an equivalent to this node
             DAGNode<V, E> newNode = nodeTable.get(Pair.of(sat, neighbors));

@@ -37,7 +37,6 @@ import org.junit.Test;
 import javax.inject.Provider;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -93,7 +92,7 @@ public class ReflectionInjectionTest {
         Assert.assertSame(instance, r.getInstance(TypeC.class));
 
         DAGNode<Component, Dependency> resolvedRoot =
-                r.getSolver().getGraph().getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(rootDesire)).getTail();
+                r.getSolver().getGraph().getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(rootDesire)).getTail();
         assertThat(resolvedRoot.getOutgoingEdges(),
                    hasSize(5));
 
@@ -180,7 +179,7 @@ public class ReflectionInjectionTest {
         Assert.assertSame(instance, r.getInstance(TypeC.class));
 
         DAGNode<Component, Dependency> resolvedRoot =
-                r.getSolver().getGraph().getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(rootDesire)).getTail();
+                r.getSolver().getGraph().getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(rootDesire)).getTail();
         assertThat(resolvedRoot.getOutgoingEdges(),
                    hasSize(5));
         

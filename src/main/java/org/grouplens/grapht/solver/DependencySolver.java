@@ -20,8 +20,10 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Functions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.Component;
@@ -158,13 +160,13 @@ public class DependencySolver {
      * @see #getBackEdges()
      */
     public synchronized DAGNode<Component, Dependency> getBackEdge(DAGNode<Component, Dependency> parent,
-                                                                            Desire desire) {
-        Predicate<DAGEdge<?, Dependency>> pred = DAGEdge.labelMatches(Dependency.hasInitialDesire(desire));
-        return FluentIterable.from(backEdges.get(parent))
-                             .filter(pred)
-                             .first()
-                             .transform(DAGEdge.<Component, Dependency>extractTail())
-                             .orNull();
+                                                                   Desire desire) {
+        return backEdges.get(parent)
+                .stream()
+                .filter(e -> e.getLabel().hasInitialDesire(desire))
+                .findFirst()
+                .map(DAGEdge::getTail)
+                .orElse(null);
     }
 
     /**

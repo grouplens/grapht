@@ -58,7 +58,7 @@ public class DependencySolverTest {
     
     // bypass synthetic root and return node that resolves the desire 
     private DAGNode<Component, Dependency> getRoot(DependencySolver r, Desire d) {
-        return r.getGraph().getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d)).getTail();
+        return r.getGraph().getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d)).getTail();
     }
     
     @Test
@@ -219,15 +219,16 @@ public class DependencySolverTest {
         DAGNode<Component, Dependency> n2 = getNode(r.getGraph(), Component.create(s2, CachePolicy.NO_PREFERENCE));
         DAGNode<Component, Dependency> n3 = getNode(r.getGraph(), Component.create(s3, CachePolicy.NO_PREFERENCE));
 
-        assertThat(Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))),
+        assertThat(Sets.filter(n1.getOutgoingEdges(),
+                               e -> e.getTail().equals(n2)),
                    hasSize(1));
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
         
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(d2, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(d2, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
         
-        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
     }
     
     @Test
@@ -281,15 +282,15 @@ public class DependencySolverTest {
         Assert.assertEquals(n1, rootNode);
         Assert.assertEquals(2, n1.getOutgoingEdges().size());
         
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(dr1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(dr2, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(dr1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(dr2, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
 
-        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n4))).size());
-        Assert.assertEquals(d3, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n4))).iterator().next().getLabel().getInitialDesire());
-        Assert.assertEquals(1, Sets.filter(n3.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(on4))).size());
-        Assert.assertEquals(d3, Sets.filter(n3.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(on4))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n4)).size());
+        Assert.assertEquals(d3, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n4)).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n3.getOutgoingEdges(), e -> e.getTail().equals(on4)).size());
+        Assert.assertEquals(d3, Sets.filter(n3.getOutgoingEdges(), e -> e.getTail().equals(on4)).iterator().next().getLabel().getInitialDesire());
     }
     
     @Test
@@ -365,11 +366,11 @@ public class DependencySolverTest {
         Assert.assertNotNull(n3);
         Assert.assertNull(on3);
         
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
 
-        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
     }
 
     @Test
@@ -419,11 +420,11 @@ public class DependencySolverTest {
         Assert.assertNotNull(n3);
         Assert.assertNull(on3);
         
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
 
-        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
     }
     
     @Test
@@ -462,8 +463,8 @@ public class DependencySolverTest {
         Assert.assertNotNull(n2);
         Assert.assertNull(on2);
         
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
     }
 
     @Test
@@ -501,14 +502,14 @@ public class DependencySolverTest {
         DAGNode<Component, Dependency> n2 = getNode(r.getGraph(), Component.create(sd2, CachePolicy.NO_PREFERENCE));
         DAGNode<Component, Dependency> n3 = getNode(r.getGraph(), Component.create(sd3, CachePolicy.NO_PREFERENCE));
         
-        Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n1))).size());
-        Assert.assertEquals(d1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n1))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), e -> e.getTail().equals(n1)).size());
+        Assert.assertEquals(d1, Sets.filter(rootNode.getOutgoingEdges(), e -> e.getTail().equals(n1)).iterator().next().getLabel().getInitialDesire());
         
-        Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d2, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d2, Sets.filter(rootNode.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
         
-        Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(d3, Sets.filter(rootNode.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(rootNode.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(d3, Sets.filter(rootNode.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
     }
 
     @Test
@@ -582,11 +583,11 @@ public class DependencySolverTest {
         DAGNode<Component, Dependency> n2 = getNode(r.getGraph(), Component.create(s2, CachePolicy.NO_PREFERENCE));
         DAGNode<Component, Dependency> n3 = getNode(r.getGraph(), Component.create(s3, CachePolicy.NO_PREFERENCE));
         
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
         
-        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).size());
-        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n3))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).size());
+        Assert.assertEquals(d2, Sets.filter(n2.getOutgoingEdges(), e -> e.getTail().equals(n3)).iterator().next().getLabel().getInitialDesire());
     }
 
     @Test
@@ -813,8 +814,8 @@ public class DependencySolverTest {
         
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
     }
 
     @Test
@@ -847,8 +848,8 @@ public class DependencySolverTest {
         
         Assert.assertNotNull(n1);
         Assert.assertNotNull(n2);
-        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).size());
-        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(n2))).iterator().next().getLabel().getInitialDesire());
+        Assert.assertEquals(1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).size());
+        Assert.assertEquals(d1, Sets.filter(n1.getOutgoingEdges(), e -> e.getTail().equals(n2)).iterator().next().getLabel().getInitialDesire());
     }
     
     @Test
@@ -883,15 +884,15 @@ public class DependencySolverTest {
         Assert.assertEquals(2, root.getOutgoingEdges().size()); // da and dap
         
         DAGNode<Component, Dependency> na =
-                root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
-        DAGNode<Component, Dependency> nap = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dap)).getTail();
+                root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(da)).getTail();
+        DAGNode<Component, Dependency> nap = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(dap)).getTail();
         
         // sa and sap were different satisfactions, so they should be separate nodes
         Assert.assertNotSame(na, nap);
         
         // the resolved desire for a1, from da
-        DAGNode<Component, Dependency> ra1 = na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
-        DAGNode<Component, Dependency> ra1p = nap.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+        DAGNode<Component, Dependency> ra1 = na.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(a1)).getTail();
+        DAGNode<Component, Dependency> ra1p = nap.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(a1)).getTail();
         
         // verify that both a and ap point to the sb satisfaction, and verify
         // that sb (and also its children) are properly shared
@@ -899,10 +900,13 @@ public class DependencySolverTest {
         Assert.assertSame(sd, ra1p.getLabel().getSatisfaction());
         Assert.assertSame(ra1, ra1p);
 
-        Predicate<DAGNode<Component, ?>> tgt = DAGNode.labelMatches(Predicates.equalTo(Component.create(sd, CachePolicy.NO_PREFERENCE)));
         DAGNode<Component, Dependency> node =
-                Iterables.find(r.getGraph().getReachableNodes(),
-                               tgt);
+                r.getGraph()
+                 .getReachableNodes()
+                 .stream()
+                 .filter(e -> e.getLabel().equals(Component.create(sd, CachePolicy.NO_PREFERENCE)))
+                 .findFirst()
+                 .orElseThrow(() -> new AssertionError("could not find node"));
         assertThat(r.getGraph().getIncomingEdges(node),
                    hasSize(2));
     }
@@ -945,15 +949,15 @@ public class DependencySolverTest {
         Assert.assertEquals(8 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         Assert.assertEquals(2, root.getOutgoingEdges().size()); // da and dap
         
-        DAGNode<Component, Dependency> na = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
-        DAGNode<Component, Dependency> nap = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dap)).getTail();
+        DAGNode<Component, Dependency> na = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(da)).getTail();
+        DAGNode<Component, Dependency> nap = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(dap)).getTail();
         
         // sa and sap were different satisfactions, so they should be separate nodes
         Assert.assertNotSame(na, nap);
         
         // the resolved desire for a1, from da
-        DAGNode<Component, Dependency> ra1 = na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
-        DAGNode<Component, Dependency> ra1p = nap.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+        DAGNode<Component, Dependency> ra1 = na.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(a1)).getTail();
+        DAGNode<Component, Dependency> ra1p = nap.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(a1)).getTail();
         
         // verify that both ra1 and ra1p are different nodes that both use the
         // sd satisfaction because sd's dependencies are configured differently
@@ -961,10 +965,10 @@ public class DependencySolverTest {
         Assert.assertSame(sd, ra1.getLabel().getSatisfaction());
         Assert.assertSame(sd, ra1p.getLabel().getSatisfaction());
         
-        Assert.assertSame(sb, ra1.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
-        Assert.assertSame(sc, ra1.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
-        Assert.assertSame(sbp, ra1p.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
-        Assert.assertSame(scp, ra1p.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(sb, ra1.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(sc, ra1.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(sbp, ra1p.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(scp, ra1p.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
     }
     
     @Test
@@ -996,12 +1000,12 @@ public class DependencySolverTest {
         Assert.assertEquals(4 + 1, r.getGraph().getReachableNodes().size()); // add one for synthetic root
         Assert.assertEquals(2, root.getOutgoingEdges().size()); // da and dd
         
-        DAGNode<Component, Dependency> na = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
-        DAGNode<Component, Dependency> nd = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dd)).getTail();
+        DAGNode<Component, Dependency> na = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(da)).getTail();
+        DAGNode<Component, Dependency> nd = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(dd)).getTail();
         
         // additionally verify that there is an edge going from na to nd
-        Assert.assertEquals(1, Sets.filter(na.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(nd))).size());
-        Assert.assertSame(nd, na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail());
+        Assert.assertEquals(1, Sets.filter(na.getOutgoingEdges(), e -> e.getTail().equals(nd)).size());
+        Assert.assertSame(nd, na.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(a1)).getTail());
     }
     
     @Test
@@ -1043,14 +1047,14 @@ public class DependencySolverTest {
         Assert.assertEquals(2, root.getOutgoingEdges().size()); // da and dd
         
         // resolved root desire nodes
-        DAGNode<Component, Dependency> na = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(da)).getTail();
-        DAGNode<Component, Dependency> nd = root.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(dd)).getTail();
+        DAGNode<Component, Dependency> na = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(da)).getTail();
+        DAGNode<Component, Dependency> nd = root.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(dd)).getTail();
         
         // make sure that there is no edge between na and nd
-        Assert.assertTrue(Sets.filter(na.getOutgoingEdges(), DAGEdge.tailMatches(Predicates.equalTo(nd))).isEmpty());
+        Assert.assertTrue(Sets.filter(na.getOutgoingEdges(), e -> e.getTail().equals(nd)).isEmpty());
         
         // look up dependency for na (which is also the sd satisfaction)
-        DAGNode<Component, Dependency> nad = na.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(a1)).getTail();
+        DAGNode<Component, Dependency> nad = na.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(a1)).getTail();
         
         // verify that the two sd nodes are different and have different edge
         // configurations
@@ -1058,10 +1062,10 @@ public class DependencySolverTest {
         Assert.assertSame(sd, nd.getLabel().getSatisfaction());
         Assert.assertSame(sd, nad.getLabel().getSatisfaction());
         
-        Assert.assertSame(sb, nad.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
-        Assert.assertSame(sc, nad.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
-        Assert.assertSame(sbp, nd.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
-        Assert.assertSame(scp, nd.getOutgoingEdgeWithLabel(Dependency.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(sb, nad.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(sc, nad.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(sbp, nd.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d1)).getTail().getLabel().getSatisfaction());
+        Assert.assertSame(scp, nd.getOutgoingEdgeWithLabel(dep -> dep.hasInitialDesire(d2)).getTail().getLabel().getSatisfaction());
     }
 
     @Test(expected=UnresolvableDependencyException.class)
@@ -1193,8 +1197,11 @@ public class DependencySolverTest {
     }
     
     private DAGNode<Component, Dependency> getNode(DAGNode<Component, Dependency> g, Component s) {
-        Predicate<DAGNode<Component, ?>> pred = DAGNode.labelMatches(Predicates.equalTo(s));
-        return Iterables.find(g.getReachableNodes(), pred, null);
+        return g.getReachableNodes()
+                .stream()
+                .filter(e -> e.getLabel().equals(s))
+                .findFirst()
+                .orElse(null);
     }
     
     @Qualifier
