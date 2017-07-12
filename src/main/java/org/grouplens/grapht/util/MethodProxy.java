@@ -29,7 +29,7 @@ import java.util.Arrays;
 /**
  * Proxy class for serializing methods
  */
-public final class MethodProxy implements Serializable {
+public final class MethodProxy implements MemberProxy {
     private static final long serialVersionUID = 1L;
 
     private final ClassProxy declaringClass;
@@ -104,6 +104,7 @@ public final class MethodProxy implements Serializable {
      * @throws ClassNotFoundException If the proxy's declaring type cannot be resolved.
      * @throws NoSuchMethodException If the method does not exist on the declaring type.
      */
+    @Override
     public Method resolve() throws ClassNotFoundException, NoSuchMethodException {
         Method m = method;
         if (m == null) {

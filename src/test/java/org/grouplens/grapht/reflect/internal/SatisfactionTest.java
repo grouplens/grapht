@@ -46,7 +46,7 @@ public class SatisfactionTest {
     
     @Before
     public void setup() throws Exception {
-        ctorProviderCIP = new ConstructorParameterInjectionPoint(ProviderC.class.getConstructor(int.class), 0);
+        ctorProviderCIP = new ParameterInjectionPoint(ProviderC.class.getConstructor(int.class), 0);
         
         typeCInjectPoints = new HashSet<InjectionPoint>();
         providerCInjectPoints = new HashSet<InjectionPoint>();

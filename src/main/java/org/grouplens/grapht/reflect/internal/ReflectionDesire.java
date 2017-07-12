@@ -33,14 +33,10 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.lang.reflect.*;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * ReflectionDesire is an implementation of desire that contains all necessary
@@ -68,8 +64,8 @@ public class ReflectionDesire implements Desire, Serializable {
             if (ctor.getAnnotation(Inject.class) != null) {
                 if (!ctorFound) {
                     ctorFound = true;
-                    for (int i = 0; i < ctor.getParameterTypes().length; i++) {
-                        desires.add(new ReflectionDesire(new ConstructorParameterInjectionPoint(ctor, i)));
+                    for (int i = 0; i < ctor.getParameterCount(); i++) {
+                        desires.add(forParameter(ctor, i));
                     }
                 } else {
                     // at the moment there can only be one injectable constructor
@@ -86,16 +82,21 @@ public class ReflectionDesire implements Desire, Serializable {
 
         for (Method m: Types.getUniqueMethods(type)) {
             if (m.getAnnotation(Inject.class) != null && !Modifier.isStatic(m.getModifiers())) {
-                int nparams = m.getParameterCount();
-                if (nparams > 0) {
-                    for (int i = 0; i < nparams; i++) {
-                        desires.add(new ReflectionDesire(new SetterInjectionPoint(m, i)));
-                    }
+                for (int i = 0; i < m.getParameterCount(); i++) {
+                    desires.add(forParameter(m, i));
                 }
             }
         }
 
         return Collections.unmodifiableList(desires);
+    }
+
+    static Desire forParameter(Executable member, int param) {
+        InjectionPoint ip = new ParameterInjectionPoint(member, param);
+        if (member.getParameterTypes()[param].equals(Optional.class)) {
+            ip = new OptionalInjectionPoint(ip);
+        }
+        return new ReflectionDesire(ip);
     }
     
     private final transient Class<?> desiredType;

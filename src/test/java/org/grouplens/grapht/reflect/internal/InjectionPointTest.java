@@ -19,6 +19,7 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
+import com.google.common.collect.Sets;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
 import org.grouplens.grapht.reflect.Desire;
@@ -40,6 +41,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
@@ -51,9 +53,9 @@ public class InjectionPointTest {
     
     @Test
     public void testAttributesLookup() throws Exception {
-        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class);
-        ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
-        ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
+        ParameterInjectionPoint p1 = new ParameterInjectionPoint(ctor, 0);
+        ParameterInjectionPoint p2 = new ParameterInjectionPoint(ctor, 1);
         
         // p1 has the transient attribute, p2 does not
         Assert.assertNotNull(p1.getAttribute(Transient.class));
@@ -65,14 +67,12 @@ public class InjectionPointTest {
     @Test
     public void testConstructorParameterInjectionPoint() throws Exception {
         // created expected injection points
-        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class);
-        ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
-        ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
-        
-        Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
-        expected.add(p1);
-        expected.add(p2);
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
+        InjectionPoint p1 = ReflectionDesire.forParameter(ctor, 0).getInjectionPoint();
+        InjectionPoint p2 = ReflectionDesire.forParameter(ctor, 1).getInjectionPoint();
+        InjectionPoint p3 = ReflectionDesire.forParameter(ctor, 2).getInjectionPoint();
 
+        Set<InjectionPoint> expected = Sets.newHashSet(p1, p2, p3);
         // verify that the qualifiers and types are identified properly
         Assert.assertThat(p1.getQualifier(), instanceOf(RoleA.class));
         Assert.assertThat(p2.getQualifier(), instanceOf(RoleB.class));
@@ -87,20 +87,33 @@ public class InjectionPointTest {
         // verify nullability and transience
         Assert.assertFalse(p1.isOptional());
         Assert.assertTrue(p2.isOptional());
-        
-        Assert.assertEquals(expected, getInjectionPoints(CtorType.class));
+
+        Assert.assertThat(getInjectionPoints(CtorType.class),
+                          containsInAnyOrder(p1, p2, p3));
     }
-    
+
+    @Test
+    public void testConstructorParameterOptionalDep() throws NoSuchMethodException {
+        Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
+        Desire desire = ReflectionDesire.forParameter(ctor, 2);
+        InjectionPoint point = desire.getInjectionPoint();
+        Assert.assertThat(point.getQualifier(), instanceOf(RoleB.class));
+        Assert.assertThat(point.getAttributes(), hasSize(0));
+        Assert.assertThat(point.getAttribute(Transient.class), nullValue());
+        Assert.assertTrue(point.isOptional());
+        Assert.assertEquals(String.class, point.getType());
+    }
+
     @Test
     public void testSetterMethodInjectionPoint() throws Exception {
         // create expected injection points
         Method m1 = SetterType.class.getMethod("setA", Object.class);
         Method m2 = SetterType.class.getMethod("setB", String.class);
         Method m3 = SetterType.class.getMethod("setMulti", Object.class, String.class);
-        SetterInjectionPoint p1 = new SetterInjectionPoint(m1, 0);
-        SetterInjectionPoint p2 = new SetterInjectionPoint(m2, 0);
-        SetterInjectionPoint p3 = new SetterInjectionPoint(m3, 0);
-        SetterInjectionPoint p4 = new SetterInjectionPoint(m3, 1);
+        ParameterInjectionPoint p1 = new ParameterInjectionPoint(m1, 0);
+        ParameterInjectionPoint p2 = new ParameterInjectionPoint(m2, 0);
+        ParameterInjectionPoint p3 = new ParameterInjectionPoint(m3, 0);
+        ParameterInjectionPoint p4 = new ParameterInjectionPoint(m3, 1);
         
         Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
         expected.add(p1);
@@ -143,8 +156,8 @@ public class InjectionPointTest {
         Method m1 = PrimitiveType.class.getMethod("setUnboxed", int.class);
         Method m2 = PrimitiveType.class.getMethod("setBoxed", Integer.class);
         
-        SetterInjectionPoint p1 = new SetterInjectionPoint(m1, 0);
-        SetterInjectionPoint p2 = new SetterInjectionPoint(m2, 0);
+        ParameterInjectionPoint p1 = new ParameterInjectionPoint(m1, 0);
+        ParameterInjectionPoint p2 = new ParameterInjectionPoint(m2, 0);
         
         // make sure that both injection points are normalized to boxed types
         Assert.assertEquals(Integer.class, p1.getType());
@@ -154,8 +167,8 @@ public class InjectionPointTest {
     @Test
     public void testNamedQualifiers() throws Exception {
         Constructor<NamedType> ctor = NamedType.class.getConstructor(String.class, Integer.class);
-        ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
-        ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
+        ParameterInjectionPoint p1 = new ParameterInjectionPoint(ctor, 0);
+        ParameterInjectionPoint p2 = new ParameterInjectionPoint(ctor, 1);
         
         Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
         expected.add(p1);
@@ -186,14 +199,14 @@ public class InjectionPointTest {
     public void testCombinedDesires() throws Exception {
         // create expected injection points
         Constructor<AllTypes> ctor = AllTypes.class.getConstructor(Object.class, String.class);
-        ConstructorParameterInjectionPoint p1 = new ConstructorParameterInjectionPoint(ctor, 0);
-        ConstructorParameterInjectionPoint p2 = new ConstructorParameterInjectionPoint(ctor, 1);
+        ParameterInjectionPoint p1 = new ParameterInjectionPoint(ctor, 0);
+        ParameterInjectionPoint p2 = new ParameterInjectionPoint(ctor, 1);
         Method m1 = AllTypes.class.getMethod("setC", Object.class);
         Method m2 = AllTypes.class.getMethod("setD", String.class);
         Field f1 = AllTypes.class.getField("field");
         FieldInjectionPoint p3 = new FieldInjectionPoint(f1);
-        SetterInjectionPoint p4 = new SetterInjectionPoint(m1, 0);
-        SetterInjectionPoint p5 = new SetterInjectionPoint(m2, 0);
+        ParameterInjectionPoint p4 = new ParameterInjectionPoint(m1, 0);
+        ParameterInjectionPoint p5 = new ParameterInjectionPoint(m2, 0);
         
         Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
         expected.add(p1);
@@ -208,7 +221,7 @@ public class InjectionPointTest {
     @Test
     public void testSubclassOverrides() throws Exception {
         Method m1 = SubType.class.getMethod("injectMethod", Object.class);
-        SetterInjectionPoint p1 = new SetterInjectionPoint(m1, 0);
+        ParameterInjectionPoint p1 = new ParameterInjectionPoint(m1, 0);
         
         Set<InjectionPoint> expected = new HashSet<InjectionPoint>();
         expected.add(p1);
@@ -231,7 +244,8 @@ public class InjectionPointTest {
     
     public static class CtorType {
         @Inject
-        public CtorType(@Transient @RoleA Object a, @Nullable @RoleB String b) { }
+        public CtorType(@Transient @RoleA Object a, @Nullable @RoleB String b,
+                        @RoleB Optional<String> c) { }
         
         // other constructor to be ignored
         public CtorType() { }

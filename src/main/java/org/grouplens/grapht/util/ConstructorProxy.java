@@ -29,7 +29,7 @@ import java.util.Arrays;
 /**
  * Proxy class for serializing constructors
  */
-public final class ConstructorProxy implements Serializable {
+public final class ConstructorProxy implements MemberProxy {
     private static final long serialVersionUID = 1L;
 
     private final ClassProxy declaringClass;
@@ -98,6 +98,7 @@ public final class ConstructorProxy implements Serializable {
      * @throws ClassNotFoundException If the proxy's declaring type cannot be resolved.
      * @throws NoSuchMethodException If the constructor does not exist on the declaring type.
      */
+    @Override
     public Constructor resolve() throws ClassNotFoundException, NoSuchMethodException {
         Constructor ctor = constructor;
         if (ctor == null) {

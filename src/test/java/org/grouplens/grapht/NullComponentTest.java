@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -35,6 +36,15 @@ import static org.junit.Assert.assertThat;
 public class NullComponentTest {
     @Test
     public void testDefaultNull() throws InjectionException {
+        InjectorBuilder b = InjectorBuilder.create();
+        Injector inj = b.build();
+        NullableDep obj = inj.getInstance(NullableDep.class);
+        assertThat(obj, not(nullValue()));
+        assertThat(obj.getDep(), nullValue());
+    }
+
+    @Test
+    public void testDefaultAbsent() throws InjectionException {
         InjectorBuilder b = InjectorBuilder.create();
         Injector inj = b.build();
         OptionalDep obj = inj.getInstance(OptionalDep.class);
@@ -49,11 +59,22 @@ public class NullComponentTest {
         inj.getInstance(RequireDep.class);
     }
 
+    private static class NullableDep {
+        private TypeDftN depend;
+        @Inject
+        public NullableDep(@Nullable TypeDftN dep) {
+            depend = dep;
+        }
+        public TypeDftN getDep() {
+            return depend;
+        }
+    }
+
     private static class OptionalDep {
         private TypeDftN depend;
         @Inject
-        public OptionalDep(@Nullable TypeDftN dep) {
-            depend = dep;
+        public OptionalDep(Optional<TypeDftN> dep) {
+            depend = dep.orElse(null);
         }
         public TypeDftN getDep() {
             return depend;
