@@ -19,12 +19,12 @@
  */
 package org.grouplens.grapht;
 
-import com.google.common.base.Optional;
 import org.grouplens.grapht.reflect.internal.types.TypeDftN;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -74,7 +74,7 @@ public class NullComponentTest {
         private TypeDftN depend;
         @Inject
         public OptionalDep(Optional<TypeDftN> dep) {
-            depend = dep.orNull();
+            depend = dep.orElse(null);
         }
         public TypeDftN getDep() {
             return depend;

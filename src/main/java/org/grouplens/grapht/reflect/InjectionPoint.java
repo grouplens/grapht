@@ -93,7 +93,15 @@ public interface InjectionPoint extends Serializable {
      */
     default Object transform(Object obj) {
         return obj;
-    };
+    }
+
+    /**
+     * Get the parameter index, if applicable, for this injection point.
+     * @return The parameter index.
+     */
+    default int getParameterIndex() {
+        return -1;
+    }
 
     /**
      * Query whether this injection point is optional.  Optional injection points do not need to be satisfied in order

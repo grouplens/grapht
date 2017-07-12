@@ -164,11 +164,11 @@ public class ClassInstantiator implements Instantiator {
             for (Desire d : ctorDeps) {
                 // this desire is a constructor argument so create it now
                 Instantiator provider = providers.get(d);
-                ParameterInjectionPoint cd = (ParameterInjectionPoint) d.getInjectionPoint();
-                logger.trace("Injection point satisfactions in progress {}", cd);
+                InjectionPoint ip = d.getInjectionPoint();
+                logger.trace("Injection point satisfactions in progress {}", ip);
                 try (LogContext ipContext = LogContext.create()) {
-                    ipContext.put("org.grouplens.grapht.injectionPoint", cd.toString());
-                    ctorArgs[cd.getParameterIndex()] = checkNull(cd, provider.instantiate());
+                    ipContext.put("org.grouplens.grapht.injectionPoint", ip.toString());
+                    ctorArgs[ip.getParameterIndex()] = ip.transform(checkNull(ip, provider.instantiate()));
                 }
             }
             logger.trace("Invoking constructor {} with arguments {}", ctor, ctorArgs);
@@ -186,11 +186,13 @@ public class ClassInstantiator implements Instantiator {
 
     private void invokeMethod(Object instance, Method setter, List<Desire> desires) throws ConstructionException {
         Object[] args = new Object[desires.size()];
+        desires.sort(Comparator.comparing(d -> d.getInjectionPoint().getParameterIndex()));
         for (int i = 0; i < args.length; i++) {
             Desire d = desires.get(i);
+            InjectionPoint ip = d.getInjectionPoint();
             try (LogContext ipContext = LogContext.create()) {
                 ipContext.put("org.grouplens.grapht.injectionPoint", d.getInjectionPoint().toString());
-                args[i] = providers.get(d).instantiate();
+                args[i] = ip.transform(checkNull(ip, providers.get(d).instantiate()));
             }
         }
 

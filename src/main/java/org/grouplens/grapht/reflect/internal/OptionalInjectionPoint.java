@@ -96,6 +96,11 @@ public class OptionalInjectionPoint implements InjectionPoint {
     }
 
     @Override
+    public int getParameterIndex() {
+        return delegate.getParameterIndex();
+    }
+
+    @Override
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(1)
