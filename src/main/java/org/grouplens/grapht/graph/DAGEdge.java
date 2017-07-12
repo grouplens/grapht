@@ -23,8 +23,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * Edges in DAGs.  These arise from building nodes with a {@link DAGNodeBuilder}.
@@ -121,52 +119,5 @@ public class DAGEdge<V,E> implements Serializable {
           .append(" to ")
           .append(tail);
         return sb.toString();
-    }
-
-    public static <E> Predicate<DAGEdge<?,E>> labelMatches(final Predicate<? super E> pred) {
-        return input -> {
-            E label = input == null ? null : input.getLabel();
-            return pred.test(label);
-        };
-    }
-
-    public static <V,E> Predicate<DAGEdge<V,E>> tailMatches(final Predicate<? super DAGNode<V,E>> pred) {
-        return input -> {
-            DAGNode<V,E> tail = input == null ? null : input.getTail();
-            return pred.test(tail);
-        };
-    }
-
-    /**
-     * Transform an edge.  This function does not further transform the nodes, so if the edge is
-     * known as the outgoing edge of a node, that won't be fixed.  Mostly useful for bulk operations
-     * on a bunch of edges, if you have them lying around.
-     *
-     * @param func The node transformation function.  If this function returns null, that is treated
-     *             as equivalent to the identity function.
-     * @param <V> The type of vertices.
-     * @param <E> The type of edges.
-     * @return A function over edges.
-     */
-    public static <V,E> Function<DAGEdge<V,E>,DAGEdge<V,E>> transformNodes(final Function<? super DAGNode<V,E>,? extends DAGNode<V,E>> func) {
-        return input -> {
-            if (input == null) {
-                return null;
-            }
-            DAGNode<V,E> nt, nh;
-            nt = func.apply(input.getTail());
-            nh = func.apply(input.getHead());
-            if (nt == null) {
-                nt = input.getTail();
-            }
-            if (nh == null) {
-                nh = input.getHead();
-            }
-            if (!nt.equals(input.getTail()) || !nh.equals(input.getHead())) {
-                return create(nh, nt, input.getLabel());
-            } else {
-                return input;
-            }
-        };
     }
 }

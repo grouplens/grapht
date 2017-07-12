@@ -212,9 +212,8 @@ public class DAGNode<V,E> implements Serializable {
      */
     @Nullable
     public DAGEdge<V, E> getOutgoingEdgeWithLabel(Predicate<? super E> predicate) {
-        Predicate<DAGEdge<?, E>> edgePred = DAGEdge.labelMatches(predicate);
         return outgoingEdges.stream()
-                            .filter(edgePred)
+                            .filter(e -> predicate.test(e.getLabel()))
                             .findFirst()
                             .orElse(null);
     }
@@ -451,13 +450,6 @@ public class DAGNode<V,E> implements Serializable {
           .append(outgoingEdges.size())
           .append(" edges");
         return sb.toString();
-    }
-
-    public static <V> Predicate<DAGNode<V,?>> labelMatches(final Predicate<? super V> pred) {
-        return input -> {
-            V lbl = input == null ? null : input.getLabel();
-            return pred.test(lbl);
-        };
     }
 
     /**
