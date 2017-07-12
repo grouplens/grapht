@@ -20,8 +20,8 @@
 package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-
 import org.jetbrains.annotations.NotNull;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
@@ -179,7 +179,7 @@ public final class Types {
             try {
                 return (Class<?>) raw;
             } catch (ClassCastException e) {
-                throw new RuntimeException("raw type not a Class", e);
+                throw new IllegalArgumentException("raw type not a Class", e);
             }
         } else {
             throw new IllegalArgumentException();
