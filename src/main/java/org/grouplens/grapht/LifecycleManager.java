@@ -100,7 +100,7 @@ public class LifecycleManager implements AutoCloseable {
                 logger.debug("invoking pre-destroy method {} on {}", method, instance);
                 method.invoke(instance);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("cannot access " + method, e);
+                throw new UncheckedExecutionException("cannot access " + method, e);
             } catch (InvocationTargetException e) {
                 throw new UncheckedExecutionException("error invoking " + method, e);
             }
