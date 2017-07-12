@@ -198,7 +198,7 @@ public class BindingFunctionBuilder implements Cloneable {
         case SUPER_TYPES:
             return superRules;
         default:
-            throw new RuntimeException("Should not happen");
+            throw new IllegalArgumentException("Invalid rule set " + set);
         }
     }
 }
