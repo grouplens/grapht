@@ -1,8 +1,7 @@
 # Grapht
 
 [![Build Status](https://travis-ci.org/grouplens/grapht.png?branch=master)](https://travis-ci.org/grouplens/grapht)
-[![SonarQube test coverage](https://img.shields.io/sonar/https/sonar.cs.txstate.edu/org.grouplens.grapht:grapht/coverage.svg)](https://sonar.cs.txstate.edu/dashboard/index/2713)
-[![SonarQube tech debt](https://img.shields.io/sonar/https/sonar.cs.txstate.edu/org.grouplens.grapht:grapht/tech_debt.svg)](https://sonar.cs.txstate.edu/dashboard/index/2713)
+[![codecov](https://codecov.io/gh/grouplens/grapht/branch/master/graph/badge.svg)](https://codecov.io/gh/grouplens/grapht)
 [![Maven Central](https://img.shields.io/maven-central/v/org.grouplens.grapht/grapht.svg)](http://search.maven.org/#search|gav|1|g%3A%22org.grouplens.grapht%22%20AND%20a%3A%22grapht%22)
 
 Grapht is a light-weight dependency injector. It converts the dependency
