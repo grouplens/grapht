@@ -580,7 +580,7 @@ public final class AnnotationBuilder<T extends Annotation> {
             attributes.put(name, AnnotationProxy.copyAnnotationValue(value));
             return this;
         } catch (SecurityException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Cannot access attribute " + name + " + of " + this.type, e);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Annotation type " + this.type + " does not have an attribute named: " + name, e);
         }
