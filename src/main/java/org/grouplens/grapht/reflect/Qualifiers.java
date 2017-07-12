@@ -28,7 +28,7 @@ import org.grouplens.grapht.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import javax.inject.Qualifier;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -68,8 +68,8 @@ public final class Qualifiers {
      * @throws java.lang.IllegalArgumentException if there is a problem with the type, such as a
      *                                            circular alias reference.
      */
-    @Nonnull
-    public static Class<? extends Annotation> resolveAliases(@Nonnull Class<? extends Annotation> type) {
+    @NotNull
+    public static Class<? extends Annotation> resolveAliases(@NotNull Class<? extends Annotation> type) {
         Preconditions.notNull("qualifier type", type);
         Set<Class<? extends Annotation>> seen = Sets.newHashSet();
         seen.add(type);

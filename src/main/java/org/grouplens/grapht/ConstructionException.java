@@ -21,7 +21,7 @@ package org.grouplens.grapht;
 
 import org.grouplens.grapht.reflect.InjectionPoint;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Member;
 
 /**

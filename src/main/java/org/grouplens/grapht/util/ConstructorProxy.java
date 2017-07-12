@@ -21,7 +21,7 @@ package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;

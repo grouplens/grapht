@@ -19,10 +19,13 @@
  */
 package org.grouplens.grapht.reflect;
 
-import org.grouplens.grapht.*;
+import org.grouplens.grapht.CachePolicy;
+import org.grouplens.grapht.Injector;
+import org.grouplens.grapht.Instantiator;
+import org.grouplens.grapht.LifecycleManager;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -115,6 +118,6 @@ public interface Satisfaction extends Serializable {
      *         satisfaction, instantiated using the specified dependency
      *         mapping.
      */
-    Instantiator makeInstantiator(@Nonnull Map<Desire,Instantiator> dependencies,
+    Instantiator makeInstantiator(@NotNull Map<Desire,Instantiator> dependencies,
                                   @Nullable LifecycleManager lm);
 }

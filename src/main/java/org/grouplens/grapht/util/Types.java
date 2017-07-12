@@ -21,7 +21,7 @@ package org.grouplens.grapht.util;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
@@ -197,7 +197,7 @@ public final class Types {
      * @return The type distance
      * @throws IllegalArgumentException if {@code child} is not a subtype of {@code parent}.
      */
-    public static int getTypeDistance(@Nonnull Class<?> child, @Nonnull Class<?> parent) {
+    public static int getTypeDistance(@NotNull Class<?> child, @NotNull Class<?> parent) {
         Preconditions.notNull("child class", child);
         Preconditions.notNull("parent class", parent);
 

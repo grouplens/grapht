@@ -29,8 +29,8 @@ import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
@@ -68,10 +68,10 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param flags The flags to apply to this bind rule and its results.
      * @throws NullPointerException if arguments are null
      */
-    public BindRuleImpl(@Nonnull Class<?> depType,
-                        @Nonnull Satisfaction satisfaction,
-                        @Nonnull CachePolicy policy,
-                        @Nonnull QualifierMatcher qualifier,
+    public BindRuleImpl(@NotNull Class<?> depType,
+                        @NotNull Satisfaction satisfaction,
+                        @NotNull CachePolicy policy,
+                        @NotNull QualifierMatcher qualifier,
                         EnumSet<BindingFlag> flags) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("satisfaction", satisfaction);
@@ -101,10 +101,10 @@ final class BindRuleImpl implements BindRule, Serializable {
      * @param flags The flags to apply to this bind rule and its results.
      * @throws NullPointerException if arguments are null
      */
-    public BindRuleImpl(@Nonnull Class<?> depType,
-                        @Nonnull Class<?> implType,
-                        @Nonnull CachePolicy policy,
-                        @Nonnull QualifierMatcher qualifier,
+    public BindRuleImpl(@NotNull Class<?> depType,
+                        @NotNull Class<?> implType,
+                        @NotNull CachePolicy policy,
+                        @NotNull QualifierMatcher qualifier,
                         EnumSet<BindingFlag> flags) {
         Preconditions.notNull("dependency type", depType);
         Preconditions.notNull("implementation type", implType);

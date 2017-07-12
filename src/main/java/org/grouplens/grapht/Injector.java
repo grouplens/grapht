@@ -19,8 +19,8 @@
  */
 package org.grouplens.grapht;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import javax.inject.Qualifier;
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
@@ -60,7 +60,7 @@ public interface Injector extends AutoCloseable {
      * @return An instance of type T
      * @throws ConstructionException if type cannot be instantiated
      */
-    @Nonnull
+    @NotNull
     <T> T getInstance(Class<T> type) throws InjectionException;
 
     /**
@@ -72,7 +72,7 @@ public interface Injector extends AutoCloseable {
      * @return An instance of type T
      * @throws ConstructionException if type cannot be instantiated
      */
-    @Nonnull
+    @NotNull
     <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException;
 
     /**

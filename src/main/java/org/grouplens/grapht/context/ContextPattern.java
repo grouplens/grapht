@@ -27,7 +27,7 @@ import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.solver.InjectionContext;
 import org.grouplens.grapht.util.AbstractChain;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;

@@ -23,7 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 
 /**
@@ -51,8 +51,8 @@ public class DAGNodeBuilder<V,E> {
      * @param lbl The node's label.
      * @return The builder (for chaining).
      */
-    @Nonnull
-    public DAGNodeBuilder<V,E> setLabel(@Nonnull V lbl) {
+    @NotNull
+    public DAGNodeBuilder<V,E> setLabel(@NotNull V lbl) {
         Preconditions.checkNotNull(lbl, "node label");
         label = lbl;
         return this;
@@ -72,9 +72,9 @@ public class DAGNodeBuilder<V,E> {
      * @param label The edge label.
      * @return The builder (for chaining).
      */
-    @Nonnull
-    public DAGNodeBuilder<V,E> addEdge(@Nonnull DAGNode<V,E> target,
-                                       @Nonnull E label) {
+    @NotNull
+    public DAGNodeBuilder<V,E> addEdge(@NotNull DAGNode<V,E> target,
+                                       @NotNull E label) {
         Preconditions.checkNotNull(target, "edge target");
         Preconditions.checkNotNull(label, "edge label");
         return addEdge(Pair.of(target, label));
@@ -85,7 +85,7 @@ public class DAGNodeBuilder<V,E> {
      * @param edge The target node and label for the edge.
      * @return The builder (for chaining).
      */
-    @Nonnull
+    @NotNull
     public DAGNodeBuilder<V,E> addEdge(Pair<DAGNode<V,E>,E> edge) {
         Preconditions.checkNotNull(edge, "edge");
         Preconditions.checkNotNull(edge.getLeft(), "edge target");
@@ -100,12 +100,12 @@ public class DAGNodeBuilder<V,E> {
      *
      * @return The set of edges.
      */
-    @Nonnull
+    @NotNull
     public Set<Pair<DAGNode<V,E>,E>> getEdges() {
         return edges;
     }
 
-    @Nonnull
+    @NotNull
     public DAGNode<V,E> build() {
         Preconditions.checkState(label != null, "no node label set");
         return new DAGNode<V,E>(label, edges);

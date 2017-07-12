@@ -32,7 +32,7 @@ import org.grouplens.grapht.reflect.Desire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.*;

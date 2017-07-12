@@ -19,8 +19,9 @@
  */
 package org.grouplens.grapht.reflect;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
@@ -73,7 +74,7 @@ public interface InjectionPoint extends Serializable {
      * @return Immutable collection of attribute annotations (does not include
      *         the qualifier)
      */
-    @Nonnull
+    @NotNull
     Collection<Annotation> getAttributes();
 
     /**

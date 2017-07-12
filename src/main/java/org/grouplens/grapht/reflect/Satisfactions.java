@@ -21,7 +21,7 @@ package org.grouplens.grapht.reflect;
 
 import org.grouplens.grapht.reflect.internal.*;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import javax.inject.Provider;
 
 /**
@@ -33,23 +33,23 @@ import javax.inject.Provider;
 public final class Satisfactions {
     private Satisfactions() {}
 
-    public static Satisfaction type(@Nonnull Class<?> type) {
+    public static Satisfaction type(@NotNull Class<?> type) {
         return new ClassSatisfaction(type);
     }
 
-    public static Satisfaction nullOfType(@Nonnull Class<?> type) {
+    public static Satisfaction nullOfType(@NotNull Class<?> type) {
         return new NullSatisfaction(type);
     }
 
-    public static Satisfaction instance(@Nonnull Object o) {
+    public static Satisfaction instance(@NotNull Object o) {
         return new InstanceSatisfaction(o);
     }
 
-    public static Satisfaction providerType(@Nonnull Class<? extends Provider<?>> providerType) {
+    public static Satisfaction providerType(@NotNull Class<? extends Provider<?>> providerType) {
         return new ProviderClassSatisfaction(providerType);
     }
 
-    public static Satisfaction providerInstance(@Nonnull Provider<?> provider) {
+    public static Satisfaction providerInstance(@NotNull Provider<?> provider) {
         return new ProviderInstanceSatisfaction(provider);
     }
 }

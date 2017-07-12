@@ -21,8 +21,8 @@ package org.grouplens.grapht.util;
 
 import com.google.common.base.Supplier;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import javax.inject.Provider;
 
 /**
@@ -34,7 +34,7 @@ import javax.inject.Provider;
 public final class Providers {
     private Providers() {}
 
-    public static <T> Provider<T> of(@Nonnull T object) {
+    public static <T> Provider<T> of(@NotNull T object) {
         return new InstanceProvider<T>(object, object.getClass());
     }
 
@@ -42,7 +42,7 @@ public final class Providers {
         return new InstanceProvider<T>(object, type);
     }
 
-    public static <T> Provider<T> memoize(@Nonnull Provider<T> inner) {
+    public static <T> Provider<T> memoize(@NotNull Provider<T> inner) {
         return new MemoizingProvider<T>(inner);
     }
 

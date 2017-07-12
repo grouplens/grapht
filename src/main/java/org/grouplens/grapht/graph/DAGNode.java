@@ -21,11 +21,11 @@ package org.grouplens.grapht.graph;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
+import net.jcip.annotations.Immutable;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -53,10 +53,10 @@ import java.util.*;
 public class DAGNode<V,E> implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Nonnull
+    @NotNull
     @SuppressWarnings("squid:S1948") // serializable warning; node is serializable iff its label type is
     private final V label;
-    @Nonnull
+    @NotNull
     private final ImmutableSet<DAGEdge<V,E>> outgoingEdges;
 
     private transient Supplier<SetMultimap<DAGNode<V,E>,DAGEdge<V,E>>> reverseEdgeCache;
@@ -117,7 +117,7 @@ public class DAGNode<V,E> implements Serializable {
      *              need to be constructed within the constructor in order to create the circular
      *              references back to the head nodes properly.
      */
-    DAGNode(@Nonnull V lbl, Iterable<Pair<DAGNode<V,E>,E>> edges) {
+    DAGNode(@NotNull V lbl, Iterable<Pair<DAGNode<V,E>,E>> edges) {
         label = lbl;
         ImmutableSet.Builder<DAGEdge<V,E>> bld = ImmutableSet.builder();
         for (Pair<DAGNode<V,E>,E> pair: edges) {
@@ -154,7 +154,7 @@ public class DAGNode<V,E> implements Serializable {
      * Get the label for this node.
      * @return The node's label.
      */
-    @Nonnull
+    @NotNull
     public V getLabel() {
         return label;
     }
@@ -163,7 +163,7 @@ public class DAGNode<V,E> implements Serializable {
      * Get the outgoing edges of this node.
      * @return The outgoing edges of the node.
      */
-    @Nonnull
+    @NotNull
     public Set<DAGEdge<V,E>> getOutgoingEdges() {
         return outgoingEdges;
     }
@@ -224,12 +224,12 @@ public class DAGNode<V,E> implements Serializable {
      *
      * @return The reverse edge map.
      */
-    @Nonnull
+    @NotNull
     private SetMultimap<DAGNode<V,E>,DAGEdge<V,E>> getIncomingEdgeMap() {
         return reverseEdgeCache.get();
     }
 
-    @Nonnull
+    @NotNull
     public Set<DAGNode<V,E>> getReachableNodes() {
         return reachableNodeCache.get();
     }
@@ -243,7 +243,7 @@ public class DAGNode<V,E> implements Serializable {
      * the returned list.
      * @return The sorted list of reachable nodes.
      */
-    @Nonnull
+    @NotNull
     public List<DAGNode<V,E>> getSortedNodes() {
         return topologicalSortCache.get();
     }
@@ -270,7 +270,7 @@ public class DAGNode<V,E> implements Serializable {
      * Get the incoming edges to a node reachable from this node.
      * @return The set of incoming edges, or an empty set if the node is not reachable.
      */
-    @Nonnull
+    @NotNull
     public Set<DAGEdge<V,E>> getIncomingEdges(DAGNode<V,E> node) {
         return getIncomingEdgeMap().get(node);
     }
@@ -317,7 +317,7 @@ public class DAGNode<V,E> implements Serializable {
      * @return The first node matching {@code pred} in a breadth-first search, or {@code null} if no
      *         such node is found.
      */
-    public DAGNode<V, E> findNodeBFS(@Nonnull Predicate<? super DAGNode<V, E>> pred) {
+    public DAGNode<V, E> findNodeBFS(@NotNull Predicate<? super DAGNode<V, E>> pred) {
         if (pred.apply(this)) {
             return this;
         }
@@ -353,7 +353,7 @@ public class DAGNode<V,E> implements Serializable {
      * @return The first node matching {@code pred} in a breadth-first search, or {@code null} if no
      *         such node is found.
      */
-    public DAGEdge<V, E> findEdgeBFS(@Nonnull Predicate<? super DAGEdge<V, E>> pred) {
+    public DAGEdge<V, E> findEdgeBFS(@NotNull Predicate<? super DAGEdge<V, E>> pred) {
         Queue<DAGNode<V, E>> work = Lists.newLinkedList();
         Set<DAGNode<V, E>> seen = Sets.newHashSet();
         work.add(this);

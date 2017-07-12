@@ -25,7 +25,7 @@ import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.reflect.internal.SimpleInjectionPoint;
 import org.grouplens.grapht.util.AbstractChain;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * <p>

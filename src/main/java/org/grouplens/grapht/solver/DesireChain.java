@@ -23,8 +23,8 @@ import com.google.common.base.Predicate;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.util.AbstractChain;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +42,7 @@ import java.util.UUID;
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
 public class DesireChain extends AbstractChain<Desire> {
-    @Nonnull
+    @NotNull
     private final Desire initialDesire;
     private final UUID key;
 
@@ -55,7 +55,7 @@ public class DesireChain extends AbstractChain<Desire> {
      * @param prev The previous chain.
      * @param d The desire.
      */
-    private DesireChain(DesireChain prev, @Nonnull Desire d) {
+    private DesireChain(DesireChain prev, @NotNull Desire d) {
         super(prev, d);
         key = prev == null ? UUID.randomUUID() : prev.key;
         initialDesire = prev == null ? d : prev.getInitialDesire();
@@ -70,12 +70,12 @@ public class DesireChain extends AbstractChain<Desire> {
         };
     }
 
-    @Nonnull
+    @NotNull
     public Desire getCurrentDesire() {
         return tailValue;
     }
 
-    @Nonnull
+    @NotNull
     public Desire getInitialDesire() {
         return initialDesire;
     }
@@ -84,7 +84,7 @@ public class DesireChain extends AbstractChain<Desire> {
      * Return the list of desires up to, but not including, the current desire.
      * @return The previous desire chain.
      */
-    @Nonnull
+    @NotNull
     public List<Desire> getPreviousDesires() {
         if (previous == null) {
             return Collections.emptyList();
@@ -97,7 +97,7 @@ public class DesireChain extends AbstractChain<Desire> {
      * Return the desire chain up to, but not including, the current desire.
      * @return The previous desire chain.
      */
-    @Nonnull
+    @NotNull
     public DesireChain getPreviousDesireChain() {
         if (previous == null) {
             throw new IllegalArgumentException("cannot get previous chain from singleton");
@@ -124,8 +124,8 @@ public class DesireChain extends AbstractChain<Desire> {
      * @param d The new current desire.
      * @return The new desire chain.
      */
-    @Nonnull
-    public DesireChain extend(@Nonnull Desire d) {
+    @NotNull
+    public DesireChain extend(@NotNull Desire d) {
         return new DesireChain(this, d);
     }
 }

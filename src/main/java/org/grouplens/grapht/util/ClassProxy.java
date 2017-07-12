@@ -19,13 +19,13 @@
  */
 package org.grouplens.grapht.util;
 
+import net.jcip.annotations.Immutable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -26,7 +26,7 @@ import org.grouplens.grapht.reflect.QualifierMatcher;
 import org.grouplens.grapht.context.Multiplicity;
 import org.grouplens.grapht.reflect.Qualifiers;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 
 /**

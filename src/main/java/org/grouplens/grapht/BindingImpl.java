@@ -24,16 +24,19 @@ import org.grouplens.grapht.BindingFunctionBuilder.RuleSet;
 import org.grouplens.grapht.annotation.DefaultImplementation;
 import org.grouplens.grapht.annotation.DefaultProvider;
 import org.grouplens.grapht.context.ContextMatcher;
-import org.grouplens.grapht.reflect.*;
+import org.grouplens.grapht.reflect.QualifierMatcher;
+import org.grouplens.grapht.reflect.Qualifiers;
+import org.grouplens.grapht.reflect.Satisfaction;
+import org.grouplens.grapht.reflect.Satisfactions;
 import org.grouplens.grapht.solver.BindRuleBuilder;
 import org.grouplens.grapht.solver.BindingFlag;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
@@ -83,13 +86,13 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier) {
+    public Binding<T> withQualifier(@NotNull Class<? extends Annotation> qualifier) {
         QualifierMatcher q = Qualifiers.match(qualifier);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
     
     @Override
-    public Binding<T> withQualifier(@Nonnull Annotation annot) {
+    public Binding<T> withQualifier(@NotNull Annotation annot) {
         QualifierMatcher q = Qualifiers.match(annot);
         return new BindingImpl<T>(context, sourceType, excludeTypes, q, cachePolicy, fixed);
     }
@@ -107,7 +110,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public Binding<T> exclude(@Nonnull Class<?> exclude) {
+    public Binding<T> exclude(@NotNull Class<?> exclude) {
         Preconditions.notNull("exclude type", exclude);
         Set<Class<?>> excludes = new HashSet<Class<?>>(excludeTypes);
         excludes.add(exclude);
@@ -130,7 +133,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void to(@Nonnull Class<? extends T> impl, boolean chained) {
+    public void to(@NotNull Class<? extends T> impl, boolean chained) {
         Preconditions.isAssignable(sourceType, impl);
         if (logger.isWarnEnabled()) {
             if (Types.shouldBeInstantiable(impl)
@@ -152,7 +155,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void to(@Nonnull Class<? extends T> impl) {
+    public void to(@NotNull Class<? extends T> impl) {
         to(impl, true);
     }
 
@@ -177,7 +180,7 @@ class BindingImpl<T> implements Binding<T> {
     }
     
     @Override
-    public void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider) {
+    public void toProvider(@NotNull Class<? extends Provider<? extends T>> provider) {
         Satisfaction s = Satisfactions.providerType(provider);
         BindRuleBuilder brb = startRule().setSatisfaction(s);
         Class<?> provided;
@@ -194,7 +197,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void toProvider(@Nonnull Provider<? extends T> provider) {
+    public void toProvider(@NotNull Provider<? extends T> provider) {
         Satisfaction s = Satisfactions.providerInstance(provider);
         BindRuleBuilder brb = startRule().setSatisfaction(s);
         Class<?> provided;
@@ -223,7 +226,7 @@ class BindingImpl<T> implements Binding<T> {
     }
 
     @Override
-    public void toSatisfaction(@Nonnull Satisfaction sat) {
+    public void toSatisfaction(@NotNull Satisfaction sat) {
         Preconditions.notNull("satisfaction", sat);
 
         BindRuleBuilder brb = startRule().setSatisfaction(sat);

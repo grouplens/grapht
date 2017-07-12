@@ -22,8 +22,8 @@ package org.grouplens.grapht;
 import org.grouplens.grapht.solver.BindRule;
 import org.grouplens.grapht.reflect.Satisfaction;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
@@ -49,7 +49,7 @@ public interface Binding<T> {
      * @param qualifier The Qualifier that must match
      * @return A newly configured Binding
      */
-    Binding<T> withQualifier(@Nonnull Class<? extends Annotation> qualifier);
+    Binding<T> withQualifier(@NotNull Class<? extends Annotation> qualifier);
 
     /**
      * Configure the binding to match injection points that have been annotated with the exact
@@ -65,7 +65,7 @@ public interface Binding<T> {
      * @param annot The annotation instance to match.
      * @return A newly configured Binding
      */
-    Binding<T> withQualifier(@Nonnull Annotation annot);
+    Binding<T> withQualifier(@NotNull Annotation annot);
 
     /**
      * Configure the binding to match injection points that have any qualifier annotation (including
@@ -98,7 +98,7 @@ public interface Binding<T> {
      * @param exclude The type to exclude from automated rule generation
      * @return A newly configured Binding
      */
-    Binding<T> exclude(@Nonnull Class<?> exclude);
+    Binding<T> exclude(@NotNull Class<?> exclude);
     
     /**
      * Configure the binding so that a shared instance is always used when
@@ -143,7 +143,7 @@ public interface Binding<T> {
      * @param chained Whether further binding lookup will be done on the implementation type.
      *                {@code true} allows lookup, {@code false} creates a terminal binding.
      */
-    void to(@Nonnull Class<? extends T> impl, boolean chained);
+    void to(@NotNull Class<? extends T> impl, boolean chained);
 
     /**
      * Bind to an implementation type non-terminally.  This calls {@link #to(Class, boolean)}
@@ -151,7 +151,7 @@ public interface Binding<T> {
      *
      * @param impl The implementation type.
      */
-    void to(@Nonnull Class<? extends T> impl);
+    void to(@NotNull Class<? extends T> impl);
 
     /**
      * Complete this binding by specifying an instance to use. The instance will
@@ -171,7 +171,7 @@ public interface Binding<T> {
      * 
      * @param provider The provider type that will satisfy this binding
      */
-    void toProvider(@Nonnull Class<? extends Provider<? extends T>> provider);
+    void toProvider(@NotNull Class<? extends Provider<? extends T>> provider);
 
     /**
      * Complete this binding by specifying a Provider instance that will be used
@@ -179,7 +179,7 @@ public interface Binding<T> {
      * 
      * @param provider The provider instance
      */
-    void toProvider(@Nonnull Provider<? extends T> provider);
+    void toProvider(@NotNull Provider<? extends T> provider);
 
 
     /**
@@ -209,5 +209,5 @@ public interface Binding<T> {
      *
      * @param sat The satisfaction to bind to.
      */
-    void toSatisfaction(@Nonnull Satisfaction sat);
+    void toSatisfaction(@NotNull Satisfaction sat);
 }

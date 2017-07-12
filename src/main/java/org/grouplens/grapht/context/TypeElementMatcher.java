@@ -29,7 +29,7 @@ import org.grouplens.grapht.reflect.Satisfaction;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Types;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import javax.inject.Qualifier;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;

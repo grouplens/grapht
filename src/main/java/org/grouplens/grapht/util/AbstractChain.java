@@ -20,8 +20,8 @@
 package org.grouplens.grapht.util;
 
 import com.google.common.collect.Iterators;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Iterator;
@@ -75,7 +75,7 @@ public abstract class AbstractChain<E extends Serializable> extends AbstractList
         }
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Iterator<E> iterator() {
         Iterator<E> current = Iterators.singletonIterator(tailValue);

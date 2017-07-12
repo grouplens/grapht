@@ -20,6 +20,7 @@
 package org.grouplens.grapht.solver;
 
 import com.google.common.base.Predicate;
+import net.jcip.annotations.ThreadSafe;
 import org.grouplens.grapht.*;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
@@ -28,9 +29,8 @@ import org.grouplens.grapht.reflect.Desires;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 
 /**
@@ -122,13 +122,13 @@ public class DefaultInjector implements Injector {
         return solver;
     }
     
-    @Nonnull
+    @NotNull
     @Override
     public <T> T getInstance(Class<T> type) throws InjectionException {
         return getInstance(null, type);
     }
     
-    @Nonnull
+    @NotNull
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getInstance(Annotation qualifier, Class<T> type) throws InjectionException {

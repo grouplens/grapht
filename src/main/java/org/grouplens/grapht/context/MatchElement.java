@@ -21,7 +21,7 @@ package org.grouplens.grapht.context;
 
 import com.google.common.collect.Ordering;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.Comparator;
 
 /**

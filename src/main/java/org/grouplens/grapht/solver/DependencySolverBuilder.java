@@ -22,7 +22,7 @@ package org.grouplens.grapht.solver;
 import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.util.Preconditions;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -64,7 +64,7 @@ public class DependencySolverBuilder {
      * @param func The binding function.
      * @return The builder (for chaining).
      */
-    public DependencySolverBuilder addBindingFunction(@Nonnull BindingFunction func) {
+    public DependencySolverBuilder addBindingFunction(@NotNull BindingFunction func) {
         return addBindingFunction(func, true);
     }
 
@@ -80,7 +80,7 @@ public class DependencySolverBuilder {
      *                          {@code false} here to keep default bindings from triggering rewrites.
      * @return The builder (for chaining).
      */
-    public DependencySolverBuilder addBindingFunction(@Nonnull BindingFunction func,
+    public DependencySolverBuilder addBindingFunction(@NotNull BindingFunction func,
                                                       boolean canTriggerRewrite) {
         Preconditions.notNull("binding function", func);
         bindingFunctions.add(func);
@@ -95,7 +95,7 @@ public class DependencySolverBuilder {
      * @param funcs The binding functions.
      * @return The builder (for chaining).
      */
-    public DependencySolverBuilder addBindingFunctions(@Nonnull BindingFunction... funcs) {
+    public DependencySolverBuilder addBindingFunctions(@NotNull BindingFunction... funcs) {
         return addBindingFunctions(Arrays.asList(funcs));
     }
 
@@ -104,7 +104,7 @@ public class DependencySolverBuilder {
      * @param funcs The binding functions.
      * @return The builder (for chaining).
      */
-    public DependencySolverBuilder addBindingFunctions(@Nonnull Iterable<BindingFunction> funcs) {
+    public DependencySolverBuilder addBindingFunctions(@NotNull Iterable<BindingFunction> funcs) {
         for (BindingFunction fn: funcs) {
             addBindingFunction(fn);
         }

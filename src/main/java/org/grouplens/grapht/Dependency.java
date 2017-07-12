@@ -23,7 +23,7 @@ import com.google.common.base.Predicate;
 import org.grouplens.grapht.reflect.Desire;
 import org.grouplens.grapht.solver.DesireChain;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.EnumSet;
 

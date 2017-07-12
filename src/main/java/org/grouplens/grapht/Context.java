@@ -21,7 +21,7 @@ package org.grouplens.grapht;
 
 import org.grouplens.grapht.context.ContextPattern;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 

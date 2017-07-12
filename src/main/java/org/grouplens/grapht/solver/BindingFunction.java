@@ -21,7 +21,7 @@ package org.grouplens.grapht.solver;
 
 import org.grouplens.grapht.ResolutionException;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Locate bindings for an injection point.

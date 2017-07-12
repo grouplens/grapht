@@ -19,8 +19,9 @@
  */
 package org.grouplens.grapht.util;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.ThreadSafe;
+import net.jcip.annotations.ThreadSafe;
+import org.jetbrains.annotations.NotNull;
+
 import javax.inject.Provider;
 
 /**
@@ -40,7 +41,7 @@ public class MemoizingProvider<T> implements TypedProvider<T> {
     private volatile T cached;
     private volatile boolean invoked;
 
-    public MemoizingProvider(@Nonnull Provider<T> provider) {
+    public MemoizingProvider(@NotNull Provider<T> provider) {
         Preconditions.notNull("provider", provider);
         wrapped = provider;
         cached = null;

@@ -22,7 +22,7 @@ package org.grouplens.grapht.reflect;
 import org.grouplens.grapht.reflect.internal.ReflectionDesire;
 import org.grouplens.grapht.reflect.internal.SimpleInjectionPoint;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 
 /**

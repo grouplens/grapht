@@ -26,8 +26,8 @@ import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.ClassProxy;
 import org.grouplens.grapht.util.Preconditions;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
@@ -92,7 +92,7 @@ public final class SimpleInjectionPoint implements InjectionPoint, Serializable 
         return null;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Collection<Annotation> getAttributes() {
         return Collections.emptyList();

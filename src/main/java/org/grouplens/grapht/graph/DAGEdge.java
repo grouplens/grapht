@@ -23,8 +23,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 
 /**
@@ -41,11 +41,11 @@ import java.io.Serializable;
 public class DAGEdge<V,E> implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Nonnull
+    @NotNull
     private final DAGNode<V,E> head;
-    @Nonnull
+    @NotNull
     private final DAGNode<V,E> tail;
-    @Nonnull
+    @NotNull
     @SuppressWarnings("squid:S1948") // serializable warning; edge is serializable iff its label type is
     private final E label;
     private transient volatile int hashCode;
@@ -67,7 +67,7 @@ public class DAGEdge<V,E> implements Serializable {
      * Get the edge's head (starting node).
      * @return The edge's head.
      */
-    @Nonnull
+    @NotNull
     public DAGNode<V,E> getHead() {
         return head;
     }
@@ -76,7 +76,7 @@ public class DAGEdge<V,E> implements Serializable {
      * Get the edge's tail (ending node).
      * @return The edge's tail.
      */
-    @Nonnull
+    @NotNull
     public DAGNode<V,E> getTail() {
         return tail;
     }
@@ -85,7 +85,7 @@ public class DAGEdge<V,E> implements Serializable {
      * Get the edge's label.
      * @return The edge's label.
      */
-    @Nonnull
+    @NotNull
     public E getLabel() {
         return label;
     }

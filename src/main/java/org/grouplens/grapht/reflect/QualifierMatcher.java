@@ -20,8 +20,8 @@
 package org.grouplens.grapht.reflect;
 
 import com.google.common.base.Predicate;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;

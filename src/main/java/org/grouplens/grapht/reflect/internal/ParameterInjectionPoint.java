@@ -24,8 +24,8 @@ import org.grouplens.grapht.util.MemberProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
@@ -51,7 +51,7 @@ public class ParameterInjectionPoint implements InjectionPoint, Serializable {
      * @param mem The constructor or method.
      * @param param The parameter index.
      */
-    public ParameterInjectionPoint(@Nonnull Executable mem, int param) {
+    public ParameterInjectionPoint(@NotNull Executable mem, int param) {
         Preconditions.notNull("ctor method", mem);
         Preconditions.inRange(param, 0, mem.getParameterTypes().length);
 
@@ -63,7 +63,7 @@ public class ParameterInjectionPoint implements InjectionPoint, Serializable {
     /**
      * @return The method or constructor wrapped by this injection point
      */
-    @Override @Nonnull
+    @Override @NotNull
     public Executable getMember() {
         return member;
     }
@@ -105,7 +105,7 @@ public class ParameterInjectionPoint implements InjectionPoint, Serializable {
         return annotations.getAttribute(atype);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Collection<Annotation> getAttributes() {
         return annotations.getAttributes();

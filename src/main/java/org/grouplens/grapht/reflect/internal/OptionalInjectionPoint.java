@@ -24,8 +24,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.grouplens.grapht.reflect.InjectionPoint;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
@@ -73,7 +73,7 @@ public class OptionalInjectionPoint implements InjectionPoint {
         return delegate.getAttribute(atype);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Collection<Annotation> getAttributes() {
         return delegate.getAttributes();
