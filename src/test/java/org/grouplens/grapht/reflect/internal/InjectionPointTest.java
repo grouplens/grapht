@@ -19,7 +19,6 @@
  */
 package org.grouplens.grapht.reflect.internal;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.annotation.Attribute;
@@ -42,6 +41,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
@@ -68,9 +68,9 @@ public class InjectionPointTest {
     public void testConstructorParameterInjectionPoint() throws Exception {
         // created expected injection points
         Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
-        ParameterInjectionPoint p1 = new ParameterInjectionPoint(ctor, 0);
-        ParameterInjectionPoint p2 = new ParameterInjectionPoint(ctor, 1);
-        ParameterInjectionPoint p3 = new ParameterInjectionPoint(ctor, 2);
+        InjectionPoint p1 = ReflectionDesire.forParameter(ctor, 0).getInjectionPoint();
+        InjectionPoint p2 = ReflectionDesire.forParameter(ctor, 1).getInjectionPoint();
+        InjectionPoint p3 = ReflectionDesire.forParameter(ctor, 2).getInjectionPoint();
 
         Set<InjectionPoint> expected = Sets.newHashSet(p1, p2, p3);
         // verify that the qualifiers and types are identified properly
@@ -87,19 +87,21 @@ public class InjectionPointTest {
         // verify nullability and transience
         Assert.assertFalse(p1.isOptional());
         Assert.assertTrue(p2.isOptional());
-        
-        Assert.assertEquals(expected, getInjectionPoints(CtorType.class));
+
+        Assert.assertThat(getInjectionPoints(CtorType.class),
+                          containsInAnyOrder(p1, p2, p3));
     }
 
     @Test
     public void testConstructorParameterOptionalDep() throws NoSuchMethodException {
         Constructor<CtorType> ctor = CtorType.class.getConstructor(Object.class, String.class, Optional.class);
-        ParameterInjectionPoint point = new ParameterInjectionPoint(ctor, 2);
+        Desire desire = ReflectionDesire.forParameter(ctor, 2);
+        InjectionPoint point = desire.getInjectionPoint();
         Assert.assertThat(point.getQualifier(), instanceOf(RoleB.class));
         Assert.assertThat(point.getAttributes(), hasSize(0));
         Assert.assertThat(point.getAttribute(Transient.class), nullValue());
-        Assert.assertEquals(String.class, point.getType());
         Assert.assertTrue(point.isOptional());
+        Assert.assertEquals(String.class, point.getType());
     }
 
     @Test

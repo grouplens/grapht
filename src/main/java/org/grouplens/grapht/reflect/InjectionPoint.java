@@ -85,6 +85,17 @@ public interface InjectionPoint extends Serializable {
     @Nullable Member getMember();
 
     /**
+     * Transform an object into the actual type needed for the injection point.  The default implementation is the
+     * identity function.
+     *
+     * @param obj The object to transform.
+     * @return The transformed object.
+     */
+    default Object transform(Object obj) {
+        return obj;
+    };
+
+    /**
      * Query whether this injection point is optional.  Optional injection points do not need to be satisfied in order
      * for the class to be instantiated.
      *
