@@ -19,6 +19,11 @@
  */
 package org.grouplens.grapht.util;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import net.jcip.annotations.Immutable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,9 +38,6 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -147,8 +149,6 @@ public final class ClassProxy implements Serializable {
         return proxy;
     }
 
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-
     public static boolean isSerializationPermissive() {
         return Boolean.getBoolean("grapht.deserialization.permissive");
     }
@@ -164,24 +164,22 @@ public final class ClassProxy implements Serializable {
      * </p>
      *
      * @param type The class to checksum.
-     * @return The
+     * @return The checksum.
      */
+    @SuppressWarnings("deprecation")
     private static long checksumClass(Class<?> type) {
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("JVM does not support MD5", e);
-        }
-        checksumClass(type, digest);
+        HashFunction hf = Hashing.md5();
+        Hasher hash = hf.newHasher();
+        checksumClass(type, hash);
 
-        ByteBuffer buf = ByteBuffer.wrap(digest.digest());
+        HashCode code = hash.hash();
+        ByteBuffer buf = ByteBuffer.wrap(code.asBytes());
         long l1 = buf.getLong();
         long l2 = buf.getLong();
         return l1 ^ l2;
     }
 
-    private static void checksumClass(Class<?> type, MessageDigest digest) {
+    private static void checksumClass(Class<?> type, Hasher hash) {
         // we compute a big hash of all the members of the class, and its superclasses.
 
         List<String> members = new ArrayList<String>();
@@ -208,10 +206,10 @@ public final class ClassProxy implements Serializable {
 
         Class<?> sup = type.getSuperclass();
         if (sup != null) {
-            checksumClass(sup, digest);
+            checksumClass(sup, hash);
         }
         for (String mem: members) {
-            digest.update(mem.getBytes(UTF8));
+            hash.putString(mem, Charsets.UTF_8);
         }
     }
 
