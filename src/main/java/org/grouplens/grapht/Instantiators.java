@@ -150,7 +150,7 @@ public final class Instantiators {
             try (LogContext mdcContextProvider = LogContext.create()) {
                 mdcContextProvider.put("org.grouplens.grapht.currentProvider", provider.toString());
                 return provider.get();
-            } catch (Throwable th) {
+            } catch (Exception th) {
                 throw new ConstructionException(getType(), "Error invoking provider " + providerInstantiator, th);
             }
         }
@@ -180,7 +180,7 @@ public final class Instantiators {
                     if (!instantiated) {
                         try {
                             instance = delegate.instantiate();
-                        } catch (Throwable th) {
+                        } catch (Exception th) {
                             error = th;
                         }
                         instantiated = true;

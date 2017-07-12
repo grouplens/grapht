@@ -57,6 +57,7 @@ public class LifecycleManager implements AutoCloseable {
     /**
      * Close the lifecycle manager, shutting down all components it manages.
      */
+    @SuppressWarnings("squid:S1181") // catch Throwable - OK b/c we use it for ensuring cleanup
     @Override
     public void close() {
         Throwable error = null;
