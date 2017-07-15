@@ -495,14 +495,12 @@ public class DAGNode<V,E> implements Serializable {
             }
 
             DAGNode<V, E> node = work.remove();
-            node.getOutgoingEdges()
-                .stream()
-                .map(DAGEdge::getTail)
-                .filter(n -> !seen.contains(n))
-                .forEach(n -> {
-                    seen.add(n);
-                    work.add(n);
-                });
+            for (DAGEdge<V,E> e: node.getOutgoingEdges()) {
+                if (seen.add(e.getTail())) {
+                    work.add(e.getTail());
+                }
+            }
+
             return node;
         }
     }
