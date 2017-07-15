@@ -20,7 +20,7 @@ deploy:
   on:
     repo: grouplens/grapht
     branch: master
-    jdk: oraclejdk7
+    jdk: oraclejdk8
 branches:
   except:
   - stable
