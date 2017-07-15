@@ -3,9 +3,8 @@
 [![Maven Central](https://img.shields.io/maven-central/v/org.grouplens.grapht/grapht.svg)](http://search.maven.org/#search|gav|1|g%3A%22org.grouplens.grapht%22%20AND%20a%3A%22grapht%22)
 [![Build Status](https://travis-ci.org/grouplens/grapht.png?branch=master)](https://travis-ci.org/grouplens/grapht)
 [![codecov](https://codecov.io/gh/grouplens/grapht/branch/master/graph/badge.svg)](https://codecov.io/gh/grouplens/grapht)
-[![SonarQube line count](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=ncloc)](https://sonarcloud.io/dashboard?id=grapht)
-[![SonarQube test coverage](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=coverage)](https://sonarcloud.io/dashboard?id=grapht)
-[![SonarQube technical debt](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=sqale_debt_ratio)](https://sonarcloud.io/dashboard?id=grapht)
+[![SonarQube line count](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=ncloc)](https://sonarcloud.io/dashboard?id=org.grouplens.grapht:grapht)
+[![SonarQube technical debt](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=sqale_debt_ratio)](https://sonarcloud.io/dashboard?id=org.grouplens.grapht:grapht)
 
 Grapht is a light-weight dependency injector. It converts the dependency
 injection problem into a graph-based problem that can be solved and analyzed
