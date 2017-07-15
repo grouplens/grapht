@@ -36,6 +36,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A node in a (rooted) DAG.  Since DAGs are rooted, a full graph is just represented by its root
@@ -326,34 +328,11 @@ public class DAGNode<V,E> implements Serializable {
      * @param pred The predicate for matching nodes.
      * @return The first node matching {@code pred} in a breadth-first search, or {@code null} if no
      *         such node is found.
+     * @deprecated Use {@link #breadthFirstNodes()} instead.
      */
+    @Deprecated
     public DAGNode<V, E> findNodeBFS(@NotNull Predicate<? super DAGNode<V, E>> pred) {
-        if (pred.test(this)) {
-            return this;
-        }
-
-        Queue<DAGNode<V, E>> work = Lists.newLinkedList();
-        Set<DAGNode<V, E>> seen = Sets.newHashSet();
-        work.add(this);
-        seen.add(this);
-        while (!work.isEmpty()) {
-            DAGNode<V, E> node = work.remove();
-            for (DAGEdge<V, E> e : node.getOutgoingEdges()) {
-                // is this the node we are looking for?
-                DAGNode<V, E> nbr = e.getTail();
-                if (!seen.contains(nbr)) {
-                    if (pred.test(nbr)) {
-                        return nbr;
-                    } else {
-                        seen.add(nbr);
-                        work.add(nbr);
-                    }
-                }
-            }
-        }
-
-        // no node found
-        return null;
+        return breadthFirstNodes().filter(pred).findFirst().orElse(null);
     }
 
     /**
@@ -362,27 +341,35 @@ public class DAGNode<V,E> implements Serializable {
      * @param pred The predicate for matching nodes.
      * @return The first node matching {@code pred} in a breadth-first search, or {@code null} if no
      *         such node is found.
+     * @deprecated Use {@link #breadthFirstEdges()} first.
      */
+    @Deprecated
     public DAGEdge<V, E> findEdgeBFS(@NotNull Predicate<? super DAGEdge<V, E>> pred) {
-        Queue<DAGNode<V, E>> work = Lists.newLinkedList();
-        Set<DAGNode<V, E>> seen = Sets.newHashSet();
-        work.add(this);
-        seen.add(this);
-        while (!work.isEmpty()) {
-            DAGNode<V, E> node = work.remove();
-            for (DAGEdge<V, E> e : node.getOutgoingEdges()) {
-                // is this the edge we are looking for?
-                if (pred.test(e)) {
-                    return e;
-                } else if (!seen.contains(e.getTail())) {
-                    seen.add(e.getTail());
-                    work.add(e.getTail());
-                }
-            }
-        }
+        return breadthFirstEdges().filter(pred)
+                                  .findFirst()
+                                  .orElse(null);
+    }
 
-        // no node found
-        return null;
+    /**
+     * Iterate nodes breadth-first.
+     * @return An ordered stream over a breadth-first traversal of the nodes.
+     */
+    public Stream<DAGNode<V,E>> breadthFirstNodes() {
+        Spliterator<DAGNode<V, E>> split =
+                Spliterators.spliteratorUnknownSize(new BFSNodeIter<>(this),
+                                                    Spliterator.ORDERED | Spliterator.IMMUTABLE);
+        return StreamSupport.stream(split, false);
+    }
+
+    /**
+     * Iterate nodes breadth-first.
+     * @return An ordered stream over a breadth-first traversal of the edges.
+     */
+    public Stream<DAGEdge<V,E>> breadthFirstEdges() {
+        Spliterator<DAGEdge<V, E>> split =
+                Spliterators.spliteratorUnknownSize(new BFSEdgeIter<>(this),
+                                                    Spliterator.ORDERED | Spliterator.IMMUTABLE);
+        return StreamSupport.stream(split, false);
     }
 
     /**
@@ -483,6 +470,69 @@ public class DAGNode<V,E> implements Serializable {
             LinkedHashSet<DAGNode<V,E>> visited = Sets.newLinkedHashSet();
             sortVisit(visited);
             return ImmutableList.copyOf(visited);
+        }
+    }
+
+    private static class BFSNodeIter<V,E> implements Iterator<DAGNode<V,E>> {
+        // things only go on work if they've been added to seen
+        Queue<DAGNode<V, E>> work = Lists.newLinkedList();
+        Set<DAGNode<V, E>> seen = Sets.newHashSet();
+
+        BFSNodeIter(DAGNode<V,E> start) {
+            work.add(start);
+            seen.add(start);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !work.isEmpty();
+        }
+
+        @Override
+        public DAGNode<V, E> next() {
+            if (work.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+
+            DAGNode<V, E> node = work.remove();
+            for (DAGEdge<V,E> e: node.getOutgoingEdges()) {
+                if (seen.add(e.getTail())) {
+                    work.add(e.getTail());
+                }
+            }
+
+            return node;
+        }
+    }
+
+    private static class BFSEdgeIter<V,E> implements Iterator<DAGEdge<V,E>> {
+        // things only go on work if they've been added to seen
+        Queue<DAGEdge<V, E>> work = Lists.newLinkedList();
+        Set<DAGNode<V, E>> visited = Sets.newHashSet();
+
+        BFSEdgeIter(DAGNode<V,E> start) {
+            visited.add(start);
+            work.addAll(start.getOutgoingEdges());
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !work.isEmpty();
+        }
+
+        @Override
+        public DAGEdge<V, E> next() {
+            if (work.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+
+            DAGEdge<V, E> edge = work.remove();
+            DAGNode<V, E> node = edge.getTail();
+            if (visited.add(node)) {
+                work.addAll(node.getOutgoingEdges());
+            }
+
+            return edge;
         }
     }
 }
