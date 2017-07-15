@@ -43,7 +43,7 @@ public class DAGNodeBuilder<V,E> {
 
     public DAGNodeBuilder(V lbl) {
         label = lbl;
-        edges = Sets.newHashSet();
+        edges = Sets.newLinkedHashSet();
     }
 
     /**

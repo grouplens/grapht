@@ -28,6 +28,7 @@ import org.junit.Test;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -229,6 +230,79 @@ public class TestDAGNode {
                    nullValue());
         assertThat(g2.getOutgoingEdge(wombat, "wumpus"),
                    notNullValue());
+    }
+
+    @Test
+    public void testSingletonBFSNodes() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        assertThat(foo.breadthFirstNodes().collect(Collectors.toList()),
+                   contains(foo));
+    }
+
+    @Test
+    public void testSingletonBFSEdges() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        assertThat(foo.breadthFirstEdges().collect(Collectors.toList()),
+                   empty());
+    }
+
+    @Test
+    public void testTwoNodeBFS() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                .addEdge(foo, "foo")
+                .build();
+
+        assertThat(bar.breadthFirstNodes().collect(Collectors.toList()),
+                   contains(bar, foo));
+    }
+
+    @Test
+    public void testTwoNodeBFSEdge() {
+        DAGNode<String,String> foo = DAGNode.singleton("foo");
+        DAGNode<String,String> bar = DAGNode.<String,String>newBuilder("bar")
+                .addEdge(foo, "foo")
+                .build();
+
+        assertThat(bar.breadthFirstEdges().collect(Collectors.toList()),
+                   contains(DAGEdge.create(bar, foo, "foo")));
+    }
+
+    @Test
+    public void testDAGBFS() {
+        DAGNode<String,String> deep = DAGNode.singleton("deep");
+        DAGNode<String,String> alsoDeep = DAGNode.singleton("alsoDeep");
+        DAGNode<String,String> middle = DAGNode.<String,String>newBuilder("middle")
+                                               .addEdge(deep, "deep")
+                                               .addEdge(alsoDeep, "alsoDeep")
+                                               .build();
+        DAGNode<String,String> root = DAGNode.<String,String>newBuilder("root")
+                                             .addEdge(middle, "middle")
+                                             .addEdge(alsoDeep, "shortcut")
+                                             .build();
+
+        assertThat(root.breadthFirstNodes().collect(Collectors.toList()),
+                   contains(root, middle, alsoDeep, deep));
+    }
+
+    @Test
+    public void testDAGBFSEdges() {
+        DAGNode<String,String> deep = DAGNode.singleton("deep");
+        DAGNode<String,String> alsoDeep = DAGNode.singleton("alsoDeep");
+        DAGNode<String,String> middle = DAGNode.<String,String>newBuilder("middle")
+                .addEdge(deep, "deep")
+                .addEdge(alsoDeep, "alsoDeep")
+                .build();
+        DAGNode<String,String> root = DAGNode.<String,String>newBuilder("root")
+                .addEdge(middle, "middle")
+                .addEdge(alsoDeep, "shortcut")
+                .build();
+
+        assertThat(root.breadthFirstEdges().collect(Collectors.toList()),
+                   contains(DAGEdge.create(root, middle, "middle"),
+                            DAGEdge.create(root, alsoDeep, "shortcut"),
+                            DAGEdge.create(middle, deep, "deep"),
+                            DAGEdge.create(middle, alsoDeep, "alsoDeep")));
     }
 
     @Test
