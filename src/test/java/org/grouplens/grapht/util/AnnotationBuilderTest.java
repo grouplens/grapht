@@ -19,7 +19,6 @@
  */
 package org.grouplens.grapht.util;
 
-import com.sun.tools.javac.code.Attribute;
 import org.grouplens.grapht.annotation.AnnotationBuilder;
 import org.grouplens.grapht.reflect.internal.types.InterfaceA;
 import org.junit.Assert;
