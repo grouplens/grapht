@@ -26,13 +26,9 @@ package org.grouplens.grapht;
 
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -53,9 +49,6 @@ public class LifecycleManager implements AutoCloseable {
 
         if (instance instanceof AutoCloseable) {
             actions.add(new CloseAction((AutoCloseable) instance));
-        }
-        for (Method m: MethodUtils.getMethodsListWithAnnotation(instance.getClass(), PreDestroy.class)) {
-            actions.add(new PreDestroyAction(instance, m));
         }
     }
 
@@ -88,28 +81,6 @@ public class LifecycleManager implements AutoCloseable {
      */
     interface TeardownAction {
         void destroy();
-    }
-
-    static class PreDestroyAction implements TeardownAction {
-        private final Object instance;
-        private final Method method;
-
-        public PreDestroyAction(Object inst, Method m) {
-            instance = inst;
-            method = m;
-        }
-
-        @Override
-        public void destroy() {
-            try {
-                logger.debug("invoking pre-destroy method {} on {}", method, instance);
-                method.invoke(instance);
-            } catch (IllegalAccessException e) {
-                throw new UncheckedExecutionException("cannot access " + method, e);
-            } catch (InvocationTargetException e) {
-                throw new UncheckedExecutionException("error invoking " + method, e);
-            }
-        }
     }
 
     static class CloseAction implements TeardownAction {

@@ -25,22 +25,20 @@
 package org.grouplens.grapht;
 
 import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.grouplens.grapht.graph.DAGEdge;
 import org.grouplens.grapht.graph.DAGNode;
 import org.grouplens.grapht.reflect.Desire;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.jetbrains.annotations.Nullable;
-import javax.annotation.PreDestroy;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Container for dependency-injected components.  A container is the scope of memoization, so

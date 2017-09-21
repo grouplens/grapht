@@ -25,7 +25,6 @@
 package org.grouplens.grapht.reflect.internal;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.grouplens.grapht.ConstructionException;
 import org.grouplens.grapht.Instantiator;
 import org.grouplens.grapht.LifecycleManager;
@@ -38,7 +37,6 @@ import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.lang.reflect.*;
 import java.util.*;
@@ -157,7 +155,6 @@ public class ClassInstantiator implements Instantiator {
                                           Types.supertypesFirst()))
              .forEach(methods::add);
 
-        methods.add(MethodUtils.getMethodsWithAnnotation(type, PostConstruct.class));
         return methods.build();
     }
 

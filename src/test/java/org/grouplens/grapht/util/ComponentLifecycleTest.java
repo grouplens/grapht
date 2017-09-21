@@ -24,17 +24,13 @@
  */
 package org.grouplens.grapht.util;
 
-import org.grouplens.grapht.InjectionException;
 import org.grouplens.grapht.Injector;
 import org.grouplens.grapht.InjectorBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
 
 /*
@@ -96,64 +92,6 @@ public class ComponentLifecycleTest {
     }
 
     /**
-     * Test that the lifecycle management calls pre-destroy methods.
-     */
-    @Test
-    public void testCallsPreDestroy() throws Exception {
-        InjectorBuilder bld = InjectorBuilder.create();
-        Flag closed = new Flag();
-        bld.bind(Flag.class).to(closed);
-        Injector injector = bld.build();
-        try {
-            LifecycleShutdownComponent comp = injector.getInstance(LifecycleShutdownComponent.class);
-            assertThat(comp, notNullValue());
-        } finally {
-            injector.close();
-        }
-        // Check that close was called.
-        assertTrue("close was called", closed.isSet());
-    }
-
-    /**
-     * Test that the lifecycle management does not call pre-destroy methods on an instance.
-     */
-    @Test
-    public void testDoesNotCallPreDestroyOnInstance() throws Exception {
-        InjectorBuilder bld = InjectorBuilder.create();
-        Flag closed = new Flag();
-        bld.bind(LifecycleShutdownComponent.class).to(new LifecycleShutdownComponent(closed));
-        Injector injector = bld.build();
-        try {
-            LifecycleShutdownComponent comp = injector.getInstance(LifecycleShutdownComponent.class);
-            assertThat(comp, notNullValue());
-        } finally {
-            injector.close();
-        }
-        // Check that close was called.
-        assertFalse("close was called", closed.isSet());
-    }
-
-    /**
-     * Test that the lifecycle management calls post-construct methods
-     */
-    @Test
-    public void testCallsPostConstruct() throws Exception {
-        InjectorBuilder bld = InjectorBuilder.create();
-        Flag setup = new Flag();
-        bld.bind(Flag.class).to(setup);
-        Injector injector = bld.build();
-        try {
-            PostConstructComponent comp = injector.getInstance(PostConstructComponent.class);
-            assertThat(comp, notNullValue());
-            assertTrue("setup was called", setup.isSet());
-        } finally {
-            injector.close();
-        }
-        // Check that close was called.
-        assertTrue("close was called", setup.isSet());
-    }
-
-    /**
      * Flag component for detecting closure.
      */
     public static class Flag {
@@ -182,42 +120,6 @@ public class ComponentLifecycleTest {
         @Override
         public void close() throws Exception {
             flag.set();
-        }
-    }
-
-    /**
-     * Component with PreDestroy method that must be called.
-     */
-    public static class LifecycleShutdownComponent {
-        private final Flag flag;
-
-        @Inject
-        public LifecycleShutdownComponent(Flag f) {
-            flag = f;
-        }
-
-        @PreDestroy
-        public void shutdown() {
-            flag.set();
-        }
-    }
-
-    /**
-     * component with post-construct methods
-     */
-    public static class PostConstructComponent {
-        private Flag setup;
-
-        // we use setter injection to make sure PostConstruct is called after setters
-        @Inject
-        public void setFlag(Flag f) {
-            setup = f;
-        }
-
-        @PostConstruct
-        public void setup() {
-            assertThat(setup, notNullValue());
-            setup.set();
         }
     }
 }
