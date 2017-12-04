@@ -34,7 +34,8 @@ import java.lang.annotation.*;
  * for types annotated with it.
  */
 @Documented
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE,
+        ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DefaultProvider {
     Class<? extends Provider<?>> value();

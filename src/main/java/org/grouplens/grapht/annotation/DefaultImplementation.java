@@ -33,7 +33,8 @@ import java.lang.annotation.*;
  * A default implementation for a {@link Qualifier}.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
+@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE,
+        ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD })
 @Documented
 public @interface DefaultImplementation {
     /**
