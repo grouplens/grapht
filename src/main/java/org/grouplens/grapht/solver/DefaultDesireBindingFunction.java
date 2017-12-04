@@ -27,10 +27,7 @@ package org.grouplens.grapht.solver;
 import org.grouplens.grapht.CachePolicy;
 import org.grouplens.grapht.ResolutionException;
 import org.grouplens.grapht.annotation.*;
-import org.grouplens.grapht.reflect.Desire;
-import org.grouplens.grapht.reflect.Qualifiers;
-import org.grouplens.grapht.reflect.Satisfaction;
-import org.grouplens.grapht.reflect.Satisfactions;
+import org.grouplens.grapht.reflect.*;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
 import org.slf4j.Logger;
@@ -40,6 +37,7 @@ import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,21 +85,32 @@ public class DefaultDesireBindingFunction implements BindingFunction {
 
         Annotation qualifier = desire.getInjectionPoint().getQualifier();
 
-        // Only use qualifier defaults if this is the first desire 
+        // Only use qualifier or local defaults if this is the first desire
         // (i.e. the desire that declared any qualifier)
         // REVIEW If it is not the first desire, can a qualifier exist?
-        if (dchain.getPreviousDesires().isEmpty() && qualifier != null) {
-            Class<? extends Annotation> annotType = qualifier.annotationType();
-            annotType = Qualifiers.resolveAliases(annotType);
-
-            result = getDefaultValue(desire, annotType);
-            if (result == null) {
-                result = getAnnotatedDefault(desire, annotType);
+        if (dchain.getPreviousDesires().isEmpty()) {
+            InjectionPoint ip = dchain.getCurrentDesire().getInjectionPoint();
+            AnnotatedElement elt = ip.getElement();
+            if (elt != null) {
+                result = getDefaultValue(desire, elt);
+                if (result == null) {
+                    result = getAnnotatedDefault(desire, elt);
+                }
             }
 
-            // if the qualifier does not allow fall-through, we're done
-            if (!annotType.isAnnotationPresent(AllowDefaultMatch.class) && !annotType.isAnnotationPresent(AllowUnqualifiedMatch.class)) {
-                return result;
+            if (result == null && qualifier != null) {
+                Class<? extends Annotation> annotType = qualifier.annotationType();
+                annotType = Qualifiers.resolveAliases(annotType);
+
+                result = getDefaultValue(desire, annotType);
+                if (result == null) {
+                    result = getAnnotatedDefault(desire, annotType);
+                }
+
+                // if the qualifier does not allow fall-through, we're done
+                if (!annotType.isAnnotationPresent(AllowDefaultMatch.class) && !annotType.isAnnotationPresent(AllowUnqualifiedMatch.class)) {
+                    return result;
+                }
             }
         }
 
@@ -128,7 +137,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
      * @param type The class to scan for annotations.
      * @return The binding result, or {@code null} if there are no relevant annotations.
      */
-    private BindingResult getDefaultValue(Desire desire, Class<?> type) {
+    private BindingResult getDefaultValue(Desire desire, AnnotatedElement type) {
         // FIXME Check whether the annotation type is actually relevant for the desire
         BindingResult.Builder bld = null;
         DefaultDouble dfltDouble = type.getAnnotation(DefaultDouble.class);
@@ -163,7 +172,7 @@ public class DefaultDesireBindingFunction implements BindingFunction {
      * @param type The type to scan for annotations.
      * @return A binding result, or {@code null} if no usable annotations are present.
      */
-    private BindingResult getAnnotatedDefault(Desire desire, Class<?> type) {
+    private BindingResult getAnnotatedDefault(Desire desire, AnnotatedElement type) {
         DefaultProvider provider = type.getAnnotation(DefaultProvider.class);
         BindingResult.Builder brb = null;
         if (provider != null) {
