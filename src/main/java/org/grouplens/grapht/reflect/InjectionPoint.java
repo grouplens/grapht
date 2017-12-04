@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -89,6 +90,14 @@ public interface InjectionPoint extends Serializable {
      * @return The Member that produces this injection point
      */
     @Nullable Member getMember();
+
+    /**
+     * Return the element (parameter, field, etc.) of this injection point.
+     * @return The injection point element.
+     */
+    default @Nullable AnnotatedElement getElement() {
+        return null;
+    }
 
     /**
      * Transform an object into the actual type needed for the injection point.  The default implementation is the
