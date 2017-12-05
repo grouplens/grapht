@@ -29,10 +29,11 @@ import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.grouplens.grapht.reflect.InjectionPoint;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -99,6 +100,12 @@ public class OptionalInjectionPoint implements InjectionPoint {
     @Override
     public Member getMember() {
         return delegate.getMember();
+    }
+
+    @Nullable
+    @Override
+    public AnnotatedElement getElement() {
+        return delegate.getElement();
     }
 
     @Override

@@ -28,15 +28,16 @@ import org.grouplens.grapht.reflect.InjectionPoint;
 import org.grouplens.grapht.util.MemberProxy;
 import org.grouplens.grapht.util.Preconditions;
 import org.grouplens.grapht.util.Types;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -71,6 +72,11 @@ public class ParameterInjectionPoint implements InjectionPoint, Serializable {
     @Override @NotNull
     public Executable getMember() {
         return member;
+    }
+
+    @Override @NotNull
+    public Parameter getElement() {
+        return member.getParameters()[parameter];
     }
 
     /**

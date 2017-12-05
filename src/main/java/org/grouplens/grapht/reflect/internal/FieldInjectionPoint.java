@@ -35,6 +35,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -92,6 +93,11 @@ public final class FieldInjectionPoint implements InjectionPoint, Serializable {
 
     @Override @NotNull
     public Field getMember() {
+        return field;
+    }
+
+    @Override @NotNull
+    public AnnotatedElement getElement() {
         return field;
     }
 
