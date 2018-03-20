@@ -386,6 +386,10 @@ public class DependencySolver {
         if (result.deferDependencies) {
             // extend node onto deferred queue and skip its dependencies for now
             logger.debug("Deferring dependencies of {}", result.satisfaction);
+            if (deferQueue == null) {
+                logger.error("deferral disabled, but {} has deferred dependencies", result);
+                throw new ResolutionException("node " + result + " has deferred dependencies, but deferrals are disabled");
+            }
             node = DAGNode.singleton(result.makeSatisfaction());
             // FIXME Deferred and skippable bindings do not interact well
             deferQueue.add(new Deferral(node, newContext));
