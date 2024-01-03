@@ -6,11 +6,16 @@
 [![SonarQube line count](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=ncloc)](https://sonarcloud.io/dashboard?id=org.grouplens.grapht:grapht)
 [![SonarQube technical debt](https://sonarcloud.io/api/badges/measure?key=org.grouplens.grapht:grapht&metric=sqale_debt_ratio)](https://sonarcloud.io/dashboard?id=org.grouplens.grapht:grapht)
 
+> [!NOTE]
+> Grapht is no longer under active development.  If you are interested in taking over the project, contact [Michael Ekstrand](https://md.ekstrandom.net/contact).
+
 Grapht is a light-weight dependency injector. It converts the dependency
 injection problem into a graph-based problem that can be solved and analyzed
 without constructing any components until a solution is guaranteed. The solution
 graph is also exposed to enable flexible extensions such as static analysis, 
-and visualizations.
+and visualizations.  Its design is discussed in our paper:
+
+> Michael D. Ekstrand and Michael Ludwig. 2016. Dependency Injection with Static Analysis and Context-Aware Policy. <cite>Journal of Object Technology</cite> 15(1) (February 1st, 2016), 1:1–31. DOI [10.5381/jot.2016.15.1.a1](https://dx.doi.org/10.5381/jot.2016.15.1.a1).
 
 Grapht also supports specifying dependency bindings based on where in the
 graph the components must be injected. This allows a programmer to specify that
